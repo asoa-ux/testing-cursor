@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filter Panel - Polished</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+    }
+
+    /* Filter Panel */
+    .filter-panel {
+      width: 360px;
+      min-width: 360px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+    }
+
+    /* Header */
+    .filter-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: white;
+    }
+
+    .filter-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-badge {
+      background: #0891b2;
+      color: white;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 500;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .filter-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #666;
+      transition: all 0.15s;
+    }
+
+    .filter-close:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    /* Active Filters Chips */
+    .active-filters {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 18px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    .active-filters.visible {
+      display: flex;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px 4px 10px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .filter-chip-remove {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      cursor: pointer;
+      color: #999;
+      transition: all 0.15s;
+    }
+
+    .filter-chip-remove:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .filter-chip-remove svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Search + Type Filter Section */
+    .filter-controls {
+      padding: 14px 18px;
+      background: #fafafa;
+      border-bottom: 1px solid #e8e8e8;
+      flex-shrink: 0;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      background: white;
+      transition: all 0.15s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #0891b2;
+      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+    }
+
+    .search-input::placeholder {
+      color: #aaa;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      width: 16px;
+      height: 16px;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #999;
+      border-radius: 50%;
+      transition: all 0.15s;
+    }
+
+    .search-clear:hover {
+      background: #e8e8e8;
+      color: #666;
+    }
+
+    .search-clear.visible {
+      display: flex;
+    }
+
+    /* Type Filter */
+    .type-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .type-filter-label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .type-pills {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .type-pill {
+      padding: 6px 14px;
+      font-size: 12px;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      background: white;
+      cursor: pointer;
+      color: #555;
+      transition: all 0.15s;
+      font-weight: 450;
+    }
+
+    .type-pill:hover {
+      border-color: #0891b2;
+      color: #0891b2;
+    }
+
+    .type-pill.active {
+      background: #0891b2;
+      border-color: #0891b2;
+      color: white;
+    }
+
+    /* Tree Header (expand/collapse all) */
+    .tree-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      border-bottom: 1px solid #f0f0f0;
+      background: white;
+    }
+
+    .tree-summary {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .tree-summary strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .tree-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tree-header-btn {
+      font-size: 11px;
+      color: #666;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .tree-header-btn:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .tree-header-btn svg {
+      width: 12px;
+      height: 12px;
+      vertical-align: -2px;
+      margin-right: 3px;
+    }
+
+    /* Tree Container */
+    .tree-container {
+      flex: 1;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    /* Groups */
+    .tree-group {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .tree-group:last-child {
+      border-bottom: none;
+    }
+
+    .tree-group-header {
+      display: flex;
+      align-items: center;
+      padding: 11px 18px;
+      cursor: pointer;
+      user-select: none;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+
+    .tree-group-header:hover {
+      background: #f8f9fa;
+    }
+
+    .tree-group-header:focus {
+      outline: none;
+      background: #f0f7ff;
+    }
+
+    .tree-expand-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .tree-group.collapsed .tree-expand-icon {
+      transform: rotate(-90deg);
+    }
+
+    .tree-expand-icon svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .tree-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .tree-checkbox:hover {
+      border-color: #0891b2;
+    }
+
+    .tree-checkbox.checked {
+      background: #0891b2;
+      border-color: #0891b2;
+    }
+
+    .tree-checkbox.partial {
+      background: white;
+      border-color: #0891b2;
+    }
+
+    .tree-checkbox.partial::before {
+      content: '';
+      width: 8px;
+      height: 2px;
+      background: #0891b2;
+      border-radius: 1px;
+    }
+
+    .tree-checkbox svg {
+      width: 11px;
+      height: 11px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    .tree-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    .tree-group-label {
+      flex: 1;
+      font-size: 13px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .tree-group-count {
+      font-size: 11px;
+      color: #888;
+      background: #f0f0f0;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .tree-group-count.all-selected {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .tree-group-count.none-selected {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .tree-group-actions {
+      display: flex;
+      gap: 2px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .tree-group-header:hover .tree-group-actions {
+      opacity: 1;
+    }
+
+    .tree-action-link {
+      font-size: 11px;
+      color: #0891b2;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .tree-action-link:hover {
+      background: #e0f7fa;
+    }
+
+    /* Items */
+    .tree-items {
+      display: block;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+
+    .tree-group.collapsed .tree-items {
+      max-height: 0 !important;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 9px 18px 9px 50px;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .tree-item:hover {
+      background: #f8f9fa;
+    }
+
+    .tree-item:focus {
+      outline: none;
+      background: #f0f7ff;
+    }
+
+    .tree-item.hidden-by-type {
+      display: none;
+    }
+
+    .tree-item.hidden-by-search {
+      display: none;
+    }
+
+    .tree-item-label {
+      flex: 1;
+      font-size: 13px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .globe-icon {
+      width: 14px;
+      height: 14px;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+
+    .type-tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .type-tag.attr {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .type-tag.ref {
+      background: #fce7f3;
+      color: #be185d;
+    }
+
+    /* Ungrouped Section */
+    .ungrouped-section {
+      border-top: 2px solid #e8e8e8;
+      margin-top: 4px;
+      padding-top: 4px;
+    }
+
+    .ungrouped-header {
+      padding: 12px 18px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nested groups (for ungrouped reference types) */
+    .tree-subgroup .tree-group-header {
+      padding-left: 32px;
+    }
+
+    .tree-subgroup .tree-item {
+      padding-left: 64px;
+    }
+
+    /* No Results */
+    .no-results {
+      padding: 50px 20px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+      display: none;
+    }
+
+    .no-results.visible {
+      display: block;
+    }
+
+    .no-results svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+
+    .no-results p {
+      margin-bottom: 12px;
+    }
+
+    .no-results-btn {
+      font-size: 12px;
+      color: #0891b2;
+      background: none;
+      border: 1px solid #0891b2;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .no-results-btn:hover {
+      background: #0891b2;
+      color: white;
+    }
+
+    /* Conditional Filter */
+    .filter-conditions {
+      padding: 16px 18px;
+      border-top: 1px solid #e8e8e8;
+      background: #fafafa;
+      flex-shrink: 0;
+    }
+
+    .filter-condition {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+
+    .filter-condition:hover .filter-condition-label {
+      color: #0891b2;
+    }
+
+    .filter-condition-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .filter-condition-checkbox.checked {
+      background: #0891b2;
+      border-color: #0891b2;
+    }
+
+    .filter-condition-checkbox svg {
+      width: 11px;
+      height: 11px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    .filter-condition-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    .filter-condition-label {
+      font-size: 13px;
+      color: #333;
+      font-weight: 450;
+      transition: color 0.15s;
+    }
+
+    .filter-condition-note {
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .filter-condition-note svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.7;
+    }
+
+    /* Preview Count */
+    .preview-count {
+      padding: 12px 18px;
+      background: #f0fdf4;
+      border-top: 1px solid #bbf7d0;
+      font-size: 13px;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .preview-count.filtered {
+      background: #fef3c7;
+      border-color: #fcd34d;
+      color: #92400e;
+    }
+
+    .preview-count svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .preview-count strong {
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .filter-footer {
+      padding: 14px 18px;
+      border-top: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      background: white;
+    }
+
+    .reset-btn {
+      font-size: 13px;
+      color: #666;
+      background: none;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 450;
+      transition: all 0.15s;
+    }
+
+    .reset-btn:hover:not(:disabled) {
+      border-color: #999;
+      color: #333;
+    }
+
+    .reset-btn:disabled {
+      color: #ccc;
+      border-color: #eee;
+      cursor: not-allowed;
+    }
+
+    .apply-btn {
+      font-size: 13px;
+      color: white;
+      background: #0891b2;
+      border: none;
+      cursor: pointer;
+      padding: 9px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .apply-btn:hover {
+      background: #0e7490;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+    }
+
+    .apply-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+      background: #f5f5f5;
+    }
+
+    .placeholder-message {
+      background: white;
+      border-radius: 12px;
+      padding: 50px;
+      text-align: center;
+      color: #888;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      max-width: 500px;
+      margin: 40px auto;
+    }
+
+    .placeholder-message h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .placeholder-message p {
+      line-height: 1.6;
+    }
+
+    /* Keyboard focus styles */
+    .tree-checkbox:focus-visible,
+    .type-pill:focus-visible,
+    .filter-condition-checkbox:focus-visible {
+      outline: 2px solid #0891b2;
+      outline-offset: 2px;
+    }
+
+    /* Scrollbar styling */
+    .tree-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .tree-container::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+
+    .tree-container::-webkit-scrollbar-thumb {
+      background: #ddd;
+      border-radius: 4px;
+    }
+
+    .tree-container::-webkit-scrollbar-thumb:hover {
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Filter Panel -->
+    <aside class="filter-panel">
+      
+      <div class="filter-header">
+        <h2>
+          Filter
+          <span class="filter-badge" id="filterBadge" style="display: none;">0</span>
+        </h2>
+        <div class="filter-close" tabindex="0" role="button" aria-label="Close filter panel">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Active Filter Chips -->
+      <div class="active-filters" id="activeFilters">
+        <!-- Chips inserted dynamically -->
+      </div>
+
+      <!-- Search + Type Filter -->
+      <div class="filter-controls">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search attributes, references, groups...">
+          <div class="search-clear" id="searchClear" onclick="clearSearch()" tabindex="0" role="button" aria-label="Clear search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+        </div>
+        <div class="type-filter">
+          <span class="type-filter-label">Show:</span>
+          <div class="type-pills">
+            <button class="type-pill active" data-type="all" onclick="setTypeFilter('all')">All</button>
+            <button class="type-pill" data-type="attribute" onclick="setTypeFilter('attribute')">Attributes</button>
+            <button class="type-pill" data-type="reference" onclick="setTypeFilter('reference')">References</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tree Header -->
+      <div class="tree-header">
+        <div class="tree-summary">
+          <strong id="selectedCount">18</strong> of <strong id="totalCount">18</strong> items selected
+        </div>
+        <div class="tree-actions">
+          <button class="tree-header-btn" onclick="expandAll()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+            Expand
+          </button>
+          <button class="tree-header-btn" onclick="collapseAll()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+            </svg>
+            Collapse
+          </button>
+        </div>
+      </div>
+
+      <!-- Tree -->
+      <div class="tree-container" id="treeContainer">
+        
+        <!-- Attribute Group: Basic Information (mixed) -->
+        <div class="tree-group" data-group="basic-info">
+          <div class="tree-group-header" tabindex="0" onclick="toggleGroup(this.parentElement)" onkeydown="handleGroupKey(event, this.parentElement)">
+            <div class="tree-expand-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+            <div class="tree-checkbox checked" tabindex="0" onclick="event.stopPropagation(); toggleGroupCheckbox(this)" onkeydown="handleCheckboxKey(event, this)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <span class="tree-group-label">Basic Information</span>
+            <span class="tree-group-count all-selected">5/5</span>
+            <div class="tree-group-actions">
+              <button class="tree-action-link" onclick="event.stopPropagation(); selectAllInGroup(this)">All</button>
+              <button class="tree-action-link" onclick="event.stopPropagation(); selectNoneInGroup(this)">None</button>
+            </div>
+          </div>
+          <div class="tree-items">
+            <div class="tree-item" data-item="name" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Name</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="approval-status" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Approval status</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="sku" data-type="attribute" data-global="true" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">
+                <svg class="globe-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
+                </svg>
+                SKU
+              </span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="linked-ref-1" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Linked ref. type 1</span>
+              <span class="type-tag ref">ref</span>
+            </div>
+            <div class="tree-item" data-item="linked-ref-2" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Linked ref. type 2</span>
+              <span class="type-tag ref">ref</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attribute Group: Feature Bullets (attributes only) -->
+        <div class="tree-group" data-group="feature-bullets">
+          <div class="tree-group-header" tabindex="0" onclick="toggleGroup(this.parentElement)" onkeydown="handleGroupKey(event, this.parentElement)">
+            <div class="tree-expand-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+            <div class="tree-checkbox checked" tabindex="0" onclick="event.stopPropagation(); toggleGroupCheckbox(this)" onkeydown="handleCheckboxKey(event, this)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <span class="tree-group-label">Feature Bullets</span>
+            <span class="tree-group-count all-selected">3/3</span>
+            <div class="tree-group-actions">
+              <button class="tree-action-link" onclick="event.stopPropagation(); selectAllInGroup(this)">All</button>
+              <button class="tree-action-link" onclick="event.stopPropagation(); selectNoneInGroup(this)">None</button>
+            </div>
+          </div>
+          <div class="tree-items">
+            <div class="tree-item" data-item="feature-bullet-1" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Feature bullet 1</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="feature-bullet-2" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Feature bullet 2</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="non-context-dep" data-type="attribute" data-global="true" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">
+                <svg class="globe-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
+                </svg>
+                Non-context dependent
+              </span>
+              <span class="type-tag attr">attr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attribute Group: Descriptions (attributes only) -->
+        <div class="tree-group" data-group="descriptions">
+          <div class="tree-group-header" tabindex="0" onclick="toggleGroup(this.parentElement)" onkeydown="handleGroupKey(event, this.parentElement)">
+            <div class="tree-expand-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+            <div class="tree-checkbox checked" tabindex="0" onclick="event.stopPropagation(); toggleGroupCheckbox(this)" onkeydown="handleCheckboxKey(event, this)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <span class="tree-group-label">Descriptions</span>
+            <span class="tree-group-count all-selected">3/3</span>
+            <div class="tree-group-actions">
+              <button class="tree-action-link" onclick="event.stopPropagation(); selectAllInGroup(this)">All</button>
+              <button class="tree-action-link" onclick="event.stopPropagation(); selectNoneInGroup(this)">None</button>
+            </div>
+          </div>
+          <div class="tree-items">
+            <div class="tree-item" data-item="long-desc" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Long description</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="short-desc" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Short description</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+            <div class="tree-item" data-item="marketing-copy" data-type="attribute" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+              <div class="tree-checkbox checked">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-item-label">Marketing copy</span>
+              <span class="type-tag attr">attr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ungrouped Reference Types -->
+        <div class="ungrouped-section" id="ungroupedSection">
+          <div class="ungrouped-header">Ungrouped Reference Types</div>
+          
+          <!-- Product References -->
+          <div class="tree-group tree-subgroup" data-group="product-refs">
+            <div class="tree-group-header" tabindex="0" onclick="toggleGroup(this.parentElement)" onkeydown="handleGroupKey(event, this.parentElement)">
+              <div class="tree-expand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
+              <div class="tree-checkbox checked" tabindex="0" onclick="event.stopPropagation(); toggleGroupCheckbox(this)" onkeydown="handleCheckboxKey(event, this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-group-label">Product References</span>
+              <span class="tree-group-count all-selected">2/2</span>
+              <div class="tree-group-actions">
+                <button class="tree-action-link" onclick="event.stopPropagation(); selectAllInGroup(this)">All</button>
+                <button class="tree-action-link" onclick="event.stopPropagation(); selectNoneInGroup(this)">None</button>
+              </div>
+            </div>
+            <div class="tree-items">
+              <div class="tree-item" data-item="cross-sell" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">Cross-sell products</span>
+                <span class="type-tag ref">ref</span>
+              </div>
+              <div class="tree-item" data-item="upsell" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">Up-sell products</span>
+                <span class="type-tag ref">ref</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Asset References -->
+          <div class="tree-group tree-subgroup" data-group="asset-refs">
+            <div class="tree-group-header" tabindex="0" onclick="toggleGroup(this.parentElement)" onkeydown="handleGroupKey(event, this.parentElement)">
+              <div class="tree-expand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
+              <div class="tree-checkbox checked" tabindex="0" onclick="event.stopPropagation(); toggleGroupCheckbox(this)" onkeydown="handleCheckboxKey(event, this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-group-label">Asset References</span>
+              <span class="tree-group-count all-selected">3/3</span>
+              <div class="tree-group-actions">
+                <button class="tree-action-link" onclick="event.stopPropagation(); selectAllInGroup(this)">All</button>
+                <button class="tree-action-link" onclick="event.stopPropagation(); selectNoneInGroup(this)">None</button>
+              </div>
+            </div>
+            <div class="tree-items">
+              <div class="tree-item" data-item="primary-image" data-type="reference" data-global="true" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">
+                  <svg class="globe-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
+                  </svg>
+                  Primary image
+                </span>
+                <span class="type-tag ref">ref</span>
+              </div>
+              <div class="tree-item" data-item="gallery-images" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">Gallery images</span>
+                <span class="type-tag ref">ref</span>
+              </div>
+              <div class="tree-item" data-item="documents" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">Documents</span>
+                <span class="type-tag ref">ref</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Classification References -->
+          <div class="tree-group tree-subgroup" data-group="class-refs">
+            <div class="tree-group-header" tabindex="0" onclick="toggleGroup(this.parentElement)" onkeydown="handleGroupKey(event, this.parentElement)">
+              <div class="tree-expand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
+              <div class="tree-checkbox checked" tabindex="0" onclick="event.stopPropagation(); toggleGroupCheckbox(this)" onkeydown="handleCheckboxKey(event, this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <span class="tree-group-label">Classification References</span>
+              <span class="tree-group-count all-selected">2/2</span>
+              <div class="tree-group-actions">
+                <button class="tree-action-link" onclick="event.stopPropagation(); selectAllInGroup(this)">All</button>
+                <button class="tree-action-link" onclick="event.stopPropagation(); selectNoneInGroup(this)">None</button>
+              </div>
+            </div>
+            <div class="tree-items">
+              <div class="tree-item" data-item="category" data-type="reference" data-global="true" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">
+                  <svg class="globe-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
+                  </svg>
+                  Category
+                </span>
+                <span class="type-tag ref">ref</span>
+              </div>
+              <div class="tree-item" data-item="web-hierarchy" data-type="reference" tabindex="0" onclick="toggleItemCheckbox(this.querySelector('.tree-checkbox'))" onkeydown="handleItemKey(event, this)">
+                <div class="tree-checkbox checked">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="tree-item-label">Web hierarchy</span>
+                <span class="type-tag ref">ref</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- No Results -->
+        <div class="no-results" id="noResults">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <p>No matching items found</p>
+          <button class="no-results-btn" onclick="clearSearch()">Clear search</button>
+        </div>
+
+      </div>
+
+      <!-- Conditional Filter -->
+      <div class="filter-conditions">
+        <div class="filter-condition" onclick="toggleHideIdentical()">
+          <div class="filter-condition-checkbox" id="hideIdenticalCheck" tabindex="0" onkeydown="handleCheckboxKey(event, this)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <div>
+            <div class="filter-condition-label">Hide identical rows</div>
+            <div class="filter-condition-note">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3" />
+              </svg>
+              Global rows are always identical
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Count -->
+      <div class="preview-count" id="previewCount">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>Will show <strong id="previewSelected">18</strong> of <strong id="previewTotal">18</strong> rows</span>
+      </div>
+
+      <!-- Footer -->
+      <div class="filter-footer">
+        <button class="reset-btn" id="resetBtn" onclick="resetFilters()" disabled>Reset</button>
+        <button class="apply-btn" onclick="applyFilters()">Apply Filters</button>
+      </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="placeholder-message">
+        <h3>Multi-Context Table</h3>
+        <p>Use the filter panel to select which rows to display.<br>Changes preview in real-time. Click "Apply" to update the table.</p>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // State
+    let currentTypeFilter = 'all';
+    let hideIdentical = false;
+    let searchQuery = '';
+    const totalItems = 18;
+    const globalItemsCount = 5; // SKU, Non-context dependent, Primary image, Category
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAllCounts();
+    });
+
+    // Type filter
+    function setTypeFilter(type) {
+      currentTypeFilter = type;
+      
+      // Update pills
+      document.querySelectorAll('.type-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.dataset.type === type);
+      });
+      
+      // Filter items
+      document.querySelectorAll('.tree-item').forEach(item => {
+        const itemType = item.dataset.type;
+        const shouldShow = type === 'all' || itemType === type;
+        item.classList.toggle('hidden-by-type', !shouldShow);
+      });
+      
+      // Update group visibility
+      updateGroupVisibility();
+      
+      // Handle ungrouped section
+      const ungroupedSection = document.getElementById('ungroupedSection');
+      if (type === 'attribute') {
+        ungroupedSection.style.display = 'none';
+      } else {
+        ungroupedSection.style.display = '';
+      }
+      
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    function updateGroupVisibility() {
+      document.querySelectorAll('.tree-group').forEach(group => {
+        const visibleItems = group.querySelectorAll('.tree-item:not(.hidden-by-type):not(.hidden-by-search)');
+        group.style.display = visibleItems.length === 0 ? 'none' : '';
+      });
+      
+      // Check if any results
+      const allVisible = document.querySelectorAll('.tree-item:not(.hidden-by-type):not(.hidden-by-search)');
+      document.getElementById('noResults').classList.toggle('visible', allVisible.length === 0);
+    }
+
+    // Group expand/collapse
+    function toggleGroup(group) {
+      group.classList.toggle('collapsed');
+    }
+
+    function expandAll() {
+      document.querySelectorAll('.tree-group').forEach(g => g.classList.remove('collapsed'));
+    }
+
+    function collapseAll() {
+      document.querySelectorAll('.tree-group').forEach(g => g.classList.add('collapsed'));
+    }
+
+    // Checkbox handling
+    function toggleGroupCheckbox(checkbox) {
+      const isChecked = checkbox.classList.contains('checked');
+      checkbox.classList.toggle('checked');
+      checkbox.classList.remove('partial');
+      
+      const group = checkbox.closest('.tree-group');
+      const items = group.querySelectorAll('.tree-items .tree-checkbox');
+      items.forEach(item => {
+        if (!isChecked) {
+          item.classList.add('checked');
+        } else {
+          item.classList.remove('checked');
+        }
+      });
+      
+      updateGroupCount(group);
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    function toggleItemCheckbox(checkbox) {
+      checkbox.classList.toggle('checked');
+      const group = checkbox.closest('.tree-group');
+      updateGroupCheckboxState(group);
+      updateGroupCount(group);
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    function updateGroupCheckboxState(group) {
+      const allItems = group.querySelectorAll('.tree-items .tree-checkbox');
+      const checkedItems = group.querySelectorAll('.tree-items .tree-checkbox.checked');
+      const groupCheckbox = group.querySelector('.tree-group-header .tree-checkbox');
+      
+      if (checkedItems.length === 0) {
+        groupCheckbox.classList.remove('checked', 'partial');
+      } else if (checkedItems.length === allItems.length) {
+        groupCheckbox.classList.add('checked');
+        groupCheckbox.classList.remove('partial');
+      } else {
+        groupCheckbox.classList.remove('checked');
+        groupCheckbox.classList.add('partial');
+      }
+    }
+
+    function updateGroupCount(group) {
+      const allItems = group.querySelectorAll('.tree-items .tree-item');
+      const checkedItems = group.querySelectorAll('.tree-items .tree-checkbox.checked');
+      const countEl = group.querySelector('.tree-group-count');
+      
+      countEl.textContent = `${checkedItems.length}/${allItems.length}`;
+      countEl.classList.remove('all-selected', 'none-selected');
+      
+      if (checkedItems.length === allItems.length) {
+        countEl.classList.add('all-selected');
+      } else if (checkedItems.length === 0) {
+        countEl.classList.add('none-selected');
+      }
+    }
+
+    function selectAllInGroup(btn) {
+      const group = btn.closest('.tree-group');
+      group.querySelectorAll('.tree-checkbox').forEach(cb => {
+        cb.classList.add('checked');
+        cb.classList.remove('partial');
+      });
+      updateGroupCount(group);
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    function selectNoneInGroup(btn) {
+      const group = btn.closest('.tree-group');
+      group.querySelectorAll('.tree-checkbox').forEach(cb => {
+        cb.classList.remove('checked', 'partial');
+      });
+      updateGroupCount(group);
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    // Hide identical
+    function toggleHideIdentical() {
+      const checkbox = document.getElementById('hideIdenticalCheck');
+      checkbox.classList.toggle('checked');
+      hideIdentical = checkbox.classList.contains('checked');
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      searchQuery = e.target.value.toLowerCase().trim();
+      document.getElementById('searchClear').classList.toggle('visible', searchQuery.length > 0);
+      
+      document.querySelectorAll('.tree-item').forEach(item => {
+        const label = item.querySelector('.tree-item-label').textContent.toLowerCase();
+        const matches = searchQuery === '' || label.includes(searchQuery);
+        item.classList.toggle('hidden-by-search', !matches);
+      });
+      
+      // Also search group names
+      document.querySelectorAll('.tree-group').forEach(group => {
+        const groupLabel = group.querySelector('.tree-group-label').textContent.toLowerCase();
+        if (searchQuery && groupLabel.includes(searchQuery)) {
+          // Show all items in matching group
+          group.querySelectorAll('.tree-item').forEach(item => {
+            item.classList.remove('hidden-by-search');
+          });
+        }
+      });
+      
+      // Expand groups with matches
+      if (searchQuery) {
+        document.querySelectorAll('.tree-group').forEach(group => {
+          const hasMatches = group.querySelectorAll('.tree-item:not(.hidden-by-search):not(.hidden-by-type)').length > 0;
+          if (hasMatches) {
+            group.classList.remove('collapsed');
+          }
+        });
+      }
+      
+      updateGroupVisibility();
+      updateActiveFilters();
+    });
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').dispatchEvent(new Event('input'));
+    }
+
+    // Update counts
+    function updateAllCounts() {
+      // Count selected items (considering type filter)
+      let selected = 0;
+      let total = 0;
+      
+      document.querySelectorAll('.tree-item').forEach(item => {
+        const isHiddenByType = item.classList.contains('hidden-by-type');
+        if (!isHiddenByType) {
+          total++;
+          if (item.querySelector('.tree-checkbox.checked')) {
+            selected++;
+          }
+        }
+      });
+      
+      document.getElementById('selectedCount').textContent = selected;
+      document.getElementById('totalCount').textContent = total;
+      
+      // Preview count (accounting for hide identical)
+      let previewCount = selected;
+      if (hideIdentical) {
+        // Subtract global items that are selected
+        const selectedGlobal = document.querySelectorAll('.tree-item[data-global="true"] .tree-checkbox.checked').length;
+        previewCount = Math.max(0, selected - selectedGlobal);
+      }
+      
+      document.getElementById('previewSelected').textContent = previewCount;
+      document.getElementById('previewTotal').textContent = total;
+      
+      // Style preview count
+      const previewEl = document.getElementById('previewCount');
+      previewEl.classList.toggle('filtered', previewCount < total);
+      
+      // Update filter badge
+      updateFilterBadge();
+    }
+
+    function updateFilterBadge() {
+      let count = 0;
+      
+      if (currentTypeFilter !== 'all') count++;
+      if (hideIdentical) count++;
+      if (searchQuery) count++;
+      
+      const unchecked = document.querySelectorAll('.tree-item:not(.hidden-by-type) .tree-checkbox:not(.checked)').length;
+      if (unchecked > 0) count++;
+      
+      const badge = document.getElementById('filterBadge');
+      const resetBtn = document.getElementById('resetBtn');
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline';
+        resetBtn.disabled = false;
+      } else {
+        badge.style.display = 'none';
+        resetBtn.disabled = true;
+      }
+    }
+
+    // Active filter chips
+    function updateActiveFilters() {
+      const container = document.getElementById('activeFilters');
+      container.innerHTML = '';
+      let hasFilters = false;
+      
+      if (currentTypeFilter === 'attribute') {
+        hasFilters = true;
+        container.innerHTML += createChip('Attributes only', () => setTypeFilter('all'));
+      } else if (currentTypeFilter === 'reference') {
+        hasFilters = true;
+        container.innerHTML += createChip('References only', () => setTypeFilter('all'));
+      }
+      
+      if (hideIdentical) {
+        hasFilters = true;
+        container.innerHTML += createChip('Hide identical', () => {
+          document.getElementById('hideIdenticalCheck').classList.remove('checked');
+          hideIdentical = false;
+          updateAllCounts();
+          updateActiveFilters();
+        });
+      }
+      
+      const unchecked = document.querySelectorAll('.tree-item:not(.hidden-by-type) .tree-checkbox:not(.checked)').length;
+      if (unchecked > 0) {
+        hasFilters = true;
+        const selectedCount = document.querySelectorAll('.tree-item:not(.hidden-by-type) .tree-checkbox.checked').length;
+        container.innerHTML += createChip(`${selectedCount} items selected`, () => {
+          document.querySelectorAll('.tree-checkbox').forEach(cb => {
+            cb.classList.add('checked');
+            cb.classList.remove('partial');
+          });
+          document.querySelectorAll('.tree-group').forEach(g => updateGroupCount(g));
+          updateAllCounts();
+          updateActiveFilters();
+        });
+      }
+      
+      container.classList.toggle('visible', hasFilters);
+    }
+
+    function createChip(text, onRemove) {
+      const chipId = 'chip-' + Math.random().toString(36).substr(2, 9);
+      setTimeout(() => {
+        const removeBtn = document.getElementById(chipId);
+        if (removeBtn) removeBtn.onclick = onRemove;
+      }, 0);
+      
+      return `
+        <div class="filter-chip">
+          ${text}
+          <div class="filter-chip-remove" id="${chipId}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+        </div>
+      `;
+    }
+
+    // Reset
+    function resetFilters() {
+      setTypeFilter('all');
+      hideIdentical = false;
+      document.getElementById('hideIdenticalCheck').classList.remove('checked');
+      
+      document.querySelectorAll('.tree-checkbox').forEach(cb => {
+        cb.classList.add('checked');
+        cb.classList.remove('partial');
+      });
+      
+      document.querySelectorAll('.tree-item').forEach(item => {
+        item.classList.remove('hidden-by-type', 'hidden-by-search');
+      });
+      
+      document.querySelectorAll('.tree-group').forEach(group => {
+        group.style.display = '';
+        updateGroupCount(group);
+      });
+      
+      document.getElementById('ungroupedSection').style.display = '';
+      
+      clearSearch();
+      updateAllCounts();
+      updateActiveFilters();
+    }
+
+    // Apply
+    function applyFilters() {
+      const previewCount = document.getElementById('previewSelected').textContent;
+      const totalCount = document.getElementById('previewTotal').textContent;
+      alert(`Filters applied! Showing ${previewCount} of ${totalCount} rows.\n\nIn the real app, this would update the table.`);
+    }
+
+    // Keyboard handlers
+    function handleGroupKey(e, group) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleGroup(group);
+      }
+    }
+
+    function handleItemKey(e, item) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleItemCheckbox(item.querySelector('.tree-checkbox'));
+      }
+    }
+
+    function handleCheckboxKey(e, checkbox) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (checkbox.id === 'hideIdenticalCheck') {
+          toggleHideIdentical();
+        } else if (checkbox.closest('.tree-group-header')) {
+          toggleGroupCheckbox(checkbox);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>

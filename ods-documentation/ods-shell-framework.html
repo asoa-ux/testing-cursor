@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODS Shell Framework — One Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface-2: #EFEDE8;
+    --ink: #1A1714;
+    --ink-muted: #6B6660;
+    --ink-faint: #A09C98;
+    --accent: #1D4ED8;
+    --accent-light: #EEF2FF;
+    --accent-2: #D97706;
+    --accent-2-light: #FFFBEB;
+    --accent-3: #059669;
+    --accent-3-light: #ECFDF5;
+    --danger: #DC2626;
+    --danger-light: #FEF2F2;
+    --layer-a: #1D4ED8;
+    --layer-b: #7C3AED;
+    --layer-c: #059669;
+    --layer-d: #D97706;
+    --layer-e: #DC2626;
+    --border: #E2DDD8;
+    --radius: 6px;
+    --radius-lg: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ─── LAYOUT ─── */
+  .shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR NAV ─── */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .sidebar-logo .wordmark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .sidebar-logo .subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 3px;
+  }
+
+  .nav-group { margin-bottom: 8px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 12px 24px 6px;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 24px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-link:hover { background: var(--bg); color: var(--ink); }
+  .nav-link.active { background: var(--accent-light); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  .nav-link .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .version-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  main {
+    min-width: 0;
+    padding: 60px 80px 120px;
+    max-width: 960px;
+  }
+
+  /* ─── SECTIONS ─── */
+  .doc-section {
+    margin-bottom: 80px;
+    scroll-margin-top: 40px;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 44px;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-bottom: 10px;
+    margin-top: 28px;
+  }
+  h3:first-child { margin-top: 0; }
+  p { color: var(--ink-muted); margin-bottom: 14px; line-height: 1.7; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  .lead {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    margin-bottom: 0;
+    max-width: 640px;
+  }
+
+  .section-intro {
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin-bottom: 28px;
+    max-width: 620px;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 36px 0;
+  }
+
+  /* ─── LAYER MAP DIAGRAM ─── */
+  .layer-map {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin: 28px 0;
+  }
+  .layer-map-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+  .lm-row { display: flex; gap: 6px; }
+  .lm-block {
+    border-radius: 5px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  .lm-label { font-size: 10px; opacity: 0.75; }
+  .lm-name { font-size: 11px; font-weight: 600; }
+  .lm-tag {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-left: auto;
+  }
+  .lm-a { background: #EEF2FF; color: #1D4ED8; flex: 1; }
+  .lm-a .lm-tag { background: #C7D2FE; color: #1D4ED8; }
+  .lm-b { background: #F5F3FF; color: #7C3AED; width: 120px; flex-shrink: 0; }
+  .lm-b .lm-tag { background: #DDD6FE; color: #7C3AED; }
+  .lm-c { background: #ECFDF5; color: #059669; width: 140px; flex-shrink: 0; }
+  .lm-c .lm-tag { background: #A7F3D0; color: #059669; }
+  .lm-d { background: #FFFBEB; color: #D97706; flex: 1; }
+  .lm-d .lm-tag { background: #FDE68A; color: #D97706; }
+  .lm-e { background: #FEF2F2; color: #DC2626; width: 150px; flex-shrink: 0; }
+  .lm-e .lm-tag { background: #FECACA; color: #DC2626; }
+
+  /* ─── LAYER CARDS ─── */
+  .layer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .layer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    border-top: 3px solid;
+  }
+  .layer-card.a { border-top-color: var(--layer-a); }
+  .layer-card.b { border-top-color: var(--layer-b); }
+  .layer-card.c { border-top-color: var(--layer-c); }
+  .layer-card.d { border-top-color: var(--layer-d); }
+  .layer-card.e { border-top-color: var(--layer-e); }
+  .layer-card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .layer-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .badge-a { background: var(--accent-light); color: var(--layer-a); }
+  .badge-b { background: #F5F3FF; color: var(--layer-b); }
+  .badge-c { background: var(--accent-3-light); color: var(--layer-c); }
+  .badge-d { background: var(--accent-2-light); color: var(--layer-d); }
+  .badge-e { background: var(--danger-light); color: var(--layer-e); }
+  .layer-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .layer-optional-tag {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    background: var(--surface-2);
+    padding: 1px 7px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+  .layer-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .layer-card ul li {
+    font-size: 13px;
+    color: var(--ink-muted);
+    padding-left: 14px;
+    position: relative;
+  }
+  .layer-card ul li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--ink-faint);
+  }
+
+  /* ─── RULE BLOCKS ─── */
+  .rule-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .rule-block-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+  }
+  .rule-block-header .rule-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  .rule-block-header .rule-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .rule-block-body {
+    padding: 16px 20px;
+  }
+  .rule-block-body p {
+    font-size: 13.5px;
+    margin-bottom: 8px;
+  }
+  .rule-block-body p:last-child { margin-bottom: 0; }
+
+  /* ─── DO / DON'T — not requested but light inline notes ─── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .callout-note { background: var(--accent-light); color: #1e3a8a; border-left: 3px solid var(--accent); }
+  .callout-warning { background: var(--accent-2-light); color: #92400e; border-left: 3px solid var(--accent-2); }
+  .callout-danger { background: var(--danger-light); color: #991b1b; border-left: 3px solid var(--danger); }
+
+  /* ─── DECISION TREE ─── */
+  .decision-tree {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .dt-node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    line-height: 1.4;
+  }
+  .dt-question { background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); }
+  .dt-outcome-b { background: var(--accent-light); color: var(--accent); border: 1px solid #C7D2FE; }
+  .dt-outcome-c { background: var(--accent-3-light); color: var(--accent-3); border: 1px solid #A7F3D0; }
+  .dt-outcome-d { background: var(--accent-2-light); color: var(--accent-2); border: 1px solid #FDE68A; }
+  .dt-outcome-e { background: var(--danger-light); color: var(--danger); border: 1px solid #FECACA; }
+  .dt-outcome-no { background: var(--surface-2); color: var(--ink-muted); border: 1px solid var(--border); font-style: italic; }
+
+  .dt-row { display: flex; align-items: flex-start; gap: 0; margin-bottom: 0; }
+  .dt-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .dt-arrow-down {
+    width: 1px; height: 24px;
+    background: var(--border);
+    margin: 0 auto;
+  }
+  .dt-arrow-right {
+    height: 1px; width: 32px;
+    background: var(--border);
+    margin-top: 17px; flex-shrink: 0;
+  }
+  .dt-branches { display: flex; gap: 0; align-items: flex-start; }
+  .dt-branch { display: flex; flex-direction: column; align-items: center; }
+  .dt-branch-label {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .dt-yes { color: var(--accent-3); }
+  .dt-no { color: var(--danger); }
+
+  /* ─── PAGE STRUCTURE DIAGRAMS ─── */
+  .page-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .page-diagram h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 16px;
+  }
+  .pd-row {
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 8px 14px;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pd-row.highlight {
+    border-color: currentColor;
+    border-style: solid;
+  }
+  .pd-row.sticky { background: var(--surface-2); }
+  .pd-annotation {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-left: auto;
+  }
+  .pd-cols { display: flex; gap: 6px; margin-bottom: 6px; }
+  .pd-col { flex: 1; border: 1px dashed var(--border); border-radius: 4px; padding: 8px 14px; font-size: 12.5px; color: var(--ink-muted); }
+  .pd-col.grow { flex: 3; }
+
+  /* ─── PROPERTY TABLE ─── */
+  .prop-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+  .prop-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .prop-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-muted);
+    vertical-align: top;
+  }
+  .prop-table td:first-child {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .prop-table tr:last-child td { border-bottom: none; }
+  .prop-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  /* ─── STATE PILLS ─── */
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .pill-required { background: var(--danger-light); color: var(--danger); }
+  .pill-optional { background: var(--accent-2-light); color: var(--accent-2); }
+  .pill-context { background: var(--accent-3-light); color: var(--accent-3); }
+  .pill-fixed { background: var(--accent-light); color: var(--accent); }
+
+  /* ─── INLINE CODE ─── */
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    main { padding: 40px 28px 80px; }
+    .layer-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 1100px) {
+    main { padding: 48px 48px 80px; }
+  }
+
+  /* ─── SCROLL HIGHLIGHT ─── */
+  :target { animation: highlight 1.5s ease; }
+  @keyframes highlight {
+    0% { background: var(--accent-light); }
+    100% { background: transparent; }
+  }
+
+  /* ─── OVERVIEW TABLE ─── */
+  .overview-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 24px 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .ov-row {
+    display: grid;
+    grid-template-columns: 32px 80px 160px 1fr 80px;
+    align-items: start;
+    gap: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .ov-row:last-child { border-bottom: none; }
+  .ov-row.header { background: var(--bg); }
+  .ov-cell {
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    border-right: 1px solid var(--border);
+  }
+  .ov-cell:last-child { border-right: none; }
+  .ov-row.header .ov-cell {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 8px 14px;
+  }
+  .ov-color { width: 4px; padding: 0; }
+  .ov-color-a { background: var(--layer-a); }
+  .ov-color-b { background: var(--layer-b); }
+  .ov-color-c { background: var(--layer-c); }
+  .ov-color-d { background: var(--layer-d); }
+  .ov-color-e { background: var(--layer-e); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="wordmark">One Design System</div>
+      <div class="subtitle">Shell Framework · v0.1</div>
+    </div>
+
+    <a href="index.html" style="display:block;padding:8px 24px;margin-bottom:12px;font-size:12px;color:var(--accent);text-decoration:none;border-bottom:1px solid var(--border);">← Back to ODS Documentation</a>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Introduction</div>
+      <a href="#overview" class="nav-link active"><span class="dot" style="background:var(--ink-faint)"></span>Overview</a>
+      <a href="#principles" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Principles</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Layers</div>
+      <a href="#layer-a" class="nav-link"><span class="dot" style="background:var(--layer-a)"></span>A — Top Bar</a>
+      <a href="#layer-b" class="nav-link"><span class="dot" style="background:var(--layer-b)"></span>B — Side Panel</a>
+      <a href="#layer-c" class="nav-link"><span class="dot" style="background:var(--layer-c)"></span>C — Explorer</a>
+      <a href="#layer-d" class="nav-link"><span class="dot" style="background:var(--layer-d)"></span>D — Content Area</a>
+      <a href="#layer-e" class="nav-link"><span class="dot" style="background:var(--layer-e)"></span>E — Contextual Panel</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Patterns</div>
+      <a href="#navigation-rules" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Navigation Rules</a>
+      <a href="#page-types" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Page Types</a>
+      <a href="#layer-states" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Layer States</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Decision Guides</div>
+      <a href="#dt-nav" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Which nav pattern?</a>
+      <a href="#dt-layers" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Which layers to show?</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Responsive</div>
+      <a href="#tablet" class="nav-link"><span class="dot" style="background:var(--ink-faint)"></span>Tablet behaviour</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="version-tag">Shell Framework · Draft · 2026</div>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main>
+
+    <!-- ══ OVERVIEW ══ -->
+    <section class="doc-section" id="overview">
+      <div class="page-eyebrow">One Design System · Shell Framework</div>
+      <h1>The Application Shell</h1>
+      <p class="lead">A shared layout grammar for every product in the Stibo Systems suite. This document defines the five structural layers, their responsibilities, their interaction rules, and the decision criteria designers use when building new — or rearchitecting existing — applications.</p>
+
+      <hr class="divider">
+
+      <h2>The five layers at a glance</h2>
+      <p class="section-intro">Every application in the suite is composed of up to five layers. Two are always present; three are situational.</p>
+
+      <!-- Visual layer map -->
+      <div class="layer-map">
+        <div class="layer-map-inner">
+          <div class="lm-block lm-a">
+            <div>
+              <div class="lm-label">Layer A</div>
+              <div class="lm-name">Top Bar — Suite Navigation</div>
+            </div>
+            <span class="lm-tag">Always present</span>
+          </div>
+          <div class="lm-row">
+            <div class="lm-block lm-b" style="align-self:stretch; flex-direction:column; justify-content:flex-start;">
+              <div>
+                <div class="lm-label">Layer B</div>
+                <div class="lm-name">Side Panel</div>
+              </div>
+              <span class="lm-tag" style="margin-left:0; margin-top:6px;">Always present</span>
+            </div>
+            <div class="lm-block lm-c" style="align-self:stretch; flex-direction:column; justify-content:flex-start;">
+              <div>
+                <div class="lm-label">Layer C</div>
+                <div class="lm-name">Explorer</div>
+              </div>
+              <span class="lm-tag" style="margin-left:0; margin-top:6px;">Optional</span>
+            </div>
+            <div class="lm-block lm-d" style="flex:1; align-self:stretch; flex-direction:column; justify-content:flex-start;">
+              <div>
+                <div class="lm-label">Layer D</div>
+                <div class="lm-name">Main Content Area</div>
+              </div>
+              <span class="lm-tag" style="margin-left:0; margin-top:6px;">Always present</span>
+            </div>
+            <div class="lm-block lm-e" style="align-self:stretch; flex-direction:column; justify-content:flex-start;">
+              <div>
+                <div class="lm-label">Layer E</div>
+                <div class="lm-name">Contextual Panel</div>
+              </div>
+              <span class="lm-tag" style="margin-left:0; margin-top:6px;">Optional</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOCKUP MOVED TO TABLET SECTION -->
+      <div style="display:none; resize: both;
+        overflow: hidden;
+        min-width: 480px;
+        min-height: 300px;
+        width: 100%;
+        height: 420px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: #f0eee9;
+        display: flex;
+        flex-direction: column;
+        font-family: 'DM Mono', monospace;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      ">
+
+        <!-- Layer A -->
+        <div style="
+          flex-shrink: 0;
+          height: 44px;
+          background: #EEF2FF;
+          border-bottom: 1px solid #C7D2FE;
+          display: flex;
+          align-items: center;
+          padding: 0 14px;
+          gap: 10px;
+        ">
+          <!-- collapse btn -->
+          <div style="width:20px; height:20px; border-radius:4px; background:#C7D2FE; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="2" width="8" height="1.2" rx="0.6" fill="#4F46E5"/><rect x="1" y="4.4" width="8" height="1.2" rx="0.6" fill="#4F46E5"/><rect x="1" y="6.8" width="8" height="1.2" rx="0.6" fill="#4F46E5"/></svg>
+          </div>
+          <!-- app pill -->
+          <div style="background:#C7D2FE; border-radius:20px; padding:2px 10px; font-size:9px; font-weight:600; color:#1D4ED8; flex-shrink:0;">⬡ App</div>
+          <!-- customer logo slot -->
+          <div style="width:28px; height:14px; border-radius:3px; background:#DDD6FE; flex-shrink:0;"></div>
+          <!-- search -->
+          <div style="flex:1; max-width:220px; height:20px; border-radius:10px; background:#fff; border:1px solid #C7D2FE; display:flex; align-items:center; padding:0 8px; gap:4px;">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="3.2" cy="3.2" r="2.2" stroke="#6366F1" stroke-width="1"/><line x1="5" y1="5" x2="7" y2="7" stroke="#6366F1" stroke-width="1" stroke-linecap="round"/></svg>
+            <div style="font-size:8px; color:#A5B4FC;">Search…</div>
+          </div>
+          <div style="flex:1;"></div>
+          <!-- env -->
+          <div style="font-size:8px; color:#4F46E5; background:#E0E7FF; border-radius:3px; padding:2px 6px; flex-shrink:0;">EN · PROD</div>
+          <!-- AI agent -->
+          <div style="background:#4F46E5; border-radius:20px; padding:2px 8px; font-size:8px; font-weight:600; color:#fff; flex-shrink:0;">✦ AI</div>
+          <!-- bell -->
+          <div style="width:20px; height:20px; border-radius:4px; background:#C7D2FE; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px;">🔔</div>
+          <div style="font-size:8px; font-weight:600; color:#6366F1; letter-spacing:0.06em; position:absolute; margin-left:-999px; opacity:0">Layer A</div>
+        </div>
+
+        <!-- label A -->
+        <div style="position:relative;">
+          <div style="
+            position:absolute; top:-38px; left:14px;
+            font-size:8px; font-weight:700; letter-spacing:0.08em;
+            color:#4F46E5; text-transform:uppercase; pointer-events:none;
+          ">Layer A — Top Bar</div>
+        </div>
+
+        <!-- Body row: B + C + D + E -->
+        <div style="flex:1; display:flex; overflow:hidden; min-height:0;">
+
+          <!-- Layer B -->
+          <div style="
+            width: 130px;
+            flex-shrink: 0;
+            background: #F5F3FF;
+            border-right: 1px solid #DDD6FE;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            gap: 2px;
+            position: relative;
+          ">
+            <div style="font-size:7px; font-weight:700; letter-spacing:0.1em; color:#7C3AED; text-transform:uppercase; padding: 0 10px 6px; border-bottom:1px solid #EDE9FE; margin-bottom:4px;">Layer B · Side Panel</div>
+            <!-- Recent -->
+            <div style="padding:3px 10px; font-size:8px; color:#A78BFA; font-weight:600;">Recent</div>
+            <div style="padding:3px 10px; font-size:8.5px; color:#7C3AED; display:flex; align-items:center; gap:5px; background:#EDE9FE; border-radius:3px; margin:0 6px;">
+              <div style="width:10px;height:10px;border-radius:2px;background:#C4B5FD;flex-shrink:0;"></div>Work area
+            </div>
+            <!-- Nav items -->
+            <div style="padding:6px 10px 2px; font-size:7px; color:#A78BFA; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;">Navigation</div>
+            <div style="padding:3px 10px; font-size:8.5px; color:#6D28D9; display:flex; align-items:center; gap:5px;">
+              <div style="width:10px;height:10px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Section
+              <svg style="margin-left:auto" width="6" height="6" viewBox="0 0 6 6" fill="none"><path d="M2 1.5L4 3L2 4.5" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
+            </div>
+            <div style="padding:3px 10px; font-size:8.5px; color:#6D28D9; display:flex; align-items:center; gap:5px;">
+              <div style="width:10px;height:10px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Section
+              <svg style="margin-left:auto" width="6" height="6" viewBox="0 0 6 6" fill="none"><path d="M2 1.5L4 3L2 4.5" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
+            </div>
+            <div style="padding:3px 10px; font-size:8.5px; color:#6D28D9; display:flex; align-items:center; gap:5px;">
+              <div style="width:10px;height:10px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Section
+            </div>
+            <div style="padding:3px 10px; font-size:8.5px; color:#6D28D9; display:flex; align-items:center; gap:5px;">
+              <div style="width:10px;height:10px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Browse
+              <svg style="margin-left:auto" width="6" height="6" viewBox="0 0 6 6" fill="none"><path d="M3 1.5L3 4.5M1.5 3L4.5 3" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
+            </div>
+            <!-- spacer -->
+            <div style="flex:1;"></div>
+            <!-- Settings -->
+            <div style="padding:3px 10px; font-size:8.5px; color:#A78BFA; display:flex; align-items:center; gap:5px; border-top:1px solid #EDE9FE; padding-top:6px; margin-top:2px;">
+              <div style="width:10px;height:10px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Settings
+            </div>
+            <!-- User -->
+            <div style="padding:4px 10px; font-size:8px; color:#7C3AED; display:flex; align-items:center; gap:5px; border-top:1px solid #EDE9FE;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#7C3AED;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:700;">J</div>
+              <div><div style="font-size:8px;font-weight:600;color:#4C1D95;">John Doe</div><div style="font-size:7px;color:#A78BFA;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7812561c171d38191b151d561b1715">[email&#160;protected]</a></div></div>
+            </div>
+            <!-- Logo -->
+            <div style="padding:4px 10px; border-top:1px solid #EDE9FE; display:flex; align-items:center; gap:4px;">
+              <div style="width:14px;height:14px;border-radius:2px;background:#7C3AED;flex-shrink:0;"></div>
+              <div style="font-size:8px;font-weight:700;color:#4C1D95;">ACME</div>
+            </div>
+          </div>
+
+          <!-- Layer C (optional – shown here) -->
+          <div style="
+            width: 100px;
+            flex-shrink: 0;
+            background: #ECFDF5;
+            border-right: 1px solid #A7F3D0;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+          ">
+            <div style="font-size:7px; font-weight:700; letter-spacing:0.1em; color:#059669; text-transform:uppercase; padding: 0 10px 6px; border-bottom:1px solid #A7F3D0; margin-bottom:4px;">Layer C · Explorer</div>
+            <!-- Tree nodes -->
+            <div style="padding:3px 10px; font-size:8.5px; color:#065F46; display:flex; align-items:center; gap:4px;">
+              <span style="color:#6EE7B7;">▾</span> Root
+            </div>
+            <div style="padding:3px 10px 3px 18px; font-size:8px; color:#047857; display:flex; align-items:center; gap:4px; background:#D1FAE5;">
+              <span style="color:#6EE7B7;">▾</span> Category A
+            </div>
+            <div style="padding:3px 10px 3px 26px; font-size:8px; color:#059669;">Sub-item 1</div>
+            <div style="padding:3px 10px 3px 26px; font-size:8px; color:#059669;">Sub-item 2</div>
+            <div style="padding:3px 10px 3px 18px; font-size:8px; color:#047857; display:flex; align-items:center; gap:4px;">
+              <span style="color:#A7F3D0;">▸</span> Category B
+            </div>
+            <div style="padding:3px 10px 3px 18px; font-size:8px; color:#047857; display:flex; align-items:center; gap:4px;">
+              <span style="color:#A7F3D0;">▸</span> Category C
+            </div>
+            <div style="padding:3px 10px; font-size:8.5px; color:#065F46; display:flex; align-items:center; gap:4px; margin-top:4px;">
+              <span style="color:#6EE7B7;">▸</span> Root 2
+            </div>
+          </div>
+
+          <!-- Layer D -->
+          <div style="
+            flex: 1;
+            background: #FFFBEB;
+            border-right: 1px solid #FDE68A;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+            position: relative;
+          ">
+            <div style="font-size:7px; font-weight:700; letter-spacing:0.1em; color:#D97706; text-transform:uppercase; padding: 6px 12px 6px; border-bottom:1px solid #FDE68A; flex-shrink:0;">Layer D · Main Content Area</div>
+
+            <!-- 12-col grid overlay -->
+            <div style="
+              position: absolute;
+              top: 26px; left: 0; right: 0; bottom: 0;
+              display: grid;
+              grid-template-columns: repeat(12, 1fr);
+              gap: 0;
+              pointer-events: none;
+              z-index: 0;
+            ">
+              <!-- 12 column stripes -->
+              <div style="background:rgba(251,191,36,0.07); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.0); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.07); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.0); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.07); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.0); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.07); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.0); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.07); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.0); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.07); border-right:1px dashed rgba(251,191,36,0.3);"></div>
+              <div style="background:rgba(251,191,36,0.0);"></div>
+            </div>
+
+            <!-- Content sketches over the grid -->
+            <div style="position:relative; z-index:1; padding:8px 12px; flex:1; display:flex; flex-direction:column; gap:6px; min-height:0;">
+              <!-- Breadcrumb -->
+              <div style="display:flex;align-items:center;gap:4px;font-size:7.5px;color:#B45309;">
+                <span>Work areas</span><span style="color:#FCD34D;">›</span><span>Product Mgmt</span><span style="color:#FCD34D;">›</span><span style="font-weight:600;color:#92400E;">Item name</span>
+              </div>
+              <!-- Title row -->
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="font-size:11px;font-weight:700;color:#78350F;">Page / Item Title</div>
+                <div style="margin-left:auto;background:#FDE68A;border-radius:3px;padding:2px 6px;font-size:7.5px;color:#92400E;">⋯</div>
+              </div>
+              <!-- Toolbar -->
+              <div style="display:flex;align-items:center;gap:4px;padding:4px 0;border-top:1px dashed #FDE68A;border-bottom:1px dashed #FDE68A;">
+                <div style="height:14px;width:60px;background:#FDE68A;border-radius:10px;flex-shrink:0;"></div>
+                <div style="height:14px;width:16px;background:#FDE68A;border-radius:3px;flex-shrink:0;"></div>
+                <div style="height:14px;width:16px;background:#FDE68A;border-radius:3px;flex-shrink:0;"></div>
+                <div style="flex:1;"></div>
+                <div style="height:14px;width:40px;background:#F59E0B;border-radius:3px;flex-shrink:0;"></div>
+                <div style="height:14px;width:24px;background:#FDE68A;border-radius:3px;flex-shrink:0;"></div>
+                <div style="height:14px;width:16px;background:#D97706;border-radius:3px;flex-shrink:0;"></div>
+              </div>
+              <!-- Content rows -->
+              <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;flex:1;min-height:0;align-content:start;">
+                <!-- header row -->
+                <div style="grid-column:span 2;height:10px;background:#FDE68A;border-radius:2px;opacity:0.8;"></div>
+                <div style="grid-column:span 3;height:10px;background:#FDE68A;border-radius:2px;opacity:0.8;"></div>
+                <div style="grid-column:span 2;height:10px;background:#FDE68A;border-radius:2px;opacity:0.8;"></div>
+                <div style="grid-column:span 2;height:10px;background:#FDE68A;border-radius:2px;opacity:0.8;"></div>
+                <div style="grid-column:span 3;height:10px;background:#FDE68A;border-radius:2px;opacity:0.8;"></div>
+                <!-- data rows -->
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 3;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 3;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 3;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 3;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 3;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 2;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+                <div style="grid-column:span 3;height:9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:2px;"></div>
+              </div>
+            </div>
+
+            <!-- Column count label -->
+            <div style="position:absolute;bottom:6px;right:8px;font-size:7px;color:#D97706;opacity:0.7;font-family:'DM Mono',monospace;z-index:2;">12 cols</div>
+
+            <!-- Sticky footer -->
+            <div style="
+              flex-shrink:0;
+              border-top:1px solid #FDE68A;
+              background:#FEF3C7;
+              padding:4px 12px;
+              display:flex;
+              align-items:center;
+              gap:6px;
+              font-size:8px;
+              color:#92400E;
+              font-family:'DM Mono',monospace;
+            ">
+              <span>142 items</span>
+              <span style="background:#FDE68A;border-radius:20px;padding:1px 6px;">3 of 142 selected</span>
+            </div>
+          </div>
+
+          <!-- Layer E (contextual panel) -->
+          <div style="
+            width: 110px;
+            flex-shrink: 0;
+            background: #FEF2F2;
+            border-left: 1px solid #FECACA;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+          ">
+            <div style="font-size:7px; font-weight:700; letter-spacing:0.1em; color:#DC2626; text-transform:uppercase; padding: 0 10px 6px; border-bottom:1px solid #FECACA; margin-bottom:6px; display:flex; align-items:center;">
+              Layer E
+              <span style="margin-left:auto;font-size:9px;color:#FCA5A5;cursor:pointer;">✕</span>
+            </div>
+            <!-- Mode toggle -->
+            <div style="display:flex;gap:3px;margin:0 8px 8px;background:#FECACA;border-radius:4px;padding:2px;">
+              <div style="flex:1;background:#fff;border-radius:3px;font-size:7px;color:#DC2626;font-weight:600;text-align:center;padding:2px 0;">Inspector</div>
+              <div style="flex:1;font-size:7px;color:#EF4444;text-align:center;padding:2px 0;">AI Agent</div>
+            </div>
+            <!-- Context info -->
+            <div style="padding:0 10px;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:7.5px;color:#991B1B;font-weight:600;">Item details</div>
+              <div style="height:8px;background:#FECACA;border-radius:2px;width:80%;opacity:0.6;"></div>
+              <div style="height:8px;background:#FECACA;border-radius:2px;width:60%;opacity:0.6;"></div>
+              <div style="height:8px;background:#FECACA;border-radius:2px;width:70%;opacity:0.6;"></div>
+              <div style="font-size:7.5px;color:#991B1B;font-weight:600;margin-top:4px;">Related</div>
+              <div style="height:8px;background:#FECACA;border-radius:2px;width:90%;opacity:0.6;"></div>
+              <div style="height:8px;background:#FECACA;border-radius:2px;width:50%;opacity:0.6;"></div>
+            </div>
+          </div>
+
+        </div><!-- end body row -->
+      </div><!-- end hidden legacy mockup -->
+
+      <!-- Overview table -->
+      <div class="overview-strip">
+        <div class="ov-row header">
+          <div class="ov-cell ov-color"></div>
+          <div class="ov-cell">Layer</div>
+          <div class="ov-cell">Name</div>
+          <div class="ov-cell">Primary responsibility</div>
+          <div class="ov-cell">Presence</div>
+        </div>
+        <div class="ov-row">
+          <div class="ov-cell ov-color ov-color-a"></div>
+          <div class="ov-cell"><strong>A</strong></div>
+          <div class="ov-cell">Top Bar</div>
+          <div class="ov-cell">Suite-level navigation: app switching, environment context, global search, AI agent entry point, notifications</div>
+          <div class="ov-cell"><span class="pill pill-required">Required</span></div>
+        </div>
+        <div class="ov-row">
+          <div class="ov-cell ov-color ov-color-b"></div>
+          <div class="ov-cell"><strong>B</strong></div>
+          <div class="ov-cell">Side Panel</div>
+          <div class="ov-cell">Product-level navigation. Shallow only. Determines what section of the product the user is in.</div>
+          <div class="ov-cell"><span class="pill pill-required">Required</span></div>
+        </div>
+        <div class="ov-row">
+          <div class="ov-cell ov-color ov-color-c"></div>
+          <div class="ov-cell"><strong>C</strong></div>
+          <div class="ov-cell">Explorer</div>
+          <div class="ov-cell">Contextual data hierarchy browsing. Driven by the current B selection. Can be arbitrarily deep.</div>
+          <div class="ov-cell"><span class="pill pill-optional">Optional</span></div>
+        </div>
+        <div class="ov-row">
+          <div class="ov-cell ov-color ov-color-d"></div>
+          <div class="ov-cell"><strong>D</strong></div>
+          <div class="ov-cell">Content Area</div>
+          <div class="ov-cell">The primary working surface. Always visible. Responds to selections in B and C.</div>
+          <div class="ov-cell"><span class="pill pill-required">Required</span></div>
+        </div>
+        <div class="ov-row">
+          <div class="ov-cell ov-color ov-color-e"></div>
+          <div class="ov-cell"><strong>E</strong></div>
+          <div class="ov-cell">Contextual Panel</div>
+          <div class="ov-cell">On-demand inspector: contextual detail view or AI agent interaction surface.</div>
+          <div class="ov-cell"><span class="pill pill-optional">Optional</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PRINCIPLES ══ -->
+    <section class="doc-section" id="principles">
+      <h2>Design principles</h2>
+      <p class="section-intro">These principles govern decisions at every layer. When two guidelines conflict, apply the one ranked higher.</p>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">01</span><span class="rule-title">Scope stays in its layer</span></div>
+        <div class="rule-block-body"><p>Each layer has a defined jurisdiction. Navigation belongs in A and B. Deep data browsing belongs in C. Working on content belongs in D. Contextual inspection belongs in E. Never use a layer for something outside its scope.</p></div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">02</span><span class="rule-title">Global before local</span></div>
+        <div class="rule-block-body"><p>Layer A actions affect the whole suite. Layer B actions affect the current product. Layer C actions affect the current section. Layer D actions affect the current item. Never surface a global action below Layer A.</p></div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">03</span><span class="rule-title">Selection cascades downward</span></div>
+        <div class="rule-block-body"><p>Selecting in Layer B updates Layer C (if present) and Layer D. Selecting in Layer C updates Layer D. This cascade is one-way and must not be reversed. Layer D actions must never change the Layer B navigation state.</p></div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">04</span><span class="rule-title">Optional layers are triggered, not defaulted</span></div>
+        <div class="rule-block-body"><p>Layer C appears when the current context contains a deep hierarchy to browse. Layer E appears when the user explicitly requests contextual information or AI agent interaction. Neither panel should appear on page load unless the context demands it.</p></div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">05</span><span class="rule-title">Consistency over customisation</span></div>
+        <div class="rule-block-body"><p>Product teams may configure Layer B navigation items, Layer C data sources, and Layer D content. They may not relocate components between layers, add new persistent layers, or break the left-to-right cascade order.</p></div>
+      </div>
+    </section>
+
+    <!-- ══ LAYER A ══ -->
+    <section class="doc-section" id="layer-a">
+      <h2><span style="color:var(--layer-a)">Layer A</span> — Top Bar</h2>
+      <p class="section-intro">The Top Bar is the one persistent surface shared across all products. It orients the user within the suite and provides access to suite-level functionality.</p>
+
+      <div class="callout callout-note"><span class="callout-icon">ℹ</span><span>Layer A is owned by the <strong>ODS team</strong>. Product teams do not modify its structure or component order. They may supply a customer logo and configure which apps appear in the app switcher.</span></div>
+
+      <h3>Component slots — fixed order</h3>
+      <div class="prop-table-wrap">
+        <table class="prop-table">
+          <thead><tr><th>Slot</th><th>Component</th><th>Position</th><th>Required</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>collapse-btn</td><td>Collapse / expand Layer B</td><td>Far left</td><td><span class="pill pill-required">Yes</span></td><td>Icon changes between ← and → based on Layer B state</td></tr>
+            <tr><td>app-switcher</td><td>App switcher</td><td>Left</td><td><span class="pill pill-required">Yes</span></td><td>Shows the current product badge; opens a popover listing all accessible apps</td></tr>
+            <tr><td>customer-logo</td><td>Customer / tenant logo</td><td>Left, after app switcher</td><td><span class="pill pill-optional">Optional</span></td><td>Tenant-configurable; hidden when not supplied</td></tr>
+            <tr><td>search</td><td>Global search</td><td>Centre</td><td><span class="pill pill-required">Yes</span></td><td>Searches across all data within the current environment</td></tr>
+            <tr><td>env-context</td><td>Environment / language selector</td><td>Right</td><td><span class="pill pill-context">Context</span></td><td>Shown when the product supports multiple environments or language variants</td></tr>
+            <tr><td>ai-agent</td><td>AI Agent button</td><td>Right</td><td><span class="pill pill-required">Yes</span></td><td>Opens / closes Layer E in AI Agent mode</td></tr>
+            <tr><td>notifications</td><td>Notification bell</td><td>Far right</td><td><span class="pill pill-required">Yes</span></td><td>Badge shows unread count</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Behaviour</h3>
+      <p>The Top Bar is always visible and never scrolls with the page content. It sits above all other layers at a fixed height. It never contains product-specific navigation links or data-level actions.</p>
+
+      <div class="callout callout-warning"><span class="callout-icon">⚠</span><span><strong>Do not place product navigation in Layer A.</strong> If an item feels like it belongs between the app switcher and search, it is almost certainly a Layer B item.</span></div>
+    </section>
+
+    <!-- ══ LAYER B ══ -->
+    <section class="doc-section" id="layer-b">
+      <h2><span style="color:var(--layer-b)">Layer B</span> — Side Panel</h2>
+      <p class="section-intro">The Side Panel provides navigation within a single product. It is shallow by rule — users should never need to descend more than two levels to reach any navigable section.</p>
+
+      <h3>Anatomy — top to bottom</h3>
+      <div class="prop-table-wrap">
+        <table class="prop-table">
+          <thead><tr><th>Slot</th><th>Component</th><th>Required</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>recent</td><td>Recently visited items</td><td><span class="pill pill-optional">Optional</span></td><td>Product team decides whether to include this; maximum 5 items shown</td></tr>
+            <tr><td>nav-items</td><td>Product navigation</td><td><span class="pill pill-required">Yes</span></td><td>Accordion or popover based on depth rules below</td></tr>
+            <tr><td>settings</td><td>Settings</td><td><span class="pill pill-context">If applicable</span></td><td>Only present when the product has configuration screens; always at the bottom of nav, above the user block</td></tr>
+            <tr><td>user-info</td><td>User block</td><td><span class="pill pill-required">Yes</span></td><td>Avatar, display name, email; always pinned to bottom</td></tr>
+            <tr><td>company-logo</td><td>Company / product logo</td><td><span class="pill pill-required">Yes</span></td><td>Always pinned to bottom, below user block</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Depth rule</h3>
+      <p>Layer B navigation must never carry deep data hierarchies. The maximum depth is <strong>two levels</strong> (a parent item and its direct children). Any structure deeper than two levels belongs in Layer C.</p>
+
+      <div class="callout callout-danger"><span class="callout-icon">✕</span><span><strong>Never replicate MDM data trees in Layer B.</strong> A product hierarchy with hundreds of nodes is a Layer C concern, not a Layer B concern.</span></div>
+
+      <h3>Collapsed state</h3>
+      <p>When the user collapses Layer B via the button in Layer A, the panel is <strong>fully hidden</strong> — not reduced to an icon rail. The Layer A collapse button changes to an expand icon. This maximises the working area in Layer D and is the preferred state for data-intensive tasks.</p>
+    </section>
+
+    <!-- ══ LAYER C ══ -->
+    <section class="doc-section" id="layer-c">
+      <h2><span style="color:var(--layer-c)">Layer C</span> — Explorer</h2>
+      <p class="section-intro">The Explorer is a contextual data panel. It is not global navigation. It appears when the current section of the product exposes a deep hierarchy that the user needs to browse — for example, a product category tree or an organisational structure.</p>
+
+      <h3>When to include Layer C</h3>
+      <p>Ask the following question: <em>"Does the user need to navigate a structured hierarchy with potentially unlimited depth before they can work on an item?"</em> If yes, Layer C is appropriate. If the user only needs to pick from a flat list or a two-level structure, Layer B is sufficient.</p>
+
+      <div class="callout callout-note"><span class="callout-icon">ℹ</span><span>Layer C is <strong>driven by the Layer B selection</strong>. Switching sections in Layer B must update — or hide — Layer C accordingly.</span></div>
+
+      <h3>Responsibilities</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; margin:12px 0 16px; padding:0;">
+        <li style="display:flex; gap:10px; font-size:13.5px; color:var(--ink-muted);"><span style="color:var(--accent-3); font-size:14px;">✓</span> Hierarchical browsing of MDM data structures</li>
+        <li style="display:flex; gap:10px; font-size:13.5px; color:var(--ink-muted);"><span style="color:var(--accent-3); font-size:14px;">✓</span> Node selection that updates the Layer D content</li>
+        <li style="display:flex; gap:10px; font-size:13.5px; color:var(--ink-muted);"><span style="color:var(--accent-3); font-size:14px;">✓</span> May be as deep as the data requires — no depth limit applies here</li>
+        <li style="display:flex; gap:10px; font-size:13.5px; color:var(--ink-muted);"><span style="color:var(--danger); font-size:14px;">✕</span> Must not contain suite navigation or product section links</li>
+        <li style="display:flex; gap:10px; font-size:13.5px; color:var(--ink-muted);"><span style="color:var(--danger); font-size:14px;">✕</span> Must not duplicate Layer B navigation items</li>
+      </ul>
+
+      <h3>Layer B + C co-existence</h3>
+      <p>Layer B always remains fully expanded when Layer C is open. There is no automatic icon-rail state. If a user wants to maximise horizontal space, they collapse Layer B manually using the collapse button in Layer A — this is a user action, not a product-driven behaviour. Product teams must not programmatically hide or collapse Layer B when Layer C appears.</p>
+    </section>
+
+    <!-- ══ LAYER D ══ -->
+    <section class="doc-section" id="layer-d">
+      <h2><span style="color:var(--layer-d)">Layer D</span> — Content Area</h2>
+      <p class="section-intro">Layer D is the primary working surface. It is always present. Its content is entirely determined by the current selection state in Layer B and, when applicable, Layer C.</p>
+
+      <h3>General rules</h3>
+      <p>Layer D must never contain navigation elements that duplicate what is available in Layers B or C. All persistent navigation belongs to the left. Layer D is a workspace, not a menu.</p>
+
+      <p>Layer D supports two page type patterns, defined below in <a href="#page-types" style="color:var(--accent)">Page Types</a>. Product teams may create additional page types for their domain but must follow the shared structural rules for breadcrumbs, titles, and action placement.</p>
+    </section>
+
+    <!-- ══ LAYER E ══ -->
+    <section class="doc-section" id="layer-e">
+      <h2><span style="color:var(--layer-e)">Layer E</span> — Contextual Panel</h2>
+      <p class="section-intro">Layer E is an on-demand panel that slides in from the right edge of the viewport. It serves two distinct modes that share the same panel surface.</p>
+
+      <div class="prop-table-wrap">
+        <table class="prop-table">
+          <thead><tr><th>Mode</th><th>Trigger</th><th>Content</th></tr></thead>
+          <tbody>
+            <tr><td>Inspector</td><td>User clicks "View details in context" on an item in Layer D</td><td>Read-only or quick-edit view of item metadata, without leaving the current Layer D page</td></tr>
+            <tr><td>AI Agent</td><td>User clicks the AI Agent button in Layer A</td><td>Full conversational AI interface; context-aware of the current product, section, and item selection</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Panel behaviour</h3>
+      <p>Layer E opens as an overlay that pushes Layer D content leftward — it does not sit on top of it. Only one mode is active at a time. Switching between Inspector and AI Agent modes while the panel is open replaces the panel content without closing and reopening the panel.</p>
+      <p>The panel is dismissed by clicking the close button inside Layer E, or by pressing <code>Esc</code>.</p>
+
+      <div class="callout callout-note"><span class="callout-icon">ℹ</span><span>The AI Agent in Layer E is context-aware. It receives the identity of the current product, the current work area, and the currently selected item. Product teams are responsible for passing this context payload when opening Layer E in AI Agent mode.</span></div>
+    </section>
+
+    <!-- ══ NAVIGATION RULES ══ -->
+    <section class="doc-section" id="navigation-rules">
+      <h2>Layer B navigation interaction rules</h2>
+      <p class="section-intro">Navigation items in Layer B follow one of two interaction patterns depending on the number of sub-items they contain. The choice is determined by a single rule.</p>
+
+      <div class="prop-table-wrap">
+        <table class="prop-table">
+          <thead><tr><th>Pattern</th><th>Use when</th><th>Sub-item count</th></tr></thead>
+          <tbody>
+            <tr><td>Accordion</td><td>The sub-items are finite and predictable</td><td>1–5 items</td></tr>
+            <tr><td>Popover</td><td>The sub-item list could grow, or exceeds 5 items</td><td>6+ items, or open-ended</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-note"><span class="callout-icon">ℹ</span><span>When a popover contains more items than can be comfortably displayed, the visible items are shown first and the remainder are accessible via a <strong>"… More [X]"</strong> menu item at the end of the list. This keeps the popover scannable without truncating access.</span></div>
+
+      <h3>Accordion pattern</h3>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">B-01</span><span class="rule-title">Hover state</span></div>
+        <div class="rule-block-body"><p>When the user hovers a nav item that uses the accordion pattern, the item's icon is replaced by a <strong>chevron pointing down</strong>. This is the affordance that signals the item is expandable.</p></div>
+      </div>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">B-02</span><span class="rule-title">Click behaviour</span></div>
+        <div class="rule-block-body"><p>Clicking the item toggles the accordion open or closed. The chevron rotates to point upward when the accordion is open. Sub-items are revealed inline beneath the parent item. Only one accordion may be open at a time; opening a second one collapses the first.</p></div>
+      </div>
+
+      <h3>Popover pattern</h3>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">B-03</span><span class="rule-title">Chevron indicator</span></div>
+        <div class="rule-block-body"><p>Items using the popover pattern display a <strong>static chevron pointing right</strong> on the trailing edge of the item at all times — not just on hover. This distinguishes them from accordion items.</p></div>
+      </div>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">B-04</span><span class="rule-title">Click behaviour</span></div>
+        <div class="rule-block-body"><p>The <strong>entire item row is clickable</strong> and opens the popover. The popover lists all sub-sections. At the end of the popover list, a <strong>"View all [X]"</strong> menu item links to a full listing page for that section. Popovers are dismissed on outside click or <code>Esc</code>.</p></div>
+      </div>
+
+      <div class="callout callout-warning"><span class="callout-icon">⚠</span><span>Do not mix accordion and popover patterns for sibling items at the same navigation level within a single product. Choose one pattern per depth level and apply it consistently.</span></div>
+    </section>
+
+    <!-- ══ PAGE TYPES ══ -->
+    <section class="doc-section" id="page-types">
+      <h2>Page types in Layer D</h2>
+      <p class="section-intro">Two canonical page structures cover the majority of use cases. Every screen in a product should map to one of these — or explicitly document why it diverges.</p>
+
+      <h3>Bulk page — lists, tables, galleries</h3>
+      <p>Used when the user is browsing or operating on multiple items at once.</p>
+
+      <div class="page-diagram">
+        <h4>Bulk page structure</h4>
+        <div class="pd-row highlight" style="color:var(--ink-muted); border-color:#A09C98">
+          Breadcrumb
+          <span class="pd-annotation">navigation context</span>
+        </div>
+        <div class="pd-row highlight" style="color:var(--ink); border-color:#1A1714">
+          <strong>Page title</strong>
+          <span class="pd-annotation" style="margin-left:auto">… actions button → far right</span>
+        </div>
+        <div class="pd-cols">
+          <div class="pd-col grow">Search field + Sort + Filter</div>
+          <div class="pd-col">Actions · … overflow · View toggle (far right)</div>
+        </div>
+        <div class="pd-row" style="min-height:80px; align-items:flex-start; padding-top:14px;">
+          Table or gallery content
+          <span class="pd-annotation">fills remaining height</span>
+        </div>
+        <div class="pd-row sticky">
+          Sticky footer: total item count · <em>X of Y selected</em> (shown when items are selected)
+          <span class="pd-annotation">sticky · bottom</span>
+        </div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">D-01</span><span class="rule-title">Actions placement</span></div>
+        <div class="rule-block-body"><p>All actions — both general page actions and bulk actions for selected items — live in the <strong>same action area</strong> on the right side of the search/filter bar. Actions are shown as buttons; when there are more actions than space allows, they overflow into a <strong>"…" icon button</strong> at the far right of that row. There are no separate bulk-action controls in the footer — the footer shows selection count only.</p></div>
+      </div>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">D-02</span><span class="rule-title">View mode toggle</span></div>
+        <div class="rule-block-body"><p>If a bulk page supports both table and gallery views, the toggle sits at the <strong>far right</strong> of the search/filter/actions bar — it is the rightmost element in that row. Table view is the default. The chosen mode persists per user per work area.</p></div>
+      </div>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">D-03</span><span class="rule-title">Sticky footer</span></div>
+        <div class="rule-block-body"><p>The footer always shows the total number of items in the current filtered set. When one or more items are selected, it additionally shows <em>"X of Y selected"</em>. The footer is informational only — actions remain in the toolbar row above the list. The footer must stay visible while scrolling.</p></div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Details page — single item</h3>
+      <p>Used when the user is reading or editing a specific record.</p>
+
+      <div class="page-diagram">
+        <h4>Details page structure</h4>
+        <div class="pd-row highlight" style="color:var(--ink-muted); border-color:#A09C98">
+          Breadcrumb
+          <span class="pd-annotation">shows full path to item</span>
+        </div>
+        <div class="pd-row highlight" style="color:var(--ink); border-color:#1A1714">
+          <strong>Item title</strong>
+          <span class="pd-annotation">… actions button → far right</span>
+        </div>
+        <div class="pd-row">
+          Secondary metadata (revision, last editor, status badge…)
+          <span class="pd-annotation">below title</span>
+        </div>
+        <div class="pd-row" style="border-color:var(--accent); color:var(--accent)">
+          Tab bar (Details / References / Activity / …)
+          <span class="pd-annotation">sticky below header</span>
+        </div>
+        <div class="pd-row" style="min-height:60px; align-items:flex-start; padding-top:14px;">
+          <div>
+            <div style="font-size:12px; font-weight:600; color:var(--ink); margin-bottom:4px;">Item details</div>
+            <div style="color:var(--ink-faint); font-size:12px;">Form fields grouped by named sections · collapsible</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning"><span class="callout-icon">⚠</span><span><strong>To be defined:</strong> How widgets are handled within the Details page and the Bulk (table/gallery) page. This section will be updated once the widget pattern is agreed upon.</span></div>
+
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">D-04</span><span class="rule-title">Tabs</span></div>
+        <div class="rule-block-body"><p>The tab bar is sticky below the item header. The first tab is always the primary data view ("Details"). Additional tabs (References, Activity, etc.) are product-specific. Do not add navigation-level links as tabs — tabs switch the content view of the same item, not the item itself.</p></div>
+      </div>
+      <div class="rule-block">
+        <div class="rule-block-header"><span class="rule-num">D-05</span><span class="rule-title">Field grouping</span></div>
+        <div class="rule-block-body"><p>Form fields within the Details tab are organised into collapsible <strong>named sections</strong>. Related fields belong together in the same section. Section names are title case and describe the content, not the structure (e.g. "Product information", not "Section 1").</p></div>
+      </div>
+    </section>
+
+    <!-- ══ LAYER STATES ══ -->
+    <section class="doc-section" id="layer-states">
+      <h2>Layer states and combinations</h2>
+      <p class="section-intro">The five layers combine into a finite set of valid configurations. Invalid combinations — such as showing Layer C without a driving Layer B selection — must be avoided.</p>
+
+      <div class="prop-table-wrap">
+        <table class="prop-table">
+          <thead><tr><th>Configuration</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>When</th></tr></thead>
+          <tbody>
+            <tr><td>Default</td><td>✓</td><td>✓</td><td>—</td><td>✓</td><td>—</td><td>Most product screens</td></tr>
+            <tr><td>With Explorer</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td><td>Browse / hierarchy pages</td></tr>
+            <tr><td>With Contextual Panel</td><td>✓</td><td>✓</td><td>—</td><td>✓ (narrowed)</td><td>✓</td><td>Inspector or AI Agent open</td></tr>
+            <tr><td>Full (all layers)</td><td>✓</td><td>✓</td><td>✓</td><td>✓ (narrowed)</td><td>✓</td><td>Browse + Inspector simultaneously</td></tr>
+            <tr><td>Focus mode</td><td>✓</td><td>hidden</td><td>—</td><td>✓ (full width)</td><td>—</td><td>B collapsed by user for maximum workspace</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-danger"><span class="callout-icon">✕</span><span>Layer C must never appear without a corresponding Layer B item being active. Layer E must never appear without an explicit user action to open it.</span></div>
+    </section>
+
+    <!-- ══ DECISION TREE — NAVIGATION ══ -->
+    <section class="doc-section" id="dt-nav">
+      <h2>Decision guide — Which navigation pattern?</h2>
+      <p class="section-intro">Use this guide when designing navigation items for Layer B.</p>
+
+      <div class="decision-tree">
+        <div style="display:flex; flex-direction:column; align-items:flex-start; gap:0;">
+
+          <!-- Q1 -->
+          <div style="display:flex; flex-direction:column; align-items:flex-start;">
+            <div class="dt-node dt-question">Does this navigation item have sub-items?</div>
+            <div style="display:flex; gap:48px; margin-top:0;">
+              <!-- NO branch -->
+              <div style="display:flex; flex-direction:column; align-items:center;">
+                <div class="dt-arrow-down"></div>
+                <div class="dt-branch-label dt-no">No</div>
+                <div class="dt-node dt-outcome-no">Simple link<br><span style="font-size:10px; opacity:0.7">No indicator icon</span></div>
+              </div>
+              <!-- YES branch -->
+              <div style="display:flex; flex-direction:column; align-items:center;">
+                <div class="dt-arrow-down"></div>
+                <div class="dt-branch-label dt-yes">Yes</div>
+                <!-- Q2 -->
+                <div class="dt-node dt-question">Are there 5 or fewer sub-items,<br>and the list will not grow?</div>
+                <div style="display:flex; gap:48px; margin-top:0;">
+                  <!-- YES → Accordion -->
+                  <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="dt-arrow-down"></div>
+                    <div class="dt-branch-label dt-yes">Yes</div>
+                    <div class="dt-node dt-outcome-b">Accordion<br><span style="font-size:10px; opacity:0.8">Icon → chevron on hover<br>Click toggles open/closed</span></div>
+                  </div>
+                  <!-- NO → Q3 -->
+                  <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="dt-arrow-down"></div>
+                    <div class="dt-branch-label dt-no">No</div>
+                    <!-- Q3 -->
+                    <div class="dt-node dt-question">Could sub-items represent<br>deep data hierarchy?</div>
+                    <div style="display:flex; gap:48px; margin-top:0;">
+                      <!-- YES → Layer C -->
+                      <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="dt-arrow-down"></div>
+                        <div class="dt-branch-label dt-yes">Yes</div>
+                        <div class="dt-node dt-outcome-c">Move to Layer C<br><span style="font-size:10px; opacity:0.8">B item links to section;<br>C renders the hierarchy</span></div>
+                      </div>
+                      <!-- NO → Popover -->
+                      <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="dt-arrow-down"></div>
+                        <div class="dt-branch-label dt-no">No</div>
+                        <div class="dt-node dt-outcome-b" style="background:#F5F3FF; color:#7C3AED; border-color:#DDD6FE;">Popover<br><span style="font-size:10px; opacity:0.8">Static right-chevron indicator<br>Chevron click opens popover</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ DECISION TREE — LAYERS ══ -->
+    <section class="doc-section" id="dt-layers">
+      <h2>Decision guide — Which layers does this screen need?</h2>
+      <p class="section-intro">Use this guide when designing a new screen or migrating an existing one to ODS.</p>
+
+      <div class="decision-tree">
+        <div style="display:flex; flex-direction:column; align-items:flex-start; gap:0;">
+
+          <div class="dt-node dt-question" style="width:auto;">Designing a new screen</div>
+          <div class="dt-arrow-down"></div>
+          <div class="dt-node dt-outcome-b" style="width:auto;">Layer A + B + D always present — no decision needed</div>
+          <div class="dt-arrow-down"></div>
+
+          <div class="dt-node dt-question">Does the user need to navigate<br>a deep data hierarchy on this screen?</div>
+          <div style="display:flex; gap:48px;">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div class="dt-arrow-down"></div>
+              <div class="dt-branch-label dt-yes">Yes</div>
+              <div class="dt-node dt-outcome-c">Add Layer C<br><span style="font-size:10px; opacity:0.8">Layer B stays fully expanded;<br>user may collapse B manually</span></div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div class="dt-arrow-down"></div>
+              <div class="dt-branch-label dt-no">No</div>
+              <div class="dt-node dt-outcome-no">Layer C not needed</div>
+            </div>
+          </div>
+
+          <div class="dt-arrow-down" style="margin-top:24px;"></div>
+          <div class="dt-node dt-question">Does the screen involve inspecting item<br>details or AI agent interaction?</div>
+          <div style="display:flex; gap:48px;">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div class="dt-arrow-down"></div>
+              <div class="dt-branch-label dt-yes">Yes</div>
+              <div class="dt-node dt-outcome-e">Layer E available<br><span style="font-size:10px; opacity:0.8">Triggered by user action;<br>not shown on page load</span></div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div class="dt-arrow-down"></div>
+              <div class="dt-branch-label dt-no">No</div>
+              <div class="dt-node dt-outcome-no">Layer E not needed</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ TABLET ══ -->
+    <section class="doc-section" id="tablet">
+      <h2>Responsive — Tablet behaviour</h2>
+      <p class="section-intro">The shell is designed for desktop-first usage. Tablet support (≥ 768px viewport width) is required. Phone support is out of scope for this version.</p>
+
+      <!-- ── BEHAVIOUR TABLE ── -->
+      <div class="prop-table-wrap">
+        <table class="prop-table">
+          <thead><tr><th>Layer</th><th>Desktop (≥ 1280px)</th><th>Tablet (768px – 1279px)</th></tr></thead>
+          <tbody>
+            <tr><td>Layer A</td><td>Full — all slots visible</td><td>Customer logo hidden; env-context collapsed into a single icon</td></tr>
+            <tr><td>Layer B</td><td>Full width, visible by default</td><td>Hidden by default; tap expand button in Layer A to open as a full overlay</td></tr>
+            <tr><td>Layer C</td><td>Inline panel beside Layer B</td><td>Opens as an overlay drawer from the left edge; tap outside to dismiss</td></tr>
+            <tr><td>Layer D</td><td>Fills remaining width</td><td>Full viewport width when B and C are hidden</td></tr>
+            <tr><td>Layer E</td><td>Pushes Layer D content leftward</td><td>Opens as a full-width bottom sheet instead of a side panel</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warning" style="margin-bottom:32px;"><span class="callout-icon">⚠</span><span>On tablet, avoid designs that require Layer B, C, and E to be simultaneously visible. The available horizontal space is insufficient for a comfortable experience with all panels open at once.</span></div>
+
+      <!-- ── MOCKUP COMPARISON ── -->
+      <h3>Layout comparison</h3>
+      <p style="font-size:13.5px; color:var(--ink-muted); margin-bottom:20px;">The mockups below illustrate how the shell adapts between desktop and tablet. Numbered callouts reference the behaviour changes described in the table above. Layer D always shows the 12-column grid.</p>
+
+      <div style="display:flex; flex-direction:column; gap:32px; font-family:'DM Mono',monospace;">
+
+        <!-- ─ DESKTOP MOCKUP ─ -->
+        <div>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <div style="font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-muted);">Desktop</div>
+            <div style="font-size:10px; color:var(--ink-faint); font-family:'DM Mono',monospace;">≥ 1280px · All layers visible</div>
+          </div>
+          <div style="
+            width:100%; height:340px;
+            border:1px solid var(--border); border-radius:var(--radius-lg);
+            background:#f0eee9; display:flex; flex-direction:column;
+            overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+          ">
+            <!-- Layer A desktop -->
+            <div style="flex-shrink:0; height:38px; background:#EEF2FF; border-bottom:1px solid #C7D2FE; display:flex; align-items:center; padding:0 12px; gap:8px; position:relative;">
+              <!-- callout 1 marker -->
+              <div style="position:absolute;top:-1px;left:-1px;width:100%;height:100%;pointer-events:none;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:7px;font-weight:700;color:#4F46E5;opacity:0.25;letter-spacing:0.1em;text-transform:uppercase;">Layer A — always full on desktop</div>
+              </div>
+              <div style="width:16px;height:16px;border-radius:3px;background:#C7D2FE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><rect x="1" y="1.5" width="7" height="1" rx="0.5" fill="#4F46E5"/><rect x="1" y="4" width="7" height="1" rx="0.5" fill="#4F46E5"/><rect x="1" y="6.5" width="7" height="1" rx="0.5" fill="#4F46E5"/></svg>
+              </div>
+              <div style="background:#C7D2FE;border-radius:20px;padding:1px 8px;font-size:8px;font-weight:600;color:#1D4ED8;flex-shrink:0;">⬡ App</div>
+              <div style="width:22px;height:11px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>
+              <div style="flex:1;max-width:180px;height:18px;border-radius:9px;background:#fff;border:1px solid #C7D2FE;display:flex;align-items:center;padding:0 7px;gap:3px;">
+                <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><circle cx="3.2" cy="3.2" r="2.2" stroke="#6366F1" stroke-width="1"/><line x1="5" y1="5" x2="7" y2="7" stroke="#6366F1" stroke-width="1" stroke-linecap="round"/></svg>
+                <div style="font-size:7px;color:#A5B4FC;">Search…</div>
+              </div>
+              <div style="flex:1;"></div>
+              <!-- callout bubble 1 -->
+              <div style="position:relative;flex-shrink:0;">
+                <div style="font-size:7px;color:#4F46E5;background:#E0E7FF;border-radius:3px;padding:1px 5px;">EN · PROD</div>
+                <div style="position:absolute;top:-18px;right:0;background:#1D4ED8;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;">1</div>
+              </div>
+              <div style="background:#4F46E5;border-radius:20px;padding:1px 7px;font-size:7px;font-weight:600;color:#fff;flex-shrink:0;">✦ AI</div>
+              <div style="width:16px;height:16px;border-radius:3px;background:#C7D2FE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🔔</div>
+            </div>
+            <!-- Body -->
+            <div style="flex:1;display:flex;overflow:hidden;min-height:0;">
+              <!-- B desktop -->
+              <div style="width:110px;flex-shrink:0;background:#F5F3FF;border-right:1px solid #DDD6FE;display:flex;flex-direction:column;padding:8px 0;gap:1px;position:relative;">
+                <div style="position:absolute;top:4px;right:4px;background:#7C3AED;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;">2</div>
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.1em;color:#7C3AED;text-transform:uppercase;padding:0 8px 5px;border-bottom:1px solid #EDE9FE;margin-bottom:3px;">Layer B</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#A78BFA;font-weight:600;">Recent</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#7C3AED;display:flex;align-items:center;gap:4px;background:#EDE9FE;border-radius:2px;margin:0 5px;">
+                  <div style="width:8px;height:8px;border-radius:2px;background:#C4B5FD;flex-shrink:0;"></div>Item
+                </div>
+                <div style="padding:5px 8px 2px;font-size:6px;color:#A78BFA;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Nav</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#6D28D9;display:flex;align-items:center;gap:4px;">
+                  <div style="width:8px;height:8px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Section
+                  <svg style="margin-left:auto" width="5" height="5" viewBox="0 0 6 6" fill="none"><path d="M2 1.5L4 3L2 4.5" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
+                </div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#6D28D9;display:flex;align-items:center;gap:4px;">
+                  <div style="width:8px;height:8px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Section
+                  <svg style="margin-left:auto" width="5" height="5" viewBox="0 0 6 6" fill="none"><path d="M2 1.5L4 3L2 4.5" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
+                </div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#6D28D9;display:flex;align-items:center;gap:4px;">
+                  <div style="width:8px;height:8px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Browse
+                </div>
+                <div style="flex:1;"></div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#A78BFA;display:flex;align-items:center;gap:4px;border-top:1px solid #EDE9FE;padding-top:5px;">
+                  <div style="width:8px;height:8px;border-radius:2px;background:#DDD6FE;flex-shrink:0;"></div>Settings
+                </div>
+                <div style="padding:3px 8px;display:flex;align-items:center;gap:4px;border-top:1px solid #EDE9FE;">
+                  <div style="width:13px;height:13px;border-radius:50%;background:#7C3AED;display:flex;align-items:center;justify-content:center;font-size:6px;color:#fff;font-weight:700;">J</div>
+                  <div style="font-size:7px;color:#4C1D95;font-weight:600;">John Doe</div>
+                </div>
+                <div style="padding:3px 8px;border-top:1px solid #EDE9FE;display:flex;align-items:center;gap:3px;">
+                  <div style="width:11px;height:11px;border-radius:2px;background:#7C3AED;flex-shrink:0;"></div>
+                  <div style="font-size:7px;font-weight:700;color:#4C1D95;">ACME</div>
+                </div>
+              </div>
+              <!-- C desktop -->
+              <div style="width:85px;flex-shrink:0;background:#ECFDF5;border-right:1px solid #A7F3D0;display:flex;flex-direction:column;padding:8px 0;gap:1px;position:relative;">
+                <div style="position:absolute;top:4px;right:4px;background:#059669;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;">3</div>
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.1em;color:#059669;text-transform:uppercase;padding:0 8px 5px;border-bottom:1px solid #A7F3D0;margin-bottom:3px;">Layer C</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#065F46;display:flex;align-items:center;gap:3px;"><span style="color:#6EE7B7;">▾</span>Root</div>
+                <div style="padding:2px 8px 2px 16px;font-size:7px;color:#047857;display:flex;align-items:center;gap:3px;background:#D1FAE5;"><span style="color:#6EE7B7;">▾</span>Category A</div>
+                <div style="padding:2px 8px 2px 22px;font-size:7px;color:#059669;">Sub-item 1</div>
+                <div style="padding:2px 8px 2px 22px;font-size:7px;color:#059669;">Sub-item 2</div>
+                <div style="padding:2px 8px 2px 16px;font-size:7px;color:#047857;display:flex;align-items:center;gap:3px;"><span style="color:#A7F3D0;">▸</span>Category B</div>
+                <div style="padding:2px 8px 2px 16px;font-size:7px;color:#047857;display:flex;align-items:center;gap:3px;"><span style="color:#A7F3D0;">▸</span>Category C</div>
+              </div>
+              <!-- D desktop -->
+              <div style="flex:1;background:#FFFBEB;border-right:1px solid #FDE68A;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative;">
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.1em;color:#D97706;text-transform:uppercase;padding:5px 10px;border-bottom:1px solid #FDE68A;flex-shrink:0;">Layer D — 12 columns</div>
+                <div style="position:absolute;top:22px;left:0;right:0;bottom:26px;display:grid;grid-template-columns:repeat(12,1fr);pointer-events:none;z-index:0;">
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div></div>
+                </div>
+                <div style="position:relative;z-index:1;padding:6px 10px;flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;">
+                  <div style="display:flex;align-items:center;gap:3px;font-size:7px;color:#B45309;"><span>Work areas</span><span style="color:#FCD34D;">›</span><span>Product Mgmt</span><span style="color:#FCD34D;">›</span><span style="font-weight:600;color:#92400E;">Item</span></div>
+                  <div style="display:flex;align-items:center;gap:5px;"><div style="font-size:9px;font-weight:700;color:#78350F;">Page Title</div><div style="margin-left:auto;background:#FDE68A;border-radius:2px;padding:1px 5px;font-size:7px;color:#92400E;">⋯</div></div>
+                  <div style="display:flex;align-items:center;gap:3px;padding:3px 0;border-top:1px dashed #FDE68A;border-bottom:1px dashed #FDE68A;">
+                    <div style="height:12px;width:50px;background:#FDE68A;border-radius:8px;flex-shrink:0;"></div>
+                    <div style="height:12px;width:14px;background:#FDE68A;border-radius:2px;flex-shrink:0;"></div>
+                    <div style="flex:1;"></div>
+                    <div style="height:12px;width:32px;background:#F59E0B;border-radius:2px;flex-shrink:0;"></div>
+                    <div style="height:12px;width:14px;background:#D97706;border-radius:2px;flex-shrink:0;"></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-content:start;">
+                    <div style="grid-column:span 2;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 3;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 2;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 3;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 2;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                  </div>
+                </div>
+                <div style="flex-shrink:0;border-top:1px solid #FDE68A;background:#FEF3C7;padding:3px 10px;display:flex;align-items:center;gap:5px;font-size:7px;color:#92400E;">
+                  <span>142 items</span><span style="background:#FDE68A;border-radius:20px;padding:1px 5px;">3 of 142 selected</span>
+                </div>
+              </div>
+              <!-- E desktop -->
+              <div style="width:95px;flex-shrink:0;background:#FEF2F2;border-left:1px solid #FECACA;display:flex;flex-direction:column;padding:8px 0;position:relative;">
+                <div style="position:absolute;top:4px;right:4px;background:#DC2626;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;">4</div>
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.1em;color:#DC2626;text-transform:uppercase;padding:0 8px 5px;border-bottom:1px solid #FECACA;margin-bottom:5px;display:flex;align-items:center;">Layer E<span style="margin-left:auto;font-size:8px;color:#FCA5A5;">✕</span></div>
+                <div style="display:flex;gap:2px;margin:0 6px 6px;background:#FECACA;border-radius:3px;padding:2px;">
+                  <div style="flex:1;background:#fff;border-radius:2px;font-size:6px;color:#DC2626;font-weight:600;text-align:center;padding:2px 0;">Inspector</div>
+                  <div style="flex:1;font-size:6px;color:#EF4444;text-align:center;padding:2px 0;">AI Agent</div>
+                </div>
+                <div style="padding:0 8px;display:flex;flex-direction:column;gap:4px;">
+                  <div style="font-size:7px;color:#991B1B;font-weight:600;">Item details</div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:80%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:60%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:75%;opacity:0.6;"></div>
+                  <div style="font-size:7px;color:#991B1B;font-weight:600;margin-top:3px;">Related</div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:90%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:55%;opacity:0.6;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- desktop callout legend -->
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#1D4ED8;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+              Env + language selector visible
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#7C3AED;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+              Layer B fully expanded inline
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#059669;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+              Layer C inline, beside B
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#DC2626;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+              Layer E pushes D leftward
+            </div>
+          </div>
+        </div>
+
+        <!-- ─ TABLET MOCKUP ─ -->
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-muted);">Tablet</div>
+            <div style="font-size:10px;color:var(--ink-faint);font-family:'DM Mono',monospace;">768px – 1279px · B hidden · E as bottom sheet</div>
+          </div>
+          <div style="
+            width:100%; height:360px;
+            border:1px solid var(--border); border-radius:var(--radius-lg);
+            background:#f0eee9; display:flex; flex-direction:column;
+            overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+            position:relative;
+          ">
+            <!-- Layer A tablet -->
+            <div style="flex-shrink:0;height:38px;background:#EEF2FF;border-bottom:1px solid #C7D2FE;display:flex;align-items:center;padding:0 12px;gap:8px;position:relative;">
+              <!-- expand button (B is hidden) -->
+              <div style="position:relative;flex-shrink:0;">
+                <div style="width:16px;height:16px;border-radius:3px;background:#C7D2FE;display:flex;align-items:center;justify-content:center;">
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><rect x="1" y="1.5" width="7" height="1" rx="0.5" fill="#4F46E5"/><rect x="1" y="4" width="7" height="1" rx="0.5" fill="#4F46E5"/><rect x="1" y="6.5" width="7" height="1" rx="0.5" fill="#4F46E5"/></svg>
+                </div>
+                <div style="position:absolute;top:-18px;left:-2px;background:#7C3AED;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</div>
+              </div>
+              <div style="background:#C7D2FE;border-radius:20px;padding:1px 8px;font-size:8px;font-weight:600;color:#1D4ED8;flex-shrink:0;">⬡ App</div>
+              <!-- customer logo HIDDEN on tablet -->
+              <div style="width:22px;height:11px;border-radius:2px;background:#DDD6FE;flex-shrink:0;opacity:0.3;text-decoration:line-through;position:relative;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;height:1px;background:#7C3AED;opacity:0.6;"></div>
+              </div>
+              <div style="flex:1;max-width:220px;height:18px;border-radius:9px;background:#fff;border:1px solid #C7D2FE;display:flex;align-items:center;padding:0 7px;gap:3px;">
+                <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><circle cx="3.2" cy="3.2" r="2.2" stroke="#6366F1" stroke-width="1"/><line x1="5" y1="5" x2="7" y2="7" stroke="#6366F1" stroke-width="1" stroke-linecap="round"/></svg>
+                <div style="font-size:7px;color:#A5B4FC;">Search…</div>
+              </div>
+              <div style="flex:1;"></div>
+              <!-- env collapsed to icon -->
+              <div style="position:relative;flex-shrink:0;">
+                <div style="width:16px;height:16px;background:#E0E7FF;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;">🌐</div>
+                <div style="position:absolute;top:-18px;right:-2px;background:#1D4ED8;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;">1</div>
+              </div>
+              <div style="background:#4F46E5;border-radius:20px;padding:1px 7px;font-size:7px;font-weight:600;color:#fff;flex-shrink:0;">✦ AI</div>
+              <div style="width:16px;height:16px;border-radius:3px;background:#C7D2FE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🔔</div>
+            </div>
+
+            <!-- Body: no B, D takes full width, E as bottom sheet -->
+            <div style="flex:1;display:flex;overflow:hidden;min-height:0;position:relative;">
+
+              <!-- Layer B as overlay drawer (shown translucent/ghost to indicate it's hidden) -->
+              <div style="
+                position:absolute;top:0;left:0;bottom:0;width:130px;
+                background:#F5F3FF;border-right:2px dashed #DDD6FE;
+                display:flex;flex-direction:column;padding:8px 0;
+                opacity:0.25;z-index:3;pointer-events:none;
+              ">
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.1em;color:#7C3AED;text-transform:uppercase;padding:0 8px 5px;border-bottom:1px solid #EDE9FE;margin-bottom:3px;">Layer B · hidden</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#6D28D9;">Section</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#6D28D9;">Section</div>
+                <div style="padding:2px 8px;font-size:7.5px;color:#6D28D9;">Section</div>
+              </div>
+              <!-- overlay label -->
+              <div style="position:absolute;top:50%;left:0;width:130px;transform:translateY(-50%);z-index:4;pointer-events:none;display:flex;align-items:center;justify-content:center;">
+                <div style="background:rgba(124,58,237,0.9);color:#fff;font-size:7.5px;font-weight:700;padding:4px 8px;border-radius:4px;text-align:center;line-height:1.4;">Hidden<br>Tap ☰ to open<br>as overlay</div>
+              </div>
+
+              <!-- D tablet — full width -->
+              <div style="flex:1;background:#FFFBEB;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative;">
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.1em;color:#D97706;text-transform:uppercase;padding:5px 10px;border-bottom:1px solid #FDE68A;flex-shrink:0;display:flex;align-items:center;">
+                  Layer D — full width on tablet
+                  <div style="position:relative;margin-left:8px;flex-shrink:0;">
+                    <div style="font-size:6.5px;color:#D97706;background:#FDE68A;border-radius:2px;padding:1px 4px;">12 cols</div>
+                    <div style="position:absolute;top:-14px;right:-2px;background:#D97706;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;">3</div>
+                  </div>
+                </div>
+                <!-- 12 col grid -->
+                <div style="position:absolute;top:22px;left:0;right:0;bottom:50px;display:grid;grid-template-columns:repeat(12,1fr);pointer-events:none;z-index:0;">
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div style="background:rgba(251,191,36,0.07);border-right:1px dashed rgba(251,191,36,0.3);"></div>
+                  <div></div>
+                </div>
+                <div style="position:relative;z-index:1;padding:6px 10px;flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;">
+                  <div style="display:flex;align-items:center;gap:3px;font-size:7px;color:#B45309;"><span>Work areas</span><span style="color:#FCD34D;">›</span><span>Product Mgmt</span><span style="color:#FCD34D;">›</span><span style="font-weight:600;color:#92400E;">Item</span></div>
+                  <div style="display:flex;align-items:center;gap:5px;"><div style="font-size:9px;font-weight:700;color:#78350F;">Page Title</div><div style="margin-left:auto;background:#FDE68A;border-radius:2px;padding:1px 5px;font-size:7px;color:#92400E;">⋯</div></div>
+                  <div style="display:flex;align-items:center;gap:3px;padding:3px 0;border-top:1px dashed #FDE68A;border-bottom:1px dashed #FDE68A;">
+                    <div style="height:12px;width:50px;background:#FDE68A;border-radius:8px;flex-shrink:0;"></div>
+                    <div style="height:12px;width:14px;background:#FDE68A;border-radius:2px;flex-shrink:0;"></div>
+                    <div style="flex:1;"></div>
+                    <div style="height:12px;width:32px;background:#F59E0B;border-radius:2px;flex-shrink:0;"></div>
+                    <div style="height:12px;width:14px;background:#D97706;border-radius:2px;flex-shrink:0;"></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-content:start;">
+                    <div style="grid-column:span 2;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 3;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 2;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 3;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 2;height:8px;background:#FDE68A;border-radius:1px;opacity:0.8;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 3;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                    <div style="grid-column:span 2;height:7px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:1px;"></div>
+                  </div>
+                </div>
+                <div style="flex-shrink:0;border-top:1px solid #FDE68A;background:#FEF3C7;padding:3px 10px;display:flex;align-items:center;gap:5px;font-size:7px;color:#92400E;">
+                  <span>142 items</span><span style="background:#FDE68A;border-radius:20px;padding:1px 5px;">3 of 142 selected</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Layer E bottom sheet (tablet) -->
+            <div style="
+              flex-shrink:0;height:80px;
+              background:#FEF2F2;border-top:2px solid #FECACA;
+              display:flex;flex-direction:column;padding:6px 12px;
+              position:relative;
+            ">
+              <div style="position:absolute;top:4px;right:8px;background:#DC2626;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;">4</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <div style="font-size:6.5px;font-weight:700;letter-spacing:0.08em;color:#DC2626;text-transform:uppercase;">Layer E — bottom sheet on tablet</div>
+                <span style="font-size:8px;color:#FCA5A5;margin-left:auto;">✕</span>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="display:flex;gap:2px;background:#FECACA;border-radius:3px;padding:2px;flex-shrink:0;">
+                  <div style="background:#fff;border-radius:2px;font-size:6px;color:#DC2626;font-weight:600;padding:2px 6px;">Inspector</div>
+                  <div style="font-size:6px;color:#EF4444;padding:2px 6px;">AI Agent</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px;flex:1;">
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:60%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:40%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:50%;opacity:0.6;"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px;flex:1;">
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:70%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:45%;opacity:0.6;"></div>
+                  <div style="height:7px;background:#FECACA;border-radius:2px;width:60%;opacity:0.6;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- tablet callout legend -->
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#1D4ED8;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+              Env/lang collapsed to single icon
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#7C3AED;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+              Layer B hidden — ☰ opens full overlay
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#D97706;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+              Layer D fills full viewport width
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);">
+              <div style="background:#DC2626;color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+              Layer E becomes a bottom sheet
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end mockup comparison -->
+    </section>
+
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Active nav link highlight on scroll
+  const sections = document.querySelectorAll('.doc-section');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#$

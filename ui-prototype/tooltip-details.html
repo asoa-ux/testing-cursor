@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Chip Tooltip - Fully Interactive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #f5f5f5;
+      --bg-card: #ffffff;
+      --bg-chip: #f8f9fa;
+      --bg-chip-hover: #e9ecef;
+      --border: #dee2e6;
+      --border-light: #e9ecef;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #0097a7;
+      --accent-hover: #00838f;
+      --accent-light: rgba(0, 151, 167, 0.1);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.1);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+      --shadow-tooltip: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+      --transition-fast: 150ms ease;
+      --transition-smooth: 200ms ease-out;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      padding: 40px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .page-description {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    /* Details Card Container */
+    .details-card {
+      background: var(--bg-card);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      max-width: 900px;
+    }
+
+    .details-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .details-header-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .details-header-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .details-header-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .details-content {
+      padding: 20px;
+    }
+
+    /* Form Field Row */
+    .field-row {
+      display: flex;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .field-row:last-child {
+      border-bottom: none;
+    }
+
+    .field-label {
+      width: 200px;
+      min-width: 200px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding-top: 6px;
+    }
+
+    .field-value {
+      flex: 1;
+      position: relative;
+    }
+
+    /* Product Chips Container */
+    .product-chips-container {
+      position: relative;
+    }
+
+    .product-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    /* Empty state */
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 13px;
+      padding: 8px 0;
+    }
+
+    /* Product Chip with Thumbnail */
+    .product-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-chip);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 6px 4px 4px;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      text-decoration: none;
+      animation: chipAppear 0.2s ease-out;
+    }
+
+    @keyframes chipAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .product-chip.removing {
+      animation: chipRemove 0.2s ease-out forwards;
+    }
+
+    @keyframes chipRemove {
+      to {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+
+    .product-chip:hover,
+    .product-chip:focus {
+      background: var(--bg-chip-hover);
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .product-chip:focus-visible {
+      box-shadow: 0 0 0 2px rgba(0, 151, 167, 0.3);
+    }
+
+    .product-chip-thumbnail {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 3px;
+      object-fit: cover;
+      background: #eee;
+    }
+
+    .product-chip-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .product-chip-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      margin-left: 2px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .product-chip-remove:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .product-chip-remove svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Add Button (inline with chips) */
+    .add-product-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: var(--bg-chip);
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      height: 34px;
+      font-family: inherit;
+    }
+
+    .add-product-btn:hover,
+    .add-product-btn:focus {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      border-style: solid;
+      outline: none;
+    }
+
+    .add-product-btn:focus-visible {
+      box-shadow: 0 0 0 2px rgba(0, 151, 167, 0.3);
+    }
+
+    .add-product-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       OVERFLOW CHIP & POPOVER
+       ======================================== */
+
+    .overflow-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .overflow-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-chip);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      height: 34px;
+      font-family: inherit;
+    }
+
+    .overflow-chip:hover,
+    .overflow-chip:focus {
+      background: var(--bg-chip-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+      outline: none;
+    }
+
+    .overflow-chip:focus-visible {
+      box-shadow: 0 0 0 2px rgba(0, 151, 167, 0.3);
+    }
+
+    .overflow-chip[aria-expanded="true"] {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Product count summary (for accessibility) */
+    .product-count-summary {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .product-count-summary .count {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* Overflow Popover */
+    .overflow-popover {
+      position: fixed;
+      z-index: 500;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      min-width: 360px;
+      max-width: 480px;
+      max-height: 400px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth), visibility var(--transition-smooth);
+    }
+
+    .overflow-popover.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .overflow-popover.position-above {
+      transform: translateY(8px);
+    }
+
+    .overflow-popover.position-above.visible {
+      transform: translateY(0);
+    }
+
+    /* Popover Header */
+    .overflow-popover-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .overflow-popover-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .overflow-popover-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .overflow-popover-close {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      margin-left: auto;
+    }
+
+    .overflow-popover-close:hover {
+      background: var(--bg-chip-hover);
+      color: var(--text-primary);
+    }
+
+    .overflow-popover-close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Popover Content - Scrollable List */
+    .overflow-popover-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    /* List View */
+    .overflow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .overflow-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .overflow-list-item:hover,
+    .overflow-list-item:focus {
+      background: var(--bg-chip-hover);
+      outline: none;
+    }
+
+    .overflow-list-item:focus-visible {
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+
+    .overflow-list-item.removing {
+      animation: listItemRemove 0.2s ease-out forwards;
+    }
+
+    @keyframes listItemRemove {
+      to {
+        opacity: 0;
+        transform: translateX(-10px);
+        height: 0;
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    .overflow-list-item-image {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: #eee;
+      border: 1px solid var(--border-light);
+    }
+
+    .overflow-list-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .overflow-list-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overflow-list-item-id {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .overflow-list-item-remove {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      opacity: 0;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .overflow-list-item:hover .overflow-list-item-remove {
+      opacity: 1;
+    }
+
+    .overflow-list-item-remove:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .overflow-list-item-remove svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Popover Footer */
+    .overflow-popover-footer {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+      background: var(--bg-chip);
+    }
+
+    .overflow-footer-action {
+      font-size: 12px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .overflow-footer-action:hover {
+      background: var(--accent-light);
+      color: var(--accent-hover);
+    }
+
+    .overflow-footer-action.danger {
+      color: var(--danger);
+    }
+
+    .overflow-footer-action.danger:hover {
+      background: var(--danger-light);
+    }
+
+    .overflow-footer-action svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Empty overflow state */
+    .overflow-empty {
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .overflow-empty svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    /* ========================================
+       ADD PRODUCT POPOVER
+       ======================================== */
+
+    .add-popover {
+      position: fixed;
+      z-index: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      width: 400px;
+      max-height: 450px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth), visibility var(--transition-smooth);
+    }
+
+    .add-popover.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .add-popover.position-above {
+      transform: translateY(8px);
+    }
+
+    .add-popover.position-above.visible {
+      transform: translateY(0);
+    }
+
+    .add-popover-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .add-popover-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .add-popover-close {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+    }
+
+    .add-popover-close:hover {
+      background: var(--bg-chip-hover);
+      color: var(--text-primary);
+    }
+
+    .add-popover-close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .add-popover-search {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .add-search-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .add-search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 151, 167, 0.1);
+    }
+
+    .add-search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .add-popover-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      max-height: 300px;
+    }
+
+    .add-popover-hint {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .add-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .add-list-item:hover,
+    .add-list-item:focus {
+      background: var(--bg-chip-hover);
+      outline: none;
+    }
+
+    .add-list-item:focus-visible {
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+
+    .add-list-item.selected {
+      background: var(--success-light);
+    }
+
+    .add-list-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .add-list-item-image {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: #eee;
+      border: 1px solid var(--border-light);
+    }
+
+    .add-list-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .add-list-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .add-list-item-id {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .add-list-item-status {
+      font-size: 11px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .add-list-item-status svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .add-list-item-action {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .add-list-item-action:hover {
+      background: var(--accent-hover);
+    }
+
+    .add-list-item-action svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ========================================
+       TOOLTIP COMPONENT
+       ======================================== */
+    
+    .tooltip-container {
+      position: fixed;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+    }
+
+    .tooltip-container.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .tooltip-container.above {
+      transform: translateY(-8px);
+    }
+
+    .tooltip-container.above.visible {
+      transform: translateY(0);
+    }
+
+    .product-tooltip {
+      background: var(--bg-card);
+      border-radius: 8px;
+      box-shadow: var(--shadow-tooltip);
+      min-width: 280px;
+      max-width: 320px;
+      overflow: hidden;
+    }
+
+    .tooltip-arrow {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--bg-card);
+      transform: rotate(45deg);
+      box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .tooltip-container.below .tooltip-arrow {
+      top: -6px;
+      left: 50%;
+      margin-left: -6px;
+    }
+
+    .tooltip-container.above .tooltip-arrow {
+      bottom: -6px;
+      left: 50%;
+      margin-left: -6px;
+      box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .tooltip-content {
+      display: flex;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    .tooltip-image {
+      width: 100px;
+      height: 100px;
+      min-width: 100px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #f5f5f5;
+      border: 1px solid var(--border-light);
+    }
+
+    .tooltip-image-placeholder {
+      width: 100px;
+      height: 100px;
+      min-width: 100px;
+      background: #f5f5f5;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .tooltip-image-placeholder svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 4px;
+      opacity: 0.5;
+    }
+
+    .tooltip-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .tooltip-field {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tooltip-field-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .tooltip-field-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .tooltip-field-value.id {
+      font-family: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+
+    .tooltip-actions {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tooltip-action {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .tooltip-action:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    .tooltip-action svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .action-separator {
+      color: var(--border);
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--text-primary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastIn 0.3s ease-out;
+      max-width: 360px;
+    }
+
+    .toast.removing {
+      animation: toastOut 0.3s ease-out forwards;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes toastOut {
+      to {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toast-icon.success {
+      color: var(--success);
+    }
+
+    .toast-icon.danger {
+      color: #fca5a5;
+    }
+
+    .toast-message {
+      flex: 1;
+    }
+
+    .toast-undo {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: background var(--transition-fast);
+    }
+
+    .toast-undo:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Screen reader only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Keyboard styling */
+    kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-chip);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    /* Tooltip keyboard hint */
+    .tooltip-keyboard-hint {
+      padding: 6px 16px;
+      background: var(--bg-chip);
+      border-top: 1px solid var(--border-light);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      display: none;
+    }
+
+    .tooltip-keyboard-hint.visible {
+      display: block;
+    }
+
+    /* Demo sections */
+    .demo-section {
+      margin-bottom: 48px;
+    }
+
+    .demo-section h2 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .demo-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 16px;
+      padding: 12px;
+      background: #fff8e1;
+      border-radius: 6px;
+      border-left: 3px solid #ffc107;
+    }
+
+    /* Live region */
+    #announcer {
+      position: absolute;
+      left: -10000px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Live region for screen reader announcements -->
+  <div id="announcer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <h1>Fully Interactive Product Reference Component</h1>
+  <p class="page-description">
+    Add and remove products interactively. Changes are reflected immediately with undo support.
+  </p>
+
+  <!-- Interactive Demo -->
+  <div class="demo-section">
+    <h2>Interactive Details View</h2>
+    
+    <div class="details-card">
+      <div class="details-header">
+        <div class="details-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <span class="details-header-title">1926 Martin T-18 "Tiple"</span>
+      </div>
+      
+      <div class="details-content">
+        <!-- Confirmed Duplicate Product Field -->
+        <div class="field-row">
+          <div class="field-label">Confirmed Duplicate Product</div>
+          <div class="field-value">
+            <div class="product-chips-container" id="product-chips-container">
+              <div class="product-chips" id="product-chips" role="list" aria-label="Selected duplicate products" aria-describedby="product-count-status">
+                <!-- Chips will be rendered by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Field -->
+        <div class="field-row">
+          <div class="field-label">Long Item Description</div>
+          <div class="field-value">
+            1926 Martin T-18 "Tiple" Spruce top, Mahogany back & sides, Replaced pickguard, Great sounding! Lovely instrument, Vintage Soft Geib case.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-note">
+      <strong>Try it out:</strong><br>
+      - Click the X on any chip to remove it<br>
+      - Click "+N" to see overflow items and remove from there<br>
+      - Click "+ Add" to search and add new products<br>
+      - Undo is available for 5 seconds after removal<br><br>
+      <strong>Keyboard navigation:</strong><br>
+      - <kbd>Tab</kbd> to move through chips, counter (+N), and Add button<br>
+      - <kbd>Enter</kbd> or <kbd>↓</kbd> on a chip to access tooltip actions<br>
+      - <kbd>↑</kbd> or <kbd>Escape</kbd> to exit tooltip and return to chip<br>
+      - <kbd>Enter</kbd> on counter to open overflow panel<br>
+      - <kbd>Enter</kbd> on Add to open search panel
+    </div>
+  </div>
+
+  <!-- Add Product Popover (rendered by JS, positioned dynamically) -->
+  <div class="add-popover" id="add-popover" role="dialog" aria-labelledby="add-popover-title" aria-describedby="add-popover-desc" aria-modal="true">
+    <div class="add-popover-header">
+      <span class="add-popover-title" id="add-popover-title">Add Product</span>
+      <span id="add-popover-desc" class="sr-only">Search for products to add to the selection. Type to search, then click or press Enter to add.</span>
+      <button class="add-popover-close" id="add-popover-close" aria-label="Close add product panel">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="add-popover-search">
+      <input type="text" 
+             class="add-search-input" 
+             id="add-search-input"
+             placeholder="Search products by name or ID..."
+             aria-label="Search products to add"
+             aria-describedby="add-search-hint"
+             autocomplete="off">
+      <span id="add-search-hint" class="sr-only">Type at least one character to see results</span>
+    </div>
+    <div class="add-popover-content" id="add-popover-content" role="listbox" aria-label="Search results">
+      <div class="add-popover-hint" role="status">Type to search for products to add</div>
+    </div>
+  </div>
+
+  <!-- Overflow Popover -->
+  <div class="overflow-popover" id="overflow-popover" role="dialog" aria-labelledby="overflow-popover-title" aria-describedby="overflow-popover-desc" aria-modal="true">
+    <div class="overflow-popover-header">
+      <span class="overflow-popover-title" id="overflow-popover-title">Additional Products</span>
+      <span class="overflow-popover-count" id="overflow-count" aria-live="polite"></span>
+      <span id="overflow-popover-desc" class="sr-only">List of products not shown in the main view. Use arrow keys to navigate, Tab to access remove buttons.</span>
+      <button class="overflow-popover-close" id="overflow-popover-close" aria-label="Close additional products panel">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="overflow-popover-content" id="overflow-popover-content">
+      <div class="overflow-list" id="overflow-list">
+        <!-- Items rendered by JS -->
+      </div>
+    </div>
+    <div class="overflow-popover-footer">
+      <button class="overflow-footer-action danger" id="clear-all-btn" aria-describedby="clear-all-desc">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        Clear All
+        <span id="clear-all-desc" class="sr-only">Remove all selected products. This can be undone.</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tooltip Container -->
+  <div id="product-tooltip" class="tooltip-container below" role="tooltip" aria-hidden="true">
+    <div class="tooltip-arrow"></div>
+    <div class="product-tooltip">
+      <div class="tooltip-content">
+        <img src="" alt="" class="tooltip-image" id="tooltip-image">
+        <div class="tooltip-image-placeholder" id="tooltip-placeholder" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+          </svg>
+          No image
+        </div>
+        <div class="tooltip-details">
+          <div class="tooltip-field">
+            <span class="tooltip-field-label">Title</span>
+            <span class="tooltip-field-value" id="tooltip-title"></span>
+          </div>
+          <div class="tooltip-field">
+            <span class="tooltip-field-label">ID</span>
+            <span class="tooltip-field-value id" id="tooltip-id"></span>
+          </div>
+        </div>
+      </div>
+      <div class="tooltip-actions">
+        <button class="tooltip-action" id="tooltip-view-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          View Details
+        </button>
+        <span class="action-separator">|</span>
+        <button class="tooltip-action" id="tooltip-open-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          Open in New Tab
+        </button>
+      </div>
+      <div class="tooltip-keyboard-hint" id="tooltip-keyboard-hint">
+        Press <kbd>Enter</kbd> or <kbd>↓</kbd> for actions, <kbd>Esc</kbd> to close
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ========================================
+     * DATA & STATE
+     * ========================================
+     */
+    
+    // Sample product database (simulating API data)
+    const productDatabase = [
+      { id: 'tstEXT-100904', name: '1917 Gibson Style U Harp Guitar', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-102933', name: '1926 Martin T-18 "Tiple"', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-102292', name: '1929 Gibson Nick Lucas Special', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?w=200&h=200&fit=crop' },
+      { id: 'tstINT-102059', name: '1934 Gibson Jumbo, Gibson\'s first dreadnought model', image: 'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?w=200&h=200&fit=crop' },
+      { id: 'tstINT-102060', name: '1934 Martin C-1 Archtop Guitar', image: 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100905', name: '1940 Gibson J-55, Sunburst', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100906', name: '1945 Martin 000-28 Herringbone', image: 'https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100907', name: '1949 Gibson ES-5', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100908', name: '1956 Gibson EB-1 Electric Bass', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100909', name: '1958 Gibson Explorer', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100910', name: '1959 Gibson Les Paul Standard', image: 'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100911', name: '1960 Fender Stratocaster', image: 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100912', name: '1962 Fender Jazz Bass', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100913', name: '1965 Rickenbacker 360/12', image: 'https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100914', name: '1968 Gibson SG Standard', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100915', name: '1970 Fender Telecaster Deluxe', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100916', name: '1972 Gibson ES-335', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100917', name: '1975 Fender Precision Bass', image: 'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100918', name: '1978 Gibson Flying V', image: 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?w=200&h=200&fit=crop' },
+      { id: 'tstEXT-100919', name: '1980 Martin D-28', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=200&h=200&fit=crop' },
+    ];
+
+    // Current selected products (state)
+    let selectedProducts = [
+      productDatabase[0],
+      productDatabase[1],
+      productDatabase[2],
+      productDatabase[3],
+      productDatabase[4],
+      productDatabase[5],
+      productDatabase[6],
+      productDatabase[7],
+      productDatabase[8],
+      productDatabase[9],
+      productDatabase[10],
+      productDatabase[11],
+      productDatabase[12],
+      productDatabase[13],
+      productDatabase[14],
+    ];
+
+    // Configuration
+    const MAX_VISIBLE_CHIPS = 4;
+    
+    // Undo stack
+    let undoStack = [];
+
+    /**
+     * ========================================
+     * TOAST NOTIFICATIONS
+     * ========================================
+     */
+    
+    function showToast(message, type = 'success', undoCallback = null) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      const iconSvg = type === 'success' 
+        ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>';
+      
+      toast.innerHTML = `
+        <span class="toast-icon ${type}">${iconSvg}</span>
+        <span class="toast-message">${message}</span>
+        ${undoCallback ? '<button class="toast-undo">Undo</button>' : ''}
+      `;
+      
+      container.appendChild(toast);
+      
+      if (undoCallback) {
+        const undoBtn = toast.querySelector('.toast-undo');
+        undoBtn.addEventListener('click', () => {
+          undoCallback();
+          removeToast(toast);
+        });
+      }
+      
+      // Auto remove after 5 seconds
+      setTimeout(() => removeToast(toast), 5000);
+    }
+    
+    function removeToast(toast) {
+      if (!toast.parentElement) return;
+      toast.classList.add('removing');
+      setTimeout(() => toast.remove(), 300);
+    }
+
+    /**
+     * ========================================
+     * RENDER FUNCTIONS
+     * ========================================
+     */
+    
+    // Track previous count for announcements
+    let previousProductCount = selectedProducts.length;
+    
+    function render() {
+      const container = document.getElementById('product-chips');
+      const visibleProducts = selectedProducts.slice(0, MAX_VISIBLE_CHIPS);
+      const overflowProducts = selectedProducts.slice(MAX_VISIBLE_CHIPS);
+      const totalCount = selectedProducts.length;
+      
+      let html = '';
+      
+      if (totalCount === 0) {
+        html = '<div class="empty-state" role="status">No products selected</div>';
+      } else {
+        // Render visible chips
+        visibleProducts.forEach((product, index) => {
+          html += createChipHTML(product, index + 1, totalCount);
+        });
+        
+        // Render overflow chip if needed
+        if (overflowProducts.length > 0) {
+          const overflowLabel = overflowProducts.length === 1 
+            ? '1 more product, click to view' 
+            : `${overflowProducts.length} more products, click to view all`;
+          
+          html += `
+            <div class="overflow-wrapper">
+              <button class="overflow-chip" 
+                      id="overflow-trigger"
+                      aria-expanded="false"
+                      aria-controls="overflow-popover"
+                      aria-label="${overflowLabel}"
+                      aria-describedby="product-count-status">
+                +${overflowProducts.length}
+              </button>
+            </div>
+          `;
+        }
+      }
+      
+      // Add button
+      html += `
+        <button class="add-product-btn" id="add-product-btn" aria-haspopup="dialog" aria-label="Add product">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Add
+        </button>
+      `;
+      
+      // Add count summary (visible to all users)
+      const countText = totalCount === 0 
+        ? 'No products selected'
+        : totalCount === 1 
+          ? '1 product selected'
+          : `${totalCount} products selected`;
+      
+      const visibleText = overflowProducts.length > 0 
+        ? ` (${visibleProducts.length} shown, ${overflowProducts.length} more)`
+        : '';
+      
+      html += `
+        <div class="product-count-summary" id="product-count-status" aria-live="polite" aria-atomic="true">
+          <span class="count">${countText}</span>${visibleText}
+        </div>
+      `;
+      
+      container.innerHTML = html;
+      
+      // Announce count changes to screen readers (only if count changed)
+      if (totalCount !== previousProductCount) {
+        announceCountChange(totalCount, previousProductCount);
+        previousProductCount = totalCount;
+      }
+      
+      // Update overflow popover content
+      renderOverflowList();
+      
+      // Reattach event listeners
+      attachChipListeners();
+      attachOverflowTriggerListener();
+      attachAddButtonListener();
+    }
+    
+    function announceCountChange(newCount, oldCount) {
+      // Use the main announcer for immediate feedback
+      // The count summary has aria-live for the persistent state
+      const difference = newCount - oldCount;
+      let message;
+      
+      if (newCount === 0) {
+        message = 'All products removed. No products selected.';
+      } else if (difference > 0) {
+        message = `Product added. ${newCount} product${newCount !== 1 ? 's' : ''} now selected.`;
+      } else {
+        message = `Product removed. ${newCount} product${newCount !== 1 ? 's' : ''} now selected.`;
+      }
+      
+      announce(message);
+    }
+    
+    function createChipHTML(product, index = null, total = null) {
+      const thumbUrl = product.image ? product.image.replace('200', '100') : '';
+      const positionLabel = index && total ? `, item ${index} of ${total}` : '';
+      const chipLabel = `${product.name}${positionLabel}. Press Enter for actions, Delete to remove.`;
+      
+      return `
+        <div class="product-chip" 
+             role="listitem"
+             tabindex="0"
+             aria-label="${escapeHtml(chipLabel)}"
+             data-product-id="${product.id}"
+             data-product-name="${escapeHtml(product.name)}"
+             data-product-image="${product.image || ''}">
+          <img src="${thumbUrl}" 
+               alt="" 
+               class="product-chip-thumbnail"
+               loading="lazy"
+               onerror="this.style.display='none'">
+          <span class="product-chip-name" aria-hidden="true">${escapeHtml(product.name)}</span>
+          <button class="product-chip-remove" 
+                  tabindex="-1"
+                  aria-label="Remove ${escapeHtml(product.name)} from selection"
+                  data-product-id="${product.id}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+    
+    function renderOverflowList() {
+      const overflowProducts = selectedProducts.slice(MAX_VISIBLE_CHIPS);
+      const listContainer = document.getElementById('overflow-list');
+      const countEl = document.getElementById('overflow-count');
+      const totalSelected = selectedProducts.length;
+      
+      // Update count with proper grammar
+      const countText = overflowProducts.length === 1 ? '1 item' : `${overflowProducts.length} items`;
+      countEl.textContent = countText;
+      
+      if (overflowProducts.length === 0) {
+        listContainer.innerHTML = `
+          <div class="overflow-empty" role="status">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <div>No additional items</div>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = `<div role="list" aria-label="Additional products not shown in main view">`;
+      overflowProducts.forEach((product, index) => {
+        const thumbUrl = product.image ? product.image.replace('200', '100') : '';
+        const overallIndex = MAX_VISIBLE_CHIPS + index + 1;
+        const itemLabel = `${product.name}, ID ${product.id}, item ${overallIndex} of ${totalSelected}`;
+        
+        html += `
+          <a href="#" class="overflow-list-item"
+             role="listitem"
+             aria-label="${escapeHtml(itemLabel)}"
+             data-product-id="${product.id}"
+             data-product-name="${escapeHtml(product.name)}"
+             data-product-image="${product.image || ''}">
+            <img src="${thumbUrl}" alt="" class="overflow-list-item-image" loading="lazy" aria-hidden="true">
+            <div class="overflow-list-item-info" aria-hidden="true">
+              <div class="overflow-list-item-title">${escapeHtml(product.name)}</div>
+              <div class="overflow-list-item-id">${product.id}</div>
+            </div>
+            <button class="overflow-list-item-remove" 
+                    aria-label="Remove ${escapeHtml(product.name)} from selection"
+                    data-product-id="${product.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </a>
+        `;
+      });
+      html += '</div>';
+      
+      listContainer.innerHTML = html;
+      attachOverflowItemListeners();
+    }
+    
+    function renderAddSearchResults(query) {
+      const container = document.getElementById('add-popover-content');
+      
+      if (!query || query.length < 1) {
+        container.innerHTML = '<div class="add-popover-hint" role="status">Type to search for products to add</div>';
+        return;
+      }
+      
+      const normalizedQuery = query.toLowerCase();
+      const results = productDatabase.filter(p => 
+        p.name.toLowerCase().includes(normalizedQuery) || 
+        p.id.toLowerCase().includes(normalizedQuery)
+      );
+      
+      if (results.length === 0) {
+        container.innerHTML = `<div class="add-popover-hint" role="status" aria-live="polite">No products found for "${escapeHtml(query)}"</div>`;
+        return;
+      }
+      
+      // Announce results count
+      announce(`${results.length} product${results.length !== 1 ? 's' : ''} found`);
+      
+      let html = `<div role="status" class="sr-only" aria-live="polite">${results.length} result${results.length !== 1 ? 's' : ''} found</div>`;
+      results.forEach((product, index) => {
+        const isSelected = selectedProducts.some(p => p.id === product.id);
+        const thumbUrl = product.image ? product.image.replace('200', '100') : '';
+        const statusText = isSelected ? ', already added' : ', click to add';
+        const itemLabel = `${product.name}, ID ${product.id}${statusText}`;
+        
+        html += `
+          <button class="add-list-item ${isSelected ? 'selected disabled' : ''}"
+                  role="option"
+                  aria-selected="${isSelected}"
+                  aria-label="${escapeHtml(itemLabel)}"
+                  data-product-id="${product.id}"
+                  ${isSelected ? 'disabled aria-disabled="true"' : ''}>
+            <img src="${thumbUrl}" alt="" class="add-list-item-image" loading="lazy" aria-hidden="true">
+            <div class="add-list-item-info" aria-hidden="true">
+              <div class="add-list-item-title">${escapeHtml(product.name)}</div>
+              <div class="add-list-item-id">${product.id}</div>
+            </div>
+            ${isSelected 
+              ? `<span class="add-list-item-status" aria-hidden="true">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                   </svg>
+                   Added
+                 </span>`
+              : `<span class="add-list-item-action" aria-hidden="true">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                   </svg>
+                 </span>`
+            }
+          </button>
+        `;
+      });
+      
+      container.innerHTML = html;
+      attachAddItemListeners();
+    }
+
+    /**
+     * ========================================
+     * PRODUCT ACTIONS
+     * ========================================
+     */
+    
+    function removeProduct(productId, element = null) {
+      const index = selectedProducts.findIndex(p => p.id === productId);
+      if (index === -1) return;
+      
+      const product = selectedProducts[index];
+      
+      // Animate removal
+      if (element) {
+        element.classList.add('removing');
+        setTimeout(() => {
+          selectedProducts.splice(index, 1);
+          render();
+          announce(`Removed ${product.name}`);
+        }, 200);
+      } else {
+        selectedProducts.splice(index, 1);
+        render();
+        announce(`Removed ${product.name}`);
+      }
+      
+      // Show toast with undo
+      showToast(`Removed "${truncate(product.name, 30)}"`, 'danger', () => {
+        // Undo: add back at original position
+        selectedProducts.splice(index, 0, product);
+        render();
+        announce(`Restored ${product.name}`);
+        showToast(`Restored "${truncate(product.name, 30)}"`, 'success');
+      });
+    }
+    
+    function addProduct(productId) {
+      const product = productDatabase.find(p => p.id === productId);
+      if (!product) return;
+      
+      // Check if already selected
+      if (selectedProducts.some(p => p.id === productId)) {
+        return;
+      }
+      
+      selectedProducts.push(product);
+      render();
+      announce(`Added ${product.name}`);
+      
+      // Update the add popover search results
+      const searchInput = document.getElementById('add-search-input');
+      if (searchInput.value) {
+        renderAddSearchResults(searchInput.value);
+      }
+      
+      showToast(`Added "${truncate(product.name, 30)}"`, 'success');
+    }
+    
+    function clearAllProducts() {
+      if (selectedProducts.length === 0) return;
+      
+      const previousProducts = [...selectedProducts];
+      selectedProducts = [];
+      render();
+      closeOverflowPopover();
+      announce('Cleared all products');
+      
+      showToast(`Cleared all ${previousProducts.length} products`, 'danger', () => {
+        selectedProducts = previousProducts;
+        render();
+        announce('Restored all products');
+        showToast('Restored all products', 'success');
+      });
+    }
+
+    /**
+     * ========================================
+     * EVENT LISTENERS
+     * ========================================
+     */
+    
+    function attachChipListeners() {
+      // Remove buttons on chips (for mouse users)
+      document.querySelectorAll('.product-chip .product-chip-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const productId = btn.dataset.productId;
+          const chip = btn.closest('.product-chip');
+          removeProduct(productId, chip);
+        });
+      });
+      
+      // Tooltip on chips with keyboard navigation
+      document.querySelectorAll('.product-chip[data-product-id]').forEach(chip => {
+        // Mouse events
+        chip.addEventListener('mouseenter', () => showTooltip(chip, false));
+        chip.addEventListener('mouseleave', () => hideTooltip());
+        
+        // Keyboard events
+        chip.addEventListener('focus', () => showTooltip(chip, true));
+        chip.addEventListener('blur', () => hideTooltipIfNotFocused());
+        
+        // Handle keyboard navigation and actions
+        chip.addEventListener('keydown', (e) => {
+          // Enter or Arrow Down: access tooltip actions
+          handleChipKeydown(e, chip);
+          
+          // Delete or Backspace: remove the chip
+          if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault();
+            const productId = chip.dataset.productId;
+            
+            // Find next chip to focus after removal
+            const allChips = document.querySelectorAll('.product-chip[data-product-id]');
+            const chipArray = Array.from(allChips);
+            const currentIndex = chipArray.indexOf(chip);
+            const nextChip = chipArray[currentIndex + 1] || chipArray[currentIndex - 1];
+            
+            removeProduct(productId, chip);
+            
+            // Focus next chip or overflow/add button
+            setTimeout(() => {
+              if (nextChip && document.body.contains(nextChip)) {
+                nextChip.focus();
+              } else {
+                const overflowBtn = document.getElementById('overflow-trigger');
+                const addBtn = document.getElementById('add-product-btn');
+                if (overflowBtn) {
+                  overflowBtn.focus();
+                } else if (addBtn) {
+                  addBtn.focus();
+                }
+              }
+            }, 250);
+          }
+        });
+      });
+    }
+    
+    function attachOverflowTriggerListener() {
+      const trigger = document.getElementById('overflow-trigger');
+      if (!trigger) return;
+      
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleOverflowPopover();
+      });
+    }
+    
+    function attachOverflowItemListeners() {
+      // Remove buttons
+      document.querySelectorAll('.overflow-list-item-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const productId = btn.dataset.productId;
+          const item = btn.closest('.overflow-list-item');
+          item.classList.add('removing');
+          setTimeout(() => {
+            removeProduct(productId);
+          }, 200);
+        });
+      });
+      
+      // Tooltip on overflow items with keyboard navigation
+      document.querySelectorAll('.overflow-list-item').forEach(item => {
+        // Mouse events
+        item.addEventListener('mouseenter', () => showTooltip(item, false));
+        item.addEventListener('mouseleave', () => hideTooltip());
+        
+        // Keyboard events
+        item.addEventListener('focus', () => showTooltip(item, true));
+        item.addEventListener('blur', () => hideTooltipIfNotFocused());
+        
+        // Handle Tab to move into tooltip
+        item.addEventListener('keydown', (e) => handleChipKeydown(e, item));
+        
+        // Navigate on click (not on remove button)
+        item.addEventListener('click', (e) => {
+          if (!e.target.closest('.overflow-list-item-remove')) {
+            e.preventDefault();
+            console.log('Navigate to:', item.dataset.productId);
+          }
+        });
+      });
+    }
+    
+    function attachAddButtonListener() {
+      const btn = document.getElementById('add-product-btn');
+      if (!btn) return;
+      
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAddPopover(btn);
+      });
+    }
+    
+    function attachAddItemListeners() {
+      document.querySelectorAll('.add-list-item:not(.disabled)').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const productId = item.dataset.productId;
+          addProduct(productId);
+        });
+      });
+    }
+
+    /**
+     * ========================================
+     * OVERFLOW POPOVER
+     * ========================================
+     */
+    
+    const overflowPopover = document.getElementById('overflow-popover');
+    let overflowOpen = false;
+    
+    function toggleOverflowPopover() {
+      if (overflowOpen) {
+        closeOverflowPopover();
+      } else {
+        openOverflowPopover();
+      }
+    }
+    
+    function openOverflowPopover() {
+      const trigger = document.getElementById('overflow-trigger');
+      if (!trigger) return;
+      
+      overflowOpen = true;
+      trigger.setAttribute('aria-expanded', 'true');
+      
+      // Position popover
+      positionPopover(overflowPopover, trigger, { width: 400, height: 400 });
+      
+      overflowPopover.classList.add('visible');
+      
+      // Focus first item
+      const firstItem = overflowPopover.querySelector('.overflow-list-item');
+      if (firstItem) {
+        setTimeout(() => firstItem.focus(), 100);
+      }
+    }
+    
+    function closeOverflowPopover() {
+      overflowOpen = false;
+      const trigger = document.getElementById('overflow-trigger');
+      if (trigger) {
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+      overflowPopover.classList.remove('visible');
+    }
+    
+    // Close button
+    document.getElementById('overflow-popover-close').addEventListener('click', closeOverflowPopover);
+    
+    // Clear all button
+    document.getElementById('clear-all-btn').addEventListener('click', () => {
+      clearAllProducts();
+    });
+
+    /**
+     * ========================================
+     * ADD PRODUCT POPOVER
+     * ========================================
+     */
+    
+    const addPopover = document.getElementById('add-popover');
+    const addSearchInput = document.getElementById('add-search-input');
+    let addPopoverOpen = false;
+    let addPopoverTrigger = null;
+    
+    function toggleAddPopover(trigger) {
+      if (addPopoverOpen) {
+        closeAddPopover();
+      } else {
+        openAddPopover(trigger);
+      }
+    }
+    
+    function openAddPopover(trigger) {
+      addPopoverOpen = true;
+      addPopoverTrigger = trigger;
+      
+      // Position popover
+      positionPopover(addPopover, trigger, { width: 400, height: 450 });
+      
+      addPopover.classList.add('visible');
+      
+      // Reset and focus search
+      addSearchInput.value = '';
+      renderAddSearchResults('');
+      setTimeout(() => addSearchInput.focus(), 100);
+    }
+    
+    function closeAddPopover() {
+      addPopoverOpen = false;
+      addPopover.classList.remove('visible');
+      addPopoverTrigger = null;
+    }
+    
+    // Close button
+    document.getElementById('add-popover-close').addEventListener('click', closeAddPopover);
+    
+    // Search input
+    addSearchInput.addEventListener('input', (e) => {
+      renderAddSearchResults(e.target.value);
+    });
+
+    /**
+     * ========================================
+     * POPOVER POSITIONING
+     * ========================================
+     */
+    
+    function positionPopover(popover, trigger, options = {}) {
+      const triggerRect = trigger.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const popoverWidth = options.width || 400;
+      const popoverHeight = options.height || 400;
+      
+      // Reset classes
+      popover.classList.remove('position-above', 'position-right');
+      
+      // Calculate vertical position
+      const spaceBelow = viewportHeight - triggerRect.bottom;
+      const spaceAbove = triggerRect.top;
+      
+      let top;
+      if (spaceBelow >= popoverHeight + 20) {
+        // Position below
+        top = triggerRect.bottom + 8;
+      } else if (spaceAbove >= popoverHeight + 20) {
+        // Position above
+        top = triggerRect.top - popoverHeight - 8;
+        popover.classList.add('position-above');
+      } else {
+        // Default to below, constrain to viewport
+        top = Math.min(triggerRect.bottom + 8, viewportHeight - popoverHeight - 16);
+        top = Math.max(top, 16);
+      }
+      
+      // Calculate horizontal position
+      let left = triggerRect.left;
+      
+      // Keep within viewport
+      if (left + popoverWidth > viewportWidth - 16) {
+        left = viewportWidth - popoverWidth - 16;
+      }
+      if (left < 16) {
+        left = 16;
+      }
+      
+      // Apply position
+      popover.style.top = `${top}px`;
+      popover.style.left = `${left}px`;
+    }
+
+    /**
+     * ========================================
+     * TOOLTIP (with keyboard navigation)
+     * ========================================
+     * 
+     * Keyboard navigation:
+     * - Tab: from chip to tooltip actions
+     * - Shift+Tab: back to chip
+     * - Escape: close tooltip, return focus to chip
+     * - Enter/Space on actions: activate
+     */
+    
+    const tooltip = document.getElementById('product-tooltip');
+    const tooltipImage = document.getElementById('tooltip-image');
+    const tooltipPlaceholder = document.getElementById('tooltip-placeholder');
+    const tooltipTitle = document.getElementById('tooltip-title');
+    const tooltipId = document.getElementById('tooltip-id');
+    
+    let currentTooltipTarget = null;
+    let hideTimeout = null;
+    let showTimeout = null;
+    let tooltipOpenedViaKeyboard = false;
+    const SHOW_DELAY = 200;
+    const HIDE_DELAY = 150;
+    
+    function showTooltip(target, viaKeyboard = false) {
+      clearTimeout(hideTimeout);
+      clearTimeout(showTimeout);
+      
+      const delay = viaKeyboard ? 0 : SHOW_DELAY;
+      
+      showTimeout = setTimeout(() => {
+        currentTooltipTarget = target;
+        tooltipOpenedViaKeyboard = viaKeyboard;
+        
+        const productId = target.dataset.productId;
+        const productName = target.dataset.productName;
+        const productImage = target.dataset.productImage;
+        
+        tooltipTitle.textContent = productName;
+        tooltipId.textContent = productId;
+        
+        if (productImage) {
+          tooltipImage.src = productImage;
+          tooltipImage.alt = productName;
+          tooltipImage.style.display = 'block';
+          tooltipPlaceholder.style.display = 'none';
+        } else {
+          tooltipImage.style.display = 'none';
+          tooltipPlaceholder.style.display = 'flex';
+        }
+        
+        positionTooltip(target);
+        
+        tooltip.classList.add('visible');
+        tooltip.setAttribute('aria-hidden', 'false');
+        
+        // Update aria-describedby on the target
+        target.setAttribute('aria-describedby', 'product-tooltip');
+        
+        // Show keyboard hint if opened via keyboard
+        const keyboardHint = document.getElementById('tooltip-keyboard-hint');
+        if (keyboardHint) {
+          if (viaKeyboard) {
+            keyboardHint.classList.add('visible');
+          } else {
+            keyboardHint.classList.remove('visible');
+          }
+        }
+      }, delay);
+    }
+    
+    function hideTooltip(immediate = false) {
+      clearTimeout(showTimeout);
+      clearTimeout(hideTimeout);
+      
+      const delay = immediate ? 0 : HIDE_DELAY;
+      
+      hideTimeout = setTimeout(() => {
+        tooltip.classList.remove('visible');
+        tooltip.setAttribute('aria-hidden', 'true');
+        if (currentTooltipTarget) {
+          currentTooltipTarget.removeAttribute('aria-describedby');
+        }
+        currentTooltipTarget = null;
+        tooltipOpenedViaKeyboard = false;
+      }, delay);
+    }
+    
+    function hideTooltipIfNotFocused() {
+      // Don't hide if focus is inside tooltip or on the current target
+      setTimeout(() => {
+        const activeEl = document.activeElement;
+        const focusInTooltip = tooltip.contains(activeEl);
+        const focusOnTarget = activeEl === currentTooltipTarget;
+        
+        if (!focusInTooltip && !focusOnTarget) {
+          hideTooltip();
+        }
+      }, 10);
+    }
+    
+    function positionTooltip(target) {
+      const targetRect = target.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      
+      const padding = 16;
+      if (left < padding) {
+        left = padding;
+      } else if (left + tooltipRect.width > viewportWidth - padding) {
+        left = viewportWidth - tooltipRect.width - padding;
+      }
+      
+      const spaceBelow = viewportHeight - targetRect.bottom;
+      const tooltipHeight = 200;
+      
+      let top;
+      if (spaceBelow >= tooltipHeight + 20) {
+        top = targetRect.bottom + 12;
+        tooltip.classList.remove('above');
+        tooltip.classList.add('below');
+      } else {
+        top = targetRect.top - tooltipHeight - 12;
+        tooltip.classList.remove('below');
+        tooltip.classList.add('above');
+      }
+      
+      const arrow = tooltip.querySelector('.tooltip-arrow');
+      const arrowOffset = targetRect.left + (targetRect.width / 2) - left;
+      arrow.style.left = `${Math.max(20, Math.min(arrowOffset, tooltipRect.width - 20))}px`;
+      arrow.style.marginLeft = '0';
+      
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
+    
+    // Handle keyboard navigation into tooltip
+    // Enter key enters tooltip, Tab continues naturally
+    function handleChipKeydown(e, chip) {
+      if (e.key === 'Enter' && tooltip.classList.contains('visible')) {
+        // Enter: move focus into tooltip actions
+        e.preventDefault();
+        const firstFocusable = tooltip.querySelector('button, a, [tabindex="0"]');
+        if (firstFocusable) {
+          firstFocusable.focus();
+        }
+      } else if (e.key === 'ArrowDown' && tooltip.classList.contains('visible')) {
+        // Arrow down: also enters tooltip
+        e.preventDefault();
+        const firstFocusable = tooltip.querySelector('button, a, [tabindex="0"]');
+        if (firstFocusable) {
+          firstFocusable.focus();
+        }
+      }
+      // Tab is NOT intercepted - it flows naturally to next element
+    }
+    
+    // Handle keyboard navigation inside tooltip
+    tooltip.addEventListener('keydown', (e) => {
+      const focusableElements = tooltip.querySelectorAll('button, a, [tabindex="0"]');
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+      
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+          // Shift+Tab from first element: go back to chip
+          e.preventDefault();
+          if (currentTooltipTarget) {
+            currentTooltipTarget.focus();
+          }
+        } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+          // Tab from last element: close tooltip and return to chip, let natural tab continue
+          e.preventDefault();
+          hideTooltip(true);
+          if (currentTooltipTarget) {
+            currentTooltipTarget.focus();
+            // Programmatically move to next element
+            setTimeout(() => {
+              const allFocusable = document.querySelectorAll('button:not([disabled]), [tabindex="0"], a[href], input:not([disabled])');
+              const focusArray = Array.from(allFocusable);
+              const currentIndex = focusArray.indexOf(currentTooltipTarget);
+              if (currentIndex !== -1 && currentIndex < focusArray.length - 1) {
+                focusArray[currentIndex + 1].focus();
+              }
+            }, 10);
+          }
+        }
+      } else if (e.key === 'Escape' || e.key === 'ArrowUp') {
+        // Escape or Arrow up: close tooltip and return to chip
+        e.preventDefault();
+        const targetToFocus = currentTooltipTarget;
+        hideTooltip(true);
+        if (targetToFocus) {
+          targetToFocus.focus();
+        }
+      }
+    });
+    
+    // Keep tooltip visible when hovering
+    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+    tooltip.addEventListener('mouseleave', hideTooltip);
+    
+    // Handle focus leaving tooltip
+    tooltip.addEventListener('focusout', (e) => {
+      // Check if focus is moving outside tooltip
+      if (!tooltip.contains(e.relatedTarget) && e.relatedTarget !== currentTooltipTarget) {
+        hideTooltip();
+      }
+    });
+
+    /**
+     * ========================================
+     * GLOBAL EVENT LISTENERS
+     * ========================================
+     */
+    
+    // Close popovers on click outside
+    document.addEventListener('click', (e) => {
+      // Close overflow popover
+      if (overflowOpen && !overflowPopover.contains(e.target) && !e.target.closest('#overflow-trigger')) {
+        closeOverflowPopover();
+      }
+      
+      // Close add popover
+      if (addPopoverOpen && !addPopover.contains(e.target) && !e.target.closest('#add-product-btn')) {
+        closeAddPopover();
+      }
+    });
+    
+    // Escape key handling
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (tooltip.classList.contains('visible')) {
+          hideTooltip();
+        }
+        if (overflowOpen) {
+          closeOverflowPopover();
+          document.getElementById('overflow-trigger')?.focus();
+        }
+        if (addPopoverOpen) {
+          closeAddPopover();
+          document.getElementById('add-product-btn')?.focus();
+        }
+      }
+    });
+    
+    // Update positions on scroll/resize
+    function updatePopoverPositions() {
+      if (currentTooltipTarget && tooltip.classList.contains('visible')) {
+        positionTooltip(currentTooltipTarget);
+      }
+      if (overflowOpen) {
+        const trigger = document.getElementById('overflow-trigger');
+        if (trigger) positionPopover(overflowPopover, trigger, { width: 400, height: 400 });
+      }
+      if (addPopoverOpen && addPopoverTrigger) {
+        positionPopover(addPopover, addPopoverTrigger, { width: 400, height: 450 });
+      }
+    }
+    
+    window.addEventListener('scroll', updatePopoverPositions, { passive: true });
+    window.addEventListener('resize', updatePopoverPositions, { passive: true });
+
+    /**
+     * ========================================
+     * UTILITY FUNCTIONS
+     * ========================================
+     */
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function truncate(text, maxLength) {
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength) + '...';
+    }
+    
+    function announce(message) {
+      const announcer = document.getElementById('announcer');
+      announcer.textContent = message;
+    }
+
+    /**
+     * ========================================
+     * INITIALIZATION
+     * ========================================
+     */
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+    });
+  </script>
+
+</body>
+</html>

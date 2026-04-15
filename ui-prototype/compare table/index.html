@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare Table with Filtering</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0097a7;
+      --primary-hover: #00838f;
+      --primary-light: #e0f7fa;
+      --primary-bg: #0097a710;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --danger: #ef4444;
+      --header-height: 48px;
+      --toolbar-height: 44px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    /* Top Toolbar */
+    .toolbar {
+      height: var(--toolbar-height);
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--gray-200);
+      margin: 0 8px;
+    }
+
+    .toolbar-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid var(--gray-200);
+      background: white;
+      color: var(--gray-600);
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .toolbar-btn:hover {
+      border-color: var(--gray-300);
+      background: var(--gray-50);
+    }
+
+    .toolbar-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .toolbar-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .toolbar-btn .badge {
+      background: var(--primary);
+      color: white;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .toolbar-spacer { flex: 1; }
+
+    /* Zoom slider */
+    .zoom-slider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray-500);
+      font-size: 12px;
+    }
+
+    .zoom-slider input[type="range"] {
+      width: 100px;
+      cursor: pointer;
+    }
+
+    /* Filter Panel - Two Step Style */
+    .filter-panel {
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 16px;
+      display: none;
+    }
+
+    .filter-panel.active {
+      display: block;
+    }
+
+    /* Step 1: Content type selector */
+    .filter-step {
+      margin-bottom: 16px;
+    }
+
+    .filter-step-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .content-type-toggle {
+      display: inline-flex;
+      background: white;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      padding: 3px;
+    }
+
+    .content-type-btn {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      color: var(--gray-600);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .content-type-btn:hover {
+      color: var(--gray-800);
+    }
+
+    .content-type-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Step 2: Conditional filters */
+    .filter-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-row-remove {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      color: var(--gray-400);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .filter-row-remove:hover {
+      background: var(--gray-200);
+      color: var(--gray-600);
+    }
+
+    .filter-row-remove svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      color: var(--gray-600);
+      font-weight: 500;
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    .filter-select {
+      padding: 8px 32px 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      background: white;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-800);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      min-width: 180px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .filter-select.field-select {
+      min-width: 220px;
+    }
+
+    .filter-select.operator-select {
+      min-width: 140px;
+    }
+
+    .filter-input {
+      padding: 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-800);
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .filter-input::placeholder {
+      color: var(--gray-400);
+    }
+
+    /* Add filter row */
+    .add-filter-row {
+      margin-top: 8px;
+    }
+
+    .add-filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px dashed var(--gray-300);
+      background: transparent;
+      color: var(--gray-500);
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .add-filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-bg);
+    }
+
+    .add-filter-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Filter actions */
+    .filter-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .filter-btn {
+      padding: 8px 20px;
+      border: none;
+      background: transparent;
+      color: var(--gray-600);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover {
+      background: var(--gray-200);
+      color: var(--gray-800);
+    }
+
+    .filter-btn.primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .filter-btn.primary:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Empty state for no additional filters */
+    .no-filters-hint {
+      color: var(--gray-400);
+      font-size: 12px;
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    /* View Dropdown */
+    .view-dropdown {
+      position: relative;
+    }
+
+    .view-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      z-index: 100;
+      min-width: 280px;
+      padding: 8px 0;
+      display: none;
+    }
+
+    .view-dropdown-menu.open {
+      display: block;
+    }
+
+    .view-section {
+      padding: 8px 0;
+    }
+
+    .view-section:not(:last-child) {
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .view-section-label {
+      padding: 4px 16px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-400);
+    }
+
+    .view-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .view-option:hover {
+      background: var(--gray-50);
+    }
+
+    .view-option-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--gray-300);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .view-option.active .view-option-checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .view-option-checkbox svg {
+      width: 12px;
+      height: 12px;
+      color: white;
+      opacity: 0;
+    }
+
+    .view-option.active .view-option-checkbox svg {
+      opacity: 1;
+    }
+
+    .view-option-content {
+      flex: 1;
+    }
+
+    .view-option-label {
+      font-size: 13px;
+      color: var(--gray-700);
+      font-weight: 500;
+    }
+
+    .view-option-desc {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    /* Highlighted differences */
+    .cell-different {
+      background: #fef3c7 !important;
+      position: relative;
+    }
+
+    .cell-different::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--warning);
+    }
+
+    /* Contextual attribute styling */
+    .row-item.contextual {
+      opacity: 0.6;
+    }
+
+    .row-item.contextual .item-name::after {
+      content: 'contextual';
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--gray-200);
+      color: var(--gray-500);
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-left: 6px;
+      font-weight: 500;
+    }
+
+    /* Active view indicators */
+    .view-active-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+    }
+
+    /* Active filters bar */
+    .active-filters-bar {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 8px 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .active-filters-bar.has-filters {
+      display: flex;
+    }
+
+    .active-filters-label {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px 4px 10px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--gray-700);
+    }
+
+    .filter-chip-remove {
+      width: 16px;
+      height: 16px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+
+    .filter-chip-remove:hover {
+      background: var(--gray-300);
+      color: var(--gray-600);
+    }
+
+    .filter-chip-remove svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .clear-all-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-family: inherit;
+      margin-left: auto;
+    }
+
+    .clear-all-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Dropdown with search */
+    .select-dropdown {
+      position: relative;
+    }
+
+    .select-dropdown-trigger {
+      padding: 8px 32px 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      background: white;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-800);
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      min-width: 220px;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .select-dropdown-trigger.placeholder {
+      color: var(--gray-400);
+    }
+
+    .select-dropdown-trigger:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .select-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      z-index: 1000;
+      min-width: 280px;
+      max-height: 320px;
+      display: none;
+      flex-direction: column;
+    }
+
+    .select-dropdown-menu.open {
+      display: flex;
+    }
+
+    .select-dropdown-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .select-dropdown-search input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .select-dropdown-search input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .select-dropdown-options {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .select-option-group {
+      padding: 4px 0;
+    }
+
+    .select-option-group:not(:last-child) {
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .select-option-group-label {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-500);
+    }
+
+    .select-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--gray-700);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .select-option:hover {
+      background: var(--primary-bg);
+    }
+
+    .select-option.selected {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .select-option-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--gray-400);
+    }
+
+    .select-option-icon.attr { color: var(--primary); }
+    .select-option-icon.ref { color: #8b5cf6; }
+
+    /* Table Container */
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      padding: 0;
+    }
+
+    /* Compare Table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      font-size: 12px;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      border: 1px solid var(--gray-200);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .compare-table thead th {
+      background: var(--gray-100);
+      font-weight: 600;
+      color: var(--gray-700);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .compare-table th.row-header {
+      width: 220px;
+      min-width: 220px;
+      background: var(--gray-50);
+      position: sticky;
+      left: 0;
+      z-index: 5;
+    }
+
+    .compare-table thead th.row-header {
+      z-index: 15;
+    }
+
+    .compare-table th.lang-col {
+      min-width: 200px;
+    }
+
+    /* Row types */
+    .compare-table tr.group-header td,
+    .compare-table tr.group-header th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .compare-table tr.group-header .row-header-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .compare-table tr.group-header .expand-toggle {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--gray-500);
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .compare-table tr.group-header .expand-toggle:hover {
+      background: var(--gray-200);
+    }
+
+    .compare-table tr.group-header .expand-toggle svg {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.2s;
+    }
+
+    .compare-table tr.group-header.collapsed .expand-toggle svg {
+      transform: rotate(-90deg);
+    }
+
+    .group-count {
+      font-size: 11px;
+      color: var(--gray-400);
+      font-weight: 400;
+    }
+
+    /* Attribute and Reference rows */
+    .row-item {
+      transition: background 0.15s;
+    }
+
+    .row-item:hover {
+      background: var(--primary-bg);
+    }
+
+    .row-item.hidden,
+    .row-item.view-hidden {
+      display: none;
+    }
+
+    .row-item .row-header-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 28px;
+    }
+
+    .row-item.nested .row-header-content {
+      padding-left: 56px;
+    }
+
+    .row-item.double-nested .row-header-content {
+      padding-left: 84px;
+    }
+
+    .item-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--gray-400);
+      flex-shrink: 0;
+    }
+
+    .item-icon.attribute { color: var(--primary); }
+    .item-icon.reference { color: #8b5cf6; }
+
+    .item-name {
+      flex: 1;
+      color: var(--gray-700);
+    }
+
+    .item-name.link {
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .item-name.link:hover {
+      text-decoration: underline;
+    }
+
+    /* Cell content */
+    .cell-content {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cell-reference {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      background: var(--gray-100);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    .cell-reference svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .cell-reference + .cell-reference {
+      margin-left: 4px;
+    }
+
+    .cell-more {
+      font-size: 11px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Approval status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-badge.approved { background: var(--success-light); color: #065f46; }
+    .status-badge.pending { background: var(--warning-light); color: #92400e; }
+    .status-badge.partial { background: #dbeafe; color: #1e40af; }
+
+    /* Empty state / no results */
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--gray-500);
+    }
+
+    .no-results svg {
+      width: 48px;
+      height: 48px;
+      color: var(--gray-300);
+      margin-bottom: 16px;
+    }
+
+    .no-results h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <button class="toolbar-btn" id="filterBtn" onclick="toggleFilterPanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        Filter
+        <span class="badge" id="filterBadge" style="display: none;">0</span>
+      </button>
+      <div class="view-dropdown" id="viewDropdown">
+        <button class="toolbar-btn" id="viewBtn" onclick="toggleViewDropdown()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          View
+          <span class="badge" id="viewBadge" style="display: none;">0</span>
+        </button>
+        <div class="view-dropdown-menu" id="viewMenu">
+          <div class="view-section">
+            <div class="view-section-label">Compare</div>
+            <div class="view-option" data-view="highlightDiff" onclick="toggleViewOption('highlightDiff')">
+              <div class="view-option-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="view-option-content">
+                <div class="view-option-label">Highlight differences</div>
+                <div class="view-option-desc">Mark cells that differ across languages</div>
+              </div>
+            </div>
+            <div class="view-option" data-view="showOnlyDiff" onclick="toggleViewOption('showOnlyDiff')">
+              <div class="view-option-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="view-option-content">
+                <div class="view-option-label">Show only differences</div>
+                <div class="view-option-desc">Hide rows with identical values</div>
+              </div>
+            </div>
+          </div>
+          <div class="view-section">
+            <div class="view-section-label">Simplify</div>
+            <div class="view-option" data-view="hideContextual" onclick="toggleViewOption('hideContextual')">
+              <div class="view-option-checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="view-option-content">
+                <div class="view-option-label">Hide contextual attributes</div>
+                <div class="view-option-desc">Hide read-only context fields</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="toolbar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Approve
+      </button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <div class="zoom-slider">
+      <span>Zoom level (0.5x)</span>
+      <input type="range" min="25" max="150" value="50">
+      <span>+</span>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <button class="toolbar-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      Customize
+    </button>
+  </div>
+
+  <!-- Filter Panel - Two Step Style -->
+  <div class="filter-panel" id="filterPanel">
+    <!-- Step 1: What to show -->
+    <div class="filter-step">
+      <label class="filter-step-label">Show</label>
+      <div class="content-type-toggle" id="contentTypeToggle">
+        <button class="content-type-btn active" data-value="all" onclick="setContentType('all')">All</button>
+        <button class="content-type-btn" data-value="attributes" onclick="setContentType('attributes')">Attributes only</button>
+        <button class="content-type-btn" data-value="references" onclick="setContentType('references')">References only</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Filter within selection -->
+    <div class="filter-step">
+      <label class="filter-step-label">Filter by</label>
+      <div class="filter-rows" id="filterRows">
+        <!-- Filter rows will be added here dynamically -->
+      </div>
+      <div class="add-filter-row" id="addFilterRow">
+        <button class="add-filter-btn" onclick="addFilterRow()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span id="addFilterLabel">Pick a field to filter by</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="filter-btn" onclick="cancelFilters()">Cancel</button>
+      <button class="filter-btn primary" onclick="applyFilters()">Apply</button>
+    </div>
+  </div>
+
+  <!-- Active Filters Bar -->
+  <div class="active-filters-bar" id="activeFiltersBar">
+    <span class="active-filters-label">Filtering by:</span>
+    <div id="activeFilterChips"></div>
+    <button class="clear-all-btn" onclick="clearAllFilters()">Clear all</button>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <table class="compare-table" id="compareTable">
+      <thead>
+        <tr>
+          <th class="row-header"></th>
+          <th class="lang-col">English (US)</th>
+          <th class="lang-col">Spanish (Mexico)</th>
+          <th class="lang-col">Danish (Denmark)</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- Name Row (standalone attribute) -->
+        <tr class="row-item" data-type="attribute" data-attr="Name" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon attribute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name">Name</span>
+            </div>
+          </th>
+          <td><span class="cell-content">Zephyr Glide shoe</span></td>
+          <td><span class="cell-content">Zapato Zephyr Glide</span></td>
+          <td><span class="cell-content">Zephyr Glide sko</span></td>
+        </tr>
+
+        <!-- Approval status Row (standalone attribute - contextual) -->
+        <tr class="row-item contextual" data-type="attribute" data-attr="Approval status" data-contextual="true" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <span class="item-name">Approval status</span>
+            </div>
+          </th>
+          <td><span class="status-badge approved">Approved</span></td>
+          <td><span class="status-badge pending">Not approved</span></td>
+          <td><span class="status-badge partial">Partially approved</span></td>
+        </tr>
+
+        <!-- Attribute group with attributes + linked reference -->
+        <tr class="group-header" data-group="attrGroup1" data-group-type="mixed">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content">
+              <span class="expand-toggle" onclick="toggleGroup('attrGroup1')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Attribute group with attributes + linked reference</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+        <tr class="row-item" data-type="reference" data-group="attrGroup1" data-ref-type="Linked ref. type 1" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon reference" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name link">Linked ref. type 1</span>
+            </div>
+          </th>
+          <td>
+            <span class="cell-reference">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Nimbus Runner shoe
+            </span>
+            <span class="cell-more">+1</span>
+          </td>
+          <td>
+            <span class="cell-reference">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Nimbus Runner shoe
+            </span>
+          </td>
+          <td>
+            <span class="cell-reference">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Terra Trekker shoe
+            </span>
+          </td>
+        </tr>
+        <tr class="row-item" data-type="reference" data-group="attrGroup1" data-ref-type="Linked ref. type 2" data-has-diff="false">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon reference" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name link">Linked ref. type 2</span>
+            </div>
+          </th>
+          <td>
+            <span class="cell-reference">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Image 234
+            </span>
+          </td>
+          <td>
+            <span class="cell-reference">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Image 234
+            </span>
+          </td>
+          <td></td>
+        </tr>
+        <tr class="row-item contextual" data-type="attribute" data-group="attrGroup1" data-attr="Example attribute" data-contextual="true" data-has-diff="false">
+          <th class="row-header">
+            <div class="row-header-content">
+              <span class="item-name">Example attribute</span>
+            </div>
+          </th>
+          <td>🐱</td>
+          <td>🐱</td>
+          <td>🐱</td>
+        </tr>
+
+        <!-- Feature bullets -->
+        <tr class="group-header" data-group="attrGroup2" data-group-type="attributes">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content">
+              <span class="expand-toggle" onclick="toggleGroup('attrGroup2')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Feature bullets</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+        <tr class="row-item" data-type="attribute" data-group="attrGroup2" data-attr="Feature bullet 1" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon attribute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name">Feature bullet 1</span>
+            </div>
+          </th>
+          <td><span class="cell-content">Supreme Cushioning: Innovative foam...</span></td>
+          <td><span class="cell-content">Amortiguación suprema: tecnología d...</span></td>
+          <td><span class="cell-content">Suveræn Stødabsorbering: Innovativ s...</span></td>
+        </tr>
+        <tr class="row-item" data-type="attribute" data-group="attrGroup2" data-attr="Feature bullet 2" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon attribute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name">Feature bullet 2</span>
+            </div>
+          </th>
+          <td><span class="cell-content">Enhanced Stability: Provides support a...</span></td>
+          <td><span class="cell-content">Estabilidad mejorada: proporciona so...</span></td>
+          <td><span class="cell-content">Forbedret Stabilitet: Giver støtte og ba...</span></td>
+        </tr>
+        <tr class="row-item" data-type="attribute" data-group="attrGroup2" data-attr="Non-context dependent" data-has-diff="false">
+          <th class="row-header">
+            <div class="row-header-content">
+              <span class="item-name">Non-context dependent</span>
+            </div>
+          </th>
+          <td>😀</td>
+          <td>😀</td>
+          <td>😀</td>
+        </tr>
+
+        <!-- Descriptions -->
+        <tr class="group-header" data-group="attrGroup3" data-group-type="attributes">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content">
+              <span class="expand-toggle" onclick="toggleGroup('attrGroup3')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Descriptions</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+        <tr class="row-item" data-type="attribute" data-group="attrGroup3" data-attr="Long description" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon attribute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name">Long description</span>
+            </div>
+          </th>
+          <td><span class="cell-content">The Zephyr Glide is engineered for th...</span></td>
+          <td><span class="cell-content">El Zephyr Glide está diseñado para aq...</span></td>
+          <td><span class="cell-content">Zephyr Glide er udviklet til dem, der k...</span></td>
+        </tr>
+        <tr class="row-item" data-type="attribute" data-group="attrGroup3" data-attr="Short description" data-has-diff="true">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon attribute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name">Short description</span>
+            </div>
+          </th>
+          <td><span class="cell-content">Experience unparalleled comfort and...</span></td>
+          <td><span class="cell-content">Experimente una comodidad y un ren...</span></td>
+          <td><span class="cell-content">Oplev uovertruffen komfort og ydeev...</span></td>
+        </tr>
+        <tr class="row-item contextual" data-type="attribute" data-group="attrGroup3" data-attr="Non-context dependent" data-contextual="true" data-has-diff="false">
+          <th class="row-header">
+            <div class="row-header-content">
+              <span class="item-name">Non-context dependent</span>
+            </div>
+          </th>
+          <td>👆</td>
+          <td>👆</td>
+          <td>👆</td>
+        </tr>
+
+        <!-- Ungrouped reference types -->
+        <tr class="group-header" data-group="ungrouped" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content">
+              <span class="expand-toggle" onclick="toggleGroup('ungrouped')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Ungrouped reference types</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+
+        <!-- Product references sub-group -->
+        <tr class="group-header nested" data-group="refGroup1" data-parent-group="ungrouped" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 28px;">
+              <span class="expand-toggle" onclick="toggleGroup('refGroup1')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Product references</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+
+        <!-- References sub-sub-group -->
+        <tr class="group-header nested" data-group="references-sub" data-parent-group="refGroup1" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 56px;">
+              <span class="expand-toggle" onclick="toggleGroup('references-sub')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>References</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+        <tr class="row-item double-nested" data-type="reference" data-group="references-sub" data-ref-group="refGroup1" data-ref-type="Ungrouped ref. type 1">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon reference" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name link">Ungrouped ref. type 1</span>
+            </div>
+          </th>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="row-item double-nested" data-type="reference" data-group="references-sub" data-ref-group="refGroup1" data-ref-type="Ungrouped ref. type 2">
+          <th class="row-header">
+            <div class="row-header-content">
+              <span class="item-name">Ungrouped ref. type 2</span>
+            </div>
+          </th>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+
+        <!-- Referenced by sub-sub-group -->
+        <tr class="group-header nested" data-group="referenced-by-sub" data-parent-group="refGroup1" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 56px;">
+              <span class="expand-toggle" onclick="toggleGroup('referenced-by-sub')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Referenced by</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+        <tr class="row-item double-nested" data-type="reference" data-group="referenced-by-sub" data-ref-group="refGroup1" data-ref-type="Ungrouped ref. type 3">
+          <th class="row-header">
+            <div class="row-header-content">
+              <svg class="item-icon reference" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="item-name link">Ungrouped ref. type 3</span>
+            </div>
+          </th>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="row-item double-nested" data-type="reference" data-group="referenced-by-sub" data-ref-group="refGroup1" data-ref-type="Ungrouped ref. type 4">
+          <th class="row-header">
+            <div class="row-header-content">
+              <span class="item-name">Ungrouped ref. type 4</span>
+            </div>
+          </th>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+
+        <!-- Classification links -->
+        <tr class="group-header nested" data-group="refGroup2" data-parent-group="ungrouped" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 28px;">
+              <span class="expand-toggle no-children">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Classification links</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+
+        <!-- Asset references -->
+        <tr class="group-header nested" data-group="refGroup3" data-parent-group="ungrouped" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 28px;">
+              <span class="expand-toggle no-children">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Asset references</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+
+        <!-- Classification references -->
+        <tr class="group-header nested" data-group="refGroup4" data-parent-group="ungrouped" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 28px;">
+              <span class="expand-toggle no-children">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Classification references</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+
+        <!-- Entity references -->
+        <tr class="group-header nested" data-group="refGroup5" data-parent-group="ungrouped" data-group-type="references">
+          <th class="row-header" colspan="4">
+            <div class="row-header-content" style="padding-left: 28px;">
+              <span class="expand-toggle no-children">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span>Entity references</span>
+              <span class="group-count">(X)</span>
+            </div>
+          </th>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Footer -->
+    <div style="padding: 8px 16px; background: var(--gray-50); border-top: 1px solid var(--gray-200); font-size: 12px; color: var(--gray-500);">
+      <span id="itemCount">X items</span>
+    </div>
+  </div>
+
+  <script>
+    // Field definitions - context-aware based on content type
+    const filterFieldsByContentType = {
+      all: {
+        attrGroup: { 
+          label: 'Attribute group', 
+          type: 'group',
+          operators: ['is', 'is not'],
+          values: [
+            { id: 'attrGroup1', label: 'Attribute group with attributes + linked reference' },
+            { id: 'attrGroup2', label: 'Feature bullets' },
+            { id: 'attrGroup3', label: 'Descriptions' }
+          ]
+        },
+        refGroup: { 
+          label: 'Reference type group', 
+          type: 'group',
+          operators: ['is', 'is not'],
+          values: [
+            { id: 'refGroup1', label: 'Product references' },
+            { id: 'refGroup2', label: 'Classification links' },
+            { id: 'refGroup3', label: 'Asset references' },
+            { id: 'refGroup4', label: 'Classification references' },
+            { id: 'refGroup5', label: 'Entity references' }
+          ]
+        },
+        attribute: { 
+          label: 'Attribute', 
+          type: 'attribute',
+          operators: ['is', 'is not', 'contains', 'does not contain', 'is empty', 'is not empty'],
+          values: [
+            'Name', 'Approval status', 'Example attribute', 
+            'Feature bullet 1', 'Feature bullet 2', 'Non-context dependent',
+            'Long description', 'Short description'
+          ]
+        },
+        refType: { 
+          label: 'Reference type', 
+          type: 'reference',
+          operators: ['is', 'is not', 'is empty', 'is not empty'],
+          values: [
+            'Linked ref. type 1', 'Linked ref. type 2',
+            'Ungrouped ref. type 1', 'Ungrouped ref. type 2',
+            'Ungrouped ref. type 3', 'Ungrouped ref. type 4'
+          ]
+        }
+      },
+      attributes: {
+        attrGroup: { 
+          label: 'Attribute group', 
+          type: 'group',
+          operators: ['is', 'is not'],
+          values: [
+            { id: 'attrGroup1', label: 'Attribute group with attributes + linked reference' },
+            { id: 'attrGroup2', label: 'Feature bullets' },
+            { id: 'attrGroup3', label: 'Descriptions' }
+          ]
+        },
+        attribute: { 
+          label: 'Attribute', 
+          type: 'attribute',
+          operators: ['is', 'is not', 'contains', 'does not contain', 'is empty', 'is not empty'],
+          values: [
+            'Name', 'Approval status', 'Example attribute', 
+            'Feature bullet 1', 'Feature bullet 2', 'Non-context dependent',
+            'Long description', 'Short description'
+          ]
+        }
+      },
+      references: {
+        refGroup: { 
+          label: 'Reference type group', 
+          type: 'group',
+          operators: ['is', 'is not'],
+          values: [
+            { id: 'refGroup1', label: 'Product references' },
+            { id: 'refGroup2', label: 'Classification links' },
+            { id: 'refGroup3', label: 'Asset references' },
+            { id: 'refGroup4', label: 'Classification references' },
+            { id: 'refGroup5', label: 'Entity references' }
+          ]
+        },
+        refType: { 
+          label: 'Reference type', 
+          type: 'reference',
+          operators: ['is', 'is not', 'is empty', 'is not empty'],
+          values: [
+            'Linked ref. type 1', 'Linked ref. type 2',
+            'Ungrouped ref. type 1', 'Ungrouped ref. type 2',
+            'Ungrouped ref. type 3', 'Ungrouped ref. type 4'
+          ]
+        }
+      }
+    };
+
+    // State
+    const state = {
+      filterPanelOpen: false,
+      pendingContentType: 'all',
+      pendingFilters: [],
+      appliedContentType: 'all',
+      appliedFilters: [],
+      collapsedGroups: new Set(),
+      filterIdCounter: 0,
+      // View options
+      viewOptions: {
+        highlightDiff: false,
+        showOnlyDiff: false,
+        hideContextual: false
+      },
+      viewDropdownOpen: false
+    };
+
+    // Toggle filter panel
+    function toggleFilterPanel() {
+      state.filterPanelOpen = !state.filterPanelOpen;
+      document.getElementById('filterPanel').classList.toggle('active', state.filterPanelOpen);
+      document.getElementById('filterBtn').classList.toggle('active', state.filterPanelOpen);
+      
+      if (state.filterPanelOpen) {
+        // Copy applied state to pending
+        state.pendingContentType = state.appliedContentType;
+        state.pendingFilters = JSON.parse(JSON.stringify(state.appliedFilters));
+        updateContentTypeUI();
+        renderFilterRows();
+      }
+    }
+
+    // Set content type (step 1)
+    function setContentType(value) {
+      state.pendingContentType = value;
+      // Clear filters that don't apply to the new content type
+      const availableFields = Object.keys(filterFieldsByContentType[value]);
+      state.pendingFilters = state.pendingFilters.filter(f => availableFields.includes(f.field));
+      updateContentTypeUI();
+      renderFilterRows();
+    }
+
+    // Update content type toggle UI
+    function updateContentTypeUI() {
+      const buttons = document.querySelectorAll('#contentTypeToggle .content-type-btn');
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === state.pendingContentType);
+      });
+      
+      // Update add filter label
+      const label = document.getElementById('addFilterLabel');
+      const fields = filterFieldsByContentType[state.pendingContentType];
+      const fieldNames = Object.values(fields).map(f => f.label.toLowerCase());
+      
+      if (state.pendingContentType === 'attributes') {
+        label.textContent = 'Filter by attribute or attribute group';
+      } else if (state.pendingContentType === 'references') {
+        label.textContent = 'Filter by reference type or reference group';
+      } else {
+        label.textContent = 'Pick a field to filter by';
+      }
+    }
+
+    // Add a new filter row
+    function addFilterRow(field = null, operator = null, value = null) {
+      const filterId = ++state.filterIdCounter;
+      state.pendingFilters.push({
+        id: filterId,
+        field: field,
+        operator: operator || 'is',
+        value: value
+      });
+      renderFilterRows();
+    }
+
+    // Remove a filter row
+    function removeFilterRow(filterId) {
+      state.pendingFilters = state.pendingFilters.filter(f => f.id !== filterId);
+      renderFilterRows();
+    }
+
+    // Update filter row
+    function updateFilterRow(filterId, key, value) {
+      const filter = state.pendingFilters.find(f => f.id === filterId);
+      if (filter) {
+        filter[key] = value;
+        if (key === 'field') {
+          filter.operator = 'is';
+          filter.value = null;
+        }
+        renderFilterRows();
+      }
+    }
+
+    // Get current available fields based on content type
+    function getAvailableFields() {
+      return filterFieldsByContentType[state.pendingContentType];
+    }
+
+    // Render filter rows
+    function renderFilterRows() {
+      const container = document.getElementById('filterRows');
+      container.innerHTML = '';
+      
+      const fields = getAvailableFields();
+
+      state.pendingFilters.forEach((filter, index) => {
+        const row = document.createElement('div');
+        row.className = 'filter-row';
+        row.dataset.filterId = filter.id;
+
+        const fieldDef = filter.field ? fields[filter.field] : null;
+        const operators = fieldDef ? fieldDef.operators : [];
+        const needsValueInput = filter.operator && !['is empty', 'is not empty'].includes(filter.operator);
+
+        // Build field options based on content type
+        let fieldOptions = '';
+        if (state.pendingContentType === 'all') {
+          fieldOptions = `
+            <optgroup label="Groups">
+              <option value="attrGroup" ${filter.field === 'attrGroup' ? 'selected' : ''}>Attribute group</option>
+              <option value="refGroup" ${filter.field === 'refGroup' ? 'selected' : ''}>Reference type group</option>
+            </optgroup>
+            <optgroup label="Specific items">
+              <option value="attribute" ${filter.field === 'attribute' ? 'selected' : ''}>Attribute</option>
+              <option value="refType" ${filter.field === 'refType' ? 'selected' : ''}>Reference type</option>
+            </optgroup>
+          `;
+        } else if (state.pendingContentType === 'attributes') {
+          fieldOptions = `
+            <option value="attrGroup" ${filter.field === 'attrGroup' ? 'selected' : ''}>Attribute group</option>
+            <option value="attribute" ${filter.field === 'attribute' ? 'selected' : ''}>Attribute</option>
+          `;
+        } else {
+          fieldOptions = `
+            <option value="refGroup" ${filter.field === 'refGroup' ? 'selected' : ''}>Reference type group</option>
+            <option value="refType" ${filter.field === 'refType' ? 'selected' : ''}>Reference type</option>
+          `;
+        }
+
+        row.innerHTML = `
+          <button class="filter-row-remove" onclick="removeFilterRow(${filter.id})" title="Remove filter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+          <span class="filter-label">${index === 0 ? 'Where' : 'And'}</span>
+          <select class="filter-select field-select" onchange="updateFilterRow(${filter.id}, 'field', this.value)">
+            <option value="">Select field...</option>
+            ${fieldOptions}
+          </select>
+          ${filter.field ? `
+            <select class="filter-select operator-select" onchange="updateFilterRow(${filter.id}, 'operator', this.value)">
+              ${operators.map(op => `<option value="${op}" ${filter.operator === op ? 'selected' : ''}>${capitalizeFirst(op)}</option>`).join('')}
+            </select>
+          ` : ''}
+          ${filter.field && needsValueInput ? renderValueInput(filter, fieldDef) : ''}
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    // Render value input based on field type
+    function renderValueInput(filter, fieldDef) {
+      if (fieldDef.type === 'group') {
+        return `
+          <select class="filter-select" onchange="updateFilterRow(${filter.id}, 'value', this.value)">
+            <option value="">Select...</option>
+            ${fieldDef.values.map(v => `<option value="${v.id}" ${filter.value === v.id ? 'selected' : ''}>${v.label}</option>`).join('')}
+          </select>
+        `;
+      } else if (filter.operator === 'contains' || filter.operator === 'does not contain') {
+        return `
+          <input type="text" class="filter-input" placeholder="Enter value..." 
+            value="${filter.value || ''}" 
+            onchange="updateFilterRow(${filter.id}, 'value', this.value)">
+        `;
+      } else {
+        return `
+          <select class="filter-select" onchange="updateFilterRow(${filter.id}, 'value', this.value)">
+            <option value="">Select...</option>
+            ${fieldDef.values.map(v => `<option value="${v}" ${filter.value === v ? 'selected' : ''}>${v}</option>`).join('')}
+          </select>
+        `;
+      }
+    }
+
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Cancel filter editing
+    function cancelFilters() {
+      state.pendingContentType = state.appliedContentType;
+      state.pendingFilters = JSON.parse(JSON.stringify(state.appliedFilters));
+      toggleFilterPanel();
+    }
+
+    // Apply filters
+    function applyFilters() {
+      state.appliedContentType = state.pendingContentType;
+      // Only keep complete filters
+      state.appliedFilters = state.pendingFilters.filter(f => {
+        if (!f.field) return false;
+        if (['is empty', 'is not empty'].includes(f.operator)) return true;
+        return f.value;
+      });
+
+      applyFiltersToTable();
+      updateActiveFiltersBar();
+      updateFilterBadge();
+      
+      if (state.filterPanelOpen) {
+        toggleFilterPanel();
+      }
+    }
+
+    // Apply filters to the table
+    function applyFiltersToTable() {
+      const rows = document.querySelectorAll('#tableBody tr');
+      let visibleCount = 0;
+
+      const fields = filterFieldsByContentType[state.appliedContentType];
+      const attrGroupFilters = state.appliedFilters.filter(f => f.field === 'attrGroup');
+      const refGroupFilters = state.appliedFilters.filter(f => f.field === 'refGroup');
+      const attributeFilters = state.appliedFilters.filter(f => f.field === 'attribute');
+      const refTypeFilters = state.appliedFilters.filter(f => f.field === 'refType');
+
+      rows.forEach(row => {
+        let shouldShow = true;
+
+        if (row.classList.contains('group-header')) {
+          const groupType = row.dataset.groupType;
+          const group = row.dataset.group;
+          const parentGroup = row.dataset.parentGroup;
+
+          // Content type filter (step 1)
+          if (state.appliedContentType === 'attributes' && groupType === 'references') {
+            shouldShow = false;
+          } else if (state.appliedContentType === 'references' && groupType === 'attributes') {
+            shouldShow = false;
+          }
+
+          // Attribute group filters
+          if (shouldShow) {
+            attrGroupFilters.forEach(f => {
+              if (groupType === 'attributes' || groupType === 'mixed') {
+                if (f.operator === 'is' && group !== f.value && !parentGroup) {
+                  shouldShow = false;
+                } else if (f.operator === 'is not' && group === f.value) {
+                  shouldShow = false;
+                }
+              }
+            });
+          }
+
+          // Reference group filters
+          if (shouldShow) {
+            refGroupFilters.forEach(f => {
+              if (parentGroup === 'ungrouped') {
+                if (f.operator === 'is' && group !== f.value) {
+                  shouldShow = false;
+                } else if (f.operator === 'is not' && group === f.value) {
+                  shouldShow = false;
+                }
+              }
+            });
+          }
+
+        } else if (row.classList.contains('row-item')) {
+          const type = row.dataset.type;
+          const group = row.dataset.group;
+          const attr = row.dataset.attr;
+          const refType = row.dataset.refType;
+          const refGroup = row.dataset.refGroup;
+
+          // Content type filter (step 1)
+          if (state.appliedContentType === 'attributes' && type === 'reference') {
+            shouldShow = false;
+          } else if (state.appliedContentType === 'references' && type === 'attribute') {
+            shouldShow = false;
+          }
+
+          // Attribute filters
+          if (shouldShow) {
+            attributeFilters.forEach(f => {
+              if (type === 'attribute' && attr) {
+                if (f.operator === 'is' && attr !== f.value) {
+                  shouldShow = false;
+                } else if (f.operator === 'is not' && attr === f.value) {
+                  shouldShow = false;
+                } else if (f.operator === 'contains' && !attr.toLowerCase().includes(f.value.toLowerCase())) {
+                  shouldShow = false;
+                } else if (f.operator === 'does not contain' && attr.toLowerCase().includes(f.value.toLowerCase())) {
+                  shouldShow = false;
+                }
+              }
+            });
+          }
+
+          // Reference type filters
+          if (shouldShow) {
+            refTypeFilters.forEach(f => {
+              if (type === 'reference' && refType) {
+                if (f.operator === 'is' && refType !== f.value) {
+                  shouldShow = false;
+                } else if (f.operator === 'is not' && refType === f.value) {
+                  shouldShow = false;
+                }
+              }
+            });
+          }
+
+          // Attribute group filters
+          if (shouldShow) {
+            attrGroupFilters.forEach(f => {
+              if (type === 'attribute' && group) {
+                if (f.operator === 'is' && group !== f.value) {
+                  shouldShow = false;
+                } else if (f.operator === 'is not' && group === f.value) {
+                  shouldShow = false;
+                }
+              }
+            });
+          }
+
+          // Reference group filters
+          if (shouldShow) {
+            refGroupFilters.forEach(f => {
+              if (type === 'reference' && refGroup) {
+                if (f.operator === 'is' && refGroup !== f.value) {
+                  shouldShow = false;
+                } else if (f.operator === 'is not' && refGroup === f.value) {
+                  shouldShow = false;
+                }
+              }
+            });
+          }
+
+          // Check collapsed state
+          if (group && state.collapsedGroups.has(group)) {
+            shouldShow = false;
+          }
+
+          if (shouldShow && !row.classList.contains('group-header')) {
+            visibleCount++;
+          }
+        }
+
+        row.classList.toggle('hidden', !shouldShow);
+      });
+
+      // Re-apply view options after filter changes
+      applyViewOptions();
+    }
+
+    // Update active filters bar
+    function updateActiveFiltersBar() {
+      const bar = document.getElementById('activeFiltersBar');
+      const chips = document.getElementById('activeFilterChips');
+      chips.innerHTML = '';
+
+      const hasContentFilter = state.appliedContentType !== 'all';
+      const hasFieldFilters = state.appliedFilters.length > 0;
+
+      // Show content type if not "all"
+      if (hasContentFilter) {
+        const chip = document.createElement('span');
+        chip.className = 'filter-chip';
+        const label = state.appliedContentType === 'attributes' ? 'Attributes only' : 'References only';
+        chip.innerHTML = `
+          ${label}
+          <button class="filter-chip-remove" onclick="removeContentTypeFilter()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        `;
+        chips.appendChild(chip);
+      }
+
+      // Show field filters
+      const fields = filterFieldsByContentType[state.appliedContentType];
+      state.appliedFilters.forEach(filter => {
+        const fieldDef = fields[filter.field];
+        if (!fieldDef) return;
+        
+        let displayValue = filter.value;
+
+        if (fieldDef.type === 'group' && filter.value) {
+          const valueObj = fieldDef.values.find(v => v.id === filter.value);
+          displayValue = valueObj ? valueObj.label : filter.value;
+        }
+
+        const chip = document.createElement('span');
+        chip.className = 'filter-chip';
+        
+        let chipText = `${fieldDef.label} ${filter.operator}`;
+        if (!['is empty', 'is not empty'].includes(filter.operator)) {
+          chipText += ` "${displayValue}"`;
+        }
+
+        chip.innerHTML = `
+          ${chipText}
+          <button class="filter-chip-remove" onclick="removeAppliedFilter(${filter.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        `;
+        chips.appendChild(chip);
+      });
+
+      bar.classList.toggle('has-filters', hasContentFilter || hasFieldFilters);
+    }
+
+    // Remove content type filter
+    function removeContentTypeFilter() {
+      state.appliedContentType = 'all';
+      state.pendingContentType = 'all';
+      // Keep filters that are still valid
+      const availableFields = Object.keys(filterFieldsByContentType['all']);
+      state.appliedFilters = state.appliedFilters.filter(f => availableFields.includes(f.field));
+      state.pendingFilters = JSON.parse(JSON.stringify(state.appliedFilters));
+      applyFiltersToTable();
+      updateActiveFiltersBar();
+      updateFilterBadge();
+    }
+
+    // Remove applied filter
+    function removeAppliedFilter(filterId) {
+      state.appliedFilters = state.appliedFilters.filter(f => f.id !== filterId);
+      state.pendingFilters = JSON.parse(JSON.stringify(state.appliedFilters));
+      applyFiltersToTable();
+      updateActiveFiltersBar();
+      updateFilterBadge();
+    }
+
+    // Clear all filters
+    function clearAllFilters() {
+      state.appliedContentType = 'all';
+      state.pendingContentType = 'all';
+      state.appliedFilters = [];
+      state.pendingFilters = [];
+      applyFiltersToTable();
+      updateActiveFiltersBar();
+      updateFilterBadge();
+    }
+
+    // Update filter badge
+    function updateFilterBadge() {
+      const badge = document.getElementById('filterBadge');
+      let count = state.appliedFilters.length;
+      if (state.appliedContentType !== 'all') count++;
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Toggle group expansion
+    function toggleGroup(groupId) {
+      const groupHeader = document.querySelector(`tr[data-group="${groupId}"]`);
+      const isCollapsed = groupHeader.classList.toggle('collapsed');
+      
+      if (isCollapsed) {
+        state.collapsedGroups.add(groupId);
+      } else {
+        state.collapsedGroups.delete(groupId);
+      }
+
+      const childRows = document.querySelectorAll(`tr[data-group="${groupId}"]:not(.group-header), tr[data-parent-group="${groupId}"]`);
+      childRows.forEach(row => {
+        row.classList.toggle('hidden', isCollapsed);
+        
+        if (isCollapsed && row.classList.contains('group-header')) {
+          const nestedGroupId = row.dataset.group;
+          const nestedChildren = document.querySelectorAll(`tr[data-group="${nestedGroupId}"]:not(.group-header)`);
+          nestedChildren.forEach(nestedRow => nestedRow.classList.add('hidden'));
+        }
+      });
+    }
+
+    // ==========================================
+    // VIEW FUNCTIONALITY
+    // ==========================================
+
+    // Toggle view dropdown
+    function toggleViewDropdown() {
+      state.viewDropdownOpen = !state.viewDropdownOpen;
+      document.getElementById('viewMenu').classList.toggle('open', state.viewDropdownOpen);
+      document.getElementById('viewBtn').classList.toggle('active', state.viewDropdownOpen);
+    }
+
+    // Toggle a view option
+    function toggleViewOption(option) {
+      state.viewOptions[option] = !state.viewOptions[option];
+      
+      // Update UI
+      const optionEl = document.querySelector(`.view-option[data-view="${option}"]`);
+      optionEl.classList.toggle('active', state.viewOptions[option]);
+      
+      // Apply view changes
+      applyViewOptions();
+      updateViewBadge();
+    }
+
+    // Apply all view options to the table
+    function applyViewOptions() {
+      const rows = document.querySelectorAll('#tableBody tr.row-item');
+      
+      rows.forEach(row => {
+        const hasDiff = row.dataset.hasDiff === 'true';
+        const isContextual = row.dataset.contextual === 'true';
+        const cells = row.querySelectorAll('td');
+        
+        // Highlight differences
+        cells.forEach(cell => {
+          cell.classList.toggle('cell-different', state.viewOptions.highlightDiff && hasDiff);
+        });
+        
+        // Show only differences (hide identical rows)
+        // This interacts with filters - we add a view-hidden class separate from filter hidden
+        if (state.viewOptions.showOnlyDiff && !hasDiff) {
+          row.classList.add('view-hidden');
+        } else {
+          row.classList.remove('view-hidden');
+        }
+        
+        // Hide contextual attributes
+        if (state.viewOptions.hideContextual && isContextual) {
+          row.classList.add('view-hidden');
+        }
+      });
+      
+      // Update row visibility (combines filter + view)
+      updateRowVisibility();
+    }
+
+    // Update row visibility combining filter and view states
+    function updateRowVisibility() {
+      const rows = document.querySelectorAll('#tableBody tr.row-item');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const isFilterHidden = row.classList.contains('hidden');
+        const isViewHidden = row.classList.contains('view-hidden');
+        
+        // Row is visible only if not hidden by either filter or view
+        const isVisible = !isFilterHidden && !isViewHidden;
+        row.style.display = isVisible ? '' : 'none';
+        
+        if (isVisible) visibleCount++;
+      });
+      
+      document.getElementById('itemCount').textContent = `${visibleCount} items`;
+    }
+
+    // Update view badge
+    function updateViewBadge() {
+      const badge = document.getElementById('viewBadge');
+      const count = Object.values(state.viewOptions).filter(v => v).length;
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      const viewDropdown = document.getElementById('viewDropdown');
+      if (state.viewDropdownOpen && !viewDropdown.contains(e.target)) {
+        state.viewDropdownOpen = false;
+        document.getElementById('viewMenu').classList.remove('open');
+        document.getElementById('viewBtn').classList.remove('active');
+      }
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      const items = document.querySelectorAll('.row-item:not(.hidden)');
+      document.getElementById('itemCount').textContent = `${items.length} items`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,4070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ODS Suite - Enterprise Master Data Management Platform">
+    <title>ODS Suite - Master Data Management Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           DESIGN TOKENS
+           ============================================ */
+        :root {
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            
+            /* Neutral Colors - WCAG AA compliant */
+            --gray-50: #FAFBFC;
+            --gray-100: #F4F5F7;
+            --gray-200: #EBECF0;
+            --gray-300: #DFE1E6;
+            --gray-400: #C1C7D0;
+            --gray-500: #8993A4;
+            --gray-600: #6B778C;
+            --gray-700: #505F79;
+            --gray-800: #42526E;
+            --gray-900: #172B4D;
+            
+            /* Text - ensuring 4.5:1 contrast ratio minimum */
+            --text-primary: #172B4D;
+            --text-secondary: #505F79;
+            --text-tertiary: #6B778C;
+            --text-disabled: #8993A4;
+            --text-inverse: #FFFFFF;
+            --text-link: #0052CC;
+            --text-link-hover: #0747A6;
+            
+            /* Backgrounds */
+            --bg-default: #FFFFFF;
+            --bg-subtle: #FAFBFC;
+            --bg-muted: #F4F5F7;
+            --bg-hover: #EBECF0;
+            --bg-active: #DFE1E6;
+            --bg-selected: #E9F2FF;
+            --bg-canvas: #F4F5F7;
+            
+            /* Borders */
+            --border-default: #DFE1E6;
+            --border-subtle: #EBECF0;
+            --border-strong: #C1C7D0;
+            --border-focus: #4C9AFF;
+            
+            /* Primary Brand */
+            --primary-50: #E9F2FF;
+            --primary-100: #CCE0FF;
+            --primary-200: #85B8FF;
+            --primary-300: #579DFF;
+            --primary-400: #388BFF;
+            --primary-500: #1D7AFC;
+            --primary-600: #0C66E4;
+            --primary-700: #0055CC;
+            --primary-800: #09326C;
+            --primary-900: #1C2B41;
+            
+            /* Product Colors */
+            --instrument-color: #00875A;
+            --instrument-bg: #E3FCEF;
+            --syndicate-color: #5E4DB2;
+            --syndicate-bg: #F3F0FF;
+            --enrich-color: #E34935;
+            --enrich-bg: #FFEDEB;
+            --analytics-color: #0078D4;
+            --analytics-bg: #E6F4FF;
+            
+            /* Status Colors - WCAG compliant */
+            --success-color: #216E4E;
+            --success-bg: #DCFFF1;
+            --success-border: #4BCE97;
+            --warning-color: #974F0C;
+            --warning-bg: #FFF7D6;
+            --warning-border: #F5CD47;
+            --error-color: #AE2E24;
+            --error-bg: #FFD5D2;
+            --error-border: #F87168;
+            --info-color: #0055CC;
+            --info-bg: #E9F2FF;
+            --info-border: #579DFF;
+            
+            /* AI Branding */
+            --ai-primary: #5E4DB2;
+            --ai-secondary: #0078D4;
+            --ai-gradient: linear-gradient(135deg, #5E4DB2 0%, #0078D4 100%);
+            --ai-bg: linear-gradient(135deg, rgba(94, 77, 178, 0.08) 0%, rgba(0, 120, 212, 0.08) 100%);
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px rgba(9, 30, 66, 0.08);
+            --shadow-sm: 0 1px 3px rgba(9, 30, 66, 0.12);
+            --shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.08), 0 0 1px rgba(9, 30, 66, 0.31);
+            --shadow-lg: 0 8px 12px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.31);
+            --shadow-xl: 0 18px 28px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.31);
+            
+            /* Focus ring for accessibility */
+            --focus-ring: 0 0 0 2px var(--bg-default), 0 0 0 4px var(--border-focus);
+            --focus-ring-inset: inset 0 0 0 2px var(--border-focus);
+            
+            /* Layout */
+            --global-nav-height: 56px;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 64px;
+            --panel-width: 400px;
+            
+            /* Radius */
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 0.1s ease;
+            --transition-base: 0.2s ease;
+            --transition-slow: 0.3s ease;
+            
+            /* Z-index layers */
+            --z-dropdown: 100;
+            --z-sticky: 200;
+            --z-modal-backdrop: 300;
+            --z-modal: 400;
+            --z-tooltip: 500;
+            --z-toast: 600;
+        }
+
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            background: var(--bg-canvas);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* ============================================
+           ACCESSIBILITY UTILITIES
+           ============================================ */
+        
+        /* Skip Link */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: var(--primary-700);
+            color: var(--text-inverse);
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            z-index: 9999;
+            transition: top var(--transition-fast);
+        }
+
+        .skip-link:focus {
+            top: 8px;
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus visible for keyboard users */
+        :focus {
+            outline: none;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (forced-colors: active) {
+            .btn-primary,
+            .ai-panel-icon,
+            .product-selector-icon {
+                forced-color-adjust: none;
+            }
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .app-shell {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           GLOBAL NAVIGATION
+           ============================================ */
+        .global-nav {
+            display: flex;
+            align-items: center;
+            height: var(--global-nav-height);
+            background: var(--primary-900);
+            padding: 0 12px;
+            gap: 4px;
+        }
+
+        .app-switcher-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-inverse);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .app-switcher-trigger:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .app-switcher-trigger:focus-visible {
+            outline: 2px solid var(--text-inverse);
+            outline-offset: 2px;
+        }
+
+        .app-switcher-trigger svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .suite-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 12px;
+        }
+
+        .suite-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary-400) 0%, var(--analytics-color) 100%);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+
+        .suite-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-inverse);
+            letter-spacing: -0.2px;
+        }
+
+        .nav-separator {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.16);
+            margin: 0 8px;
+        }
+
+        /* Product Selector */
+        .product-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-inverse);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .product-selector:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .product-selector:focus-visible {
+            outline: 2px solid var(--text-inverse);
+            outline-offset: 2px;
+        }
+
+        .product-selector-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .product-selector-icon.instrument { background: var(--instrument-color); }
+        .product-selector-icon.syndicate { background: var(--syndicate-color); }
+        .product-selector-icon.enrich { background: var(--enrich-color); }
+        .product-selector-icon.analytics { background: var(--analytics-color); }
+
+        .product-selector-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .product-selector-chevron {
+            opacity: 0.7;
+            font-size: 10px;
+            transition: transform var(--transition-fast);
+        }
+
+        .product-selector[aria-expanded="true"] .product-selector-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Primary Navigation */
+        .primary-nav {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 8px;
+        }
+
+        .primary-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-md);
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .primary-nav-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-inverse);
+        }
+
+        .primary-nav-item:focus-visible {
+            outline: 2px solid var(--text-inverse);
+            outline-offset: 2px;
+        }
+
+        .primary-nav-item[aria-current="page"] {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-inverse);
+        }
+
+        .primary-nav-item[aria-current="page"]::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: var(--text-inverse);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .nav-badge {
+            padding: 2px 6px;
+            background: var(--error-color);
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .nav-spacer {
+            flex: 1;
+        }
+
+        /* Global Search */
+        .global-search {
+            position: relative;
+            width: 420px;
+        }
+
+        .global-search-input {
+            width: 100%;
+            height: 36px;
+            padding: 0 16px 0 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid transparent;
+            border-radius: var(--radius-lg);
+            color: var(--text-inverse);
+            font-size: 14px;
+            transition: all var(--transition-base);
+        }
+
+        .global-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.48);
+        }
+
+        .global-search-input:focus {
+            background: var(--bg-default);
+            color: var(--text-primary);
+            border-color: var(--border-focus);
+            box-shadow: var(--focus-ring);
+        }
+
+        .global-search-input:focus::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .global-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.48);
+            transition: color var(--transition-base);
+            pointer-events: none;
+        }
+
+        .global-search-input:focus ~ .global-search-icon {
+            color: var(--text-tertiary);
+        }
+
+        .global-search-ai-badge {
+            position: absolute;
+            right: 76px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--ai-gradient);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .global-search-shortcut {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 3px;
+        }
+
+        .global-search-shortcut kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: inherit;
+            color: rgba(255, 255, 255, 0.64);
+        }
+
+        .global-search-input:focus ~ .global-search-shortcut,
+        .global-search-input:focus ~ .global-search-ai-badge {
+            display: none;
+        }
+
+        /* Global Actions */
+        .global-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 16px;
+        }
+
+        .global-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            color: rgba(255, 255, 255, 0.72);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        .global-action:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-inverse);
+        }
+
+        .global-action:focus-visible {
+            outline: 2px solid var(--text-inverse);
+            outline-offset: 2px;
+        }
+
+        .global-action svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: var(--error-color);
+            border: 2px solid var(--primary-900);
+            border-radius: 50%;
+        }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .user-menu-trigger:focus-visible {
+            outline: 2px solid var(--text-inverse);
+            outline-offset: 2px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #E34935 0%, #FFAB00 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* ============================================
+           PRODUCT SWITCHER DROPDOWN
+           ============================================ */
+        .product-switcher-dropdown {
+            position: fixed;
+            top: calc(var(--global-nav-height) - 4px);
+            left: 56px;
+            width: 360px;
+            background: var(--bg-default);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            z-index: var(--z-dropdown);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all var(--transition-base);
+        }
+
+        .product-switcher-dropdown[data-open="true"] {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .switcher-section {
+            padding: 8px;
+        }
+
+        .switcher-section-title {
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .switcher-product {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .switcher-product:hover {
+            background: var(--bg-muted);
+        }
+
+        .switcher-product:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .switcher-product[aria-selected="true"] {
+            background: var(--bg-selected);
+        }
+
+        .switcher-product-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            font-size: 20px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .switcher-product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .switcher-product-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .switcher-product-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .switcher-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-subtle);
+            background: var(--bg-subtle);
+            border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        }
+
+        .switcher-footer-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-link);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .switcher-footer-link:hover {
+            text-decoration: underline;
+        }
+
+        .switcher-footer-link:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        /* ============================================
+           SIDEBAR
+           ============================================ */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-subtle);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            transition: width var(--transition-base);
+            overflow: hidden;
+        }
+
+        .sidebar[data-collapsed="true"] {
+            width: var(--sidebar-collapsed);
+        }
+
+        .workspace-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .workspace-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--instrument-color);
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .workspace-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .workspace-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .workspace-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .workspace-menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .workspace-menu-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .workspace-menu-btn:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .sidebar-search {
+            padding: 12px 16px;
+        }
+
+        .sidebar-search-wrapper {
+            position: relative;
+        }
+
+        .sidebar-search-input {
+            width: 100%;
+            height: 32px;
+            padding: 0 12px 0 32px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .sidebar-search-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: var(--focus-ring);
+        }
+
+        .sidebar-search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            pointer-events: none;
+        }
+
+        /* Navigation Section */
+        .nav-section {
+            padding: 8px 0;
+        }
+
+        .nav-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 16px;
+            margin-bottom: 2px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-section-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .nav-section:hover .nav-section-action,
+        .nav-section-action:focus {
+            opacity: 1;
+        }
+
+        .nav-section-action:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-section-action:focus-visible {
+            outline: 2px solid var(--border-focus);
+            opacity: 1;
+        }
+
+        /* Navigation List */
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all var(--transition-fast);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .nav-item[aria-current="page"] {
+            background: var(--bg-selected);
+            color: var(--primary-700);
+            border-left-color: var(--primary-600);
+        }
+
+        .nav-item-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .nav-item-label {
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-item-badge {
+            padding: 2px 8px;
+            background: var(--bg-hover);
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .nav-item[aria-current="page"] .nav-item-badge {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+
+        /* Work Area */
+        .work-area {
+            margin: 2px 8px;
+        }
+
+        .work-area-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .work-area-header:hover {
+            background: var(--bg-hover);
+        }
+
+        .work-area-header:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .work-area-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            color: var(--text-tertiary);
+            transition: transform var(--transition-fast);
+            flex-shrink: 0;
+        }
+
+        .work-area-header[aria-expanded="true"] .work-area-toggle {
+            transform: rotate(90deg);
+        }
+
+        .work-area-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .work-area-name {
+            flex: 1;
+            font-weight: 500;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .work-area-count {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .work-area-menu {
+            opacity: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .work-area-header:hover .work-area-menu,
+        .work-area-menu:focus {
+            opacity: 1;
+        }
+
+        .work-area-menu:hover {
+            background: var(--bg-active);
+        }
+
+        .work-area-menu:focus-visible {
+            outline: 2px solid var(--border-focus);
+            opacity: 1;
+        }
+
+        /* Perspectives */
+        .perspectives {
+            display: none;
+            margin-left: 20px;
+            padding-left: 12px;
+            border-left: 1px solid var(--border-subtle);
+        }
+
+        .perspectives[data-expanded="true"] {
+            display: block;
+        }
+
+        .perspective-list {
+            list-style: none;
+        }
+
+        .perspective-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .perspective-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .perspective-item:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .perspective-item[aria-current="page"] {
+            background: var(--bg-selected);
+            color: var(--primary-700);
+        }
+
+        .perspective-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .perspective-name {
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .perspective-count {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .sidebar-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: left;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .sidebar-toggle:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .sidebar-toggle svg {
+            flex-shrink: 0;
+            transition: transform var(--transition-base);
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-toggle svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-toggle span,
+        .sidebar[data-collapsed="true"] .workspace-info,
+        .sidebar[data-collapsed="true"] .workspace-menu-btn,
+        .sidebar[data-collapsed="true"] .sidebar-search,
+        .sidebar[data-collapsed="true"] .nav-section-title,
+        .sidebar[data-collapsed="true"] .nav-section-action,
+        .sidebar[data-collapsed="true"] .nav-item-label,
+        .sidebar[data-collapsed="true"] .nav-item-badge,
+        .sidebar[data-collapsed="true"] .work-area-name,
+        .sidebar[data-collapsed="true"] .work-area-count,
+        .sidebar[data-collapsed="true"] .work-area-menu,
+        .sidebar[data-collapsed="true"] .perspectives {
+            display: none;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg-default);
+        }
+
+        .main-content:focus {
+            outline: none;
+        }
+
+        /* Context Bar */
+        .context-bar {
+            display: flex;
+            align-items: center;
+            min-height: 48px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--bg-default);
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-list {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--text-link);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item a:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-tertiary);
+            font-size: 12px;
+        }
+
+        .breadcrumb-item[aria-current="page"] span {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .context-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--bg-subtle);
+            border-color: var(--border-strong);
+        }
+
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            border-color: var(--primary-600);
+            color: var(--text-inverse);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            border-color: var(--primary-700);
+        }
+
+        .btn-secondary {
+            background: var(--bg-default);
+            border-color: var(--border-default);
+            color: var(--text-primary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .stat-card {
+            background: var(--bg-default);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            transition: all var(--transition-fast);
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-default);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+        }
+
+        .stat-card-icon.success {
+            background: var(--success-bg);
+            color: var(--success-color);
+        }
+
+        .stat-card-icon.warning {
+            background: var(--warning-bg);
+            color: var(--warning-color);
+        }
+
+        .stat-card-icon.error {
+            background: var(--error-bg);
+            color: var(--error-color);
+        }
+
+        .stat-card-icon.ai {
+            background: var(--ai-bg);
+            color: var(--ai-primary);
+        }
+
+        .stat-card-icon.info {
+            background: var(--info-bg);
+            color: var(--info-color);
+        }
+
+        .stat-card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stat-card-value {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--error-color);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--bg-default);
+            flex-wrap: wrap;
+        }
+
+        .view-switcher {
+            display: flex;
+            background: var(--bg-muted);
+            border-radius: var(--radius-md);
+            padding: 2px;
+        }
+
+        .view-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .view-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .view-btn:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .view-btn[aria-selected="true"] {
+            background: var(--bg-default);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-xs);
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-default);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .filter-btn:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+
+        .filter-btn[aria-pressed="true"],
+        .filter-btn.active {
+            background: var(--primary-50);
+            border-color: var(--primary-500);
+            color: var(--primary-700);
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .active-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-muted);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .active-filter-remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-hover);
+            border: none;
+            border-radius: 50%;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .active-filter-remove:hover {
+            background: var(--gray-400);
+            color: var(--text-primary);
+        }
+
+        .active-filter-remove:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 1px;
+        }
+
+        .toolbar-spacer {
+            flex: 1;
+        }
+
+        .ai-assistant-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--ai-bg);
+            border: 1px solid rgba(94, 77, 178, 0.2);
+            border-radius: var(--radius-md);
+            color: var(--ai-primary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .ai-assistant-btn:hover {
+            background: linear-gradient(135deg, rgba(94, 77, 178, 0.12) 0%, rgba(0, 120, 212, 0.12) 100%);
+            border-color: rgba(94, 77, 178, 0.3);
+        }
+
+        .ai-assistant-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--bg-default), 0 0 0 4px var(--ai-primary);
+        }
+
+        /* Data View */
+        .data-view {
+            flex: 1;
+            overflow: auto;
+            padding: 0 24px 24px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 16px;
+        }
+
+        .data-table th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-subtle);
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-default);
+            z-index: 5;
+            white-space: nowrap;
+        }
+
+        .data-table th:first-child {
+            border-radius: var(--radius-lg) 0 0 0;
+        }
+
+        .data-table th:last-child {
+            border-radius: 0 var(--radius-lg) 0 0;
+        }
+
+        .sortable-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            text-transform: inherit;
+            letter-spacing: inherit;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .sortable-header:hover {
+            color: var(--text-primary);
+        }
+
+        .sortable-header:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr {
+            transition: background var(--transition-fast);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--bg-subtle);
+        }
+
+        .data-table tbody tr.selected,
+        .data-table tbody tr[aria-selected="true"] {
+            background: var(--bg-selected);
+        }
+
+        /* Table Cell Components */
+        .cell-checkbox {
+            width: 40px;
+        }
+
+        .cell-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary-600);
+        }
+
+        .cell-checkbox input[type="checkbox"]:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .cell-product {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-image {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-muted);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--text-link);
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-name:hover {
+            text-decoration: underline;
+        }
+
+        .product-name:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .product-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cell-sku {
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-muted);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+
+        .cell-enrichment {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--bg-hover);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-500);
+            border-radius: 3px;
+            transition: width var(--transition-slow);
+        }
+
+        .progress-fill.complete {
+            background: var(--success-color);
+        }
+
+        .progress-fill.warning {
+            background: var(--warning-color);
+        }
+
+        .progress-fill.error {
+            background: var(--error-color);
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            min-width: 32px;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--ai-bg);
+            border: 1px solid rgba(94, 77, 178, 0.2);
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--ai-primary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-badge.complete {
+            background: var(--success-bg);
+            color: var(--success-color);
+        }
+
+        .status-badge.pending {
+            background: var(--warning-bg);
+            color: var(--warning-color);
+        }
+
+        .status-badge.error {
+            background: var(--error-bg);
+            color: var(--error-color);
+        }
+
+        .status-badge.draft {
+            background: var(--bg-muted);
+            color: var(--text-secondary);
+        }
+
+        .cell-channels {
+            display: flex;
+            gap: 4px;
+        }
+
+        .channel-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .channel-icon.amazon { background: #FF9900; }
+        .channel-icon.shopify { background: #96bf48; }
+        .channel-icon.ebay { background: #e53238; }
+        .channel-icon.walmart { background: #0071dc; }
+        .channel-icon.google { background: #4285f4; }
+
+        .cell-date {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+        }
+
+        .cell-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .data-table tbody tr:hover .cell-actions,
+        .data-table tbody tr:focus-within .cell-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .action-btn:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            margin-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .pagination-btn:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-pages {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .pagination-page:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .pagination-page:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+
+        .pagination-page.active,
+        .pagination-page[aria-current="page"] {
+            background: var(--primary-600);
+            color: var(--text-inverse);
+        }
+
+        .pagination-ellipsis {
+            padding: 0 8px;
+            color: var(--text-tertiary);
+        }
+
+        /* ============================================
+           AI PANEL
+           ============================================ */
+        .ai-panel {
+            width: var(--panel-width);
+            background: var(--bg-default);
+            border-left: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition-base);
+        }
+
+        .ai-panel[data-open="false"] {
+            width: 0;
+            border-left: none;
+            overflow: hidden;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .ai-panel-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--ai-gradient);
+            border-radius: var(--radius-lg);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .ai-panel-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ai-panel-title h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .ai-panel-title p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .ai-panel-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .ai-panel-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .ai-panel-close:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .ai-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .ai-section {
+            margin-bottom: 24px;
+        }
+
+        .ai-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .ai-suggestion-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .ai-suggestion-card:hover {
+            border-color: var(--primary-500);
+            background: var(--bg-selected);
+        }
+
+        .ai-suggestion-card:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring-inset);
+        }
+
+        .ai-suggestion-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0 0 6px;
+        }
+
+        .ai-suggestion-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .ai-suggestion-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .ai-confidence {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--success-color);
+        }
+
+        .ai-item-count {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        /* AI Chat Input */
+        .ai-chat-input {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            background: var(--bg-subtle);
+        }
+
+        .ai-input-container {
+            position: relative;
+        }
+
+        .ai-input-field {
+            width: 100%;
+            padding: 12px 48px 12px 16px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            resize: none;
+        }
+
+        .ai-input-field:focus {
+            border-color: var(--border-focus);
+            box-shadow: var(--focus-ring);
+        }
+
+        .ai-input-field::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .ai-send-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--ai-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
+        }
+
+        .ai-send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .ai-send-btn:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .ai-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .ai-quick-action {
+            padding: 6px 12px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .ai-quick-action:hover {
+            border-color: var(--primary-500);
+            color: var(--primary-600);
+        }
+
+        .ai-quick-action:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+
+        /* AI FAB */
+        .ai-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: var(--ai-gradient);
+            border: none;
+            border-radius: 28px;
+            color: white;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base);
+            z-index: 50;
+        }
+
+        .ai-fab:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .ai-fab:focus-visible {
+            outline: 2px solid var(--text-inverse);
+            outline-offset: 2px;
+        }
+
+        .ai-panel[data-open="false"] ~ .ai-fab {
+            display: flex;
+        }
+
+        /* ============================================
+           SEARCH MODAL
+           ============================================ */
+        .search-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 30, 66, 0.54);
+            z-index: var(--z-modal-backdrop);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 10vh;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .search-overlay[data-open="true"] {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-modal {
+            width: 680px;
+            max-width: calc(100vw - 48px);
+            background: var(--bg-default);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            transform: translateY(-10px);
+            transition: transform var(--transition-base);
+        }
+
+        .search-overlay[data-open="true"] .search-modal {
+            transform: translateY(0);
+        }
+
+        .search-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .search-modal-icon {
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .search-modal-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--text-primary);
+            outline: none;
+            min-width: 0;
+        }
+
+        .search-modal-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-ai-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--ai-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .search-ai-toggle:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .search-modal-body {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .search-section {
+            padding: 8px 0;
+        }
+
+        .search-section-title {
+            padding: 8px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-result {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .search-result:hover,
+        .search-result:focus {
+            background: var(--bg-muted);
+            outline: none;
+        }
+
+        .search-result-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--bg-muted);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .search-result-icon.ai {
+            background: var(--ai-bg);
+            color: var(--ai-primary);
+        }
+
+        .search-result-icon.success {
+            background: var(--success-bg);
+            color: var(--success-color);
+        }
+
+        .search-result-icon.primary {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .search-result-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-result-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .search-result-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .search-result-action {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .search-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-subtle);
+            background: var(--bg-subtle);
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .search-shortcuts {
+            display: flex;
+            gap: 16px;
+        }
+
+        .search-shortcut {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .search-shortcut kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            background: var(--bg-default);
+            border: 1px solid var(--border-default);
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: inherit;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1400px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .global-search {
+                width: 280px;
+            }
+            
+            .ai-panel {
+                position: fixed;
+                right: 0;
+                top: var(--global-nav-height);
+                bottom: 0;
+                z-index: 90;
+                box-shadow: var(--shadow-lg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .primary-nav {
+                display: none;
+            }
+
+            .global-search {
+                width: 200px;
+            }
+
+            .context-bar {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 12px 16px;
+            }
+
+            .context-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="app-shell">
+        <!-- Global Navigation -->
+        <header class="global-nav" role="banner">
+            <button 
+                class="app-switcher-trigger" 
+                aria-label="Open product switcher"
+                aria-expanded="false"
+                aria-controls="product-switcher"
+                id="app-switcher-btn"
+            >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                </svg>
+            </button>
+
+            <div class="suite-brand">
+                <div class="suite-logo" aria-hidden="true">O</div>
+                <span class="suite-name">ODS</span>
+            </div>
+
+            <div class="nav-separator" aria-hidden="true"></div>
+
+            <button 
+                class="product-selector" 
+                aria-expanded="false" 
+                aria-controls="product-switcher"
+                aria-label="Current product: Instrument. Click to switch products"
+                id="product-selector-btn"
+            >
+                <span class="product-selector-icon instrument" aria-hidden="true">I</span>
+                <span class="product-selector-name">Instrument</span>
+                <span class="product-selector-chevron" aria-hidden="true">▼</span>
+            </button>
+
+            <nav class="primary-nav" aria-label="Primary navigation">
+                <a href="#" class="primary-nav-item" aria-current="page">Work Areas</a>
+                <a href="#" class="primary-nav-item">Syndication</a>
+                <a href="#" class="primary-nav-item">
+                    Reports
+                    <span class="nav-badge" aria-label="3 new reports">3</span>
+                </a>
+                <a href="#" class="primary-nav-item">Settings</a>
+            </nav>
+
+            <div class="nav-spacer"></div>
+
+            <div class="global-search" role="search">
+                <label for="global-search-input" class="sr-only">Search products, attributes, and channels</label>
+                <input 
+                    type="search" 
+                    id="global-search-input"
+                    class="global-search-input" 
+                    placeholder="Search products, attributes, channels..."
+                    aria-describedby="search-hint"
+                >
+                <svg class="global-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04Z"/>
+                </svg>
+                <span class="global-search-ai-badge" aria-hidden="true">AI</span>
+                <div class="global-search-shortcut" id="search-hint">
+                    <kbd aria-label="Command">⌘</kbd>
+                    <kbd>K</kbd>
+                </div>
+            </div>
+
+            <div class="global-actions">
+                <button class="global-action" aria-label="Create new item">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10 3a.75.75 0 0 1 .75.75v5.5h5.5a.75.75 0 0 1 0 1.5h-5.5v5.5a.75.75 0 0 1-1.5 0v-5.5h-5.5a.75.75 0 0 1 0-1.5h5.5v-5.5A.75.75 0 0 1 10 3Z"/>
+                    </svg>
+                </button>
+                <button class="global-action" aria-label="Notifications, 5 unread">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6ZM10 18a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 10 18Z"/>
+                    </svg>
+                    <span class="notification-dot" aria-hidden="true"></span>
+                </button>
+                <button class="global-action" aria-label="Help and support">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3.25 3.25 0 1 1 4.596 4.596L11.5 11.5v.75a.75.75 0 0 1-1.5 0v-1.25a.75.75 0 0 1 .22-.53l1.31-1.31a1.75 1.75 0 1 0-2.476-2.476.75.75 0 0 1-1.114.106ZM10 15.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+                    </svg>
+                </button>
+                <button class="user-menu-trigger" aria-label="User menu for John Doe" aria-expanded="false" aria-controls="user-menu">
+                    <span class="user-avatar" aria-hidden="true">JD</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Product Switcher Dropdown -->
+        <div 
+            class="product-switcher-dropdown" 
+            id="product-switcher"
+            role="menu"
+            aria-label="Select a product"
+            data-open="false"
+        >
+            <div class="switcher-section">
+                <div class="switcher-section-title" id="products-label">ODS Products</div>
+                <div role="group" aria-labelledby="products-label">
+                    <button 
+                        class="switcher-product" 
+                        role="menuitem"
+                        aria-selected="true"
+                        data-product="instrument"
+                    >
+                        <div class="switcher-product-icon" style="background: var(--instrument-color)" aria-hidden="true">📐</div>
+                        <div class="switcher-product-info">
+                            <h4>Instrument</h4>
+                            <p>Product data management & enrichment</p>
+                        </div>
+                    </button>
+                    <button 
+                        class="switcher-product" 
+                        role="menuitem"
+                        aria-selected="false"
+                        data-product="syndicate"
+                    >
+                        <div class="switcher-product-icon" style="background: var(--syndicate-color)" aria-hidden="true">📤</div>
+                        <div class="switcher-product-info">
+                            <h4>Syndicate</h4>
+                            <p>Multi-channel product distribution</p>
+                        </div>
+                    </button>
+                    <button 
+                        class="switcher-product" 
+                        role="menuitem"
+                        aria-selected="false"
+                        data-product="enrich"
+                    >
+                        <div class="switcher-product-icon" style="background: var(--enrich-color)" aria-hidden="true">✨</div>
+                        <div class="switcher-product-info">
+                            <h4>Enrich</h4>
+                            <p>AI-powered data enhancement</p>
+                        </div>
+                    </button>
+                    <button 
+                        class="switcher-product" 
+                        role="menuitem"
+                        aria-selected="false"
+                        data-product="analytics"
+                    >
+                        <div class="switcher-product-icon" style="background: var(--analytics-color)" aria-hidden="true">📊</div>
+                        <div class="switcher-product-info">
+                            <h4>Analytics</h4>
+                            <p>Data quality & performance insights</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="switcher-footer">
+                <a href="#" class="switcher-footer-link">
+                    View all products
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="app-body">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar" id="sidebar" data-collapsed="false" aria-label="Workspace navigation">
+                <div class="workspace-header">
+                    <div class="workspace-icon" aria-hidden="true">E</div>
+                    <div class="workspace-info">
+                        <div class="workspace-name">Electronics Catalog</div>
+                        <div class="workspace-meta">5,011 products</div>
+                    </div>
+                    <button class="workspace-menu-btn" aria-label="Workspace options">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <path d="M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="sidebar-search">
+                    <div class="sidebar-search-wrapper">
+                        <label for="sidebar-search" class="sr-only">Search in workspace</label>
+                        <input type="search" id="sidebar-search" class="sidebar-search-input" placeholder="Search in workspace...">
+                        <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04Z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <nav class="nav-section" aria-label="Quick access">
+                    <div class="nav-section-header">
+                        <span class="nav-section-title" id="quick-access-label">Quick Access</span>
+                    </div>
+                    <ul class="nav-list" role="list" aria-labelledby="quick-access-label">
+                        <li>
+                            <a href="#" class="nav-item" aria-current="page">
+                                <span class="nav-item-icon" aria-hidden="true">🏠</span>
+                                <span class="nav-item-label">Overview</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <span class="nav-item-icon" aria-hidden="true">⭐</span>
+                                <span class="nav-item-label">Starred</span>
+                                <span class="nav-item-badge" aria-label="12 starred items">12</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <span class="nav-item-icon" aria-hidden="true">🕐</span>
+                                <span class="nav-item-label">Recent</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <span class="nav-item-icon" aria-hidden="true">📥</span>
+                                <span class="nav-item-label">Inbox</span>
+                                <span class="nav-item-badge" aria-label="3 inbox items">3</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <nav class="nav-section" aria-label="Work areas">
+                    <div class="nav-section-header">
+                        <span class="nav-section-title" id="work-areas-label">Work Areas</span>
+                        <button class="nav-section-action" aria-label="Create new work area">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M7 1a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 7 1Z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Work Area: Mobile Phones -->
+                    <div class="work-area">
+                        <button 
+                            class="work-area-header" 
+                            aria-expanded="true" 
+                            aria-controls="perspectives-mobile"
+                            id="work-area-mobile"
+                        >
+                            <span class="work-area-toggle" aria-hidden="true">▶</span>
+                            <span class="work-area-icon" aria-hidden="true">📱</span>
+                            <span class="work-area-name">Mobile Phones</span>
+                            <span class="work-area-count" aria-label="1247 items">1,247</span>
+                            <button class="work-area-menu" aria-label="Mobile Phones options" onclick="event.stopPropagation()">⋯</button>
+                        </button>
+                        <div class="perspectives" id="perspectives-mobile" data-expanded="true" role="group" aria-labelledby="work-area-mobile">
+                            <ul class="perspective-list" role="list">
+                                <li>
+                                    <button class="perspective-item" aria-current="page">
+                                        <span class="perspective-icon" aria-hidden="true">📋</span>
+                                        <span class="perspective-name">All Products</span>
+                                        <span class="perspective-count" aria-label="1247 items">1,247</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">⚠️</span>
+                                        <span class="perspective-name">Needs Enrichment</span>
+                                        <span class="perspective-count" aria-label="89 items">89</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">✅</span>
+                                        <span class="perspective-name">Ready to Syndicate</span>
+                                        <span class="perspective-count" aria-label="1158 items">1,158</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">🔄</span>
+                                        <span class="perspective-name">Recently Modified</span>
+                                        <span class="perspective-count" aria-label="34 items">34</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Work Area: Laptops -->
+                    <div class="work-area">
+                        <button 
+                            class="work-area-header" 
+                            aria-expanded="false" 
+                            aria-controls="perspectives-laptops"
+                            id="work-area-laptops"
+                        >
+                            <span class="work-area-toggle" aria-hidden="true">▶</span>
+                            <span class="work-area-icon" aria-hidden="true">💻</span>
+                            <span class="work-area-name">Laptops</span>
+                            <span class="work-area-count" aria-label="856 items">856</span>
+                            <button class="work-area-menu" aria-label="Laptops options" onclick="event.stopPropagation()">⋯</button>
+                        </button>
+                        <div class="perspectives" id="perspectives-laptops" data-expanded="false" role="group" aria-labelledby="work-area-laptops">
+                            <ul class="perspective-list" role="list">
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">📋</span>
+                                        <span class="perspective-name">All Products</span>
+                                        <span class="perspective-count">856</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">⚠️</span>
+                                        <span class="perspective-name">Needs Enrichment</span>
+                                        <span class="perspective-count">42</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Work Area: Accessories -->
+                    <div class="work-area">
+                        <button 
+                            class="work-area-header" 
+                            aria-expanded="false" 
+                            aria-controls="perspectives-accessories"
+                            id="work-area-accessories"
+                        >
+                            <span class="work-area-toggle" aria-hidden="true">▶</span>
+                            <span class="work-area-icon" aria-hidden="true">🎧</span>
+                            <span class="work-area-name">Accessories</span>
+                            <span class="work-area-count" aria-label="2341 items">2,341</span>
+                            <button class="work-area-menu" aria-label="Accessories options" onclick="event.stopPropagation()">⋯</button>
+                        </button>
+                        <div class="perspectives" id="perspectives-accessories" data-expanded="false" role="group" aria-labelledby="work-area-accessories">
+                            <ul class="perspective-list" role="list">
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">📋</span>
+                                        <span class="perspective-name">All Products</span>
+                                        <span class="perspective-count">2,341</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Work Area: Smart Home -->
+                    <div class="work-area">
+                        <button 
+                            class="work-area-header" 
+                            aria-expanded="false" 
+                            aria-controls="perspectives-smart-home"
+                            id="work-area-smart-home"
+                        >
+                            <span class="work-area-toggle" aria-hidden="true">▶</span>
+                            <span class="work-area-icon" aria-hidden="true">🏠</span>
+                            <span class="work-area-name">Smart Home</span>
+                            <span class="work-area-count" aria-label="567 items">567</span>
+                            <button class="work-area-menu" aria-label="Smart Home options" onclick="event.stopPropagation()">⋯</button>
+                        </button>
+                        <div class="perspectives" id="perspectives-smart-home" data-expanded="false" role="group" aria-labelledby="work-area-smart-home">
+                            <ul class="perspective-list" role="list">
+                                <li>
+                                    <button class="perspective-item">
+                                        <span class="perspective-icon" aria-hidden="true">📋</span>
+                                        <span class="perspective-name">All Products</span>
+                                        <span class="perspective-count">567</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="sidebar-toggle" aria-label="Collapse sidebar" aria-expanded="true" aria-controls="sidebar">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <path d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06l-3.25-3.25a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z"/>
+                        </svg>
+                        <span>Collapse sidebar</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content" id="main-content" tabindex="-1">
+                <!-- Context Bar -->
+                <div class="context-bar">
+                    <nav class="breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="breadcrumb-list">
+                            <li class="breadcrumb-item">
+                                <a href="#">Electronics Catalog</a>
+                                <span class="breadcrumb-separator" aria-hidden="true">›</span>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="#">Mobile Phones</a>
+                                <span class="breadcrumb-separator" aria-hidden="true">›</span>
+                            </li>
+                            <li class="breadcrumb-item" aria-current="page">
+                                <span>All Products</span>
+                            </li>
+                        </ol>
+                    </nav>
+                    <div class="context-actions">
+                        <button class="btn btn-secondary" type="button">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M7 1a.75.75 0 0 1 .596.297l2.5 3.25a.75.75 0 0 1-.596 1.203H8.25v5.5a.75.75 0 0 1-1.5 0v-5.5H5.5a.75.75 0 0 1-.596-1.203l2.5-3.25A.75.75 0 0 1 7 1Z"/>
+                            </svg>
+                            Export
+                        </button>
+                        <button class="btn btn-secondary" type="button">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M7 .25a.75.75 0 0 1 .75.75v5.69l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06L6.25 6.69V1A.75.75 0 0 1 7 .25Z"/>
+                            </svg>
+                            Import
+                        </button>
+                        <button class="btn btn-primary" type="button">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M7 1a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 7 1Z"/>
+                            </svg>
+                            Add Product
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <section class="stats-grid" aria-label="Dashboard statistics">
+                    <article class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-icon success" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="stat-card-title">Syndicated</h3>
+                        </div>
+                        <div class="stat-card-value">
+                            <span class="stat-value">1,158</span>
+                            <span class="stat-label">products</span>
+                            <span class="stat-change positive" aria-label="Up 12 percent">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                    <path d="M6 2.5a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 8.793V3a.5.5 0 0 1 .5-.5Z" transform="rotate(180 6 6)"/>
+                                </svg>
+                                12%
+                            </span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-icon warning" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1Zm0 10.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM8 4a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5A.75.75 0 0 0 8 4Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="stat-card-title">Pending Review</h3>
+                        </div>
+                        <div class="stat-card-value">
+                            <span class="stat-value">89</span>
+                            <span class="stat-label">products</span>
+                            <span class="stat-change negative" aria-label="Down 5 percent">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                    <path d="M6 2.5a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 8.793V3a.5.5 0 0 1 .5-.5Z"/>
+                                </svg>
+                                5%
+                            </span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-icon ai" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 .5a.75.75 0 0 1 .75.75v.69l.97-.97a.75.75 0 0 1 1.06 1.06l-.97.97h.69a.75.75 0 0 1 0 1.5h-.69l.97.97a.75.75 0 1 1-1.06 1.06L8.75 5.56V8.5a.75.75 0 0 1-1.5 0V5.56l-.97.97a.75.75 0 0 1-1.06-1.06l.97-.97H5.5a.75.75 0 0 1 0-1.5h.69l-.97-.97a.75.75 0 0 1 1.06-1.06l.97.97v-.69A.75.75 0 0 1 8 .5ZM3 10.5a.75.75 0 0 0 0 1.5h10a.75.75 0 0 0 0-1.5H3Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="stat-card-title">AI Enriched</h3>
+                        </div>
+                        <div class="stat-card-value">
+                            <span class="stat-value">847</span>
+                            <span class="stat-label">this week</span>
+                            <span class="stat-change positive" aria-label="Up 34 percent">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                    <path d="M6 2.5a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 8.793V3a.5.5 0 0 1 .5-.5Z" transform="rotate(180 6 6)"/>
+                                </svg>
+                                34%
+                            </span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-icon info" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1ZM5.25 7.25a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="stat-card-title">Data Quality</h3>
+                        </div>
+                        <div class="stat-card-value">
+                            <span class="stat-value">94%</span>
+                            <span class="stat-label">score</span>
+                            <span class="stat-change positive" aria-label="Up 3 percent">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                    <path d="M6 2.5a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 8.793V3a.5.5 0 0 1 .5-.5Z" transform="rotate(180 6 6)"/>
+                                </svg>
+                                3%
+                            </span>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- Toolbar -->
+                <div class="toolbar" role="toolbar" aria-label="View and filter options">
+                    <div class="view-switcher" role="tablist" aria-label="View options">
+                        <button class="view-btn" role="tab" aria-selected="true" aria-controls="table-view" id="table-tab">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M1 2.75A.75.75 0 0 1 1.75 2h10.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 4.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7Zm.75 3.5a.75.75 0 0 0 0 1.5h10.5a.75.75 0 0 0 0-1.5H1.75Z"/>
+                            </svg>
+                            Table
+                        </button>
+                        <button class="view-btn" role="tab" aria-selected="false" aria-controls="cards-view" id="cards-tab">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h2A1.5 1.5 0 0 1 6 2.5v2A1.5 1.5 0 0 1 4.5 6h-2A1.5 1.5 0 0 1 1 4.5v-2Zm7 0A1.5 1.5 0 0 1 9.5 1h2A1.5 1.5 0 0 1 13 2.5v2A1.5 1.5 0 0 1 11.5 6h-2A1.5 1.5 0 0 1 8 4.5v-2ZM2.5 8A1.5 1.5 0 0 0 1 9.5v2A1.5 1.5 0 0 0 2.5 13h2A1.5 1.5 0 0 0 6 11.5v-2A1.5 1.5 0 0 0 4.5 8h-2Zm7 0A1.5 1.5 0 0 0 8 9.5v2A1.5 1.5 0 0 0 9.5 13h2a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 11.5 8h-2Z"/>
+                            </svg>
+                            Cards
+                        </button>
+                        <button class="view-btn" role="tab" aria-selected="false" aria-controls="kanban-view" id="kanban-tab">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M1 1.75A.75.75 0 0 1 1.75 1h2.5a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1-.75-.75V1.75Zm5 0a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1-.75-.75V1.75Zm5.75-.75a.75.75 0 0 0-.75.75v10.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75V1.75a.75.75 0 0 0-.75-.75h-2.5Z"/>
+                            </svg>
+                            Kanban
+                        </button>
+                    </div>
+
+                    <div class="toolbar-divider" aria-hidden="true"></div>
+
+                    <div class="filter-group">
+                        <button class="filter-btn active" type="button" aria-pressed="true" aria-haspopup="true" aria-expanded="false">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M1 2.75A.75.75 0 0 1 1.75 2h10.5a.75.75 0 0 1 .65 1.126L8.75 9.438v3.062a.75.75 0 0 1-1.086.67l-2-1A.75.75 0 0 1 5.25 11.5V9.438L1.1 3.126A.75.75 0 0 1 1.75 2Z"/>
+                            </svg>
+                            Filter
+                        </button>
+                        <button class="filter-btn" type="button" aria-pressed="false" aria-haspopup="true">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M7 1a.75.75 0 0 1 .596.297l2.5 3.25a.75.75 0 0 1-1.192.91L7 2.974 5.096 5.457a.75.75 0 0 1-1.192-.91l2.5-3.25A.75.75 0 0 1 7 1Zm-.596 12.703a.75.75 0 0 0 1.192 0l2.5-3.25a.75.75 0 1 0-1.192-.91L7 12.026l-1.904-2.483a.75.75 0 0 0-1.192.91l2.5 3.25Z"/>
+                            </svg>
+                            Sort
+                        </button>
+                        <button class="filter-btn" type="button" aria-pressed="false" aria-haspopup="true">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h9A1.5 1.5 0 0 1 13 2.5v1.879a1.5 1.5 0 0 1-.44 1.06L9 9V11.5a1.5 1.5 0 0 1-1.5 1.5h-1A1.5 1.5 0 0 1 5 11.5V9L1.44 5.44A1.5 1.5 0 0 1 1 4.38V2.5Z"/>
+                            </svg>
+                            Group
+                        </button>
+                    </div>
+
+                    <div class="active-filters" role="group" aria-label="Active filters">
+                        <span class="active-filter">
+                            Status: Needs Enrichment
+                            <button class="active-filter-remove" type="button" aria-label="Remove filter: Status Needs Enrichment">
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                                    <path d="M1.41 1.41a.5.5 0 0 1 .71 0L5 4.29l2.88-2.88a.5.5 0 0 1 .71.71L5.71 5l2.88 2.88a.5.5 0 0 1-.71.71L5 5.71 2.12 8.59a.5.5 0 0 1-.71-.71L4.29 5 1.41 2.12a.5.5 0 0 1 0-.71Z"/>
+                                </svg>
+                            </button>
+                        </span>
+                    </div>
+
+                    <div class="toolbar-spacer"></div>
+
+                    <button class="ai-assistant-btn" type="button" aria-expanded="false" aria-controls="ai-panel" id="ai-toggle-btn">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                            <path d="M7 .5a.75.75 0 0 1 .75.75v.69l.97-.97a.75.75 0 0 1 1.06 1.06l-.97.97h.69a.75.75 0 0 1 0 1.5h-.69l.97.97a.75.75 0 1 1-1.06 1.06L7.75 5.56V8.5a.75.75 0 0 1-1.5 0V5.56l-.97.97a.75.75 0 0 1-1.06-1.06l.97-.97H4.5a.75.75 0 0 1 0-1.5h.69l-.97-.97a.75.75 0 0 1 1.06-1.06l.97.97v-.69A.75.75 0 0 1 7 .5ZM3 10.5a.75.75 0 0 0 0 1.5h8a.75.75 0 0 0 0-1.5H3Z"/>
+                        </svg>
+                        AI Assistant
+                    </button>
+                </div>
+
+                <!-- Data View -->
+                <div class="data-view" id="table-view" role="tabpanel" aria-labelledby="table-tab">
+                    <div class="table-container">
+                        <table class="data-table" role="grid" aria-label="Products list">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="cell-checkbox">
+                                        <input type="checkbox" id="select-all" aria-label="Select all products">
+                                    </th>
+                                    <th scope="col">
+                                        <button class="sortable-header" aria-sort="none">
+                                            Product
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                                <path d="M6 1a.5.5 0 0 1 .39.188l2 2.5a.5.5 0 1 1-.78.624L6 2.313l-1.61 2a.5.5 0 1 1-.78-.625l2-2.5A.5.5 0 0 1 6 1Zm-2.39 7.688a.5.5 0 0 0 .78.624L6 7.312l1.61 2a.5.5 0 0 0 .78-.624l-2-2.5a.5.5 0 0 0-.78 0l-2 2.5Z"/>
+                                            </svg>
+                                        </button>
+                                    </th>
+                                    <th scope="col">SKU</th>
+                                    <th scope="col">Enrichment</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Channels</th>
+                                    <th scope="col">Updated</th>
+                                    <th scope="col" class="cell-actions-header">
+                                        <span class="sr-only">Actions</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-checkbox">
+                                        <input type="checkbox" aria-label="Select iPhone 15 Pro Max 256GB">
+                                    </td>
+                                    <td>
+                                        <div class="cell-product">
+                                            <div class="product-image" aria-hidden="true">📱</div>
+                                            <div class="product-info">
+                                                <a href="#" class="product-name">iPhone 15 Pro Max 256GB</a>
+                                                <span class="product-meta">Apple · Smartphones</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code class="cell-sku">APL-IP15PM-256</code></td>
+                                    <td>
+                                        <div class="cell-enrichment">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="Enrichment progress">
+                                                <div class="progress-fill complete" style="width: 100%"></div>
+                                            </div>
+                                            <span class="progress-text">100%</span>
+                                            <span class="ai-badge">
+                                                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                                                    <path d="M5 0a.5.5 0 0 1 .5.5v.5l.65-.65a.5.5 0 0 1 .7.7L6.2 1.7h.3a.5.5 0 0 1 0 1h-.3l.65.65a.5.5 0 0 1-.7.7L5.5 3.4V4a.5.5 0 0 1-1 0v-.6l-.65.65a.5.5 0 0 1-.7-.7l.65-.65h-.3a.5.5 0 0 1 0-1h.3l-.65-.65a.5.5 0 1 1 .7-.7l.65.65V.5A.5.5 0 0 1 5 0Z"/>
+                                                </svg>
+                                                AI
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge complete">
+                                            <span class="status-dot" aria-hidden="true"></span>
+                                            Complete
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="cell-channels">
+                                            <span class="channel-icon amazon" title="Amazon" aria-label="Amazon">A</span>
+                                            <span class="channel-icon shopify" title="Shopify" aria-label="Shopify">S</span>
+                                            <span class="channel-icon ebay" title="eBay" aria-label="eBay">E</span>
+                                        </div>
+                                    </td>
+                                    <td><time class="cell-date" datetime="2024-02-09T10:00:00">2 hours ago</time></td>
+                                    <td>
+                                        <div class="cell-actions">
+                                            <button class="action-btn" type="button" aria-label="Edit iPhone 15 Pro Max 256GB">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M10.586.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Zm-1.207 1.207L2 9.172V12h2.828l7.379-7.379-2.828-2.828Z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn" type="button" aria-label="More options for iPhone 15 Pro Max 256GB" aria-haspopup="menu">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M7 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="cell-checkbox">
+                                        <input type="checkbox" aria-label="Select Samsung Galaxy S24 Ultra">
+                                    </td>
+                                    <td>
+                                        <div class="cell-product">
+                                            <div class="product-image" aria-hidden="true">📱</div>
+                                            <div class="product-info">
+                                                <a href="#" class="product-name">Samsung Galaxy S24 Ultra</a>
+                                                <span class="product-meta">Samsung · Smartphones</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code class="cell-sku">SAM-GS24U-512</code></td>
+                                    <td>
+                                        <div class="cell-enrichment">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Enrichment progress">
+                                                <div class="progress-fill" style="width: 85%"></div>
+                                            </div>
+                                            <span class="progress-text">85%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge pending">
+                                            <span class="status-dot" aria-hidden="true"></span>
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="cell-channels">
+                                            <span class="channel-icon amazon" title="Amazon" aria-label="Amazon">A</span>
+                                            <span class="channel-icon walmart" title="Walmart" aria-label="Walmart">W</span>
+                                        </div>
+                                    </td>
+                                    <td><time class="cell-date" datetime="2024-02-09T07:00:00">5 hours ago</time></td>
+                                    <td>
+                                        <div class="cell-actions">
+                                            <button class="action-btn" type="button" aria-label="Edit Samsung Galaxy S24 Ultra">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M10.586.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Zm-1.207 1.207L2 9.172V12h2.828l7.379-7.379-2.828-2.828Z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn" type="button" aria-label="More options" aria-haspopup="menu">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M7 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="cell-checkbox">
+                                        <input type="checkbox" aria-label="Select Google Pixel 8 Pro">
+                                    </td>
+                                    <td>
+                                        <div class="cell-product">
+                                            <div class="product-image" aria-hidden="true">📱</div>
+                                            <div class="product-info">
+                                                <a href="#" class="product-name">Google Pixel 8 Pro</a>
+                                                <span class="product-meta">Google · Smartphones</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code class="cell-sku">GOO-PX8P-256</code></td>
+                                    <td>
+                                        <div class="cell-enrichment">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" aria-label="Enrichment progress">
+                                                <div class="progress-fill warning" style="width: 45%"></div>
+                                            </div>
+                                            <span class="progress-text">45%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge error">
+                                            <span class="status-dot" aria-hidden="true"></span>
+                                            Missing Data
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="cell-channels">
+                                            <span class="channel-icon shopify" title="Shopify" aria-label="Shopify">S</span>
+                                        </div>
+                                    </td>
+                                    <td><time class="cell-date" datetime="2024-02-08T12:00:00">1 day ago</time></td>
+                                    <td>
+                                        <div class="cell-actions">
+                                            <button class="action-btn" type="button" aria-label="Edit Google Pixel 8 Pro">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M10.586.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Zm-1.207 1.207L2 9.172V12h2.828l7.379-7.379-2.828-2.828Z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn" type="button" aria-label="More options" aria-haspopup="menu">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M7 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="selected" aria-selected="true">
+                                    <td class="cell-checkbox">
+                                        <input type="checkbox" checked aria-label="Select OnePlus 12 5G">
+                                    </td>
+                                    <td>
+                                        <div class="cell-product">
+                                            <div class="product-image" aria-hidden="true">📱</div>
+                                            <div class="product-info">
+                                                <a href="#" class="product-name">OnePlus 12 5G</a>
+                                                <span class="product-meta">OnePlus · Smartphones</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code class="cell-sku">ONE-12-5G-256</code></td>
+                                    <td>
+                                        <div class="cell-enrichment">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" aria-label="Enrichment progress">
+                                                <div class="progress-fill warning" style="width: 60%"></div>
+                                            </div>
+                                            <span class="progress-text">60%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge pending">
+                                            <span class="status-dot" aria-hidden="true"></span>
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="cell-channels">
+                                            <span class="channel-icon amazon" title="Amazon" aria-label="Amazon">A</span>
+                                        </div>
+                                    </td>
+                                    <td><time class="cell-date" datetime="2024-02-07T12:00:00">2 days ago</time></td>
+                                    <td>
+                                        <div class="cell-actions">
+                                            <button class="action-btn" type="button" aria-label="Edit OnePlus 12 5G">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M10.586.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Zm-1.207 1.207L2 9.172V12h2.828l7.379-7.379-2.828-2.828Z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn" type="button" aria-label="More options" aria-haspopup="menu">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M7 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="cell-checkbox">
+                                        <input type="checkbox" aria-label="Select Xiaomi 14 Ultra">
+                                    </td>
+                                    <td>
+                                        <div class="cell-product">
+                                            <div class="product-image" aria-hidden="true">📱</div>
+                                            <div class="product-info">
+                                                <a href="#" class="product-name">Xiaomi 14 Ultra</a>
+                                                <span class="product-meta">Xiaomi · Smartphones</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code class="cell-sku">XIA-14U-512</code></td>
+                                    <td>
+                                        <div class="cell-enrichment">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" aria-label="Enrichment progress">
+                                                <div class="progress-fill error" style="width: 20%"></div>
+                                            </div>
+                                            <span class="progress-text">20%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge draft">
+                                            <span class="status-dot" aria-hidden="true"></span>
+                                            Draft
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="cell-channels">
+                                            <!-- No channels -->
+                                        </div>
+                                    </td>
+                                    <td><time class="cell-date" datetime="2024-02-06T12:00:00">3 days ago</time></td>
+                                    <td>
+                                        <div class="cell-actions">
+                                            <button class="action-btn" type="button" aria-label="Edit Xiaomi 14 Ultra">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M10.586.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Zm-1.207 1.207L2 9.172V12h2.828l7.379-7.379-2.828-2.828Z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn" type="button" aria-label="More options" aria-haspopup="menu">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M7 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="cell-checkbox">
+                                        <input type="checkbox" aria-label="Select Sony Xperia 1 V">
+                                    </td>
+                                    <td>
+                                        <div class="cell-product">
+                                            <div class="product-image" aria-hidden="true">📱</div>
+                                            <div class="product-info">
+                                                <a href="#" class="product-name">Sony Xperia 1 V</a>
+                                                <span class="product-meta">Sony · Smartphones</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code class="cell-sku">SNY-XP1V-256</code></td>
+                                    <td>
+                                        <div class="cell-enrichment">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="Enrichment progress">
+                                                <div class="progress-fill complete" style="width: 92%"></div>
+                                            </div>
+                                            <span class="progress-text">92%</span>
+                                            <span class="ai-badge">
+                                                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                                                    <path d="M5 0a.5.5 0 0 1 .5.5v.5l.65-.65a.5.5 0 0 1 .7.7L6.2 1.7h.3a.5.5 0 0 1 0 1h-.3l.65.65a.5.5 0 0 1-.7.7L5.5 3.4V4a.5.5 0 0 1-1 0v-.6l-.65.65a.5.5 0 0 1-.7-.7l.65-.65h-.3a.5.5 0 0 1 0-1h.3l-.65-.65a.5.5 0 1 1 .7-.7l.65.65V.5A.5.5 0 0 1 5 0Z"/>
+                                                </svg>
+                                                AI
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge complete">
+                                            <span class="status-dot" aria-hidden="true"></span>
+                                            Complete
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="cell-channels">
+                                            <span class="channel-icon amazon" title="Amazon" aria-label="Amazon">A</span>
+                                            <span class="channel-icon shopify" title="Shopify" aria-label="Shopify">S</span>
+                                            <span class="channel-icon ebay" title="eBay" aria-label="eBay">E</span>
+                                            <span class="channel-icon walmart" title="Walmart" aria-label="Walmart">W</span>
+                                        </div>
+                                    </td>
+                                    <td><time class="cell-date" datetime="2024-02-05T12:00:00">4 days ago</time></td>
+                                    <td>
+                                        <div class="cell-actions">
+                                            <button class="action-btn" type="button" aria-label="Edit Sony Xperia 1 V">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M10.586.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Zm-1.207 1.207L2 9.172V12h2.828l7.379-7.379-2.828-2.828Z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn" type="button" aria-label="More options" aria-haspopup="menu">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                                    <path d="M7 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Pagination -->
+                    <nav class="pagination" aria-label="Table pagination">
+                        <div class="pagination-info">
+                            Showing <strong>1-6</strong> of <strong>1,247</strong> products
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" type="button" disabled aria-label="Previous page">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                    <path d="M9.78 3.22a.75.75 0 0 1 0 1.06L6.56 7.5l3.22 3.22a.75.75 0 1 1-1.06 1.06l-3.75-3.75a.75.75 0 0 1 0-1.06l3.75-3.75a.75.75 0 0 1 1.06 0Z"/>
+                                </svg>
+                            </button>
+                            <span class="pagination-pages">
+                                <button class="pagination-page active" aria-current="page">1</button>
+                                <button class="pagination-page">2</button>
+                                <button class="pagination-page">3</button>
+                                <span class="pagination-ellipsis">...</span>
+                                <button class="pagination-page">208</button>
+                            </span>
+                            <button class="pagination-btn" type="button" aria-label="Next page">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                    <path d="M4.22 3.22a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 0 1-1.06-1.06L7.44 7.5 4.22 4.28a.75.75 0 0 1 0-1.06Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            </main>
+
+            <!-- AI Assistant Panel -->
+            <aside class="ai-panel" id="ai-panel" data-open="true" aria-label="AI Assistant">
+                <div class="ai-panel-header">
+                    <div class="ai-panel-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                            <path d="M9 0a.75.75 0 0 1 .75.75v1.19l1.47-1.47a.75.75 0 0 1 1.06 1.06L10.81 3h.44a.75.75 0 0 1 0 1.5h-.44l1.47 1.47a.75.75 0 1 1-1.06 1.06L9.75 5.56V9a.75.75 0 0 1-1.5 0V5.56L6.78 7.03a.75.75 0 0 1-1.06-1.06L7.19 4.5H6.75a.75.75 0 0 1 0-1.5h.44L5.72 1.53a.75.75 0 0 1 1.06-1.06L8.25 1.94V.75A.75.75 0 0 1 9 0ZM3 12a.75.75 0 0 0 0 1.5h12a.75.75 0 0 0 0-1.5H3Z"/>
+                        </svg>
+                    </div>
+                    <div class="ai-panel-title">
+                        <h2>AI Assistant</h2>
+                        <p id="ai-selection-count">1 product selected</p>
+                    </div>
+                    <button class="ai-panel-close" type="button" aria-label="Close AI assistant panel" id="ai-close-btn">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="ai-panel-content">
+                    <section class="ai-section" aria-labelledby="suggestions-heading">
+                        <h3 class="ai-section-title" id="suggestions-heading">Suggested Actions</h3>
+                        
+                        <article class="ai-suggestion-card" tabindex="0" role="button" aria-describedby="suggestion-1-desc">
+                            <h4>
+                                <span aria-hidden="true">🎯</span>
+                                Complete Missing Attributes
+                            </h4>
+                            <p id="suggestion-1-desc">AI can auto-fill 6 missing attributes for OnePlus 12 5G based on similar products and manufacturer data.</p>
+                            <div class="ai-suggestion-meta">
+                                <span class="ai-confidence" aria-label="94 percent confidence">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                        <path d="M10.28 2.72a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 0 1-1.06 0L1.72 6.78a.75.75 0 0 1 1.06-1.06L5 7.94l4.72-4.72a.75.75 0 0 1 1.06 0Z"/>
+                                    </svg>
+                                    94% confidence
+                                </span>
+                                <span class="ai-item-count">6 attributes</span>
+                            </div>
+                        </article>
+
+                        <article class="ai-suggestion-card" tabindex="0" role="button" aria-describedby="suggestion-2-desc">
+                            <h4>
+                                <span aria-hidden="true">📝</span>
+                                Generate Description
+                            </h4>
+                            <p id="suggestion-2-desc">Create an SEO-optimized product description tailored for Amazon marketplace requirements.</p>
+                            <div class="ai-suggestion-meta">
+                                <span class="ai-confidence" aria-label="91 percent confidence">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                        <path d="M10.28 2.72a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 0 1-1.06 0L1.72 6.78a.75.75 0 0 1 1.06-1.06L5 7.94l4.72-4.72a.75.75 0 0 1 1.06 0Z"/>
+                                    </svg>
+                                    91% confidence
+                                </span>
+                            </div>
+                        </article>
+
+                        <article class="ai-suggestion-card" tabindex="0" role="button" aria-describedby="suggestion-3-desc">
+                            <h4>
+                                <span aria-hidden="true">🏷️</span>
+                                Suggest Categories
+                            </h4>
+                            <p id="suggestion-3-desc">Map to 3 additional sales channels based on product attributes and category matching.</p>
+                            <div class="ai-suggestion-meta">
+                                <span class="ai-confidence" aria-label="87 percent confidence">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                                        <path d="M10.28 2.72a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 0 1-1.06 0L1.72 6.78a.75.75 0 0 1 1.06-1.06L5 7.94l4.72-4.72a.75.75 0 0 1 1.06 0Z"/>
+                                    </svg>
+                                    87% confidence
+                                </span>
+                                <span class="ai-item-count">3 channels</span>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="ai-section" aria-labelledby="bulk-heading">
+                        <h3 class="ai-section-title" id="bulk-heading">Bulk Operations</h3>
+                        
+                        <article class="ai-suggestion-card" tabindex="0" role="button" aria-describedby="bulk-1-desc">
+                            <h4>
+                                <span aria-hidden="true">⚡</span>
+                                Enrich All Pending
+                            </h4>
+                            <p id="bulk-1-desc">Auto-enrich 89 products that are pending review using AI-powered data completion.</p>
+                            <div class="ai-suggestion-meta">
+                                <span class="ai-item-count">89 products</span>
+                            </div>
+                        </article>
+
+                        <article class="ai-suggestion-card" tabindex="0" role="button" aria-describedby="bulk-2-desc">
+                            <h4>
+                                <span aria-hidden="true">🔍</span>
+                                Find Duplicates
+                            </h4>
+                            <p id="bulk-2-desc">Scan for potential duplicate products across all work areas using fuzzy matching.</p>
+                            <div class="ai-suggestion-meta">
+                                <span class="ai-item-count">1,247 products</span>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
+                <div class="ai-chat-input">
+                    <div class="ai-input-container">
+                        <label for="ai-input" class="sr-only">Ask AI for help</label>
+                        <textarea 
+                            id="ai-input"
+                            class="ai-input-field" 
+                            placeholder="Ask AI to help with your data..." 
+                            rows="1"
+                            aria-describedby="ai-input-hint"
+                        ></textarea>
+                        <button class="ai-send-btn" type="button" aria-label="Send message to AI">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                                <path d="M1.87 1.145a.75.75 0 0 1 .906-.273l10.5 4.5a.75.75 0 0 1 0 1.377l-10.5 4.5a.75.75 0 0 1-1.02-.952L3.44 7 1.756 3.703a.75.75 0 0 1 .114-.558Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="ai-input-hint" class="sr-only">Press Enter to send, Shift+Enter for new line</p>
+                    <div class="ai-quick-actions" role="group" aria-label="Quick AI actions">
+                        <button class="ai-quick-action" type="button">Enrich selected</button>
+                        <button class="ai-quick-action" type="button">Generate images</button>
+                        <button class="ai-quick-action" type="button">Translate</button>
+                        <button class="ai-quick-action" type="button">Validate data</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- AI FAB (shown when panel is closed) -->
+        <button class="ai-fab" type="button" aria-label="Open AI assistant" id="ai-fab">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 0a1 1 0 0 1 1 1v1.586l1.707-1.707a1 1 0 0 1 1.414 1.414L14.414 4H16a1 1 0 1 1 0 2h-1.586l1.707 1.707a1 1 0 0 1-1.414 1.414L13 7.414V12a1 1 0 1 1-2 0V7.414L9.293 9.121a1 1 0 0 1-1.414-1.414L9.586 6H8a1 1 0 0 1 0-2h1.586L7.879 2.293a1 1 0 0 1 1.414-1.414L11 2.586V1a1 1 0 0 1 1-1ZM4 16a1 1 0 0 0 0 2h16a1 1 0 1 0 0-2H4Z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-labelledby="search-title" data-open="false">
+        <div class="search-modal">
+            <header class="search-modal-header">
+                <svg class="search-modal-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"/>
+                </svg>
+                <h2 id="search-title" class="sr-only">Search</h2>
+                <input 
+                    type="search" 
+                    id="modal-search-input"
+                    class="search-modal-input" 
+                    placeholder="Search products, attributes, channels..."
+                    aria-describedby="search-instructions"
+                >
+                <button class="search-ai-toggle" type="button" aria-pressed="false">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                        <path d="M6 0a.5.5 0 0 1 .5.5v.79l.65-.65a.5.5 0 0 1 .7.7l-.65.66h.3a.5.5 0 0 1 0 1h-.3l.65.65a.5.5 0 0 1-.7.7L6.5 3.71V5a.5.5 0 0 1-1 0V3.71l-.65.64a.5.5 0 0 1-.7-.7l.65-.65h-.3a.5.5 0 0 1 0-1h.3l-.65-.66a.5.5 0 1 1 .7-.7l.65.65V.5A.5.5 0 0 1 6 0Z"/>
+                    </svg>
+                    AI Search
+                </button>
+            </header>
+            <div class="search-modal-body" role="listbox" aria-label="Search results">
+                <section class="search-section">
+                    <h3 class="search-section-title" id="recent-label">Recent</h3>
+                    <div role="group" aria-labelledby="recent-label">
+                        <div class="search-result" role="option" tabindex="0">
+                            <div class="search-result-icon" aria-hidden="true">📱</div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">iPhone 15 Pro Max 256GB</div>
+                                <div class="search-result-meta">Mobile Phones · APL-IP15PM-256</div>
+                            </div>
+                            <div class="search-result-action" aria-hidden="true">↵</div>
+                        </div>
+                        <div class="search-result" role="option" tabindex="0">
+                            <div class="search-result-icon" aria-hidden="true">📁</div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">Laptops</div>
+                                <div class="search-result-meta">Work Area · 856 products</div>
+                            </div>
+                            <div class="search-result-action" aria-hidden="true">↵</div>
+                        </div>
+                    </div>
+                </section>
+                <section class="search-section">
+                    <h3 class="search-section-title" id="actions-label">Quick Actions</h3>
+                    <div role="group" aria-labelledby="actions-label">
+                        <div class="search-result" role="option" tabindex="0">
+                            <div class="search-result-icon primary" aria-hidden="true">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                                    <path d="M7 1a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 7 1Z"/>
+                                </svg>
+                            </div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">Create new product</div>
+                                <div class="search-result-meta">Add a new product to the catalog</div>
+                            </div>
+                        </div>
+                        <div class="search-result" role="option" tabindex="0">
+                            <div class="search-result-icon ai" aria-hidden="true">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                                    <path d="M7 .5a.75.75 0 0 1 .75.75v.69l.97-.97a.75.75 0 0 1 1.06 1.06l-.97.97h.69a.75.75 0 0 1 0 1.5h-.69l.97.97a.75.75 0 1 1-1.06 1.06L7.75 5.56V8.5a.75.75 0 0 1-1.5 0V5.56l-.97.97a.75.75 0 0 1-1.06-1.06l.97-.97H4.5a.75.75 0 0 1 0-1.5h.69l-.97-.97a.75.75 0 0 1 1.06-1.06l.97.97v-.69A.75.75 0 0 1 7 .5Z"/>
+                                </svg>
+                            </div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">AI-powered enrichment</div>
+                                <div class="search-result-meta">Automatically enhance product data</div>
+                            </div>
+                        </div>
+                        <div class="search-result" role="option" tabindex="0">
+                            <div class="search-result-icon success" aria-hidden="true">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                                    <path d="M7 1a.75.75 0 0 1 .596.297l2.5 3.25a.75.75 0 0 1-.596 1.203H8.25v5.5a.75.75 0 0 1-1.5 0v-5.5H5.5a.75.75 0 0 1-.596-1.203l2.5-3.25A.75.75 0 0 1 7 1Z"/>
+                                </svg>
+                            </div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">Syndicate to channels</div>
+                                <div class="search-result-meta">Publish products to sales channels</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <footer class="search-modal-footer">
+                <div class="search-shortcuts" id="search-instructions">
+                    <span class="search-shortcut"><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+                    <span class="search-shortcut"><kbd>↵</kbd> Select</span>
+                    <span class="search-shortcut"><kbd>Esc</kbd> Close</span>
+                </div>
+                <span>Powered by AI</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Live Region for Announcements -->
+    <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // ACCESSIBILITY & INTERACTION HANDLERS
+        // ============================================
+
+        // Product Switcher
+        const productSwitcherBtns = document.querySelectorAll('#app-switcher-btn, #product-selector-btn');
+        const productSwitcher = document.getElementById('product-switcher');
+
+        function toggleProductSwitcher(open) {
+            const isOpen = open ?? productSwitcher.dataset.open !== 'true';
+            productSwitcher.dataset.open = isOpen;
+            productSwitcherBtns.forEach(btn => btn.setAttribute('aria-expanded', isOpen));
+            
+            if (isOpen) {
+                const firstProduct = productSwitcher.querySelector('.switcher-product');
+                firstProduct?.focus();
+            }
+        }
+
+        productSwitcherBtns.forEach(btn => {
+            btn.addEventListener('click', () => toggleProductSwitcher());
+        });
+
+        // Product selection
+        const productButtons = productSwitcher.querySelectorAll('.switcher-product');
+        productButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const product = btn.dataset.product;
+                const productData = {
+                    instrument: { name: 'Instrument', class: 'instrument', letter: 'I' },
+                    syndicate: { name: 'Syndicate', class: 'syndicate', letter: 'S' },
+                    enrich: { name: 'Enrich', class: 'enrich', letter: 'E' },
+                    analytics: { name: 'Analytics', class: 'analytics', letter: 'A' }
+                };
+                
+                const p = productData[product];
+                const selector = document.getElementById('product-selector-btn');
+                const icon = selector.querySelector('.product-selector-icon');
+                const name = selector.querySelector('.product-selector-name');
+                
+                icon.className = 'product-selector-icon ' + p.class;
+                icon.textContent = p.letter;
+                name.textContent = p.name;
+                selector.setAttribute('aria-label', `Current product: ${p.name}. Click to switch products`);
+                
+                // Update selected state
+                productButtons.forEach(b => b.setAttribute('aria-selected', 'false'));
+                btn.setAttribute('aria-selected', 'true');
+                
+                toggleProductSwitcher(false);
+                
+                // Announce change to screen readers
+                announceToScreenReader(`Switched to ${p.name}`);
+            });
+        });
+
+        // Keyboard navigation for product switcher
+        productSwitcher.addEventListener('keydown', (e) => {
+            const items = [...productSwitcher.querySelectorAll('.switcher-product')];
+            const currentIndex = items.indexOf(document.activeElement);
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    items[(currentIndex + 1) % items.length]?.focus();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    items[(currentIndex - 1 + items.length) % items.length]?.focus();
+                    break;
+                case 'Escape':
+                    toggleProductSwitcher(false);
+                    document.getElementById('product-selector-btn').focus();
+                    break;
+                case 'Tab':
+                    toggleProductSwitcher(false);
+                    break;
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!productSwitcher.contains(e.target) && 
+                !document.getElementById('app-switcher-btn').contains(e.target) &&
+                !document.getElementById('product-selector-btn').contains(e.target)) {
+                toggleProductSwitcher(false);
+            }
+        });
+
+        // Work Area Toggle
+        document.querySelectorAll('.work-area-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const expanded = header.getAttribute('aria-expanded') === 'true';
+                header.setAttribute('aria-expanded', !expanded);
+                const perspectives = document.getElementById(header.getAttribute('aria-controls'));
+                perspectives.dataset.expanded = !expanded;
+            });
+
+            header.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    header.click();
+                }
+            });
+        });
+
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = sidebar.querySelector('.sidebar-toggle');
+
+        sidebarToggle.addEventListener('click', () => {
+            const collapsed = sidebar.dataset.collapsed === 'true';
+            sidebar.dataset.collapsed = !collapsed;
+            sidebarToggle.setAttribute('aria-expanded', collapsed);
+            sidebarToggle.setAttribute('aria-label', collapsed ? 'Collapse sidebar' : 'Expand sidebar');
+            announceToScreenReader(collapsed ? 'Sidebar expanded' : 'Sidebar collapsed');
+        });
+
+        // Global Search
+        const globalSearchInput = document.getElementById('global-search-input');
+        
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                globalSearchInput.focus();
+            }
+            if (e.key === 'Escape') {
+                toggleProductSwitcher(false);
+                if (document.activeElement === globalSearchInput) {
+                    globalSearchInput.blur();
+                }
+            }
+        });
+
+        // Screen reader announcements
+        function announceToScreenReader(message) {
+            const liveRegion = document.getElementById('live-region');
+            liveRegion.textContent = message;
+            setTimeout(() => liveRegion.textContent = '', 1000);
+        }
+
+        // AI Panel Toggle
+        const aiPanel = document.getElementById('ai-panel');
+        const aiToggleBtn = document.getElementById('ai-toggle-btn');
+        const aiCloseBtn = document.getElementById('ai-close-btn');
+        const aiFab = document.getElementById('ai-fab');
+
+        function toggleAIPanel(open) {
+            const isOpen = open ?? aiPanel.dataset.open !== 'true';
+            aiPanel.dataset.open = isOpen;
+            aiToggleBtn.setAttribute('aria-expanded', isOpen);
+            
+            if (isOpen) {
+                aiPanel.querySelector('.ai-suggestion-card')?.focus();
+                announceToScreenReader('AI assistant panel opened');
+            } else {
+                aiToggleBtn.focus();
+                announceToScreenReader('AI assistant panel closed');
+            }
+        }
+
+        aiToggleBtn.addEventListener('click', () => toggleAIPanel());
+        aiCloseBtn.addEventListener('click', () => toggleAIPanel(false));
+        aiFab.addEventListener('click', () => toggleAIPanel(true));
+
+        // Search Modal
+        const searchOverlay = document.getElementById('search-overlay');
+        const modalSearchInput = document.getElementById('modal-search-input');
+        let lastFocusedElement;
+
+        function openSearchModal() {
+            lastFocusedElement = document.activeElement;
+            searchOverlay.dataset.open = 'true';
+            setTimeout(() => modalSearchInput.focus(), 100);
+            announceToScreenReader('Search dialog opened');
+        }
+
+        function closeSearchModal() {
+            searchOverlay.dataset.open = 'false';
+            lastFocusedElement?.focus();
+            announceToScreenReader('Search dialog closed');
+        }
+
+        globalSearchInput.addEventListener('click', openSearchModal);
+        globalSearchInput.addEventListener('focus', openSearchModal);
+
+        searchOverlay.addEventListener('click', (e) => {
+            if (e.target === searchOverlay) {
+                closeSearchModal();
+            }
+        });
+
+        // Search result keyboard navigation
+        const searchResults = searchOverlay.querySelectorAll('.search-result');
+        searchOverlay.addEventListener('keydown', (e) => {
+            const results = [...searchResults];
+            const currentIndex = results.indexOf(document.activeElement);
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentIndex === -1) {
+                        results[0]?.focus();
+                    } else {
+                        results[(currentIndex + 1) % results.length]?.focus();
+                    }
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentIndex === -1) {
+                        results[results.length - 1]?.focus();
+                    } else {
+                        results[(currentIndex - 1 + results.length) % results.length]?.focus();
+                    }
+                    break;
+                case 'Enter':
+                    if (document.activeElement.classList.contains('search-result')) {
+                        announceToScreenReader('Selected: ' + document.activeElement.querySelector('.search-result-title').textContent);
+                        closeSearchModal();
+                    }
+                    break;
+                case 'Escape':
+                    closeSearchModal();
+                    break;
+            }
+        });
+
+        // View Switcher
+        const viewTabs = document.querySelectorAll('.view-btn[role="tab"]');
+        viewTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                viewTabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+                tab.setAttribute('aria-selected', 'true');
+                announceToScreenReader(`Switched to ${tab.textContent.trim()} view`);
+            });
+
+            tab.addEventListener('keydown', (e) => {
+                const tabs = [...viewTabs];
+                const currentIndex = tabs.indexOf(tab);
+                
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    tabs[(currentIndex + 1) % tabs.length].focus();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    tabs[(currentIndex - 1 + tabs.length) % tabs.length].focus();
+                }
+            });
+        });
+
+        // Table Select All
+        const selectAllCheckbox = document.getElementById('select-all');
+        const rowCheckboxes = document.querySelectorAll('.data-table tbody input[type="checkbox"]');
+
+        selectAllCheckbox?.addEventListener('change', () => {
+            const isChecked = selectAllCheckbox.checked;
+            rowCheckboxes.forEach(cb => {
+                cb.checked = isChecked;
+                cb.closest('tr').classList.toggle('selected', isChecked);
+                cb.closest('tr').setAttribute('aria-selected', isChecked);
+            });
+            
+            const count = isChecked ? rowCheckboxes.length : 0;
+            document.getElementById('ai-selection-count').textContent = 
+                count === 0 ? 'No products selected' : 
+                count === 1 ? '1 product selected' : 
+                `${count} products selected`;
+            
+            announceToScreenReader(isChecked ? 'All products selected' : 'All products deselected');
+        });
+
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                cb.closest('tr').classList.toggle('selected', cb.checked);
+                cb.closest('tr').setAttribute('aria-selected', cb.checked);
+                
+                const checkedCount = [...rowCheckboxes].filter(c => c.checked).length;
+                selectAllCheckbox.checked = checkedCount === rowCheckboxes.length;
+                selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < rowCheckboxes.length;
+                
+                document.getElementById('ai-selection-count').textContent = 
+                    checkedCount === 0 ? 'No products selected' : 
+                    checkedCount === 1 ? '1 product selected' : 
+                    `${checkedCount} products selected`;
+            });
+        });
+
+        // AI Suggestion Cards - Enter key support
+        document.querySelectorAll('.ai-suggestion-card').forEach(card => {
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    card.click();
+                    announceToScreenReader('Action triggered: ' + card.querySelector('h4').textContent);
+                }
+            });
+        });
+
+        // Global keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl + K for search
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                if (searchOverlay.dataset.open === 'true') {
+                    closeSearchModal();
+                } else {
+                    openSearchModal();
+                }
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                if (searchOverlay.dataset.open === 'true') {
+                    closeSearchModal();
+                } else if (productSwitcher.dataset.open === 'true') {
+                    toggleProductSwitcher(false);
+                    document.getElementById('product-selector-btn').focus();
+                } else if (aiPanel.dataset.open === 'true') {
+                    toggleAIPanel(false);
+                }
+            }
+
+            // Alt + A to toggle AI panel
+            if (e.altKey && e.key === 'a') {
+                e.preventDefault();
+                toggleAIPanel();
+            }
+        });
+
+        // Focus trap for modals
+        function trapFocus(element) {
+            const focusableElements = element.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            element.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    if (e.shiftKey && document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            });
+        }
+
+        trapFocus(searchOverlay.querySelector('.search-modal'));
+
+        // Initialize: Set initial ARIA states
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure proper initial states
+            const expandedWorkAreas = document.querySelectorAll('.work-area-header[aria-expanded="true"]');
+            expandedWorkAreas.forEach(header => {
+                const perspectives = document.getElementById(header.getAttribute('aria-controls'));
+                if (perspectives) {
+                    perspectives.dataset.expanded = 'true';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

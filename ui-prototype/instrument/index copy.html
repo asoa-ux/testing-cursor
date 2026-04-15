@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIM - Product Information Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #f4f6f8;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f8f9fa;
+      --bg-hover: #f1f3f5;
+      --bg-selected: #e7f5ff;
+      --bg-accent: #0c8599;
+      --bg-accent-hover: #0b7285;
+      --border: #dee2e6;
+      --border-light: #e9ecef;
+      --text-primary: #212529;
+      --text-secondary: #495057;
+      --text-muted: #868e96;
+      --text-inverse: #ffffff;
+      --accent: #0c8599;
+      --accent-light: #e7f5ff;
+      --success: #2f9e44;
+      --success-light: #d3f9d8;
+      --warning: #f08c00;
+      --warning-light: #fff3bf;
+      --error: #e03131;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-page); color: var(--text-primary); height: 100vh; overflow: hidden; font-size: 13px; }
+    
+    /* === HEADER === */
+    .header { height: 48px; background: linear-gradient(135deg, #0c8599 0%, #087f5b 100%); display: flex; align-items: center; padding: 0 16px; gap: 16px; }
+    .header-logo { display: flex; align-items: center; gap: 8px; color: var(--text-inverse); font-weight: 600; font-size: 15px; }
+    .header-logo svg { width: 24px; height: 24px; }
+    .header-nav { display: flex; gap: 4px; margin-left: 24px; }
+    .header-nav-item { padding: 6px 12px; color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; }
+    .header-nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+    .header-nav-item.active { background: rgba(255,255,255,0.2); color: white; }
+    .header-spacer { flex: 1; }
+    .header-search { position: relative; width: 220px; }
+    .header-search input { width: 100%; height: 32px; padding: 0 12px 0 32px; background: rgba(255,255,255,0.15); border: none; border-radius: var(--radius-md); color: white; font-size: 12px; }
+    .header-search input::placeholder { color: rgba(255,255,255,0.6); }
+    .header-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: rgba(255,255,255,0.6); }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .header-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border: none; border-radius: var(--radius-md); color: white; cursor: pointer; }
+    .header-btn:hover { background: rgba(255,255,255,0.2); }
+    .header-btn svg { width: 16px; height: 16px; }
+    
+    /* === NAV BAR (Breadcrumb + View Switcher) === */
+    .nav-bar { height: 44px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 16px; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .breadcrumb-item { color: var(--text-muted); cursor: pointer; }
+    .breadcrumb-item:hover { color: var(--accent); text-decoration: underline; }
+    .breadcrumb-item.current { color: var(--text-primary); font-weight: 500; cursor: default; }
+    .breadcrumb-item.current:hover { text-decoration: none; }
+    .breadcrumb-sep { color: var(--text-muted); }
+    .nav-spacer { flex: 1; }
+    
+    /* View Switcher (Segmented Control) */
+    .view-switcher { display: flex; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 2px; }
+    .view-switcher-btn { height: 28px; padding: 0 14px; display: flex; align-items: center; gap: 6px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+    .view-switcher-btn:hover { color: var(--text-primary); }
+    .view-switcher-btn.active { background: var(--bg-surface); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .view-switcher-btn svg { width: 14px; height: 14px; }
+    
+    /* === CONTEXTUAL TOOLBAR === */
+    .toolbar { height: 40px; background: var(--bg-subtle); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 0 16px; gap: 8px; }
+    .toolbar-group { display: flex; align-items: center; gap: 4px; }
+    .toolbar-btn { height: 30px; padding: 0 10px; display: flex; align-items: center; gap: 5px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+    .toolbar-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--text-muted); }
+    .toolbar-btn svg { width: 14px; height: 14px; }
+    .toolbar-btn.primary { background: var(--bg-accent); color: white; border-color: var(--bg-accent); }
+    .toolbar-btn.primary:hover { background: var(--bg-accent-hover); border-color: var(--bg-accent-hover); }
+    .toolbar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+    .toolbar-spacer { flex: 1; }
+    .toolbar-info { font-size: 12px; color: var(--text-muted); }
+    .toolbar-info strong { color: var(--text-primary); font-weight: 600; }
+    
+    /* Item Navigation (Detail view toolbar) */
+    .item-nav { display: flex; align-items: center; gap: 4px; }
+    .item-nav-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; }
+    .item-nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .item-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .item-nav-btn svg { width: 14px; height: 14px; }
+    .item-nav-info { font-size: 12px; color: var(--text-muted); padding: 0 8px; }
+    
+    /* === MAIN LAYOUT === */
+    .main { display: flex; height: calc(100vh - 132px); } /* header 48 + nav 44 + toolbar 40 */
+    
+    /* === SIDEBAR === */
+    .sidebar { width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 12px; border-bottom: 1px solid var(--border-light); }
+    .sidebar-title { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .sidebar-search { position: relative; }
+    .sidebar-search input { width: 100%; height: 30px; padding: 0 8px 0 28px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; }
+    .sidebar-search input:focus { outline: none; border-color: var(--accent); }
+    .sidebar-search svg { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; color: var(--text-muted); }
+    .sidebar-tree { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .tree-item { display: flex; align-items: center; padding: 6px 12px; gap: 6px; cursor: pointer; font-size: 12px; color: var(--text-secondary); }
+    .tree-item:hover { background: var(--bg-hover); }
+    .tree-item.selected { background: var(--bg-selected); color: var(--text-primary); font-weight: 500; }
+    .tree-item.selected::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+    .tree-item { position: relative; }
+    .tree-expand { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+    .tree-expand svg { width: 10px; height: 10px; transition: transform 0.15s; }
+    .tree-expand.open svg { transform: rotate(90deg); }
+    .tree-icon { width: 16px; height: 16px; color: var(--warning); }
+    .tree-icon svg { width: 14px; height: 14px; }
+    .tree-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tree-children { display: none; }
+    .tree-children.open { display: block; }
+    .tree-children .tree-item { padding-left: 28px; }
+    .tree-children .tree-children .tree-item { padding-left: 44px; }
+    
+    /* === CONTENT AREA === */
+    .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-page); }
+    .content-header { padding: 12px 16px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .content-title { font-size: 15px; font-weight: 600; }
+    .content-meta { font-size: 12px; color: var(--text-muted); }
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    
+    /* === TABLE VIEW === */
+    .table-view { flex: 1; overflow: auto; background: var(--bg-surface); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th { position: sticky; top: 0; background: var(--bg-subtle); padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .data-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    .data-table tr:hover td { background: var(--bg-hover); }
+    .data-table tr.selected td { background: var(--bg-selected); }
+    .table-checkbox { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 3px; cursor: pointer; }
+    .table-checkbox.checked { background: var(--accent); border-color: var(--accent); }
+    .table-thumb { width: 32px; height: 32px; background: var(--bg-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .table-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .table-thumb svg { width: 16px; height: 16px; color: var(--text-muted); }
+    .progress-bar { width: 60px; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+    .progress-fill.low { background: var(--error); }
+    .progress-fill.medium { background: var(--warning); }
+    
+    /* === GALLERY VIEW === */
+    .gallery-view { flex: 1; overflow: auto; background: var(--bg-surface); padding: 16px; display: none; }
+    .gallery-view.active { display: block; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .gallery-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transition: all 0.15s; }
+    .gallery-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .gallery-card.selected { border-color: var(--accent); background: var(--accent-light); }
+    .gallery-card-image { aspect-ratio: 1; background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+    .gallery-card-image img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-card-image svg { width: 48px; height: 48px; color: var(--text-muted); }
+    .gallery-card-checkbox { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; background: white; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
+    .gallery-card:hover .gallery-card-checkbox, .gallery-card-checkbox.checked { opacity: 1; }
+    .gallery-card-checkbox.checked { background: var(--accent); border-color: var(--accent); }
+    .gallery-card-checkbox.checked::after { content: '✓'; color: white; font-size: 12px; font-weight: bold; }
+    .gallery-card-status { position: absolute; top: 8px; right: 8px; }
+    .gallery-card-body { padding: 12px; }
+    .gallery-card-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gallery-card-sku { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+    .gallery-card-meta { display: flex; justify-content: space-between; align-items: center; }
+    .gallery-card-price { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    
+    /* === LIST VIEW === */
+    .list-view { flex: 1; overflow: auto; background: var(--bg-surface); display: none; }
+    .list-view.active { display: block; }
+    .list-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background 0.1s; }
+    .list-item:hover { background: var(--bg-hover); }
+    .list-item.selected { background: var(--bg-selected); }
+    .list-item-checkbox { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; flex-shrink: 0; }
+    .list-item-checkbox.checked { background: var(--accent); border-color: var(--accent); }
+    .list-item-image { width: 56px; height: 56px; background: var(--bg-subtle); border-radius: var(--radius-sm); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .list-item-image img { width: 100%; height: 100%; object-fit: cover; }
+    .list-item-image svg { width: 24px; height: 24px; color: var(--text-muted); }
+    .list-item-content { flex: 1; min-width: 0; }
+    .list-item-name { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+    .list-item-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .list-item-meta span { display: flex; align-items: center; gap: 4px; }
+    .list-item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .list-item-price { font-size: 14px; font-weight: 600; color: var(--text-primary); min-width: 80px; text-align: right; }
+    
+    /* === DETAIL VIEW === */
+    .detail-view { flex: 1; display: none; }
+    .detail-view.active { display: flex; }
+    .table-view.hidden { display: none; }
+    
+    /* Item List */
+    .item-list { width: 320px; background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .item-list-header { padding: 12px; border-bottom: 1px solid var(--border-light); font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .item-list-content { flex: 1; overflow-y: auto; }
+    .item-card { display: flex; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border-light); cursor: pointer; }
+    .item-card:hover { background: var(--bg-hover); }
+    .item-card.selected { background: var(--bg-selected); }
+    .item-thumb { width: 48px; height: 48px; background: var(--bg-subtle); border-radius: var(--radius-sm); flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-id { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+    .item-name { font-size: 12px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    /* Detail Panel */
+    .detail-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-surface); }
+    .detail-header { padding: 16px; border-bottom: 1px solid var(--border); }
+    .detail-header-top { display: flex; gap: 12px; margin-bottom: 12px; }
+    .detail-image { width: 56px; height: 56px; background: var(--bg-subtle); border-radius: var(--radius-md); flex-shrink: 0; overflow: hidden; }
+    .detail-image img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-title-area { flex: 1; }
+    .detail-path { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .detail-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .detail-meta { font-size: 11px; color: var(--text-muted); }
+    
+    /* Info Cards */
+    .info-cards { display: flex; gap: 12px; }
+    .info-card { flex: 1; padding: 12px; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border-light); }
+    .info-card-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .info-card-value { font-size: 20px; font-weight: 700; color: var(--accent); }
+    .info-card-label { font-size: 11px; color: var(--text-muted); }
+    .info-card-link { font-size: 11px; color: var(--accent); cursor: pointer; margin-top: 8px; }
+    .info-card-link:hover { text-decoration: underline; }
+    .completeness-bars { margin-top: 8px; }
+    .completeness-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 11px; }
+    .completeness-label { width: 80px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .completeness-bar { flex: 1; height: 4px; background: var(--border-light); border-radius: 2px; }
+    .completeness-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .completeness-pct { width: 30px; text-align: right; color: var(--text-secondary); }
+    
+    /* Tabs */
+    .detail-tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg-subtle); overflow-x: auto; }
+    .detail-tab { padding: 10px 14px; font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .detail-tab:hover { color: var(--text-primary); }
+    .detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    
+    /* Tab Content */
+    .detail-content { flex: 1; overflow-y: auto; padding: 16px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    
+    /* Form Container - constrain width for readability */
+    .form-container { max-width: 640px; }
+    
+    /* Form Sections - card style grouping */
+    .form-section { margin-bottom: 28px; }
+    .form-section-card { background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px; }
+    .form-section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+    .form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border-light); margin-left: 16px; }
+    .form-section-card .form-section-title { margin: -20px -20px 20px -20px; padding: 14px 20px; background: var(--bg-subtle); border-bottom: 1px solid var(--border-light); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+    .form-section-card .form-section-title::after { display: none; }
+    .form-section-action { font-size: 11px; color: var(--accent); cursor: pointer; font-weight: 500; background: none; border: none; padding: 4px 8px; border-radius: var(--radius-sm); }
+    .form-section-action:hover { background: var(--accent-light); }
+    
+    /* Form layout - single column default */
+    .form-fields { display: flex; flex-direction: column; gap: 20px; }
+    .form-row { display: flex; gap: 16px; align-items: flex-start; }
+    .form-row > .form-field { flex: 1; }
+    
+    /* Field sizing based on content */
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field.field-xs { max-width: 100px; } /* Codes, percentages */
+    .form-field.field-sm { max-width: 160px; } /* Short codes like SKU */
+    .form-field.field-md { max-width: 280px; } /* Medium fields */
+    .form-field.field-lg { max-width: 400px; } /* Longer text */
+    .form-field.field-full { max-width: none; } /* Full width */
+    
+    /* Labels - sentence case for readability */
+    .form-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+    .form-label .required { color: var(--error); }
+    .form-label-hint { font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: auto; }
+    
+    /* Inputs */
+    .form-input { height: 40px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--text-primary); background: var(--bg-surface); transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:hover { border-color: var(--text-muted); }
+    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .form-input:disabled { background: var(--bg-subtle); color: var(--text-muted); cursor: not-allowed; }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-textarea { min-height: 100px; padding: 12px; resize: vertical; line-height: 1.6; }
+    .form-select { height: 40px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; background: var(--bg-surface); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23868e96' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; width: 100%; }
+    .form-select:hover { border-color: var(--text-muted); }
+    .form-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    
+    /* Hints and validation */
+    .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .form-error { font-size: 12px; color: var(--error); margin-top: 4px; }
+    .form-input.error { border-color: var(--error); }
+    .form-input.error:focus { box-shadow: 0 0 0 3px rgba(224, 49, 49, 0.15); }
+    
+    /* Input with prefix/suffix */
+    .input-group { display: flex; align-items: stretch; }
+    .input-group .form-input { border-radius: 0; }
+    .input-group .form-input:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+    .input-group .form-input:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .input-prefix, .input-suffix { display: flex; align-items: center; padding: 0 12px; background: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+    .input-prefix { border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+    .input-suffix { border-left: none; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    
+    /* Read-only display */
+    .form-value { font-size: 14px; color: var(--text-primary); padding: 10px 0; }
+    .form-value-muted { color: var(--text-muted); font-style: italic; }
+    
+    /* Form Actions */
+    .form-actions { display: flex; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-light); position: sticky; bottom: 0; background: var(--bg-surface); margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; padding-bottom: 16px; }
+    .btn { height: 40px; padding: 0 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+    .btn-primary { background: var(--accent); color: white; border: none; }
+    .btn-primary:hover { background: var(--bg-accent-hover); }
+    .btn-secondary { background: var(--bg-surface); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .unsaved-indicator { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--warning); font-weight: 500; margin-left: auto; }
+    .unsaved-indicator::before { content: ''; width: 8px; height: 8px; background: var(--warning); border-radius: 50%; }
+    
+    /* Legacy grid support */
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 640px; }
+    .form-field.full { grid-column: 1 / -1; }
+    
+    /* Assets Grid */
+    .assets-toolbar { display: flex; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+    .assets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .asset-card { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; }
+    .asset-card:hover { border-color: var(--accent); }
+    .asset-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+    .asset-image { height: 100px; background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; }
+    .asset-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .asset-info { padding: 8px; font-size: 11px; }
+    .asset-name { font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .asset-type { color: var(--text-muted); }
+    
+    /* Compare Table */
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .compare-table th { background: var(--bg-subtle); padding: 8px 12px; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+    .compare-table td { padding: 8px 12px; border: 1px solid var(--border-light); }
+    .compare-section { margin-bottom: 16px; }
+    .compare-section-header { display: flex; align-items: center; gap: 8px; padding: 8px 0; cursor: pointer; font-weight: 600; font-size: 12px; }
+    .compare-section-header svg { width: 12px; height: 12px; transition: transform 0.15s; }
+    .compare-section-header.open svg { transform: rotate(90deg); }
+    .compare-section-content { display: none; }
+    .compare-section-content.open { display: block; }
+    
+    /* Status Badge */
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+    .status-badge.approved { background: var(--success-light); color: var(--success); }
+    .status-badge.pending { background: var(--warning-light); color: var(--warning); }
+    
+    /* Selection Bar */
+    .selection-bar { position: fixed; bottom: -70px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: white; padding: 12px 16px; border-radius: var(--radius-lg); display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); z-index: 1000; transition: bottom 0.3s ease; }
+    .selection-bar.visible { bottom: 24px; }
+    .selection-info { display: flex; align-items: center; gap: 8px; font-size: 13px; padding-right: 16px; border-right: 1px solid rgba(255,255,255,0.2); }
+    .selection-count { font-size: 18px; font-weight: 700; color: var(--accent-light); }
+    .selection-actions { display: flex; gap: 8px; }
+    .selection-btn { height: 36px; padding: 0 14px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1); border: none; border-radius: var(--radius-sm); color: white; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .selection-btn:hover { background: rgba(255,255,255,0.2); }
+    .selection-btn svg { width: 14px; height: 14px; }
+    .selection-btn.danger { color: #ffc9c9; }
+    .selection-btn.danger:hover { background: var(--error); color: white; }
+    .selection-clear { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; border-radius: var(--radius-sm); margin-left: 8px; }
+    .selection-clear:hover { background: rgba(255,255,255,0.1); color: white; }
+    .selection-clear svg { width: 18px; height: 18px; }
+    
+    /* Sortable Headers */
+    .sortable { cursor: pointer; user-select: none; }
+    .sortable:hover { background: var(--bg-hover); }
+    
+    /* Checkbox Partial State */
+    .table-checkbox.partial { background: var(--accent); border-color: var(--accent); position: relative; }
+    .table-checkbox.partial::after { content: '−'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 12px; line-height: 1; }
+    .table-checkbox.checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 10px; line-height: 1; }
+    
+    /* Modal */
+    #modal { position: fixed; inset: 0; z-index: 10000; display: none; align-items: center; justify-content: center; }
+    #modal.open { display: flex; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+    .modal-content { position: relative; background: var(--bg-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); width: 90%; max-width: 500px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm); }
+    .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .modal-body { padding: 20px; overflow-y: auto; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    
+    /* === RESPONSIVE === */
+    @media (max-width: 1400px) {
+      .item-list { width: 280px; }
+      .info-cards { flex-wrap: wrap; }
+      .info-card { flex: 1 1 calc(50% - 6px); min-width: 180px; }
+    }
+    
+    @media (max-width: 1200px) {
+      .header-nav { display: none; }
+      .sidebar { width: 200px; }
+      .item-list { width: 240px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: 1; }
+      .detail-tabs { gap: 0; }
+      .detail-tab { padding: 10px 10px; font-size: 11px; }
+    }
+    
+    @media (max-width: 1024px) {
+      .sidebar { width: 180px; }
+      .item-list { width: 220px; }
+      .toolbar-btn span { display: none; }
+      .toolbar-btn { padding: 0 8px; }
+      .details-toggle span { display: none; }
+      .details-toggle { padding: 0 10px; }
+      .info-card { flex: 1 1 100%; }
+      .detail-header { padding: 12px; }
+      .detail-content { padding: 12px; }
+      .compare-table { font-size: 11px; }
+      .compare-table th, .compare-table td { padding: 6px 8px; }
+    }
+    
+    @media (max-width: 768px) {
+      .header { padding: 0 12px; gap: 8px; }
+      .header-search { width: 160px; }
+      .header-logo span { display: none; }
+      .sidebar { display: none; }
+      .toolbar { padding: 0 12px; overflow-x: auto; }
+      .toolbar-sep { margin: 0 4px; }
+      .breadcrumb-bar { padding: 0 12px; overflow-x: auto; white-space: nowrap; }
+      .content-header { padding: 10px 12px; }
+      .detail-view.active { flex-direction: column; }
+      .item-list { width: 100%; height: 150px; border-right: none; border-bottom: 1px solid var(--border); }
+      .item-list-content { display: flex; overflow-x: auto; }
+      .item-card { flex-shrink: 0; width: 160px; flex-direction: column; align-items: center; text-align: center; }
+      .detail-panel { flex: 1; }
+      .detail-header-top { flex-direction: column; align-items: center; text-align: center; }
+      .detail-image { width: 80px; height: 80px; }
+      .detail-tabs { padding: 0 12px; }
+      .assets-toolbar { flex-wrap: wrap; }
+      .assets-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 480px) {
+      .header-search { display: none; }
+      .header-actions { gap: 4px; }
+      .toolbar-group { gap: 0; }
+      .item-list { height: 120px; }
+      .item-card { width: 120px; padding: 8px; }
+      .item-thumb { width: 36px; height: 36px; }
+      .detail-tabs { gap: 0; }
+      .detail-tab { padding: 8px 6px; font-size: 10px; }
+      .info-card { padding: 10px; }
+      .info-card-value { font-size: 16px; }
+      .form-section { margin-bottom: 16px; }
+      .form-input, .form-select, .btn { height: 40px; } /* Larger touch targets */
+      .assets-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Navigation
+    </div>
+    <nav class="header-nav" id="headerNav">
+      <div class="header-nav-item active" onclick="switchDataSource('external', this)">External Data Sources</div>
+      <div class="header-nav-item" onclick="switchDataSource('internal', this)">Internal Data Sources</div>
+      <div class="header-nav-item" onclick="switchDataSource('packaging', this)">Packaging</div>
+      <div class="header-nav-item" onclick="switchDataSource('assets', this)">Assets</div>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="header-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search...">
+    </div>
+    <div class="header-actions">
+      <button class="header-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <button class="header-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </header>
+
+  <!-- Navigation Bar: Breadcrumb + View Switcher -->
+  <div class="nav-bar">
+    <div class="breadcrumb" id="breadcrumb">
+      <span class="breadcrumb-item">External Data Sources</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">Music</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">Musical Instruments</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">String Musical Instruments (Non Powered)</span>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="view-switcher">
+      <button class="view-switcher-btn active" id="viewTableBtn" onclick="switchView('table')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+        Table
+      </button>
+      <button class="view-switcher-btn" id="viewGalleryBtn" onclick="switchView('gallery')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Gallery
+      </button>
+      <button class="view-switcher-btn" id="viewListBtn" onclick="switchView('list')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        List
+      </button>
+      <button class="view-switcher-btn" id="viewDetailsBtn" onclick="switchView('details')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+        Details
+      </button>
+    </div>
+  </div>
+
+  <!-- Contextual Toolbar: Content changes based on view -->
+  <div class="toolbar" id="toolbar"></div>
+
+  <!-- Selection Bar (appears when items checked in table view) -->
+  <div class="selection-bar" id="selectionBar">
+    <div class="selection-info">
+      <span class="selection-count" id="selectionCount">0</span>
+      <span>items selected</span>
+    </div>
+    <div class="selection-actions">
+      <button class="selection-btn" onclick="approveSelected()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve
+      </button>
+      <button class="selection-btn" onclick="showReferences()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Compare
+      </button>
+      <button class="selection-btn danger" onclick="deleteSelected()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Delete
+      </button>
+    </div>
+    <button class="selection-clear" onclick="clearSelection()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Browse</div>
+        <div class="sidebar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Filter...">
+        </div>
+      </div>
+      <div class="sidebar-tree" id="sidebarTree"></div>
+    </aside>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="content-header">
+        <div class="content-title" id="contentTitle">String Musical Instruments (Non Powered)</div>
+        <div class="content-meta" id="contentMeta">16 items</div>
+      </div>
+      <div class="content-body">
+        <!-- Table View -->
+        <div class="table-view" id="tableView"></div>
+        
+        <!-- Gallery View -->
+        <div class="gallery-view" id="galleryView"></div>
+        
+        <!-- List View -->
+        <div class="list-view" id="listView"></div>
+        <!-- Detail View -->
+        <div class="detail-view" id="detailView">
+          <div class="item-list">
+            <div class="item-list-header">Folder Items</div>
+            <div class="item-list-content" id="itemList"></div>
+          </div>
+          <div class="detail-panel" id="detailPanel"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+// ==================== DATA ====================
+const allProducts = [
+  // String instruments
+  { id: 'tstEXT-100904', name: '1917 Gibson Style U Harp Guitar', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&h=100&fit=crop', completeness: 33, gtin: '4542951244035', sku: 'GIA0086', description: '1917 Gibson Style U Harp Guitar, Black, Highly ornate upper end model.', price: 12500, status: 'approved' },
+  { id: 'tstEXT-102933', name: '1926 Martin T-18 "Tiple"', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?w=100&h=100&fit=crop', completeness: 33, gtin: '8985313580147', sku: 'MAA0265', description: '1926 Martin T-18 Tiple, vintage stringed instrument.', price: 8500, status: 'pending' },
+  { id: 'tstEXT-102994', name: '1928 National Style 1 Tri-cone', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?w=100&h=100&fit=crop', completeness: 18, gtin: '5824419267336', sku: 'NAT0004', description: '1928 National Style 1 Tri-cone resonator guitar.', price: 15000, status: 'approved' },
+  { id: 'tstEXT-102292', name: '1929 Gibson Nick Lucas Special', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?w=100&h=100&fit=crop', completeness: 33, gtin: '0531616388683', sku: 'GIA0793', description: '1929 Gibson Nick Lucas Special acoustic guitar.', price: 22000, status: 'pending' },
+  { id: 'tstEXT-101015', name: '1929 Martin 0-28 K', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?w=100&h=100&fit=crop', completeness: 40, gtin: '0813588952933', sku: 'MAA0206', description: '1929 Martin 0-28 K Hawaiian guitar.', price: 9800, status: 'approved' },
+  { id: 'tstEXT-102938', name: '1930 Washburn "Lyon & Healy"', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=100&fit=crop', completeness: 29, gtin: '6702458777919', sku: 'WAS0001', description: '1930 Washburn Lyon & Healy parlor guitar.', price: 6500, status: 'pending' },
+  { id: 'tstEXT-100459', name: '1932 National Triolian', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&h=100&fit=crop', completeness: 29, gtin: '9092381080741', sku: 'DOB0001', description: '1932 National Triolian resonator guitar.', price: 7200, status: 'approved' },
+  { id: 'tstEXT-102059', name: '1934 Martin C-1', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?w=100&h=100&fit=crop', completeness: 25, gtin: '4433424618616', sku: 'MAA0287', description: '1934 Martin C-1 archtop guitar.', price: 11000, status: 'pending' },
+  { id: 'tstEXT-102296', name: '1940 Gibson J-55', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?w=100&h=100&fit=crop', completeness: 33, gtin: '3247928388262', sku: 'GIA0680', description: '1940 Gibson J-55 jumbo acoustic guitar.', price: 18500, status: 'approved' },
+  { id: 'tstEXT-101017', name: '1945 Martin 000-21', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?w=100&h=100&fit=crop', completeness: 29, gtin: '0436321184707', sku: 'MAA0223', description: '1945 Martin 000-21 acoustic guitar.', price: 14500, status: 'pending' },
+  { id: 'tstEXT-102063', name: '1947 D\'Angelico Excel', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1550985616-10810253b84d?w=100&h=100&fit=crop', completeness: 18, gtin: '2829292233891', sku: 'DAN0002', description: '1947 D\'Angelico Excel archtop guitar.', price: 35000, status: 'approved' },
+  { id: 'tstEXT-102908', name: '1954 Gretsch Country Club', type: 'External Source', category: 'string', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=100&fit=crop', completeness: 25, gtin: '1326079854382', sku: 'GRE0204', description: '1954 Gretsch Country Club electric guitar.', price: 8900, status: 'pending' },
+  // Percussion
+  { id: 'tstEXT-200001', name: 'Ludwig Black Beauty Snare', type: 'External Source', category: 'percussion', image: 'https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=100&h=100&fit=crop', completeness: 45, gtin: '1234567890123', sku: 'LUD0001', description: 'Ludwig Black Beauty brass snare drum, 14x5 inch.', price: 1200, status: 'approved' },
+  { id: 'tstEXT-200002', name: 'Zildjian K Custom Dark Ride', type: 'External Source', category: 'percussion', image: 'https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=100&h=100&fit=crop', completeness: 38, gtin: '2345678901234', sku: 'ZIL0045', description: 'Zildjian K Custom Dark Ride cymbal, 20 inch.', price: 450, status: 'pending' },
+  // Brass
+  { id: 'tstEXT-300001', name: 'Bach Stradivarius Trumpet', type: 'External Source', category: 'brass', image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=100&h=100&fit=crop', completeness: 52, gtin: '3456789012345', sku: 'BAC0012', description: 'Bach Stradivarius professional Bb trumpet.', price: 3500, status: 'approved' },
+  { id: 'tstEXT-300002', name: 'Conn 8D French Horn', type: 'External Source', category: 'brass', image: 'https://images.unsplash.com/photo-1558584673-90fcd5db9c32?w=100&h=100&fit=crop', completeness: 41, gtin: '4567890123456', sku: 'CON0008', description: 'Conn 8D professional double French horn.', price: 5800, status: 'pending' },
+  // Woodwind
+  { id: 'tstEXT-400001', name: 'Selmer Mark VI Saxophone', type: 'External Source', category: 'woodwind', image: 'https://images.unsplash.com/photo-1546539782-6fc531453083?w=100&h=100&fit=crop', completeness: 67, gtin: '5678901234567', sku: 'SEL0006', description: 'Selmer Mark VI alto saxophone, vintage 1965.', price: 12000, status: 'approved' },
+  { id: 'tstEXT-400002', name: 'Buffet R13 Clarinet', type: 'External Source', category: 'woodwind', image: 'https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=100&h=100&fit=crop', completeness: 55, gtin: '6789012345678', sku: 'BUF0003', description: 'Buffet R13 professional Bb clarinet.', price: 4200, status: 'pending' },
+  // Keyboards
+  { id: 'tstEXT-500001', name: 'Steinway Model D Grand Piano', type: 'External Source', category: 'keyboards', image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=100&h=100&fit=crop', completeness: 72, gtin: '7890123456789', sku: 'STW0001', description: 'Steinway Model D concert grand piano, 9 foot.', price: 185000, status: 'approved' },
+  { id: 'tstEXT-500002', name: 'Hammond B3 Organ', type: 'External Source', category: 'keyboards', image: 'https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=100&h=100&fit=crop', completeness: 48, gtin: '8901234567890', sku: 'HAM0003', description: 'Hammond B3 tonewheel organ with Leslie speaker.', price: 15000, status: 'pending' }
+];
+
+const categories = [
+  { id: 'music', name: 'Music', children: [
+    { id: 'instruments', name: 'Musical Instruments/Accessories', children: [
+      { id: 'non-powered', name: 'Musical Instruments (Non Powered)', children: [
+        { id: 'brass', name: 'Brasswind Musical Instruments', count: 2 },
+        { id: 'keyboards', name: 'Keyboards/Pianos (Non Powered)', count: 2 },
+        { id: 'other', name: 'Musical Instruments Other', count: 0 },
+        { id: 'percussion', name: 'Percussion Musical Instruments', count: 2 },
+        { id: 'string', name: 'String Musical Instruments', count: 12 },
+        { id: 'woodwind', name: 'Woodwind Musical Instruments', count: 2 }
+      ]},
+      { id: 'powered', name: 'Musical Instruments (Powered)', count: 0 },
+      { id: 'accessories', name: 'Musical Instruments/Accessories Other', count: 0 }
+    ]}
+  ]},
+  { id: 'personal', name: 'Personal Accessories', count: 0 },
+  { id: 'pet', name: 'Pet Care/Food', count: 0 },
+  { id: 'sports', name: 'Sports Equipment', count: 0 }
+];
+
+// ==================== STATE ====================
+let state = {
+  currentView: 'table',
+  detailsOpen: false,
+  selectedItem: 0,
+  activeTab: 'basic',
+  hasChanges: false,
+  selectedCategory: 'string',
+  checkedItems: [],
+  sortBy: 'name',
+  sortDir: 'asc',
+  filterText: '',
+  sidebarFilter: '',
+  expandedNodes: ['music', 'instruments', 'non-powered']
+};
+
+// Get filtered products based on category and search
+function getFilteredProducts() {
+  let filtered = allProducts.filter(p => p.category === state.selectedCategory);
+  if (state.filterText) {
+    const search = state.filterText.toLowerCase();
+    filtered = filtered.filter(p => 
+      p.name.toLowerCase().includes(search) ||
+      p.sku.toLowerCase().includes(search) ||
+      p.gtin.includes(search) ||
+      p.id.toLowerCase().includes(search)
+    );
+  }
+  // Sort
+  filtered.sort((a, b) => {
+    let aVal = a[state.sortBy];
+    let bVal = b[state.sortBy];
+    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+    if (aVal < bVal) return state.sortDir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return state.sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return filtered;
+}
+
+let products = getFilteredProducts();
+
+// ==================== SIDEBAR TREE ====================
+function renderTree() {
+  const filter = state.sidebarFilter.toLowerCase();
+  const html = categories.map(cat => renderTreeNode(cat, 0, filter)).join('');
+  document.getElementById('sidebarTree').innerHTML = html;
+}
+
+function renderTreeNode(node, depth, filter = '') {
+  const hasChildren = node.children && node.children.length > 0;
+  const isOpen = state.expandedNodes.includes(node.id);
+  const isSelected = node.id === state.selectedCategory;
+  const matchesFilter = !filter || node.name.toLowerCase().includes(filter);
+  const childMatches = hasChildren && node.children.some(c => nodeMatchesFilter(c, filter));
+  
+  if (filter && !matchesFilter && !childMatches) return '';
+  
+  const count = node.count !== undefined ? node.count : '';
+  
+  return `
+    <div class="tree-item ${isSelected ? 'selected' : ''}" style="padding-left: ${12 + depth * 16}px" onclick="selectCategory('${node.id}', event)" data-id="${node.id}">
+      <span class="tree-expand ${hasChildren ? (isOpen ? 'open' : '') : ''}" style="${hasChildren ? '' : 'visibility:hidden'}" onclick="toggleTreeNode('${node.id}', event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </span>
+      <span class="tree-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="tree-label">${node.name}</span>
+      ${count !== '' ? `<span style="font-size:10px;color:var(--text-muted);margin-left:auto">${count}</span>` : ''}
+    </div>
+    ${hasChildren ? `<div class="tree-children ${isOpen || (filter && childMatches) ? 'open' : ''}">${node.children.map(c => renderTreeNode(c, depth + 1, filter)).join('')}</div>` : ''}
+  `;
+}
+
+function nodeMatchesFilter(node, filter) {
+  if (node.name.toLowerCase().includes(filter)) return true;
+  if (node.children) return node.children.some(c => nodeMatchesFilter(c, filter));
+  return false;
+}
+
+function toggleTreeNode(nodeId, event) {
+  event.stopPropagation();
+  const idx = state.expandedNodes.indexOf(nodeId);
+  if (idx > -1) state.expandedNodes.splice(idx, 1);
+  else state.expandedNodes.push(nodeId);
+  renderTree();
+}
+
+function selectCategory(categoryId, event) {
+  if (event) event.stopPropagation();
+  state.selectedCategory = categoryId;
+  state.selectedItem = 0;
+  state.checkedItems = [];
+  products = getFilteredProducts();
+  renderTree();
+  renderTable();
+  renderItemList();
+  renderDetail();
+  updateBreadcrumb();
+  updateContentHeader();
+}
+
+function getCategoryName(id) {
+  function find(nodes) {
+    for (const n of nodes) {
+      if (n.id === id) return n.name;
+      if (n.children) {
+        const found = find(n.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  return find(categories) || id;
+}
+
+function getCategoryPath(id) {
+  const path = [];
+  function find(nodes, trail) {
+    for (const n of nodes) {
+      if (n.id === id) {
+        path.push(...trail, n.name);
+        return true;
+      }
+      if (n.children && find(n.children, [...trail, n.name])) return true;
+    }
+    return false;
+  }
+  find(categories, []);
+  return path;
+}
+
+function updateBreadcrumb() {
+  const path = getCategoryPath(state.selectedCategory);
+  const breadcrumb = document.getElementById('breadcrumb');
+  breadcrumb.innerHTML = path.map((p, i) => {
+    const isLast = i === path.length - 1;
+    return `<span class="breadcrumb-item ${isLast ? 'current' : ''}" ${!isLast ? `onclick="navigateBreadcrumb(${i})"` : ''}>${p}</span>${!isLast ? '<span class="breadcrumb-sep">/</span>' : ''}`;
+  }).join('');
+}
+
+function navigateBreadcrumb(index) {
+  // Navigate to parent category
+  const categoryIds = ['music', 'instruments', 'non-powered'];
+  if (index < categoryIds.length) {
+    selectCategory(categoryIds[index]);
+  }
+}
+
+function updateContentHeader() {
+  document.getElementById('contentTitle').textContent = getCategoryName(state.selectedCategory);
+  document.getElementById('contentMeta').textContent = `${products.length} items`;
+}
+
+// ==================== TABLE VIEW ====================
+function renderTable() {
+  const allChecked = products.length > 0 && products.every(p => state.checkedItems.includes(p.id));
+  const someChecked = state.checkedItems.length > 0;
+  
+  document.getElementById('tableView').innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:40px"><div class="table-checkbox ${allChecked ? 'checked' : someChecked ? 'partial' : ''}" onclick="toggleAllCheckboxes()"></div></th>
+          <th style="width:50px"></th>
+          <th class="sortable" onclick="sortBy('id')">ID ${getSortIcon('id')}</th>
+          <th class="sortable" onclick="sortBy('name')">Name ${getSortIcon('name')}</th>
+          <th>Object Type</th>
+          <th style="width:60px">Image</th>
+          <th class="sortable" onclick="sortBy('completeness')">Completeness ${getSortIcon('completeness')}</th>
+          <th>GTIN</th>
+          <th class="sortable" onclick="sortBy('sku')">SKU ${getSortIcon('sku')}</th>
+          <th class="sortable" onclick="sortBy('status')">Status ${getSortIcon('status')}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${products.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted)">No items found</td></tr>` : ''}
+        ${products.map((p, i) => `
+          <tr class="${state.selectedItem === i ? 'selected' : ''}" onclick="selectItem(${i})" ondblclick="openDetails(${i})">
+            <td><div class="table-checkbox ${state.checkedItems.includes(p.id) ? 'checked' : ''}" onclick="toggleCheckbox('${p.id}', event)"></div></td>
+            <td><div class="table-thumb"><img src="${p.image}" alt="" onerror="this.style.display='none'"></div></td>
+            <td style="font-size:11px;color:var(--text-muted)">${p.id}</td>
+            <td style="font-weight:500">${highlightSearch(p.name)}</td>
+            <td>${p.type}</td>
+            <td><div class="table-thumb"><img src="${p.image}" alt="" onerror="this.style.display='none'"></div></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress-bar"><div class="progress-fill ${p.completeness < 25 ? 'low' : p.completeness < 40 ? 'medium' : ''}" style="width:${p.completeness}%"></div></div>
+                <span style="font-size:11px">${p.completeness}%</span>
+              </div>
+            </td>
+            <td style="font-size:11px">${highlightSearch(p.gtin)}</td>
+            <td style="font-size:11px">${highlightSearch(p.sku)}</td>
+            <td><span class="status-badge ${p.status}">${p.status}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function highlightSearch(text) {
+  if (!state.filterText) return text;
+  const regex = new RegExp(`(${state.filterText})`, 'gi');
+  return text.replace(regex, '<mark style="background:var(--warning-light);padding:0 2px;border-radius:2px">$1</mark>');
+}
+
+function getSortIcon(field) {
+  if (state.sortBy !== field) return '';
+  return state.sortDir === 'asc' ? '↑' : '↓';
+}
+
+function sortBy(field) {
+  if (state.sortBy === field) {
+    state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.sortBy = field;
+    state.sortDir = 'asc';
+  }
+  products = getFilteredProducts();
+  renderTable();
+  renderGallery();
+  renderListView();
+  renderItemList();
+}
+
+function renderGallery() {
+  document.getElementById('galleryView').innerHTML = `
+    <div class="gallery-grid">
+      ${products.length === 0 ? `<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-muted);">No items found</div>` : ''}
+      ${products.map((p, i) => `
+        <div class="gallery-card ${state.selectedItem === i ? 'selected' : ''}" onclick="selectItem(${i})" ondblclick="openDetails(${i})">
+          <div class="gallery-card-image">
+            <div class="gallery-card-checkbox ${state.checkedItems.includes(p.id) ? 'checked' : ''}" onclick="toggleCheckbox('${p.id}', event)"></div>
+            <div class="gallery-card-status"><span class="status-badge ${p.status}">${p.status}</span></div>
+            ${p.image ? `<img src="${p.image}" alt="" onerror="this.parentElement.innerHTML='<svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg>'">` : 
+            `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}
+          </div>
+          <div class="gallery-card-body">
+            <div class="gallery-card-name" title="${p.name}">${p.name}</div>
+            <div class="gallery-card-sku">${p.sku}</div>
+            <div class="gallery-card-meta">
+              <div class="progress-bar" style="width: 50px;"><div class="progress-fill ${p.completeness < 25 ? 'low' : p.completeness < 40 ? 'medium' : ''}" style="width:${p.completeness}%"></div></div>
+              <span class="gallery-card-price">$${p.price}</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderListView() {
+  document.getElementById('listView').innerHTML = `
+    ${products.length === 0 ? `<div style="text-align: center; padding: 60px; color: var(--text-muted);">No items found</div>` : ''}
+    ${products.map((p, i) => `
+      <div class="list-item ${state.selectedItem === i ? 'selected' : ''}" onclick="selectItem(${i})" ondblclick="openDetails(${i})">
+        <div class="list-item-checkbox ${state.checkedItems.includes(p.id) ? 'checked' : ''}" onclick="toggleCheckbox('${p.id}', event)"></div>
+        <div class="list-item-image">
+          ${p.image ? `<img src="${p.image}" alt="" onerror="this.style.display='none'">` : ''}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="list-item-content">
+          <div class="list-item-name">${highlightSearch(p.name)}</div>
+          <div class="list-item-meta">
+            <span>${p.sku}</span>
+            <span>•</span>
+            <span>${p.type}</span>
+            <span>•</span>
+            <span>GTIN: ${p.gtin}</span>
+          </div>
+        </div>
+        <div class="list-item-actions">
+          <div class="progress-bar" style="width: 60px;"><div class="progress-fill ${p.completeness < 25 ? 'low' : p.completeness < 40 ? 'medium' : ''}" style="width:${p.completeness}%"></div></div>
+          <span class="status-badge ${p.status}">${p.status}</span>
+        </div>
+        <div class="list-item-price">$${p.price}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function toggleCheckbox(id, event) {
+  event.stopPropagation();
+  const idx = state.checkedItems.indexOf(id);
+  if (idx > -1) state.checkedItems.splice(idx, 1);
+  else state.checkedItems.push(id);
+  renderTable();
+  renderGallery();
+  renderListView();
+  renderItemList();
+  updateToolbarState();
+}
+
+function toggleAllCheckboxes() {
+  const allChecked = products.every(p => state.checkedItems.includes(p.id));
+  if (allChecked) {
+    state.checkedItems = state.checkedItems.filter(id => !products.find(p => p.id === id));
+  } else {
+    products.forEach(p => {
+      if (!state.checkedItems.includes(p.id)) state.checkedItems.push(p.id);
+    });
+  }
+  renderTable();
+  renderGallery();
+  renderListView();
+  renderItemList();
+  updateToolbarState();
+}
+
+function updateToolbarState() {
+  // Update checked count display
+  const count = state.checkedItems.length;
+  const meta = document.getElementById('contentMeta');
+  const selectionBar = document.getElementById('selectionBar');
+  const selectionCount = document.getElementById('selectionCount');
+  
+  if (count > 0 && !state.detailsOpen) {
+    meta.innerHTML = `${products.length} items <span style="color:var(--accent);font-weight:500">• ${count} selected</span>`;
+    selectionBar.classList.add('visible');
+    selectionCount.textContent = count;
+  } else {
+    meta.textContent = `${products.length} items`;
+    selectionBar.classList.remove('visible');
+  }
+}
+
+function clearSelection() {
+  state.checkedItems = [];
+  renderTable();
+  renderItemList();
+  updateToolbarState();
+}
+
+function openDetails(index) {
+  state.selectedItem = index;
+  if (!state.detailsOpen) {
+    switchView('details');
+  } else {
+    renderItemList();
+    renderDetail();
+    renderToolbar();
+  }
+}
+
+// ==================== ITEM LIST ====================
+function renderItemList() {
+  const header = document.querySelector('.item-list-header');
+  if (header) {
+    const checkedCount = state.checkedItems.filter(id => products.find(p => p.id === id)).length;
+    header.innerHTML = `Folder Items (${products.length})${checkedCount > 0 ? ` <span style="color:var(--accent)">• ${checkedCount} checked</span>` : ''}`;
+  }
+  
+  document.getElementById('itemList').innerHTML = products.length === 0 
+    ? `<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:12px">No items in this category</div>`
+    : products.map((p, i) => `
+    <div class="item-card ${state.selectedItem === i ? 'selected' : ''}" onclick="selectItem(${i})">
+      <div class="item-thumb"><img src="${p.image}" alt="" onerror="this.parentElement.innerHTML='<svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><path d=\\'m21 15-5-5L5 21\\'/></svg>'"></div>
+      <div class="item-info">
+        <div class="item-id">${p.id} ${state.checkedItems.includes(p.id) ? '<span style="color:var(--accent)">✓</span>' : ''}</div>
+        <div class="item-name">${p.name}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${p.completeness}% complete</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Render detail panel
+function renderDetail() {
+  if (!products[state.selectedItem]) return;
+  const p = products[state.selectedItem];
+  const statusClass = p.status === 'approved' ? 'approved' : 'pending';
+  
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-image"><img src="${p.image}" alt=""></div>
+        <div class="detail-title-area">
+          <div class="detail-path">External Data Sources / Music / Musical Instruments</div>
+          <div class="detail-name">${p.name}</div>
+          <div class="detail-meta">
+            <span class="status-badge ${statusClass}">${p.status}</span>
+            <span style="margin-left:8px">Revision: 0.2 | Last edited by: stepys, 1 year 7 months ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-card-title">Completeness</div>
+          <div class="info-card-value">${p.completeness}%</div>
+          <div class="info-card-label">Complete</div>
+          <div class="completeness-bars">
+            <div class="completeness-row"><span class="completeness-label">Logistic Compl...</span><div class="completeness-bar"><div class="completeness-fill" style="width:28%"></div></div><span class="completeness-pct">28%</span></div>
+            <div class="completeness-row"><span class="completeness-label">Logistic Compl...</span><div class="completeness-bar"><div class="completeness-fill" style="width:28%"></div></div><span class="completeness-pct">28%</span></div>
+          </div>
+          <div class="info-card-link">See more</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Workflows</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:8px">No workflows to display</div>
+          <div class="info-card-link">View completed workflows</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Sufficiency Scores</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:8px">No sufficiency scores to display.</div>
+          <div class="info-card-link">Calculate scores</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-tabs">
+      ${['Basic Information', 'Compare Records', 'Assets', 'Pricing & Costs', 'Category Attributes', 'Warehouse Information', 'Language View'].map((tab, i) => {
+        const tabKey = ['basic', 'compare', 'assets', 'pricing', 'category', 'warehouse', 'language'][i];
+        return `<div class="detail-tab ${state.activeTab === tabKey ? 'active' : ''}" onclick="switchTab('${tabKey}')">${tab}</div>`;
+      }).join('')}
+    </div>
+    <div class="detail-content">
+      ${renderTabContent(p)}
+    </div>
+  `;
+}
+
+function renderTabContent(p) {
+  if (state.activeTab === 'basic') {
+    return `
+      <div class="form-container">
+        <!-- Identifiers Section -->
+        <div class="form-section-card">
+          <div class="form-section-title">
+            Identifiers
+            <button class="form-section-action">+ Add identifier</button>
+          </div>
+          <div class="form-fields">
+            <div class="form-row">
+              <div class="form-field field-sm">
+                <label class="form-label">SKU <span class="required">*</span></label>
+                <input type="text" class="form-input" value="${p.sku}" oninput="updateField(${state.selectedItem}, 'sku', this.value)" placeholder="e.g., GIA0086">
+                <span class="form-hint">Stock keeping unit</span>
+              </div>
+              <div class="form-field field-md">
+                <label class="form-label">GTIN <span class="label-hint">13 digits</span></label>
+                <input type="text" class="form-input" value="${p.gtin}" oninput="updateField(${state.selectedItem}, 'gtin', this.value)" placeholder="0000000000000" maxlength="13">
+              </div>
+            </div>
+            <div class="form-field field-sm">
+              <label class="form-label">Internal ID</label>
+              <input type="text" class="form-input" value="${p.id}" disabled>
+              <span class="form-hint">Auto-generated</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Description Section -->
+        <div class="form-section-card">
+          <div class="form-section-title">
+            Product Description
+          </div>
+          <div class="form-fields">
+            <div class="form-field">
+              <label class="form-label">Product name <span class="required">*</span></label>
+              <input type="text" class="form-input" value="${p.name}" oninput="updateField(${state.selectedItem}, 'name', this.value)" placeholder="Enter product name">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Long description <span class="label-hint">${p.description.length}/500</span></label>
+              <textarea class="form-input form-textarea" oninput="updateField(${state.selectedItem}, 'description', this.value)" placeholder="Enter detailed product description..." maxlength="500">${p.description}</textarea>
+              <span class="form-hint">Detailed description for product pages and catalogs</span>
+            </div>
+            <div class="form-field field-lg">
+              <label class="form-label">Short description</label>
+              <input type="text" class="form-input" value="${p.name}" placeholder="Brief summary (max 100 chars)" maxlength="100">
+              <span class="form-hint">Used in search results and listings</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Brand Section -->
+        <div class="form-section-card">
+          <div class="form-section-title">
+            Brand Information
+          </div>
+          <div class="form-fields">
+            <div class="form-field field-md">
+              <label class="form-label">Brand <span class="required">*</span></label>
+              <select class="form-select" onchange="updateField(${state.selectedItem}, 'brand', this.value)">
+                <option value="">Select a brand...</option>
+                <option value="gibson" ${p.name.toLowerCase().includes('gibson') ? 'selected' : ''}>Gibson</option>
+                <option value="martin" ${p.name.toLowerCase().includes('martin') ? 'selected' : ''}>Martin</option>
+                <option value="national" ${p.name.toLowerCase().includes('national') ? 'selected' : ''}>National</option>
+                <option value="gretsch" ${p.name.toLowerCase().includes('gretsch') ? 'selected' : ''}>Gretsch</option>
+                <option value="dangelico" ${p.name.toLowerCase().includes("d'angelico") ? 'selected' : ''}>D'Angelico</option>
+                <option value="washburn" ${p.name.toLowerCase().includes('washburn') ? 'selected' : ''}>Washburn</option>
+              </select>
+            </div>
+            <div class="form-field field-lg">
+              <label class="form-label">Brand owner</label>
+              <input type="text" class="form-input" value="Gibson Brands, Inc." placeholder="Company that owns the brand">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions" id="formActions" style="display:none">
+          <button class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+          <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
+          <span class="unsaved-indicator">Unsaved changes</span>
+        </div>
+      </div>
+    `;
+  } else if (state.activeTab === 'assets') {
+    return `
+      <div class="assets-toolbar">
+        <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filter</button>
+        <button class="toolbar-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add</button>
+        <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg> Remove</button>
+        <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import</button>
+        <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+      </div>
+      <div class="assets-grid">
+        <div class="asset-card selected">
+          <div class="asset-image"><img src="${p.image}" alt=""></div>
+          <div class="asset-info">
+            <div class="asset-name">${p.sku}-${p.name.substring(0, 10)}...</div>
+            <div class="asset-type">Primary Product Image • jpg</div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (state.activeTab === 'compare') {
+    return `
+      <div class="compare-section">
+        <div class="compare-section-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          Ungrouped (1)
+        </div>
+        <div class="compare-section-content open">
+          <table class="compare-table">
+            <thead><tr><th style="width:120px"></th><th>Golden Record</th><th>Internal Source Record</th><th>Acme</th></tr></thead>
+            <tbody><tr><td style="font-weight:500">Name</td><td>${p.name}</td><td>${p.name}</td><td>${p.name}</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="compare-section">
+        <div class="compare-section-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          Description Information (3)
+        </div>
+        <div class="compare-section-content open">
+          <table class="compare-table">
+            <thead><tr><th style="width:120px"></th><th>Golden Record</th><th>Internal Source Record</th><th>Acme</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:500">Long Item Desc</td><td>${p.description.substring(0, 20)}...</td><td>${p.description.substring(0, 20)}...</td><td>${p.description.substring(0, 20)}...</td></tr>
+              <tr><td style="font-weight:500">Short Item Desc</td><td>${p.name}</td><td>${p.name}</td><td>${p.name}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="compare-section">
+        <div class="compare-section-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          Brand Information (1)
+        </div>
+        <div class="compare-section-content">
+          <table class="compare-table">
+            <thead><tr><th style="width:120px"></th><th>Golden Record</th><th>Internal Source Record</th><th>Acme</th></tr></thead>
+            <tbody><tr><td style="font-weight:500">Brand Name</td><td>Gibson (GIBSON)</td><td>Gibson (GIBSON)</td><td>Gibson (GIBSON)</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } else if (state.activeTab === 'pricing') {
+    const listPrice = p.price || Math.floor(Math.random() * 5000) + 1000;
+    const costPrice = Math.floor(listPrice * 0.6);
+    const margin = Math.round((1 - costPrice / listPrice) * 100);
+    
+    return `
+      <div class="form-container">
+        <div class="form-section-card">
+          <div class="form-section-title">Pricing</div>
+          <div class="form-fields">
+            <div class="form-row">
+              <div class="form-field field-sm">
+                <label class="form-label">List price <span class="required">*</span></label>
+                <div class="input-group">
+                  <span class="input-prefix">$</span>
+                  <input type="number" class="form-input" value="${listPrice}" placeholder="0.00" oninput="showFormActions()" step="0.01">
+                </div>
+              </div>
+              <div class="form-field field-sm">
+                <label class="form-label">Currency</label>
+                <select class="form-select" onchange="showFormActions()">
+                  <option value="usd" selected>USD</option>
+                  <option value="eur">EUR</option>
+                  <option value="gbp">GBP</option>
+                  <option value="cad">CAD</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field field-sm">
+                <label class="form-label">Cost price</label>
+                <div class="input-group">
+                  <span class="input-prefix">$</span>
+                  <input type="number" class="form-input" value="${costPrice}" placeholder="0.00" oninput="showFormActions()" step="0.01">
+                </div>
+                <span class="form-hint">Your cost to acquire</span>
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Margin</label>
+                <div class="input-group">
+                  <input type="number" class="form-input" value="${margin}" placeholder="0" oninput="showFormActions()">
+                  <span class="input-suffix">%</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-field field-sm">
+              <label class="form-label">MAP price</label>
+              <div class="input-group">
+                <span class="input-prefix">$</span>
+                <input type="number" class="form-input" value="" placeholder="0.00" oninput="showFormActions()" step="0.01">
+              </div>
+              <span class="form-hint">Minimum advertised price</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section-card">
+          <div class="form-section-title">Tax Settings</div>
+          <div class="form-fields">
+            <div class="form-field field-md">
+              <label class="form-label">Tax category</label>
+              <select class="form-select" onchange="showFormActions()">
+                <option value="standard" selected>Standard rate (20%)</option>
+                <option value="reduced">Reduced rate (5%)</option>
+                <option value="zero">Zero rated</option>
+                <option value="exempt">Tax exempt</option>
+              </select>
+              <span class="form-hint">Determines tax rate applied at checkout</span>
+            </div>
+            <div class="form-field field-xs">
+              <label class="form-label">Tax rate</label>
+              <div class="input-group">
+                <input type="number" class="form-input" value="20" disabled>
+                <span class="input-suffix">%</span>
+              </div>
+              <span class="form-hint">Auto-calculated</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions" id="formActions" style="display:none">
+          <button class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+          <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
+          <span class="unsaved-indicator">Unsaved changes</span>
+        </div>
+      </div>
+    `;
+  } else if (state.activeTab === 'category') {
+    const year = p.name.match(/\d{4}/)?.[0] || '1930';
+    return `
+      <div class="form-container">
+        <div class="form-section-card">
+          <div class="form-section-title">Category Classification</div>
+          <div class="form-fields">
+            <div class="form-field field-lg">
+              <label class="form-label">Primary category <span class="required">*</span></label>
+              <select class="form-select" onchange="showFormActions()">
+                <option value="">Select category...</option>
+                <option value="string" selected>String Musical Instruments</option>
+                <option value="wind">Wind Musical Instruments</option>
+                <option value="percussion">Percussion Musical Instruments</option>
+                <option value="keyboard">Keyboard Instruments</option>
+              </select>
+            </div>
+            <div class="form-field field-lg">
+              <label class="form-label">Subcategory</label>
+              <select class="form-select" onchange="showFormActions()">
+                <option value="">Select subcategory...</option>
+                <option value="acoustic" selected>Acoustic Guitars</option>
+                <option value="electric">Electric Guitars</option>
+                <option value="bass">Bass Guitars</option>
+                <option value="classical">Classical Guitars</option>
+                <option value="resonator">Resonator Guitars</option>
+              </select>
+              <span class="form-hint">Further classification within primary category</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section-card">
+          <div class="form-section-title">Product Attributes</div>
+          <div class="form-fields">
+            <div class="form-field field-lg">
+              <label class="form-label">Materials</label>
+              <input type="text" class="form-input" value="Spruce, Maple, Rosewood" placeholder="e.g., Wood, Metal, Plastic" oninput="showFormActions()">
+              <span class="form-hint">Separate multiple materials with commas</span>
+            </div>
+            <div class="form-row">
+              <div class="form-field field-md">
+                <label class="form-label">Color / Finish</label>
+                <input type="text" class="form-input" value="Natural" placeholder="e.g., Sunburst, Black" oninput="showFormActions()">
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Strings</label>
+                <input type="number" class="form-input" value="6" placeholder="0" oninput="showFormActions()" min="1" max="12">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field field-xs">
+                <label class="form-label">Year</label>
+                <input type="text" class="form-input" value="${year}" placeholder="YYYY" oninput="showFormActions()" maxlength="4">
+              </div>
+              <div class="form-field field-md">
+                <label class="form-label">Condition</label>
+                <select class="form-select" onchange="showFormActions()">
+                  <option value="excellent">Excellent</option>
+                  <option value="good" selected>Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions" id="formActions" style="display:none">
+          <button class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+          <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
+          <span class="unsaved-indicator">Unsaved changes</span>
+        </div>
+      </div>
+    `;
+  } else if (state.activeTab === 'warehouse') {
+    const qty = Math.floor(Math.random() * 50);
+    return `
+      <div class="form-container">
+        <div class="form-section-card">
+          <div class="form-section-title">Inventory Levels</div>
+          <div class="form-fields">
+            <div class="form-row">
+              <div class="form-field field-xs">
+                <label class="form-label">On hand</label>
+                <input type="number" class="form-input" value="${qty}" placeholder="0" oninput="showFormActions()" min="0">
+                <span class="form-hint">Current stock</span>
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Reserved</label>
+                <input type="number" class="form-input" value="0" placeholder="0" oninput="showFormActions()" min="0">
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Available</label>
+                <input type="number" class="form-input" value="${qty}" disabled>
+                <span class="form-hint">On hand - Reserved</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field field-xs">
+                <label class="form-label">Reorder at</label>
+                <input type="number" class="form-input" value="5" placeholder="0" oninput="showFormActions()" min="0">
+                <span class="form-hint">Low stock alert</span>
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Reorder qty</label>
+                <input type="number" class="form-input" value="10" placeholder="0" oninput="showFormActions()" min="1">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section-card">
+          <div class="form-section-title">Storage Location</div>
+          <div class="form-fields">
+            <div class="form-row">
+              <div class="form-field field-sm">
+                <label class="form-label">Warehouse</label>
+                <select class="form-select" onchange="showFormActions()">
+                  <option value="wh-a" selected>WH-A (Main)</option>
+                  <option value="wh-b">WH-B (Secondary)</option>
+                  <option value="wh-c">WH-C (Overflow)</option>
+                </select>
+              </div>
+              <div class="form-field field-sm">
+                <label class="form-label">Location</label>
+                <input type="text" class="form-input" value="Aisle 12, Shelf 3" placeholder="e.g., Aisle 1, Shelf A" oninput="showFormActions()">
+              </div>
+            </div>
+            <div class="form-field field-sm">
+              <label class="form-label">Bin number</label>
+              <input type="text" class="form-input" value="BIN-${p.sku}" placeholder="e.g., BIN-001" oninput="showFormActions()">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section-card">
+          <div class="form-section-title">Dimensions & Weight</div>
+          <div class="form-fields">
+            <div class="form-row">
+              <div class="form-field field-xs">
+                <label class="form-label">Length</label>
+                <div class="input-group">
+                  <input type="number" class="form-input" value="102" placeholder="0" oninput="showFormActions()">
+                  <span class="input-suffix">cm</span>
+                </div>
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Width</label>
+                <div class="input-group">
+                  <input type="number" class="form-input" value="45" placeholder="0" oninput="showFormActions()">
+                  <span class="input-suffix">cm</span>
+                </div>
+              </div>
+              <div class="form-field field-xs">
+                <label class="form-label">Height</label>
+                <div class="input-group">
+                  <input type="number" class="form-input" value="15" placeholder="0" oninput="showFormActions()">
+                  <span class="input-suffix">cm</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-field field-xs">
+              <label class="form-label">Weight</label>
+              <div class="input-group">
+                <input type="number" class="form-input" value="3.2" step="0.1" placeholder="0" oninput="showFormActions()">
+                <span class="input-suffix">kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions" id="formActions" style="display:none">
+          <button class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+          <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
+          <span class="unsaved-indicator">Unsaved changes</span>
+        </div>
+      </div>
+    `;
+  } else {
+    return `<div style="padding:40px;text-align:center;color:var(--text-muted)">Content for ${state.activeTab} tab</div>`;
+  }
+}
+
+// ==================== CORE FUNCTIONS ====================
+function selectItem(index) {
+  if (index < 0 || index >= products.length) return;
+  state.selectedItem = index;
+  state.hasChanges = false;
+  renderTable();
+  renderGallery();
+  renderListView();
+  renderItemList();
+  if (state.detailsOpen) {
+    renderDetail();
+    renderToolbar();
+  }
+}
+
+function switchTab(tab) {
+  state.activeTab = tab;
+  renderDetail();
+}
+
+// ==================== VIEW SWITCHING ====================
+function switchView(view) {
+  state.currentView = view;
+  state.detailsOpen = (view === 'details');
+  
+  // Update view switcher buttons
+  document.getElementById('viewTableBtn').classList.toggle('active', view === 'table');
+  document.getElementById('viewGalleryBtn').classList.toggle('active', view === 'gallery');
+  document.getElementById('viewListBtn').classList.toggle('active', view === 'list');
+  document.getElementById('viewDetailsBtn').classList.toggle('active', view === 'details');
+  
+  // Toggle content views
+  document.getElementById('tableView').classList.toggle('hidden', view !== 'table');
+  document.getElementById('galleryView').classList.toggle('active', view === 'gallery');
+  document.getElementById('listView').classList.toggle('active', view === 'list');
+  document.getElementById('detailView').classList.toggle('active', view === 'details');
+  
+  // Hide selection bar in detail view
+  if (view === 'details') {
+    document.getElementById('selectionBar').classList.remove('visible');
+  } else {
+    updateToolbarState(); // Re-show if items are selected
+  }
+  
+  // Render appropriate view
+  if (view === 'gallery') renderGallery();
+  if (view === 'list') renderListView();
+  if (view === 'details') {
+    renderItemList();
+    renderDetail();
+  }
+  
+  // Render contextual toolbar
+  renderToolbar();
+}
+
+function renderToolbar() {
+  const toolbar = document.getElementById('toolbar');
+  
+  if (state.detailsOpen) {
+    // Detail view toolbar: Item navigation + product actions
+    const p = products[state.selectedItem];
+    const canGoPrev = state.selectedItem > 0;
+    const canGoNext = state.selectedItem < products.length - 1;
+    
+    toolbar.innerHTML = `
+      <div class="item-nav">
+        <button class="item-nav-btn" onclick="navigateItem(-1)" ${!canGoPrev ? 'disabled' : ''}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="item-nav-info">${state.selectedItem + 1} of ${products.length}</span>
+        <button class="item-nav-btn" onclick="navigateItem(1)" ${!canGoNext ? 'disabled' : ''}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="showProductReferences('${p?.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          References
+        </button>
+        <button class="toolbar-btn" onclick="duplicateProduct('${p?.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Duplicate
+        </button>
+        <button class="toolbar-btn" onclick="showHistory('${p?.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          History
+        </button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-group">
+        ${p && p.status === 'pending' ? `
+        <button class="toolbar-btn primary" onclick="approveProduct('${p.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Approve
+        </button>
+        ` : `
+        <button class="toolbar-btn" onclick="unapproveProduct('${p?.id}')" style="color: var(--success);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Approved
+        </button>
+        `}
+        <button class="toolbar-btn" onclick="deleteProduct('${p?.id}')" style="color: var(--error);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <span class="toolbar-info">${p ? p.name.substring(0, 35) + (p.name.length > 35 ? '...' : '') : ''}</span>
+    `;
+  } else {
+    // Bulk view toolbar (Table/Gallery/List): List actions
+    toolbar.innerHTML = `
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="showSortMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Sort
+        </button>
+        <button class="toolbar-btn" onclick="showFilterPanel()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter
+        </button>
+        <button class="toolbar-btn" onclick="showColumnSettings()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Columns
+        </button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn primary" onclick="createProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Create
+        </button>
+        <button class="toolbar-btn" onclick="importData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import
+        </button>
+        <button class="toolbar-btn" onclick="exportData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="bulkEdit()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Bulk Edit
+        </button>
+        <button class="toolbar-btn" onclick="refreshData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <span class="toolbar-info">${products.length} items</span>
+    `;
+  }
+}
+
+function navigateItem(direction) {
+  const newIndex = state.selectedItem + direction;
+  if (newIndex >= 0 && newIndex < products.length) {
+    selectItem(newIndex);
+    renderToolbar();
+  }
+}
+
+// Legacy function for backward compatibility
+function toggleDetails() {
+  switchView(state.detailsOpen ? 'table' : 'details');
+}
+
+// ==================== FORM HANDLING ====================
+function updateField(index, field, value) {
+  if (products[index]) {
+    products[index][field] = value;
+    // Also update in allProducts
+    const productId = products[index].id;
+    const allIdx = allProducts.findIndex(p => p.id === productId);
+    if (allIdx > -1) allProducts[allIdx][field] = value;
+  }
+  state.hasChanges = true;
+  showFormActions();
+  if (field === 'name') {
+    renderItemList();
+  }
+}
+
+function showFormActions() {
+  state.hasChanges = true;
+  const actions = document.getElementById('formActions');
+  if (actions) actions.style.display = 'flex';
+}
+
+function saveChanges() {
+  state.hasChanges = false;
+  const actions = document.getElementById('formActions');
+  if (actions) actions.style.display = 'none';
+  showToast('Changes saved successfully!', 'success');
+  renderTable();
+  renderItemList();
+  renderDetail();
+}
+
+function discardChanges() {
+  state.hasChanges = false;
+  const actions = document.getElementById('formActions');
+  if (actions) actions.style.display = 'none';
+  // Reload from allProducts
+  products = getFilteredProducts();
+  renderDetail();
+  showToast('Changes discarded');
+}
+
+// ==================== TOOLBAR ACTIONS ====================
+function showSortMenu() {
+  showModal('Sort By', `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${['name', 'id', 'sku', 'completeness', 'status', 'price'].map(f => `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;border-radius:4px;${state.sortBy === f ? 'background:var(--accent-light)' : ''}" onclick="setSortField('${f}')">
+          <input type="radio" name="sort" ${state.sortBy === f ? 'checked' : ''}>
+          <span>${f.charAt(0).toUpperCase() + f.slice(1)}</span>
+        </label>
+      `).join('')}
+      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:12px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" ${state.sortDir === 'desc' ? 'checked' : ''} onchange="state.sortDir = this.checked ? 'desc' : 'asc'; products = getFilteredProducts(); renderTable(); renderItemList();">
+          <span>Descending order</span>
+        </label>
+      </div>
+    </div>
+  `);
+}
+
+function setSortField(field) {
+  state.sortBy = field;
+  products = getFilteredProducts();
+  renderTable();
+  renderItemList();
+  closeModal();
+}
+
+function showFilterPanel() {
+  showModal('Filter Products', `
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="form-field">
+        <label class="form-label">Search</label>
+        <input type="text" class="form-input" id="filterSearch" value="${state.filterText}" placeholder="Search by name, SKU, GTIN..." oninput="applyFilter(this.value)">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="filterStatus" onchange="applyStatusFilter(this.value)">
+          <option value="">All statuses</option>
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Completeness</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" class="form-input" placeholder="Min %" style="width:80px">
+          <span style="display:flex;align-items:center">to</span>
+          <input type="number" class="form-input" placeholder="Max %" style="width:80px">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-primary" onclick="closeModal()">Apply</button>
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
+      </div>
+    </div>
+  `);
+}
+
+function applyFilter(text) {
+  state.filterText = text;
+  products = getFilteredProducts();
+  state.selectedItem = 0;
+  renderTable();
+  renderItemList();
+  updateContentHeader();
+}
+
+function applyStatusFilter(status) {
+  // Additional filter logic could be added here
+  products = getFilteredProducts();
+  if (status) {
+    products = products.filter(p => p.status === status);
+  }
+  state.selectedItem = 0;
+  renderTable();
+  renderItemList();
+  updateContentHeader();
+}
+
+function clearFilters() {
+  state.filterText = '';
+  products = getFilteredProducts();
+  state.selectedItem = 0;
+  renderTable();
+  renderItemList();
+  updateContentHeader();
+  closeModal();
+  showToast('Filters cleared');
+}
+
+function createProduct() {
+  showModal('Create New Product', `
+    <form onsubmit="submitNewProduct(event)" style="display:flex;flex-direction:column;gap:16px">
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">SKU *</label>
+          <input type="text" class="form-input" id="newSku" required placeholder="e.g., GIA0001">
+        </div>
+        <div class="form-field">
+          <label class="form-label">GTIN</label>
+          <input type="text" class="form-input" id="newGtin" placeholder="13-digit code">
+        </div>
+        <div class="form-field full">
+          <label class="form-label">Product Name *</label>
+          <input type="text" class="form-input" id="newName" required placeholder="Enter product name">
+        </div>
+        <div class="form-field full">
+          <label class="form-label">Description</label>
+          <textarea class="form-input form-textarea" id="newDesc" placeholder="Enter product description"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="newCategory">
+            <option value="string">String Musical Instruments</option>
+            <option value="percussion">Percussion</option>
+            <option value="brass">Brasswind</option>
+            <option value="woodwind">Woodwind</option>
+            <option value="keyboards">Keyboards/Pianos</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Price (USD)</label>
+          <input type="number" class="form-input" id="newPrice" placeholder="0.00">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">Create Product</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  `);
+}
+
+function submitNewProduct(e) {
+  e.preventDefault();
+  const newProduct = {
+    id: 'tstEXT-' + Math.floor(Math.random() * 900000 + 100000),
+    name: document.getElementById('newName').value,
+    sku: document.getElementById('newSku').value,
+    gtin: document.getElementById('newGtin').value || Math.floor(Math.random() * 9000000000000 + 1000000000000).toString(),
+    description: document.getElementById('newDesc').value || 'New product',
+    category: document.getElementById('newCategory').value,
+    price: parseFloat(document.getElementById('newPrice').value) || 0,
+    type: 'External Source',
+    image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&h=100&fit=crop',
+    completeness: 10,
+    status: 'pending'
+  };
+  
+  allProducts.unshift(newProduct);
+  // Update category count
+  updateCategoryCounts();
+  products = getFilteredProducts();
+  state.selectedItem = 0;
+  
+  closeModal();
+  renderTree();
+  renderTable();
+  renderItemList();
+  updateContentHeader();
+  showToast('Product created successfully!', 'success');
+}
+
+function updateCategoryCounts() {
+  function updateNode(node) {
+    if (node.children) {
+      node.children.forEach(updateNode);
+    } else {
+      node.count = allProducts.filter(p => p.category === node.id).length;
+    }
+  }
+  categories.forEach(updateNode);
+}
+
+// ==================== BULK ACTIONS (Selection Bar) ====================
+function approveSelected() {
+  if (state.checkedItems.length === 0) {
+    showToast('Please select items to approve', 'warning');
+    return;
+  }
+  
+  const count = state.checkedItems.length;
+  state.checkedItems.forEach(id => {
+    const product = allProducts.find(p => p.id === id);
+    if (product) product.status = 'approved';
+  });
+  
+  products = getFilteredProducts();
+  state.checkedItems = [];
+  renderTable();
+  renderItemList();
+  if (state.detailsOpen) renderDetail();
+  updateToolbarState();
+  showToast(`${count} item(s) approved`, 'success');
+}
+
+// ==================== SINGLE PRODUCT ACTIONS (Detail Panel) ====================
+function approveProduct(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (product) {
+    product.status = 'approved';
+    products = getFilteredProducts();
+    renderTable();
+    renderItemList();
+    renderDetail();
+    showToast(`"${product.name}" approved`, 'success');
+  }
+}
+
+function deleteProduct(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  
+  showModal('Delete Product', `
+    <div>
+      <p style="margin-bottom:12px">Are you sure you want to delete this product?</p>
+      <div style="background:var(--bg-subtle);padding:12px;border-radius:6px;margin-bottom:16px">
+        <div style="font-weight:600">${product.name}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${product.sku} • ${product.id}</div>
+      </div>
+      <p style="color:var(--error);font-size:12px;margin-bottom:16px">This action cannot be undone.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="background:var(--error);color:white;border:none" onclick="confirmDeleteProduct('${id}')">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  `);
+}
+
+function confirmDeleteProduct(id) {
+  const idx = allProducts.findIndex(p => p.id === id);
+  if (idx > -1) {
+    const name = allProducts[idx].name;
+    allProducts.splice(idx, 1);
+    updateCategoryCounts();
+    products = getFilteredProducts();
+    state.selectedItem = Math.min(state.selectedItem, products.length - 1);
+    if (state.selectedItem < 0) state.selectedItem = 0;
+    
+    closeModal();
+    renderTree();
+    renderTable();
+    renderItemList();
+    if (state.detailsOpen && products.length > 0) renderDetail();
+    updateContentHeader();
+    showToast(`"${name}" deleted`, 'success');
+  }
+}
+
+function showProductReferences(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  
+  showModal('References', `
+    <div style="color:var(--text-secondary)">
+      <div style="background:var(--bg-subtle);padding:12px;border-radius:6px;margin-bottom:16px">
+        <div style="font-weight:600">${product.name}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${product.sku} • ${product.id}</div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden">
+        <div style="padding:12px;background:var(--bg-subtle);border-bottom:1px solid var(--border);font-weight:600;font-size:12px">Linked Records (3)</div>
+        <div style="padding:12px;border-bottom:1px solid var(--border-light);font-size:12px;display:flex;justify-content:space-between">
+          <span>Internal Source Record</span>
+          <span style="color:var(--accent);cursor:pointer">View →</span>
+        </div>
+        <div style="padding:12px;border-bottom:1px solid var(--border-light);font-size:12px;display:flex;justify-content:space-between">
+          <span>Acme Supplier Record</span>
+          <span style="color:var(--accent);cursor:pointer">View →</span>
+        </div>
+        <div style="padding:12px;font-size:12px;display:flex;justify-content:space-between">
+          <span>ECommerce Record</span>
+          <span style="color:var(--accent);cursor:pointer">View →</span>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+function exportData() {
+  const itemsToExport = state.checkedItems.length > 0 
+    ? products.filter(p => state.checkedItems.includes(p.id))
+    : products;
+    
+  if (itemsToExport.length === 0) {
+    showToast('No items to export', 'warning');
+    return;
+  }
+  
+  // Create CSV
+  const headers = ['ID', 'Name', 'SKU', 'GTIN', 'Type', 'Category', 'Completeness', 'Status', 'Price'];
+  const rows = itemsToExport.map(p => [p.id, p.name, p.sku, p.gtin, p.type, p.category, p.completeness, p.status, p.price]);
+  const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+  
+  // Download
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `products_export_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showToast(`Exported ${itemsToExport.length} items to CSV`, 'success');
+}
+
+function importData() {
+  showModal('Import Products', `
+    <div class="form-section">
+      <p style="margin-bottom: 16px; color: var(--text-secondary);">Upload a CSV or Excel file to import products.</p>
+      <div style="border: 2px dashed var(--border); border-radius: 8px; padding: 40px; text-align: center; background: var(--bg-subtle);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 40px; height: 40px; color: var(--text-muted); margin-bottom: 12px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p style="margin-bottom: 8px; font-weight: 500;">Drop files here or click to browse</p>
+        <p style="font-size: 12px; color: var(--text-muted);">Supports CSV, XLSX (max 10MB)</p>
+      </div>
+      <div class="form-actions" style="margin-top: 20px;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal(); showToast('Import feature coming soon', 'info');">Upload</button>
+      </div>
+    </div>
+  `);
+}
+
+function showColumnSettings() {
+  showModal('Column Settings', `
+    <div class="form-section">
+      <p style="margin-bottom: 16px; color: var(--text-secondary);">Choose which columns to display in the table.</p>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer;">
+          <input type="checkbox" checked disabled> <span>Name</span> <span style="color: var(--text-muted); font-size: 11px;">(Required)</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer; background: var(--bg-subtle);">
+          <input type="checkbox" checked> <span>SKU</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer;">
+          <input type="checkbox" checked> <span>GTIN</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer; background: var(--bg-subtle);">
+          <input type="checkbox" checked> <span>Type</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer;">
+          <input type="checkbox" checked> <span>Completeness</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer; background: var(--bg-subtle);">
+          <input type="checkbox" checked> <span>Status</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer;">
+          <input type="checkbox"> <span>Price</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer; background: var(--bg-subtle);">
+          <input type="checkbox"> <span>Category</span>
+        </label>
+      </div>
+      <div class="form-actions" style="margin-top: 20px;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal(); showToast('Column settings saved', 'success');">Apply</button>
+      </div>
+    </div>
+  `);
+}
+
+function bulkEdit() {
+  if (state.checkedItems.length === 0) {
+    showToast('Select items to bulk edit', 'warning');
+    return;
+  }
+  showModal('Bulk Edit', `
+    <div class="form-section">
+      <p style="margin-bottom: 16px; color: var(--text-secondary);">Edit ${state.checkedItems.length} selected items.</p>
+      <div class="form-field">
+        <label class="form-label">Field to update</label>
+        <select class="form-select">
+          <option value="">Select field...</option>
+          <option value="status">Status</option>
+          <option value="category">Category</option>
+          <option value="brand">Brand</option>
+          <option value="manufacturer">Manufacturer</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">New value</label>
+        <input type="text" class="form-input" placeholder="Enter new value...">
+      </div>
+      <div class="form-actions" style="margin-top: 20px;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal(); showToast('Bulk edit applied to ' + state.checkedItems.length + ' items', 'success');">Apply Changes</button>
+      </div>
+    </div>
+  `);
+}
+
+function refreshData() {
+  showToast('Refreshing data...', 'info');
+  setTimeout(() => {
+    products = getFilteredProducts();
+    renderTable();
+    renderToolbar();
+    showToast('Data refreshed', 'success');
+  }, 500);
+}
+
+function duplicateProduct(id) {
+  const p = allProducts.find(prod => prod.id === id);
+  if (!p) return;
+  
+  const newProduct = {
+    ...p,
+    id: 'PROD-' + Date.now(),
+    name: p.name + ' (Copy)',
+    sku: p.sku + '-COPY',
+    status: 'pending'
+  };
+  
+  allProducts.unshift(newProduct);
+  products = getFilteredProducts();
+  updateCategoryCounts();
+  renderTable();
+  renderTree();
+  
+  showToast(`Duplicated: ${p.name}`, 'success');
+  
+  // Switch to details view showing the new product
+  state.selectedItem = 0;
+  switchView('details');
+}
+
+function showHistory(id) {
+  const p = products.find(prod => prod.id === id);
+  if (!p) return;
+  
+  showModal('Change History', `
+    <div class="form-section">
+      <p style="margin-bottom: 16px; color: var(--text-secondary);">History for <strong>${p.name}</strong></p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px; padding: 12px; background: var(--bg-subtle); border-radius: 6px;">
+          <div style="width: 8px; height: 8px; background: var(--accent); border-radius: 50%; margin-top: 5px;"></div>
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: var(--text-muted);">Today, 2:34 PM</div>
+            <div style="font-weight: 500; margin: 4px 0;">Price updated</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Changed from $299.99 to $${p.price} by John Smith</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; padding: 12px; background: var(--bg-subtle); border-radius: 6px;">
+          <div style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; margin-top: 5px;"></div>
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: var(--text-muted);">Yesterday, 10:15 AM</div>
+            <div style="font-weight: 500; margin: 4px 0;">Product approved</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Status changed to Approved by Admin</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; padding: 12px; background: var(--bg-subtle); border-radius: 6px;">
+          <div style="width: 8px; height: 8px; background: var(--warning); border-radius: 50%; margin-top: 5px;"></div>
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: var(--text-muted);">Jan 15, 2026</div>
+            <div style="font-weight: 500; margin: 4px 0;">Product created</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Initial creation by Import System</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions" style="margin-top: 20px;">
+        <button class="btn" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+}
+
+function unapproveProduct(id) {
+  const pAll = allProducts.find(prod => prod.id === id);
+  const pFiltered = products.find(prod => prod.id === id);
+  if (pAll) pAll.status = 'pending';
+  if (pFiltered) pFiltered.status = 'pending';
+  
+  renderTable();
+  renderItemList();
+  renderDetail();
+  renderToolbar();
+  showToast('Product status changed to Pending', 'info');
+}
+
+// Compare selected items (bulk action from selection bar)
+function showReferences() {
+  if (state.checkedItems.length === 0) {
+    showToast('Please select items to compare', 'warning');
+    return;
+  }
+  
+  const selectedProducts = allProducts.filter(p => state.checkedItems.includes(p.id));
+  
+  showModal('Compare Selected Items', `
+    <div style="color:var(--text-secondary)">
+      <p style="margin-bottom:16px;font-size:12px">Comparing <strong>${selectedProducts.length} items</strong></p>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:var(--bg-subtle)">
+              <th style="padding:8px;border:1px solid var(--border);text-align:left">Field</th>
+              ${selectedProducts.map(p => `<th style="padding:8px;border:1px solid var(--border);text-align:left;max-width:150px">${p.name.substring(0, 20)}...</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:8px;border:1px solid var(--border-light);font-weight:500">SKU</td>${selectedProducts.map(p => `<td style="padding:8px;border:1px solid var(--border-light)">${p.sku}</td>`).join('')}</tr>
+            <tr><td style="padding:8px;border:1px solid var(--border-light);font-weight:500">Status</td>${selectedProducts.map(p => `<td style="padding:8px;border:1px solid var(--border-light)"><span class="status-badge ${p.status}">${p.status}</span></td>`).join('')}</tr>
+            <tr><td style="padding:8px;border:1px solid var(--border-light);font-weight:500">Completeness</td>${selectedProducts.map(p => `<td style="padding:8px;border:1px solid var(--border-light)">${p.completeness}%</td>`).join('')}</tr>
+            <tr><td style="padding:8px;border:1px solid var(--border-light);font-weight:500">Category</td>${selectedProducts.map(p => `<td style="padding:8px;border:1px solid var(--border-light)">${p.category}</td>`).join('')}</tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;display:flex;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+}
+
+function deleteSelected() {
+  if (state.checkedItems.length === 0) {
+    showToast('Please select items to delete', 'warning');
+    return;
+  }
+  
+  const selectedProducts = allProducts.filter(p => state.checkedItems.includes(p.id));
+  const count = selectedProducts.length;
+  
+  showModal('Delete Selected Items', `
+    <div>
+      <p style="margin-bottom:12px">Are you sure you want to delete <strong>${count} item(s)</strong>?</p>
+      <div style="background:var(--bg-subtle);padding:12px;border-radius:6px;margin-bottom:16px;max-height:150px;overflow-y:auto">
+        ${selectedProducts.map(p => `
+          <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px">
+            <span style="color:var(--text-muted)">•</span>
+            <span>${p.name}</span>
+            <span style="color:var(--text-muted);margin-left:auto">${p.sku}</span>
+          </div>
+        `).join('')}
+      </div>
+      <p style="color:var(--error);font-size:12px;margin-bottom:16px">This action cannot be undone.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="background:var(--error);color:white;border:none" onclick="confirmDelete()">Delete ${count} Items</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  `);
+}
+
+function confirmDelete() {
+  const count = state.checkedItems.length;
+  state.checkedItems.forEach(id => {
+    const idx = allProducts.findIndex(p => p.id === id);
+    if (idx > -1) allProducts.splice(idx, 1);
+  });
+  
+  updateCategoryCounts();
+  products = getFilteredProducts();
+  state.selectedItem = Math.min(state.selectedItem, products.length - 1);
+  if (state.selectedItem < 0) state.selectedItem = 0;
+  state.checkedItems = [];
+  
+  closeModal();
+  renderTree();
+  renderTable();
+  renderItemList();
+  if (state.detailsOpen && products.length > 0) renderDetail();
+  updateContentHeader();
+  updateToolbarState();
+  showToast(`${count} items deleted`, 'success');
+}
+
+// ==================== HEADER NAVIGATION ====================
+function switchDataSource(source, el) {
+  document.querySelectorAll('.header-nav-item').forEach(item => item.classList.remove('active'));
+  el.classList.add('active');
+  showToast(`Switched to ${el.textContent}`);
+}
+
+// ==================== SEARCH ====================
+function setupSearch() {
+  // Header search
+  const headerSearch = document.querySelector('.header-search input');
+  if (headerSearch) {
+    headerSearch.addEventListener('input', (e) => {
+      applyFilter(e.target.value);
+    });
+    headerSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.target.value = '';
+        applyFilter('');
+      }
+    });
+  }
+  
+  // Sidebar filter
+  const sidebarSearch = document.querySelector('.sidebar-search input');
+  if (sidebarSearch) {
+    sidebarSearch.addEventListener('input', (e) => {
+      state.sidebarFilter = e.target.value;
+      renderTree();
+    });
+  }
+}
+
+// ==================== MODALS ====================
+function showModal(title, content) {
+  let modal = document.getElementById('modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal';
+    modal.innerHTML = `
+      <div class="modal-backdrop" onclick="closeModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title"></div>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  
+  modal.querySelector('.modal-title').textContent = title;
+  modal.querySelector('.modal-body').innerHTML = content;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const modal = document.getElementById('modal');
+  if (modal) {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// ==================== TOAST ====================
+function showToast(message, type = 'info') {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    document.body.appendChild(toast);
+  }
+  
+  const colors = {
+    success: '#2f9e44',
+    error: '#e03131',
+    warning: '#f08c00',
+    info: '#212529'
+  };
+  
+  toast.style.cssText = `position:fixed;bottom:24px;right:24px;background:${colors[type]};color:white;padding:12px 20px;border-radius:6px;font-size:13px;font-weight:500;z-index:10001;opacity:0;transform:translateY(10px);transition:all 0.3s;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;gap:8px;`;
+  
+  const icons = {
+    success: '✓',
+    error: '✕',
+    warning: '⚠',
+    info: 'ℹ'
+  };
+  
+  toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+  }, 3000);
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Escape to close modal
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+    // Ctrl/Cmd + S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (state.hasChanges) saveChanges();
+    }
+    // Ctrl/Cmd + F to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      document.querySelector('.header-search input')?.focus();
+    }
+    // Arrow keys for navigation in list
+    if (state.detailsOpen && !e.target.matches('input, textarea, select')) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectItem(Math.min(state.selectedItem + 1, products.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectItem(Math.max(state.selectedItem - 1, 0));
+      }
+    }
+  });
+}
+
+// Warn before leaving with unsaved changes
+window.addEventListener('beforeunload', (e) => {
+  if (state.hasChanges) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// ==================== INIT ====================
+function init() {
+  products = getFilteredProducts();
+  renderTree();
+  renderTable();
+  renderGallery();
+  renderListView();
+  renderToolbar();
+  updateBreadcrumb();
+  updateContentHeader();
+  setupSearch();
+  setupKeyboardShortcuts();
+}
+
+init();
+  </script>
+</body>
+</html>

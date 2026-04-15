@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Revisions - Wireframe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            color: #333;
+            padding: 40px;
+            line-height: 1.4;
+        }
+
+        .wireframe-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section labels */
+        .section-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        /* Page frame */
+        .page-frame {
+            background: #fff;
+            border: 2px solid #333;
+            padding: 24px;
+            margin-bottom: 60px;
+        }
+
+        /* Page title */
+        .page-title {
+            font-size: 20px;
+            font-weight: bold;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        /* Control bar */
+        .control-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #666;
+            background: #fff;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .checkbox.checked {
+            background: #666;
+            position: relative;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 11px;
+            position: absolute;
+            top: -2px;
+            left: 2px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            color: #444;
+        }
+
+        /* Comparison table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #999;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #ccc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .comparison-table th {
+            background: #e5e5e5;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comparison-table th:first-child {
+            background: #d5d5d5;
+            width: 140px;
+        }
+
+        .comparison-table td:first-child {
+            background: #f0f0f0;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .comparison-table td {
+            background: #fff;
+            color: #666;
+        }
+
+        /* Difference row indicator */
+        .diff-row td {
+            background: #eaeaea;
+        }
+
+        .diff-row td:first-child {
+            background: #ddd;
+            border-left: 4px solid #888;
+        }
+
+        /* Placeholder text blocks */
+        .text-block {
+            background: #bbb;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .text-block.short {
+            width: 60px;
+        }
+
+        .text-block.medium {
+            width: 100px;
+        }
+
+        .text-block.long {
+            width: 140px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 60px 40px;
+            text-align: center;
+            border: 1px dashed #ccc;
+            background: #fafafa;
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #aaa;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* Callout annotations */
+        .callout {
+            position: relative;
+            display: inline-block;
+        }
+
+        .annotation {
+            position: absolute;
+            font-size: 10px;
+            color: #666;
+            background: #fffde7;
+            border: 1px solid #e0d890;
+            padding: 6px 10px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .annotation::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 1px;
+            background: #e0d890;
+        }
+
+        /* Variant container */
+        .variants-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .variant {
+            position: relative;
+        }
+
+        .variant-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 12px;
+            padding: 4px 8px;
+            background: #e8e8e8;
+            display: inline-block;
+        }
+
+        /* Annotation boxes */
+        .annotation-box {
+            background: #fffde7;
+            border: 1px dashed #d4c85c;
+            padding: 12px 16px;
+            font-size: 11px;
+            color: #666;
+            margin-top: 16px;
+        }
+
+        .annotation-box strong {
+            color: #444;
+        }
+
+        /* Side annotation */
+        .side-annotation {
+            position: absolute;
+            right: -180px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 160px;
+            font-size: 10px;
+            color: #666;
+            background: #fffde7;
+            border: 1px solid #e0d890;
+            padding: 8px 10px;
+        }
+
+        .side-annotation::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            width: 20px;
+            height: 1px;
+            background: #e0d890;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .legend-swatch {
+            width: 20px;
+            height: 14px;
+            border: 1px solid #999;
+        }
+
+        .legend-swatch.diff {
+            background: #eaeaea;
+            border-left: 3px solid #888;
+        }
+
+        .legend-swatch.same {
+            background: #fff;
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 2px dashed #ccc;
+            margin: 60px 0;
+        }
+
+        /* Header for wireframe sections */
+        h2 {
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Inline annotation marker */
+        .marker {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #fffde7;
+            border: 1px solid #d4c85c;
+            border-radius: 50%;
+            font-size: 10px;
+            text-align: center;
+            line-height: 14px;
+            color: #888;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* Notes section */
+        .notes-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+        }
+
+        .notes-section h3 {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .notes-section ul {
+            margin-left: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .notes-section li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        
+        <!-- Wireframe Title -->
+        <div class="section-label">Low-Fidelity Wireframe: Object Revision Comparison</div>
+
+        <!-- ==================== -->
+        <!-- STATE 1: ALL VISIBLE -->
+        <!-- ==================== -->
+        <h2>State 1: Default View (All Attributes)</h2>
+        
+        <div class="page-frame">
+            <!-- Page Title -->
+            <div class="page-title">Compare Revisions</div>
+            
+            <!-- Control Bar -->
+            <div class="control-bar">
+                <span class="checkbox"></span>
+                <span class="control-label">Show differences only</span>
+                <span class="marker">1</span>
+            </div>
+            
+            <!-- Comparison Table - Clean, neutral presentation -->
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Revision A</th>
+                        <th>Revision B</th>
+                        <th>Revision C</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Name</td>
+                        <td>Widget Pro</td>
+                        <td>Widget Pro</td>
+                        <td>Widget Pro</td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td><span class="text-block long"></span></td>
+                        <td><span class="text-block medium"></span></td>
+                        <td><span class="text-block long"></span></td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>Draft</td>
+                        <td>Pending</td>
+                        <td>Active</td>
+                    </tr>
+                    <tr>
+                        <td>Category</td>
+                        <td>Electronics</td>
+                        <td>Electronics</td>
+                        <td>Electronics</td>
+                    </tr>
+                    <tr>
+                        <td>Price</td>
+                        <td>$49.99</td>
+                        <td>$54.99</td>
+                        <td>$54.99</td>
+                    </tr>
+                    <tr>
+                        <td>SKU</td>
+                        <td>WGT-001</td>
+                        <td>WGT-001</td>
+                        <td>WGT-001</td>
+                    </tr>
+                    <tr>
+                        <td>Stock</td>
+                        <td>150</td>
+                        <td>120</td>
+                        <td>200</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Annotation -->
+            <div class="annotation-box">
+                <strong>1</strong> — Toggle filters the table to show only differing attributes. <em>No pre-highlighting in default view</em> — users may be reviewing for completeness, auditing, or other non-comparison tasks.
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- ========================= -->
+        <!-- STATE 2: DIFFERENCES ONLY -->
+        <!-- ========================= -->
+        <h2>State 2: Differences Only (User Opted In)</h2>
+        
+        <div class="page-frame">
+            <!-- Page Title -->
+            <div class="page-title">Compare Revisions</div>
+            
+            <!-- Control Bar -->
+            <div class="control-bar">
+                <span class="checkbox checked"></span>
+                <span class="control-label">Show differences only</span>
+            </div>
+            
+            <!-- Comparison Table - Filtered -->
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Revision A</th>
+                        <th>Revision B</th>
+                        <th>Revision C</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="diff-row">
+                        <td>Description</td>
+                        <td><span class="text-block long"></span></td>
+                        <td><span class="text-block medium"></span></td>
+                        <td><span class="text-block long"></span></td>
+                    </tr>
+                    <tr class="diff-row">
+                        <td>Status</td>
+                        <td>Draft</td>
+                        <td>Pending</td>
+                        <td>Active</td>
+                    </tr>
+                    <tr class="diff-row">
+                        <td>Price</td>
+                        <td>$49.99</td>
+                        <td>$54.99</td>
+                        <td>$54.99</td>
+                    </tr>
+                    <tr class="diff-row">
+                        <td>Stock</td>
+                        <td>150</td>
+                        <td>120</td>
+                        <td>200</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Legend - only shown when toggle is active -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-swatch diff"></div>
+                    <span>Attribute differs across revisions</span>
+                </div>
+            </div>
+
+            <!-- Annotation -->
+            <div class="annotation-box">
+                <strong>Filtered view:</strong> Only 4 of 7 attributes shown. Rows without differences (Name, Category, SKU) are hidden. Row highlighting appears here because user has explicitly opted into comparison mode.
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- =================== -->
+        <!-- STATE 3: EMPTY STATE -->
+        <!-- =================== -->
+        <h2>State 3: Empty State (No Differences Found)</h2>
+        
+        <div class="page-frame">
+            <!-- Page Title -->
+            <div class="page-title">Compare Revisions</div>
+            
+            <!-- Control Bar -->
+            <div class="control-bar">
+                <span class="checkbox checked"></span>
+                <span class="control-label">Show differences only</span>
+            </div>
+            
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">≡</div>
+                <div class="empty-text">No differences between selected revisions.</div>
+            </div>
+
+            <!-- Annotation -->
+            <div class="annotation-box">
+                <strong>Empty state:</strong> Displayed when toggle is active and all attribute values are identical across all selected revisions.
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- ================ -->
+        <!-- BEHAVIOR NOTES -->
+        <!-- ================ -->
+        <div class="notes-section">
+            <h3>Design Rationale</h3>
+            <ul>
+                <li><strong>No pre-highlighting:</strong> The default view does not highlight differences because users may have various intents — reviewing completeness, auditing data, browsing attributes — not just comparing. Pre-highlighting assumes comparison intent and adds visual noise for other tasks.</li>
+                <li><strong>Intent-driven highlighting:</strong> Visual emphasis (gray background, left bar) only appears when the user explicitly enables "Show differences only." This ties visual treatment to stated user intent.</li>
+            </ul>
+        </div>
+
+        <div class="notes-section" style="margin-top: 20px;">
+            <h3>Interaction Notes</h3>
+            <ul>
+                <li><strong>Default view:</strong> Clean, neutral table with no pre-highlighting.</li>
+                <li><strong>Toggle behavior:</strong> "Show differences only" filters to rows where values differ. Highlighting only appears in filtered view.</li>
+                <li><strong>Difference detection:</strong> An attribute is marked as "different" if its value varies in any revision column.</li>
+                <li><strong>Row-level indication:</strong> When filtered, differences are shown at the row level (entire row), not per individual cell.</li>
+                <li><strong>Visual indicators:</strong> Filtered difference rows use a light gray background and a left-side vertical bar accent.</li>
+                <li><strong>Truncated content:</strong> Long text values represented as gray placeholder blocks to indicate truncation.</li>
+                <li><strong>Column flexibility:</strong> Table structure supports 2+ revision columns for comparison.</li>
+            </ul>
+        </div>
+
+        <!-- =================== -->
+        <!-- SIDE-BY-SIDE VIEW -->
+        <!-- =================== -->
+        <hr class="divider">
+        <h2>Side-by-Side Comparison: Toggle States</h2>
+        
+        <div class="variants-grid">
+            <!-- Variant A: Toggle Off -->
+            <div class="variant">
+                <div class="variant-label">Toggle OFF — Neutral view, all rows</div>
+                <div class="page-frame" style="padding: 16px;">
+                    <div class="control-bar" style="margin-bottom: 12px;">
+                        <span class="checkbox"></span>
+                        <span class="control-label" style="font-size: 11px;">Show differences only</span>
+                    </div>
+                    <table class="comparison-table" style="font-size: 11px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 8px;">Attr</th>
+                                <th style="padding: 8px;">Rev A</th>
+                                <th style="padding: 8px;">Rev B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 8px;">Name</td>
+                                <td style="padding: 8px;">Value</td>
+                                <td style="padding: 8px;">Value</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px;">Status</td>
+                                <td style="padding: 8px;">Draft</td>
+                                <td style="padding: 8px;">Active</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px;">Type</td>
+                                <td style="padding: 8px;">Value</td>
+                                <td style="padding: 8px;">Value</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px;">Price</td>
+                                <td style="padding: 8px;">$10</td>
+                                <td style="padding: 8px;">$15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="annotation-box" style="margin-top: 12px; padding: 8px 12px;">
+                        <span style="font-size: 10px;">No highlighting — user intent not assumed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variant B: Toggle On -->
+            <div class="variant">
+                <div class="variant-label">Toggle ON — Filtered + highlighted</div>
+                <div class="page-frame" style="padding: 16px;">
+                    <div class="control-bar" style="margin-bottom: 12px;">
+                        <span class="checkbox checked"></span>
+                        <span class="control-label" style="font-size: 11px;">Show differences only</span>
+                    </div>
+                    <table class="comparison-table" style="font-size: 11px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 8px;">Attr</th>
+                                <th style="padding: 8px;">Rev A</th>
+                                <th style="padding: 8px;">Rev B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="diff-row">
+                                <td style="padding: 8px;">Status</td>
+                                <td style="padding: 8px;">Draft</td>
+                                <td style="padding: 8px;">Active</td>
+                            </tr>
+                            <tr class="diff-row">
+                                <td style="padding: 8px;">Price</td>
+                                <td style="padding: 8px;">$10</td>
+                                <td style="padding: 8px;">$15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="annotation-box" style="margin-top: 12px; padding: 8px 12px;">
+                        <span style="font-size: 10px;">Rows filtered + visually marked as diffs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breadcrumb Navigation Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --accent: #5e6ad2;
+      --accent-hover: #4e5bc2;
+      --bg: #0f0f0f;
+      --bg-surface: #171717;
+      --bg-elevated: #1f1f1f;
+      --bg-subtle: #262626;
+      --bg-hover: #2e2e2e;
+      --text-primary: #ffffff;
+      --text-secondary: #d4d4d4;
+      --text-muted: #a3a3a3;
+      --border: #404040;
+      --border-subtle: #2a2a2a;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .description {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+    
+    /* Breadcrumb */
+    .breadcrumb-area {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .breadcrumb-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    
+    .breadcrumb-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+    
+    .breadcrumb-link.current {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    
+    .breadcrumb-details-btn {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.15s;
+    }
+    
+    .breadcrumb-item:hover .breadcrumb-details-btn {
+      opacity: 1;
+    }
+    
+    .breadcrumb-details-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .breadcrumb-details-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .breadcrumb-sep {
+      color: var(--text-muted);
+      font-size: 12px;
+      opacity: 0.5;
+    }
+    
+    /* Content layout */
+    .content-area {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+    
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .tree-node {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .tree-node:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+    
+    .tree-node.active {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .tree-node svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
+    }
+    
+    .tree-children {
+      margin-left: 20px;
+    }
+    
+    .main-area {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .list-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    
+    .list-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-subtle);
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+    
+    /* Item list */
+    .item-list {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    
+    .item-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .item-row:last-child {
+      border-bottom: none;
+    }
+    
+    .item-row:hover {
+      background: var(--bg-hover);
+    }
+    
+    .item-row.active {
+      background: var(--bg-subtle);
+    }
+    
+    .item-row.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent);
+    }
+    
+    .item-row {
+      position: relative;
+    }
+    
+    .item-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      color: var(--text-muted);
+    }
+    
+    .item-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .item-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .item-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
+    .item-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      margin-left: 12px;
+    }
+    
+    .item-badge.folder {
+      background: rgba(94, 106, 210, 0.15);
+      color: var(--accent);
+    }
+    
+    /* Slide Panel */
+    .slide-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 420px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .slide-panel.open {
+      transform: translateX(0);
+    }
+    
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+    
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    
+    .panel-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
+    .panel-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .panel-close:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+    
+    .panel-close svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .panel-section {
+      margin-bottom: 24px;
+    }
+    
+    .panel-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    
+    .form-field {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      transition: border-color 0.15s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .panel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(94, 106, 210, 0.15);
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    
+    .panel-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s;
+      z-index: 99;
+    }
+    
+    .overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Info box */
+    .info-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .info-box-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .info-box-title svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .info-box p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    .info-box p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .info-box code {
+      background: var(--bg-subtle);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      color: var(--accent);
+    }
+    
+    /* Panel Actions */
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+      position: sticky;
+      bottom: 0;
+    }
+    
+    .panel-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+    
+    .panel-btn:hover {
+      background: var(--bg-hover);
+    }
+    
+    .panel-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .panel-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .panel-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+    
+    .panel-btn.success {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: white;
+    }
+    
+    .panel-btn.success:hover {
+      background: #16a34a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enhanced Breadcrumb Navigation</h1>
+    <p class="description">
+      Click breadcrumb text to navigate (show children). Hover and click the 
+      <svg style="width:12px;height:12px;vertical-align:middle;margin:0 2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      icon to view that category's details in the slide panel without navigating away.
+    </p>
+    
+    <div class="info-box">
+      <div class="info-box-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        How it works
+      </div>
+      <p><strong>Click breadcrumb text</strong> → Navigate to that level (shows its children)</p>
+      <p><strong>Click <code>ⓘ</code> icon</strong> → Open category details in slide panel (stay where you are)</p>
+      <p>This separates "where am I" from "what do I want to edit" - no more mixing parents into the item list.</p>
+    </div>
+    
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-area">
+      <nav class="breadcrumb" id="breadcrumb"></nav>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-area">
+      <aside class="sidebar">
+        <div class="sidebar-title">Categories</div>
+        <div id="tree"></div>
+      </aside>
+      
+      <div class="main-area">
+        <div class="list-header">
+          <div style="display:flex;align-items:center;">
+            <span class="list-title" id="listTitle">Items</span>
+            <span class="list-count" id="listCount">0</span>
+          </div>
+        </div>
+        <div class="item-list" id="itemList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closePanel()"></div>
+  
+  <!-- Slide Panel -->
+  <div class="slide-panel" id="slidePanel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title" id="panelTitle">Category Name</div>
+        <div class="panel-subtitle" id="panelSubtitle">Category Details</div>
+      </div>
+      <button class="panel-close" onclick="closePanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="panel-content" id="panelContent"></div>
+    <div class="panel-actions" id="panelActions"></div>
+  </div>
+
+  <script>
+    // Data structure
+    const categories = [
+      {
+        id: 'all',
+        name: 'All Products',
+        children: [
+          {
+            id: 'guitars',
+            name: 'Guitars',
+            description: 'String instruments played by plucking or strumming',
+            children: [
+              {
+                id: 'electric',
+                name: 'Electric Guitars',
+                description: 'Guitars that use pickups to convert string vibrations',
+                children: [
+                  { id: 'solid', name: 'Solid Body', description: 'Traditional electric guitar design', items: ['Fender Stratocaster', 'Gibson Les Paul', 'PRS Custom 24'] },
+                  { id: 'hollow', name: 'Semi-Hollow', description: 'Guitars with hollow chambers', items: ['Gibson ES-335', 'Epiphone Casino'] },
+                ]
+              },
+              {
+                id: 'acoustic',
+                name: 'Acoustic Guitars',
+                description: 'Guitars that produce sound acoustically',
+                children: [
+                  { id: 'steel', name: 'Steel String', description: 'Bright, loud acoustic guitars', items: ['Martin D-28', 'Taylor 814ce'] },
+                  { id: 'classical', name: 'Classical', description: 'Nylon string guitars', items: ['Cordoba C5', 'Yamaha C40'] },
+                ]
+              }
+            ]
+          },
+          {
+            id: 'keyboards',
+            name: 'Keyboards',
+            description: 'Electronic keyboard instruments',
+            children: [
+              { id: 'synths', name: 'Synthesizers', description: 'Electronic sound generators', items: ['Moog Subsequent 37', 'Korg Minilogue'] },
+              { id: 'pianos', name: 'Digital Pianos', description: 'Electronic piano instruments', items: ['Roland FP-30X', 'Yamaha P-125'] },
+            ]
+          }
+        ]
+      }
+    ];
+    
+    let state = {
+      selectedPath: ['all'], // Array of category IDs representing current path
+      panelOpen: false,
+      panelCategory: null,
+      activeItem: null
+    };
+    
+    // Find category by ID
+    function findCategory(id, cats = categories) {
+      for (const cat of cats) {
+        if (cat.id === id) return cat;
+        if (cat.children) {
+          const found = findCategory(id, cat.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    
+    // Get current category based on path
+    function getCurrentCategory() {
+      const id = state.selectedPath[state.selectedPath.length - 1];
+      return findCategory(id);
+    }
+    
+    // Get path to a category
+    function getPathTo(targetId, cats = categories, path = []) {
+      for (const cat of cats) {
+        const newPath = [...path, cat.id];
+        if (cat.id === targetId) return newPath;
+        if (cat.children) {
+          const found = getPathTo(targetId, cat.children, newPath);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    
+    // Navigate to category (show its children)
+    function navigateTo(id) {
+      const path = getPathTo(id);
+      if (path) {
+        state.selectedPath = path;
+        state.activeItem = null;
+        render();
+      }
+    }
+    
+    // Open category details in panel
+    function openCategoryDetails(id, event) {
+      if (event) event.stopPropagation();
+      const cat = findCategory(id);
+      if (cat) {
+        state.panelCategory = cat;
+        state.panelOpen = true;
+        renderPanel();
+        document.getElementById('slidePanel').classList.add('open');
+        document.getElementById('overlay').classList.add('visible');
+      }
+    }
+    
+    // Close panel
+    function closePanel() {
+      state.panelOpen = false;
+      state.panelCategory = null;
+      document.getElementById('slidePanel').classList.remove('open');
+      document.getElementById('overlay').classList.remove('visible');
+    }
+    
+    // Select item
+    function selectItem(name) {
+      state.activeItem = name;
+      render();
+    }
+    
+    // Render breadcrumb
+    function renderBreadcrumb() {
+      const bc = document.getElementById('breadcrumb');
+      let html = '';
+      
+      state.selectedPath.forEach((id, index) => {
+        const cat = findCategory(id);
+        const isLast = index === state.selectedPath.length - 1;
+        
+        if (index > 0) {
+          html += '<span class="breadcrumb-sep">/</span>';
+        }
+        
+        html += `
+          <div class="breadcrumb-item">
+            <span class="breadcrumb-link ${isLast ? 'current' : ''}" onclick="navigateTo('${id}')">
+              ${cat.name}
+            </span>
+            <button class="breadcrumb-details-btn" onclick="openCategoryDetails('${id}', event)" title="View ${cat.name} details">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            </button>
+          </div>
+        `;
+      });
+      
+      bc.innerHTML = html;
+    }
+    
+    // Render tree
+    function renderTree() {
+      const tree = document.getElementById('tree');
+      
+      function renderNode(cat, level = 0) {
+        const isInPath = state.selectedPath.includes(cat.id);
+        const isSelected = state.selectedPath[state.selectedPath.length - 1] === cat.id;
+        
+        let html = `
+          <div class="tree-node ${isSelected ? 'active' : ''}" 
+               style="padding-left: ${12 + level * 16}px"
+               onclick="navigateTo('${cat.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              ${cat.children ? '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>' : '<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>'}
+            </svg>
+            ${cat.name}
+          </div>
+        `;
+        
+        if (cat.children && isInPath) {
+          html += '<div class="tree-children">';
+          cat.children.forEach(child => {
+            html += renderNode(child, level + 1);
+          });
+          html += '</div>';
+        }
+        
+        return html;
+      }
+      
+      tree.innerHTML = categories.map(cat => renderNode(cat)).join('');
+    }
+    
+    // Render item list
+    function renderList() {
+      const list = document.getElementById('itemList');
+      const title = document.getElementById('listTitle');
+      const count = document.getElementById('listCount');
+      
+      const current = getCurrentCategory();
+      title.textContent = current.name;
+      
+      let items = [];
+      
+      // If has children (subcategories), show them
+      if (current.children) {
+        items = current.children.map(c => ({
+          type: 'folder',
+          id: c.id,
+          name: c.name,
+          meta: c.children ? `${c.children.length} subcategories` : `${c.items?.length || 0} items`
+        }));
+      }
+      // If has items (leaf category), show them
+      else if (current.items) {
+        items = current.items.map(name => ({
+          type: 'item',
+          name: name,
+          meta: 'Product'
+        }));
+      }
+      
+      count.textContent = items.length;
+      
+      if (items.length === 0) {
+        list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">No items</div>';
+        return;
+      }
+      
+      list.innerHTML = items.map(item => `
+        <div class="item-row ${state.activeItem === item.name ? 'active' : ''}" 
+             onclick="${item.type === 'folder' ? `navigateTo('${item.id}')` : `selectItem('${item.name}')`}">
+          <div class="item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              ${item.type === 'folder' 
+                ? '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>' 
+                : '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>'}
+            </svg>
+          </div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-meta">${item.meta}</div>
+          </div>
+          ${item.type === 'folder' ? '<span class="item-badge folder">Category</span>' : ''}
+        </div>
+      `).join('');
+    }
+    
+    // Render panel
+    function renderPanel() {
+      const cat = state.panelCategory;
+      if (!cat) return;
+      
+      document.getElementById('panelTitle').textContent = cat.name;
+      document.getElementById('panelSubtitle').textContent = cat.children ? 'Category' : 'Leaf Category';
+      
+      const content = document.getElementById('panelContent');
+      content.innerHTML = `
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          ${cat.children ? `Contains ${cat.children.length} subcategories` : `Contains ${cat.items?.length || 0} products`}
+        </div>
+        
+        <div class="panel-section">
+          <div class="panel-section-title">Basic Information</div>
+          <div class="form-field">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-input" value="${cat.name}">
+          </div>
+          <div class="form-field">
+            <label class="form-label">ID</label>
+            <input type="text" class="form-input" value="${cat.id}" readonly style="opacity:0.6;">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Description</label>
+            <textarea class="form-input" rows="3">${cat.description || ''}</textarea>
+          </div>
+        </div>
+        
+        <div class="panel-section">
+          <div class="panel-section-title">Settings</div>
+          <div class="form-field">
+            <label class="form-label">Status</label>
+            <select class="form-input">
+              <option selected>Active</option>
+              <option>Draft</option>
+              <option>Archived</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Visibility</label>
+            <select class="form-input">
+              <option selected>Public</option>
+              <option>Private</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Main render
+    function render() {
+      renderBreadcrumb();
+      renderTree();
+      renderList();
+    }
+    
+    // Keyboard handler
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && state.panelOpen) {
+        closePanel();
+      }
+    });
+    
+    // Initialize
+    render();
+  </script>
+</body>
+</html>

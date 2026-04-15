@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODS Suite - Master Data Management</title>
+    <style>
+        :root {
+            /* Core colors */
+            --text: #172B4D;
+            --text-muted: #5E6C84;
+            --text-light: #97A0AF;
+            --text-inverse: #ffffff;
+            
+            /* Backgrounds */
+            --bg: #ffffff;
+            --bg-subtle: #F4F5F7;
+            --bg-hover: #EBECF0;
+            --bg-selected: #E9F2FF;
+            --bg-page: #FAFBFC;
+            
+            /* Borders */
+            --border: #DFE1E6;
+            --border-dark: #C1C7D0;
+            
+            /* Brand colors */
+            --primary: #0052CC;
+            --primary-dark: #0747A6;
+            --primary-light: #4C9AFF;
+            --primary-subtle: #DEEBFF;
+            
+            /* Accent colors for products */
+            --instrument: #00875A;
+            --syndicate: #6554C0;
+            --enrich: #FF5630;
+            --analytics: #00B8D9;
+            
+            /* Status */
+            --success: #00875A;
+            --success-subtle: #E3FCEF;
+            --warning: #FF991F;
+            --warning-subtle: #FFFAE6;
+            --error: #DE350B;
+            --error-subtle: #FFEBE6;
+            --info: #0065FF;
+            --info-subtle: #DEEBFF;
+            
+            /* AI */
+            --ai-gradient: linear-gradient(135deg, #6554C0 0%, #00B8D9 100%);
+            --ai-purple: #6554C0;
+            --ai-cyan: #00B8D9;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.08);
+            --shadow-md: 0 4px 8px rgba(9, 30, 66, 0.08), 0 0 1px rgba(9, 30, 66, 0.31);
+            --shadow-lg: 0 8px 16px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.31);
+            --shadow-overlay: 0 20px 32px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.31);
+            
+            /* Sizing */
+            --nav-width: 240px;
+            --nav-collapsed-width: 56px;
+            --top-bar-height: 56px;
+            --ai-panel-width: 380px;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, sans-serif;
+            font-size: 14px; 
+            color: var(--text); 
+            background: var(--bg-page);
+            line-height: 1.42857;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* ========================================
+           LAYOUT STRUCTURE
+           ======================================== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ========================================
+           GLOBAL TOP BAR
+           ======================================== */
+        .global-top-bar {
+            display: flex;
+            align-items: center;
+            background: var(--primary-dark);
+            color: var(--text-inverse);
+            height: var(--top-bar-height);
+            padding: 0 16px;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .global-top-bar .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-switcher-btn {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-inverse);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: background 0.15s;
+        }
+
+        .product-switcher-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .suite-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .suite-logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #4C9AFF 0%, #00B8D9 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255,255,255,0.2);
+            margin: 0 8px;
+        }
+
+        /* Current Product */
+        .current-product {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .current-product:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .product-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-icon.instrument { background: var(--instrument); }
+        .product-icon.syndicate { background: var(--syndicate); }
+        .product-icon.enrich { background: var(--enrich); }
+        .product-icon.analytics { background: var(--analytics); }
+
+        .product-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .current-product .dropdown-arrow {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        /* Global Navigation Links */
+        .global-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 16px;
+        }
+
+        .global-nav-link {
+            padding: 8px 12px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .global-nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-inverse);
+        }
+
+        .global-nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: var(--text-inverse);
+        }
+
+        /* Spacer */
+        .spacer { flex: 1; }
+
+        /* Global Search */
+        .global-search {
+            position: relative;
+            width: 400px;
+        }
+
+        .global-search-input {
+            width: 100%;
+            padding: 8px 16px 8px 40px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: var(--text-inverse);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .global-search-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .global-search-input:focus {
+            outline: none;
+            background: var(--bg);
+            color: var(--text);
+            border-color: var(--primary-light);
+        }
+
+        .global-search-input:focus::placeholder {
+            color: var(--text-light);
+        }
+
+        .global-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 16px;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .global-search-input:focus + .global-search-icon {
+            color: var(--text-light);
+        }
+
+        .search-shortcut {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 2px;
+        }
+
+        .search-shortcut kbd {
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-family: inherit;
+        }
+
+        .global-search-input:focus ~ .search-shortcut {
+            display: none;
+        }
+
+        /* AI Search Badge */
+        .ai-search-badge {
+            position: absolute;
+            right: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--ai-gradient);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Global Actions */
+        .global-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .global-action-btn {
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .global-action-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: var(--text-inverse);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--error);
+            border-radius: 50%;
+            border: 2px solid var(--primary-dark);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #FF5630 0%, #FF991F 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        /* ========================================
+           PRODUCT SWITCHER DROPDOWN
+           ======================================== */
+        .product-switcher-dropdown {
+            position: absolute;
+            top: calc(var(--top-bar-height) - 8px);
+            left: 16px;
+            width: 320px;
+            background: var(--bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow-overlay);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .product-switcher-dropdown.open {
+            display: block;
+        }
+
+        .switcher-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .switcher-header h3 {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .switcher-products {
+            padding: 8px;
+        }
+
+        .switcher-product {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .switcher-product:hover {
+            background: var(--bg-hover);
+        }
+
+        .switcher-product.active {
+            background: var(--bg-selected);
+        }
+
+        .switcher-product-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .switcher-product-info h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .switcher-product-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .switcher-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-subtle);
+        }
+
+        .switcher-footer a {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .switcher-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========================================
+           LEFT SIDEBAR NAVIGATION
+           ======================================== */
+        .sidebar {
+            width: var(--nav-width);
+            background: var(--bg-subtle);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.2s;
+        }
+
+        .sidebar.collapsed {
+            width: var(--nav-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-header .workspace-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--instrument);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .sidebar-search {
+            padding: 12px 16px;
+        }
+
+        .sidebar-search-input {
+            width: 100%;
+            padding: 8px 12px 8px 32px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .sidebar-search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Navigation Sections */
+        .nav-section {
+            padding: 8px 0;
+        }
+
+        .nav-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-section-header button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px;
+            border-radius: 4px;
+        }
+
+        .nav-section-header button:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--bg-selected);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .nav-item-badge {
+            margin-left: auto;
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .nav-item.active .nav-item-badge {
+            background: var(--primary-subtle);
+            color: var(--primary);
+        }
+
+        /* Work Areas (Folders) */
+        .work-area {
+            margin: 4px 8px;
+        }
+
+        .work-area-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .work-area-header:hover {
+            background: var(--bg-hover);
+        }
+
+        .work-area-header.expanded {
+            background: var(--bg-hover);
+        }
+
+        .work-area-toggle {
+            width: 16px;
+            font-size: 10px;
+            color: var(--text-light);
+            transition: transform 0.15s;
+        }
+
+        .work-area-header.expanded .work-area-toggle {
+            transform: rotate(90deg);
+        }
+
+        .work-area-icon {
+            font-size: 16px;
+        }
+
+        .work-area-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .work-area-count {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* Perspectives (Lists within folders) */
+        .perspectives {
+            margin-left: 24px;
+            border-left: 1px solid var(--border);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .work-area-header.expanded + .perspectives {
+            display: block;
+        }
+
+        .perspective-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            margin-left: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .perspective-item:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .perspective-item.active {
+            background: var(--bg-selected);
+            color: var(--primary);
+        }
+
+        .perspective-icon {
+            font-size: 14px;
+        }
+
+        .perspective-count {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-collapse-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .sidebar-collapse-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        /* ========================================
+           MAIN CONTENT AREA
+           ======================================== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        /* Context Header */
+        .context-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            gap: 16px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-light);
+            font-size: 10px;
+        }
+
+        .breadcrumb-current {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .context-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .context-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .context-btn:hover {
+            background: var(--bg-subtle);
+            border-color: var(--border-dark);
+        }
+
+        .context-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .context-btn.primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* Page Title Section */
+        .page-title-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .page-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-subtle);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .page-title-content {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .page-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .page-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* View Toolbar */
+        .view-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            background: var(--bg);
+        }
+
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .view-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .view-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .view-tab.active {
+            background: var(--bg-selected);
+            color: var(--primary);
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-subtle);
+            color: var(--text);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-subtle);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-subtle);
+            border-radius: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .filter-pill-remove {
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .filter-pill-remove:hover {
+            opacity: 1;
+        }
+
+        /* ========================================
+           DATA TABLE
+           ======================================== */
+        .data-view {
+            flex: 1;
+            overflow: auto;
+            padding: 0 24px 24px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--bg-subtle);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        .data-table th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-subtle);
+        }
+
+        .data-table tr.selected td {
+            background: var(--bg-selected);
+        }
+
+        /* Table Cell Types */
+        .cell-checkbox {
+            width: 40px;
+        }
+
+        .cell-checkbox input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .cell-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cell-name-image {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 16px;
+        }
+
+        .cell-name-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cell-name-primary {
+            font-weight: 500;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .cell-name-primary:hover {
+            text-decoration: underline;
+        }
+
+        .cell-name-secondary {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .cell-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .cell-status.complete {
+            background: var(--success-subtle);
+            color: var(--success);
+        }
+
+        .cell-status.pending {
+            background: var(--warning-subtle);
+            color: var(--warning);
+        }
+
+        .cell-status.error {
+            background: var(--error-subtle);
+            color: var(--error);
+        }
+
+        .cell-status.draft {
+            background: var(--bg-subtle);
+            color: var(--text-muted);
+        }
+
+        .cell-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--bg-hover);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .cell-channels {
+            display: flex;
+            gap: 4px;
+        }
+
+        .channel-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .channel-badge.amazon { background: #FF9900; }
+        .channel-badge.shopify { background: #96bf48; }
+        .channel-badge.ebay { background: #e43137; }
+        .channel-badge.walmart { background: #0071ce; }
+
+        .cell-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .cell-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        tr:hover .cell-actions {
+            opacity: 1;
+        }
+
+        .cell-action-btn {
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .cell-action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        /* AI Enrichment Badge */
+        .ai-enriched-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: linear-gradient(135deg, rgba(101, 84, 192, 0.1) 0%, rgba(0, 184, 217, 0.1) 100%);
+            border: 1px solid rgba(101, 84, 192, 0.3);
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--ai-purple);
+        }
+
+        .ai-enriched-badge::before {
+            content: "✨";
+            font-size: 10px;
+        }
+
+        /* ========================================
+           AI ASSISTANT PANEL
+           ======================================== */
+        .ai-panel {
+            width: var(--ai-panel-width);
+            background: var(--bg);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.2s, margin 0.2s;
+        }
+
+        .ai-panel.collapsed {
+            width: 0;
+            margin-left: -1px;
+            overflow: hidden;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+
+        .ai-panel-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--ai-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .ai-panel-title {
+            flex: 1;
+        }
+
+        .ai-panel-title h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .ai-panel-title span {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .ai-panel-close {
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .ai-panel-close:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .ai-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        /* AI Suggestions */
+        .ai-suggestions {
+            margin-bottom: 20px;
+        }
+
+        .ai-suggestions-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .ai-suggestions-header h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ai-suggestion-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .ai-suggestion-card:hover {
+            border-color: var(--primary);
+            background: var(--bg-selected);
+        }
+
+        .ai-suggestion-card h5 {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ai-suggestion-card p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .ai-suggestion-card .suggestion-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .ai-confidence {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--success);
+        }
+
+        .ai-items-count {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* AI Chat Input */
+        .ai-chat-input {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-subtle);
+        }
+
+        .ai-input-wrapper {
+            position: relative;
+        }
+
+        .ai-input-field {
+            width: 100%;
+            padding: 12px 48px 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text);
+            resize: none;
+        }
+
+        .ai-input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .ai-input-field::placeholder {
+            color: var(--text-light);
+        }
+
+        .ai-send-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: var(--ai-gradient);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .ai-send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .ai-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .ai-quick-action {
+            padding: 6px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .ai-quick-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ========================================
+           GLOBAL SEARCH OVERLAY
+           ======================================== */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(9, 30, 66, 0.54);
+            z-index: 1000;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 10vh;
+        }
+
+        .search-overlay.open {
+            display: flex;
+        }
+
+        .search-modal {
+            width: 640px;
+            background: var(--bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-overlay);
+            overflow: hidden;
+        }
+
+        .search-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+
+        .search-modal-input {
+            flex: 1;
+            border: none;
+            font-size: 18px;
+            color: var(--text);
+            outline: none;
+        }
+
+        .search-modal-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .search-ai-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--ai-gradient);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .search-modal-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-section {
+            padding: 8px 0;
+        }
+
+        .search-section-header {
+            padding: 8px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .search-result-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-subtle);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .search-result-content {
+            flex: 1;
+        }
+
+        .search-result-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .search-result-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .search-result-action {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .search-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-subtle);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .search-shortcuts {
+            display: flex;
+            gap: 16px;
+        }
+
+        .search-shortcuts span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .search-shortcuts kbd {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-family: inherit;
+        }
+
+        /* ========================================
+           FLOATING ACTION BUTTON
+           ======================================== */
+        .ai-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: var(--ai-gradient);
+            border: none;
+            border-radius: 28px;
+            color: white;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 100;
+        }
+
+        .ai-fab:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-overlay);
+        }
+
+        .ai-panel.collapsed ~ .ai-fab {
+            display: flex;
+        }
+
+        /* ========================================
+           EMPTY STATES & LOADING
+           ======================================== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--bg-subtle);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        /* ========================================
+           SYNDICATION PANEL
+           ======================================== */
+        .syndication-summary {
+            display: flex;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .syndication-card {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .syndication-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .syndication-card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .syndication-card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .syndication-stat {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .syndication-stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .syndication-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .syndication-stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .syndication-stat-change.positive {
+            color: var(--success);
+        }
+
+        .syndication-stat-change.negative {
+            color: var(--error);
+        }
+
+        /* ========================================
+           KEYBOARD SHORTCUTS
+           ======================================== */
+        kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: inherit;
+            color: var(--text-muted);
+        }
+
+        /* ========================================
+           RESPONSIVE STYLES
+           ======================================== */
+        @media (max-width: 1200px) {
+            .ai-panel {
+                position: fixed;
+                right: 0;
+                top: var(--top-bar-height);
+                bottom: 0;
+                z-index: 50;
+                box-shadow: var(--shadow-lg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Global Top Bar -->
+        <header class="global-top-bar">
+            <div class="logo-section">
+                <button class="product-switcher-btn" onclick="toggleProductSwitcher()" title="Switch products">
+                    ⊞
+                </button>
+                <div class="suite-logo">
+                    <div class="suite-logo-icon">O</div>
+                    <span>ODS Suite</span>
+                </div>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="current-product" onclick="toggleProductSwitcher()">
+                <div class="product-icon instrument">I</div>
+                <span class="product-name">Instrument</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+
+            <nav class="global-nav-links">
+                <a href="#" class="global-nav-link active">Work Areas</a>
+                <a href="#" class="global-nav-link">Syndication</a>
+                <a href="#" class="global-nav-link">Reports</a>
+                <a href="#" class="global-nav-link">Settings</a>
+            </nav>
+
+            <div class="spacer"></div>
+
+            <div class="global-search">
+                <input type="text" class="global-search-input" placeholder="Search products, attributes, channels..." onclick="openSearchOverlay()">
+                <span class="global-search-icon">🔍</span>
+                <span class="ai-search-badge">AI</span>
+                <div class="search-shortcut">
+                    <kbd>⌘</kbd>
+                    <kbd>K</kbd>
+                </div>
+            </div>
+
+            <div class="global-actions">
+                <button class="global-action-btn" title="Create">
+                    +
+                </button>
+                <button class="global-action-btn" title="Notifications">
+                    🔔
+                    <span class="notification-badge"></span>
+                </button>
+                <button class="global-action-btn" title="Help">
+                    ?
+                </button>
+                <div class="user-avatar" title="John Doe">JD</div>
+            </div>
+        </header>
+
+        <!-- Product Switcher Dropdown -->
+        <div class="product-switcher-dropdown" id="productSwitcher">
+            <div class="switcher-header">
+                <h3>ODS Products</h3>
+            </div>
+            <div class="switcher-products">
+                <div class="switcher-product active">
+                    <div class="switcher-product-icon" style="background: var(--instrument)">📐</div>
+                    <div class="switcher-product-info">
+                        <h4>Instrument</h4>
+                        <p>Product data management & enrichment</p>
+                    </div>
+                </div>
+                <div class="switcher-product">
+                    <div class="switcher-product-icon" style="background: var(--syndicate)">📤</div>
+                    <div class="switcher-product-info">
+                        <h4>Syndicate</h4>
+                        <p>Multi-channel product distribution</p>
+                    </div>
+                </div>
+                <div class="switcher-product">
+                    <div class="switcher-product-icon" style="background: var(--enrich)">✨</div>
+                    <div class="switcher-product-info">
+                        <h4>Enrich</h4>
+                        <p>AI-powered data enhancement</p>
+                    </div>
+                </div>
+                <div class="switcher-product">
+                    <div class="switcher-product-icon" style="background: var(--analytics)">📊</div>
+                    <div class="switcher-product-info">
+                        <h4>Analytics</h4>
+                        <p>Data quality & performance insights</p>
+                    </div>
+                </div>
+            </div>
+            <div class="switcher-footer">
+                <a href="#">View all products →</a>
+            </div>
+        </div>
+
+        <div class="main-wrapper">
+            <!-- Left Sidebar Navigation -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>
+                        <span class="workspace-icon">E</span>
+                        Electronics Catalog
+                    </h2>
+                </div>
+
+                <div class="sidebar-search">
+                    <input type="text" class="sidebar-search-input" placeholder="Search work areas...">
+                </div>
+
+                <nav class="nav-section">
+                    <div class="nav-section-header">
+                        <span>Quick Access</span>
+                    </div>
+                    <a href="#" class="nav-item active">
+                        <span class="nav-item-icon">🏠</span>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-item-icon">⭐</span>
+                        <span>Favorites</span>
+                        <span class="nav-item-badge">12</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-item-icon">🕐</span>
+                        <span>Recent</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-item-icon">📥</span>
+                        <span>Inbox</span>
+                        <span class="nav-item-badge">3</span>
+                    </a>
+                </nav>
+
+                <nav class="nav-section">
+                    <div class="nav-section-header">
+                        <span>Work Areas</span>
+                        <button title="Create work area">+</button>
+                    </div>
+                    
+                    <!-- Work Area 1 -->
+                    <div class="work-area">
+                        <div class="work-area-header expanded" onclick="toggleWorkArea(this)">
+                            <span class="work-area-toggle">▶</span>
+                            <span class="work-area-icon">📁</span>
+                            <span class="work-area-name">Mobile Phones</span>
+                            <span class="work-area-count">1,247</span>
+                        </div>
+                        <div class="perspectives">
+                            <div class="perspective-item active">
+                                <span class="perspective-icon">📋</span>
+                                <span>All Products</span>
+                                <span class="perspective-count">1,247</span>
+                            </div>
+                            <div class="perspective-item">
+                                <span class="perspective-icon">⚠️</span>
+                                <span>Needs Enrichment</span>
+                                <span class="perspective-count">89</span>
+                            </div>
+                            <div class="perspective-item">
+                                <span class="perspective-icon">✅</span>
+                                <span>Ready for Syndication</span>
+                                <span class="perspective-count">1,158</span>
+                            </div>
+                            <div class="perspective-item">
+                                <span class="perspective-icon">🔄</span>
+                                <span>Recently Updated</span>
+                                <span class="perspective-count">34</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Area 2 -->
+                    <div class="work-area">
+                        <div class="work-area-header" onclick="toggleWorkArea(this)">
+                            <span class="work-area-toggle">▶</span>
+                            <span class="work-area-icon">📁</span>
+                            <span class="work-area-name">Laptops</span>
+                            <span class="work-area-count">856</span>
+                        </div>
+                        <div class="perspectives">
+                            <div class="perspective-item">
+                                <span class="perspective-icon">📋</span>
+                                <span>All Products</span>
+                                <span class="perspective-count">856</span>
+                            </div>
+                            <div class="perspective-item">
+                                <span class="perspective-icon">⚠️</span>
+                                <span>Needs Enrichment</span>
+                                <span class="perspective-count">42</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Area 3 -->
+                    <div class="work-area">
+                        <div class="work-area-header" onclick="toggleWorkArea(this)">
+                            <span class="work-area-toggle">▶</span>
+                            <span class="work-area-icon">📁</span>
+                            <span class="work-area-name">Accessories</span>
+                            <span class="work-area-count">2,341</span>
+                        </div>
+                        <div class="perspectives">
+                            <div class="perspective-item">
+                                <span class="perspective-icon">📋</span>
+                                <span>All Products</span>
+                                <span class="perspective-count">2,341</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Area 4 -->
+                    <div class="work-area">
+                        <div class="work-area-header" onclick="toggleWorkArea(this)">
+                            <span class="work-area-toggle">▶</span>
+                            <span class="work-area-icon">📁</span>
+                            <span class="work-area-name">Smart Home</span>
+                            <span class="work-area-count">567</span>
+                        </div>
+                        <div class="perspectives">
+                            <div class="perspective-item">
+                                <span class="perspective-icon">📋</span>
+                                <span>All Products</span>
+                                <span class="perspective-count">567</span>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="sidebar-collapse-btn">
+                        <span>◀</span>
+                        <span>Collapse sidebar</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Context Header with Breadcrumbs -->
+                <div class="context-header">
+                    <nav class="breadcrumbs">
+                        <a href="#" class="breadcrumb-item">Electronics Catalog</a>
+                        <span class="breadcrumb-separator">›</span>
+                        <a href="#" class="breadcrumb-item">Mobile Phones</a>
+                        <span class="breadcrumb-separator">›</span>
+                        <span class="breadcrumb-current">All Products</span>
+                    </nav>
+                    <div class="context-actions">
+                        <button class="context-btn">
+                            <span>↓</span> Export
+                        </button>
+                        <button class="context-btn">
+                            <span>↑</span> Import
+                        </button>
+                        <button class="context-btn primary">
+                            <span>+</span> Add Product
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Syndication Summary -->
+                <div class="syndication-summary">
+                    <div class="syndication-card">
+                        <div class="syndication-card-header">
+                            <div class="syndication-card-icon" style="background: var(--success)">✓</div>
+                            <span class="syndication-card-title">Syndicated</span>
+                        </div>
+                        <div class="syndication-stat">
+                            <span class="syndication-stat-value">1,158</span>
+                            <span class="syndication-stat-label">products</span>
+                            <span class="syndication-stat-change positive">↑ 12%</span>
+                        </div>
+                    </div>
+                    <div class="syndication-card">
+                        <div class="syndication-card-header">
+                            <div class="syndication-card-icon" style="background: var(--warning)">⚠</div>
+                            <span class="syndication-card-title">Pending Review</span>
+                        </div>
+                        <div class="syndication-stat">
+                            <span class="syndication-stat-value">89</span>
+                            <span class="syndication-stat-label">products</span>
+                            <span class="syndication-stat-change negative">↓ 5%</span>
+                        </div>
+                    </div>
+                    <div class="syndication-card">
+                        <div class="syndication-card-header">
+                            <div class="syndication-card-icon" style="background: var(--ai-purple)">✨</div>
+                            <span class="syndication-card-title">AI Enriched</span>
+                        </div>
+                        <div class="syndication-stat">
+                            <span class="syndication-stat-value">847</span>
+                            <span class="syndication-stat-label">this week</span>
+                            <span class="syndication-stat-change positive">↑ 34%</span>
+                        </div>
+                    </div>
+                    <div class="syndication-card">
+                        <div class="syndication-card-header">
+                            <div class="syndication-card-icon" style="background: var(--primary)">📊</div>
+                            <span class="syndication-card-title">Data Quality</span>
+                        </div>
+                        <div class="syndication-stat">
+                            <span class="syndication-stat-value">94%</span>
+                            <span class="syndication-stat-label">score</span>
+                            <span class="syndication-stat-change positive">↑ 3%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Toolbar -->
+                <div class="view-toolbar">
+                    <div class="view-tabs">
+                        <button class="view-tab active">
+                            <span>☰</span> Table
+                        </button>
+                        <button class="view-tab">
+                            <span>▦</span> Cards
+                        </button>
+                        <button class="view-tab">
+                            <span>◫</span> Kanban
+                        </button>
+                    </div>
+
+                    <div class="toolbar-divider"></div>
+
+                    <div class="filter-group">
+                        <button class="filter-btn active">
+                            <span>⚡</span> Filter
+                        </button>
+                        <button class="filter-btn">
+                            <span>↕</span> Sort
+                        </button>
+                        <button class="filter-btn">
+                            <span>⊞</span> Group
+                        </button>
+                    </div>
+
+                    <div class="filter-pill">
+                        Status: Needs Enrichment
+                        <span class="filter-pill-remove">×</span>
+                    </div>
+
+                    <div class="spacer"></div>
+
+                    <button class="filter-btn" onclick="toggleAIPanel()">
+                        <span>✨</span> AI Assistant
+                    </button>
+                </div>
+
+                <!-- Data Table -->
+                <div class="data-view">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="cell-checkbox"><input type="checkbox"></th>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Enrichment</th>
+                                <th>Status</th>
+                                <th>Channels</th>
+                                <th>Updated</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="cell-checkbox"><input type="checkbox"></td>
+                                <td>
+                                    <div class="cell-name">
+                                        <div class="cell-name-image">📱</div>
+                                        <div class="cell-name-text">
+                                            <span class="cell-name-primary">iPhone 15 Pro Max 256GB</span>
+                                            <span class="cell-name-secondary">Apple · Smartphones</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>APL-IP15PM-256</td>
+                                <td>
+                                    <div class="cell-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" style="width: 100%"></div>
+                                        </div>
+                                        <span class="progress-text">100%</span>
+                                        <span class="ai-enriched-badge">AI</span>
+                                    </div>
+                                </td>
+                                <td><span class="cell-status complete">● Complete</span></td>
+                                <td>
+                                    <div class="cell-channels">
+                                        <span class="channel-badge amazon" title="Amazon">A</span>
+                                        <span class="channel-badge shopify" title="Shopify">S</span>
+                                        <span class="channel-badge ebay" title="eBay">E</span>
+                                    </div>
+                                </td>
+                                <td class="cell-date">2 hours ago</td>
+                                <td>
+                                    <div class="cell-actions">
+                                        <button class="cell-action-btn" title="Edit">✏️</button>
+                                        <button class="cell-action-btn" title="More">⋯</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-checkbox"><input type="checkbox"></td>
+                                <td>
+                                    <div class="cell-name">
+                                        <div class="cell-name-image">📱</div>
+                                        <div class="cell-name-text">
+                                            <span class="cell-name-primary">Samsung Galaxy S24 Ultra</span>
+                                            <span class="cell-name-secondary">Samsung · Smartphones</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>SAM-GS24U-512</td>
+                                <td>
+                                    <div class="cell-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" style="width: 85%"></div>
+                                        </div>
+                                        <span class="progress-text">85%</span>
+                                    </div>
+                                </td>
+                                <td><span class="cell-status pending">● Pending</span></td>
+                                <td>
+                                    <div class="cell-channels">
+                                        <span class="channel-badge amazon" title="Amazon">A</span>
+                                        <span class="channel-badge walmart" title="Walmart">W</span>
+                                    </div>
+                                </td>
+                                <td class="cell-date">5 hours ago</td>
+                                <td>
+                                    <div class="cell-actions">
+                                        <button class="cell-action-btn" title="Edit">✏️</button>
+                                        <button class="cell-action-btn" title="More">⋯</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-checkbox"><input type="checkbox"></td>
+                                <td>
+                                    <div class="cell-name">
+                                        <div class="cell-name-image">📱</div>
+                                        <div class="cell-name-text">
+                                            <span class="cell-name-primary">Google Pixel 8 Pro</span>
+                                            <span class="cell-name-secondary">Google · Smartphones</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>GOO-PX8P-256</td>
+                                <td>
+                                    <div class="cell-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" style="width: 45%"></div>
+                                        </div>
+                                        <span class="progress-text">45%</span>
+                                    </div>
+                                </td>
+                                <td><span class="cell-status error">● Missing Data</span></td>
+                                <td>
+                                    <div class="cell-channels">
+                                        <span class="channel-badge shopify" title="Shopify">S</span>
+                                    </div>
+                                </td>
+                                <td class="cell-date">1 day ago</td>
+                                <td>
+                                    <div class="cell-actions">
+                                        <button class="cell-action-btn" title="Edit">✏️</button>
+                                        <button class="cell-action-btn" title="More">⋯</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="selected">
+                                <td class="cell-checkbox"><input type="checkbox" checked></td>
+                                <td>
+                                    <div class="cell-name">
+                                        <div class="cell-name-image">📱</div>
+                                        <div class="cell-name-text">
+                                            <span class="cell-name-primary">OnePlus 12 5G</span>
+                                            <span class="cell-name-secondary">OnePlus · Smartphones</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>ONE-12-5G-256</td>
+                                <td>
+                                    <div class="cell-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" style="width: 60%"></div>
+                                        </div>
+                                        <span class="progress-text">60%</span>
+                                    </div>
+                                </td>
+                                <td><span class="cell-status pending">● Pending</span></td>
+                                <td>
+                                    <div class="cell-channels">
+                                        <span class="channel-badge amazon" title="Amazon">A</span>
+                                    </div>
+                                </td>
+                                <td class="cell-date">2 days ago</td>
+                                <td>
+                                    <div class="cell-actions">
+                                        <button class="cell-action-btn" title="Edit">✏️</button>
+                                        <button class="cell-action-btn" title="More">⋯</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-checkbox"><input type="checkbox"></td>
+                                <td>
+                                    <div class="cell-name">
+                                        <div class="cell-name-image">📱</div>
+                                        <div class="cell-name-text">
+                                            <span class="cell-name-primary">Xiaomi 14 Ultra</span>
+                                            <span class="cell-name-secondary">Xiaomi · Smartphones</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>XIA-14U-512</td>
+                                <td>
+                                    <div class="cell-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" style="width: 20%"></div>
+                                        </div>
+                                        <span class="progress-text">20%</span>
+                                    </div>
+                                </td>
+                                <td><span class="cell-status draft">● Draft</span></td>
+                                <td>
+                                    <div class="cell-channels">
+                                        <!-- No channels yet -->
+                                    </div>
+                                </td>
+                                <td class="cell-date">3 days ago</td>
+                                <td>
+                                    <div class="cell-actions">
+                                        <button class="cell-action-btn" title="Edit">✏️</button>
+                                        <button class="cell-action-btn" title="More">⋯</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-checkbox"><input type="checkbox"></td>
+                                <td>
+                                    <div class="cell-name">
+                                        <div class="cell-name-image">📱</div>
+                                        <div class="cell-name-text">
+                                            <span class="cell-name-primary">Sony Xperia 1 V</span>
+                                            <span class="cell-name-secondary">Sony · Smartphones</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>SNY-XP1V-256</td>
+                                <td>
+                                    <div class="cell-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" style="width: 92%"></div>
+                                        </div>
+                                        <span class="progress-text">92%</span>
+                                        <span class="ai-enriched-badge">AI</span>
+                                    </div>
+                                </td>
+                                <td><span class="cell-status complete">● Complete</span></td>
+                                <td>
+                                    <div class="cell-channels">
+                                        <span class="channel-badge amazon" title="Amazon">A</span>
+                                        <span class="channel-badge shopify" title="Shopify">S</span>
+                                        <span class="channel-badge ebay" title="eBay">E</span>
+                                        <span class="channel-badge walmart" title="Walmart">W</span>
+                                    </div>
+                                </td>
+                                <td class="cell-date">4 days ago</td>
+                                <td>
+                                    <div class="cell-actions">
+                                        <button class="cell-action-btn" title="Edit">✏️</button>
+                                        <button class="cell-action-btn" title="More">⋯</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+            <!-- AI Assistant Panel -->
+            <aside class="ai-panel" id="aiPanel">
+                <div class="ai-panel-header">
+                    <div class="ai-panel-icon">✨</div>
+                    <div class="ai-panel-title">
+                        <h3>AI Assistant</h3>
+                        <span>1 item selected</span>
+                    </div>
+                    <button class="ai-panel-close" onclick="toggleAIPanel()">×</button>
+                </div>
+
+                <div class="ai-panel-content">
+                    <div class="ai-suggestions">
+                        <div class="ai-suggestions-header">
+                            <h4>Suggested Actions</h4>
+                        </div>
+                        
+                        <div class="ai-suggestion-card">
+                            <h5>🎯 Complete Missing Attributes</h5>
+                            <p>AI can auto-fill 6 missing attributes for OnePlus 12 5G based on similar products and manufacturer data.</p>
+                            <div class="suggestion-meta">
+                                <span class="ai-confidence">✓ 94% confidence</span>
+                                <span class="ai-items-count">6 attributes</span>
+                            </div>
+                        </div>
+
+                        <div class="ai-suggestion-card">
+                            <h5>📝 Generate Product Description</h5>
+                            <p>Create an SEO-optimized product description tailored for Amazon marketplace requirements.</p>
+                            <div class="suggestion-meta">
+                                <span class="ai-confidence">✓ 91% confidence</span>
+                            </div>
+                        </div>
+
+                        <div class="ai-suggestion-card">
+                            <h5>🏷️ Suggest Categories</h5>
+                            <p>Map to 3 additional sales channels based on product attributes and category matching.</p>
+                            <div class="suggestion-meta">
+                                <span class="ai-confidence">✓ 87% confidence</span>
+                                <span class="ai-items-count">3 channels</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-suggestions">
+                        <div class="ai-suggestions-header">
+                            <h4>Bulk Operations</h4>
+                        </div>
+                        
+                        <div class="ai-suggestion-card">
+                            <h5>⚡ Enrich All Pending</h5>
+                            <p>Auto-enrich 89 products that are pending review using AI-powered data completion.</p>
+                            <div class="suggestion-meta">
+                                <span class="ai-items-count">89 products</span>
+                            </div>
+                        </div>
+
+                        <div class="ai-suggestion-card">
+                            <h5>🔍 Find Duplicates</h5>
+                            <p>Scan for potential duplicate products across all work areas using fuzzy matching.</p>
+                            <div class="suggestion-meta">
+                                <span class="ai-items-count">1,247 products</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-chat-input">
+                    <div class="ai-input-wrapper">
+                        <textarea class="ai-input-field" placeholder="Ask AI to help with your data..." rows="1"></textarea>
+                        <button class="ai-send-btn">→</button>
+                    </div>
+                    <div class="ai-quick-actions">
+                        <button class="ai-quick-action">Enrich selected</button>
+                        <button class="ai-quick-action">Generate images</button>
+                        <button class="ai-quick-action">Translate</button>
+                        <button class="ai-quick-action">Validate data</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- AI FAB (shown when panel is collapsed) -->
+        <button class="ai-fab" onclick="toggleAIPanel()">✨</button>
+    </div>
+
+    <!-- Global Search Overlay -->
+    <div class="search-overlay" id="searchOverlay" onclick="closeSearchOverlay(event)">
+        <div class="search-modal" onclick="event.stopPropagation()">
+            <div class="search-modal-header">
+                <span style="font-size: 20px; color: var(--text-light);">🔍</span>
+                <input type="text" class="search-modal-input" placeholder="Search across all products, attributes, channels..." autofocus>
+                <button class="search-ai-toggle">
+                    ✨ AI Search
+                </button>
+            </div>
+            <div class="search-modal-results">
+                <div class="search-section">
+                    <div class="search-section-header">Recent</div>
+                    <div class="search-result-item">
+                        <div class="search-result-icon">📱</div>
+                        <div class="search-result-content">
+                            <div class="search-result-title">iPhone 15 Pro Max 256GB</div>
+                            <div class="search-result-meta">Mobile Phones · APL-IP15PM-256</div>
+                        </div>
+                        <div class="search-result-action">↵</div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="search-result-icon">📁</div>
+                        <div class="search-result-content">
+                            <div class="search-result-title">Laptops</div>
+                            <div class="search-result-meta">Work Area · 856 products</div>
+                        </div>
+                        <div class="search-result-action">↵</div>
+                    </div>
+                </div>
+                <div class="search-section">
+                    <div class="search-section-header">Quick Actions</div>
+                    <div class="search-result-item">
+                        <div class="search-result-icon" style="background: var(--primary-subtle); color: var(--primary);">+</div>
+                        <div class="search-result-content">
+                            <div class="search-result-title">Create new product</div>
+                            <div class="search-result-meta">Add a new product to the catalog</div>
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="search-result-icon" style="background: linear-gradient(135deg, rgba(101, 84, 192, 0.2) 0%, rgba(0, 184, 217, 0.2) 100%); color: var(--ai-purple);">✨</div>
+                        <div class="search-result-content">
+                            <div class="search-result-title">AI-powered enrichment</div>
+                            <div class="search-result-meta">Automatically enhance product data</div>
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="search-result-icon" style="background: var(--success-subtle); color: var(--success);">📤</div>
+                        <div class="search-result-content">
+                            <div class="search-result-title">Syndicate to channels</div>
+                            <div class="search-result-meta">Publish products to sales channels</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-modal-footer">
+                <div class="search-shortcuts">
+                    <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+                    <span><kbd>↵</kbd> Select</span>
+                    <span><kbd>esc</kbd> Close</span>
+                </div>
+                <span>Powered by AI</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Product Switcher
+        function toggleProductSwitcher() {
+            const switcher = document.getElementById('productSwitcher');
+            switcher.classList.toggle('open');
+        }
+
+        // Work Area Toggle
+        function toggleWorkArea(header) {
+            header.classList.toggle('expanded');
+        }
+
+        // AI Panel Toggle
+        function toggleAIPanel() {
+            const panel = document.getElementById('aiPanel');
+            panel.classList.toggle('collapsed');
+        }
+
+        // Search Overlay
+        function openSearchOverlay() {
+            const overlay = document.getElementById('searchOverlay');
+            overlay.classList.add('open');
+            setTimeout(() => {
+                overlay.querySelector('.search-modal-input').focus();
+            }, 100);
+        }
+
+        function closeSearchOverlay(event) {
+            if (event.target === event.currentTarget) {
+                const overlay = document.getElementById('searchOverlay');
+                overlay.classList.remove('open');
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Cmd/Ctrl + K for search
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                openSearchOverlay();
+            }
+            // Escape to close overlays
+            if (e.key === 'Escape') {
+                document.getElementById('searchOverlay').classList.remove('open');
+                document.getElementById('productSwitcher').classList.remove('open');
+            }
+        });
+
+        // Close product switcher when clicking outside
+        document.addEventListener('click', function(e) {
+            const switcher = document.getElementById('productSwitcher');
+            const switcherBtn = document.querySelector('.product-switcher-btn');
+            const currentProduct = document.querySelector('.current-product');
+            
+            if (!switcher.contains(e.target) && 
+                !switcherBtn.contains(e.target) && 
+                !currentProduct.contains(e.target)) {
+                switcher.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

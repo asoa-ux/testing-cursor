@@ -1,0 +1,2679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIM - Product Information Management</title>
+  <style>
+    /* ==================== DESIGN TOKENS ==================== */
+    :root {
+      /* Colors */
+      --accent: #0891b2;
+      --accent-light: #e0f7fa;
+      --accent-hover: #0e7490;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      
+      /* Backgrounds */
+      --bg: #ffffff;
+      --bg-surface: #fafafa;
+      --bg-subtle: #f4f4f5;
+      --bg-hover: #f0f0f1;
+      --bg-selected: #e0f7fa;
+      
+      /* Text */
+      --text-primary: #18181b;
+      --text-secondary: #52525b;
+      --text-muted: #a1a1aa;
+      
+      /* Borders */
+      --border: #e4e4e7;
+      --border-light: #f4f4f5;
+      
+      /* Spacing & Sizing */
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --header-height: 48px;
+      --nav-height: 40px;
+      --breadcrumb-height: 44px;
+      --toolbar-height: 48px;
+    }
+
+    /* ==================== RESET & BASE ==================== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg-subtle); 
+      color: var(--text-primary); 
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    button { font-family: inherit; }
+    input, select, textarea { font-family: inherit; font-size: inherit; }
+
+    /* ==================== LAYOUT ==================== */
+    .app { 
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh; 
+      overflow: hidden; 
+    }
+
+    /* ==================== HEADER ==================== */
+    .header { 
+      height: var(--header-height); 
+      background: var(--text-primary); 
+      color: white; 
+      display: flex; 
+      align-items: center; 
+      padding: 0 16px; 
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .header-logo { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      font-weight: 600; 
+      font-size: 15px; 
+    }
+    .header-logo svg { width: 20px; height: 20px; }
+    .header-spacer { flex: 1; }
+    .header-search { 
+      display: flex; 
+      align-items: center; 
+      background: rgba(255,255,255,0.1); 
+      border-radius: var(--radius-md); 
+      padding: 6px 12px; 
+      gap: 8px;
+      width: 240px;
+    }
+    .header-search svg { width: 16px; height: 16px; opacity: 0.7; }
+    .header-search input { 
+      background: transparent; 
+      border: none; 
+      color: white; 
+      outline: none; 
+      width: 100%;
+      font-size: 13px;
+    }
+    .header-search input::placeholder { color: rgba(255,255,255,0.5); }
+    .header-actions { display: flex; gap: 4px; }
+    .header-btn { 
+      width: 32px; 
+      height: 32px; 
+      border-radius: var(--radius-sm); 
+      border: none; 
+      background: transparent; 
+      color: white; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .header-btn:hover { background: rgba(255,255,255,0.1); }
+    .header-btn svg { width: 18px; height: 18px; }
+
+    /* ==================== MAIN NAVIGATION TABS ==================== */
+    .main-nav { 
+      display: flex; 
+      background: var(--bg-surface); 
+      border-bottom: 1px solid var(--border); 
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+    .main-nav-tab { 
+      height: var(--nav-height); 
+      padding: 0 20px; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      background: transparent; 
+      border: none; 
+      border-bottom: 2px solid transparent; 
+      color: var(--text-secondary); 
+      font-size: 13px; 
+      font-weight: 500; 
+      cursor: pointer; 
+      transition: all 0.15s; 
+      margin-bottom: -1px; 
+    }
+    .main-nav-tab:hover { color: var(--text-primary); background: var(--bg-hover); }
+    .main-nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .main-nav-tab svg { width: 16px; height: 16px; }
+
+    /* ==================== BREADCRUMB BAR ==================== */
+    .breadcrumb-bar { 
+      height: var(--breadcrumb-height); 
+      background: var(--bg-surface); 
+      border-bottom: 1px solid var(--border); 
+      display: flex; 
+      align-items: center; 
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .breadcrumb-item { color: var(--text-muted); cursor: pointer; }
+    .breadcrumb-item:hover { color: var(--accent); text-decoration: underline; }
+    .breadcrumb-item.current { color: var(--text-primary); font-weight: 500; cursor: default; }
+    .breadcrumb-item.current:hover { text-decoration: none; }
+    .breadcrumb-sep { color: var(--text-muted); }
+
+    /* ==================== TOOLBAR ==================== */
+    .toolbar { 
+      background: var(--bg-surface); 
+      border-bottom: 1px solid var(--border); 
+      display: flex; 
+      align-items: center; 
+      padding: 12px 16px; 
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .toolbar-group { display: flex; align-items: center; gap: 4px; }
+    .toolbar-sep { width: 1px; height: 28px; background: var(--border); margin: 0 8px; }
+    .toolbar-spacer { flex: 1; }
+    .toolbar-right { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+    .toolbar-info { font-size: 12px; color: var(--text-muted); min-width: 70px; text-align: right; }
+
+    /* Toolbar Buttons (Icon on top, label below) */
+    .toolbar-btn { 
+      display: inline-flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 2px; 
+      padding: 6px 10px; 
+      min-width: 50px; 
+      background: var(--bg); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-sm); 
+      color: var(--text-secondary); 
+      font-size: 10px; 
+      font-weight: 500; 
+      cursor: pointer; 
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .toolbar-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .toolbar-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+    .toolbar-btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    .toolbar-btn.primary:hover { background: var(--accent-hover); }
+    .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .toolbar-btn svg { width: 16px; height: 16px; }
+
+    /* View Switcher (Segmented Buttons) */
+    .view-switcher { 
+      display: flex; 
+      background: var(--bg-subtle); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-sm); 
+      padding: 2px; 
+      gap: 2px; 
+    }
+    .view-btn { 
+      height: 28px; 
+      padding: 0 12px; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      background: transparent; 
+      border: none; 
+      border-radius: var(--radius-sm); 
+      color: var(--text-muted); 
+      font-size: 11px; 
+      font-weight: 500; 
+      cursor: pointer; 
+      transition: all 0.15s; 
+    }
+    .view-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+    .view-btn.active { background: var(--bg); color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+    .view-btn svg { width: 14px; height: 14px; }
+
+    /* ==================== CONTENT AREA ==================== */
+    .content { flex: 1; display: flex; overflow: hidden; }
+    
+    /* Sidebar (Category Tree) */
+    .sidebar { 
+      width: 240px; 
+      min-width: 180px;
+      max-width: 400px;
+      background: var(--bg); 
+      border-right: 1px solid var(--border); 
+      display: flex; 
+      flex-direction: column;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .sidebar-header { 
+      padding: 12px; 
+      border-bottom: 1px solid var(--border); 
+      font-weight: 600; 
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 8px; }
+    
+    /* Tree */
+    .tree-node { padding: 2px 0; }
+    .tree-node-content { 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+      padding: 6px 8px; 
+      border-radius: var(--radius-sm); 
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .tree-node-content:hover { background: var(--bg-hover); }
+    .tree-node-content.active { background: var(--accent-light); color: var(--accent); }
+    .tree-node-expand { 
+      width: 16px; 
+      height: 16px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .tree-node-expand svg { width: 12px; height: 12px; transition: transform 0.15s; }
+    .tree-node-expand.expanded svg { transform: rotate(90deg); }
+    .tree-node-icon { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+    .tree-node-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tree-node-count { 
+      font-size: 10px; 
+      color: var(--text-muted); 
+      background: var(--bg-subtle); 
+      padding: 1px 6px; 
+      border-radius: 10px;
+    }
+    .tree-node-action {
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .tree-node-action svg { width: 14px; height: 14px; }
+    .tree-node-action:hover { color: var(--accent); }
+    .tree-node-content:hover .tree-node-action { opacity: 1; 
+    }
+    .tree-children { margin-left: 20px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+    /* ==================== TABLE VIEW ==================== */
+    .table-view { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .table-container { flex: 1; overflow: auto; }
+    
+    /* ==================== GALLERY VIEW ==================== */
+    .gallery-view { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th { 
+      position: sticky; 
+      top: 0; 
+      background: var(--bg-subtle); 
+      color: var(--text-secondary); 
+      padding: 10px 12px; 
+      text-align: left; 
+      font-weight: 600; 
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .data-table td { 
+      padding: 10px 12px; 
+      border-bottom: 1px solid var(--border-light); 
+      vertical-align: middle;
+    }
+    .data-table tbody tr:hover td { background: var(--bg-hover); }
+    .data-table tbody tr.selected td { background: var(--bg-selected); }
+    
+    /* Checkbox */
+    .checkbox { 
+      width: 16px; 
+      height: 16px; 
+      border: 1px solid var(--border); 
+      border-radius: 2px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .checkbox:hover { border-color: var(--accent); }
+    .checkbox.checked { background: var(--accent); border-color: var(--accent); }
+    .checkbox.checked::after { content: '✓'; color: white; font-size: 10px; }
+
+    /* View Footer (shared style for table, gallery, item list, tabs) */
+    .view-footer { 
+      padding: 8px 12px; 
+      border-top: 1px solid var(--border); 
+      background: var(--bg-subtle); 
+      font-size: 11px; 
+      color: var(--text-muted);
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .table-footer { 
+      padding: 8px 12px; 
+      border-top: 1px solid var(--border); 
+      background: var(--bg-subtle); 
+      font-size: 11px; 
+      color: var(--text-muted);
+      text-align: center;
+    }
+    
+    /* Tab content container */
+    .tab-content-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      position: relative;
+    }
+    .tab-content-scroll {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+    .tab-content-container .view-footer,
+    .tab-content-container > div > .view-footer {
+      flex-shrink: 0;
+    }
+    
+    /* Scrollable form wrapper for form-based tabs */
+    .tab-form-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .gallery-container { flex: 1; overflow: auto; padding: 16px; }
+    .gallery-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+      gap: 16px; 
+    }
+    .gallery-card { 
+      background: var(--bg); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-md); 
+      overflow: hidden; 
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .gallery-card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .gallery-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+    .gallery-card-checkbox { position: absolute; top: 8px; left: 8px; z-index: 1; }
+    .gallery-card-image { 
+      height: 140px; 
+      background: var(--bg-subtle); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+    }
+    .gallery-card-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .gallery-card-image svg { width: 48px; height: 48px; color: var(--text-muted); }
+    .gallery-card-body { padding: 12px; }
+    .gallery-card-title { font-weight: 500; margin-bottom: 4px; }
+    .gallery-card-subtitle { font-size: 11px; color: var(--text-muted); }
+    .gallery-card-meta { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      margin-top: 8px; 
+      font-size: 11px; 
+    }
+
+    /* ==================== DETAIL VIEW ==================== */
+    .detail-view { display: none; flex: 1; overflow: hidden; }
+    .detail-view.active { display: flex; }
+    
+    /* Item List Panel */
+    .item-list { 
+      width: 280px; 
+      min-width: 200px;
+      max-width: 400px;
+      background: var(--bg-surface); 
+      border-right: 1px solid var(--border); 
+      display: flex; 
+      flex-direction: column;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .item-list-header { 
+      padding: 12px; 
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .item-list-content { flex: 1; overflow-y: auto; }
+    .item-list-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-subtle);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .item-card { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 12px; 
+      border-bottom: 1px solid var(--border-light); 
+      cursor: pointer;
+    }
+    .item-card:hover { background: var(--bg-hover); }
+    .item-card.active { background: var(--accent-light); }
+    .item-card-thumb { 
+      width: 48px; 
+      height: 48px; 
+      border-radius: var(--radius-sm); 
+      background: var(--bg-subtle); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .item-card-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
+    .item-card-thumb svg { width: 24px; height: 24px; color: var(--text-muted); }
+    .item-card-info { flex: 1; min-width: 0; }
+    .item-card-title { font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-card-subtitle { font-size: 11px; color: var(--text-muted); }
+
+    /* Detail Main Panel */
+    .detail-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .detail-header { 
+      padding: 16px; 
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .detail-header-content { flex: 1; }
+    .detail-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .detail-subtitle { font-size: 12px; color: var(--text-muted); }
+    
+    /* Detail Tabs */
+    .detail-tabs { 
+      display: flex; 
+      gap: 0; 
+      padding: 0 16px; 
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+    .detail-tab { 
+      padding: 12px 16px; 
+      font-size: 12px; 
+      font-weight: 500; 
+      color: var(--text-muted); 
+      cursor: pointer; 
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .detail-tab:hover { color: var(--text-primary); }
+    .detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    
+    /* Detail Content */
+    .detail-content { 
+      flex: 1; 
+      overflow: hidden; 
+      padding: 16px; 
+      padding-bottom: 0;
+      display: flex; 
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* Detail Sidebar */
+    .detail-sidebar { 
+      width: 280px; 
+      min-width: 200px;
+      max-width: 400px;
+      background: var(--bg-surface); 
+      border-left: 1px solid var(--border); 
+      overflow-y: auto;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
+    .sidebar-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+
+    /* ==================== FORMS ==================== */
+    .form-section { margin-bottom: 24px; }
+    .form-section-title { 
+      font-size: 14px; 
+      font-weight: 600; 
+      margin-bottom: 16px; 
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    /* Form Field (Label on left) */
+    .form-field { 
+      display: flex; 
+      align-items: flex-start; 
+      gap: 16px; 
+      margin-bottom: 12px; 
+    }
+    .form-label { 
+      width: 140px; 
+      flex-shrink: 0; 
+      font-size: 12px; 
+      color: var(--text-secondary); 
+      padding-top: 8px;
+    }
+    .form-label.required::after { content: ' *'; color: var(--error); }
+    .form-input-wrapper { flex: 1; max-width: 400px; position: relative; }
+    .form-input, .form-select, .form-textarea { 
+      width: 100%; 
+      padding: 8px 12px; 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-sm); 
+      font-size: 13px;
+      background: var(--bg);
+      transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { 
+      outline: none; 
+      border-color: var(--accent); 
+    }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    
+    /* Field Actions */
+    .field-actions { 
+      position: absolute; 
+      right: 4px; 
+      top: 50%; 
+      transform: translateY(-50%);
+      display: none;
+      gap: 2px;
+    }
+    .form-input-wrapper:hover .field-actions { display: flex; }
+    .field-action-btn { 
+      width: 24px; 
+      height: 24px; 
+      border: none; 
+      background: var(--bg-subtle); 
+      border-radius: var(--radius-sm); 
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+    .field-action-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .field-action-btn svg { width: 14px; height: 14px; }
+
+    /* Inherited Field Indicator */
+    .form-input.inherited { border-style: dashed; border-color: var(--accent); }
+    .inherited-indicator { 
+      font-size: 10px; 
+      color: var(--accent); 
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Multi-value Field */
+    .multi-value-list { display: flex; flex-direction: column; gap: 8px; }
+    .multi-value-item { display: flex; gap: 8px; }
+    .multi-value-item .form-input { flex: 1; }
+    .multi-value-add { 
+      font-size: 12px; 
+      color: var(--accent); 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .multi-value-add:hover { text-decoration: underline; }
+
+    /* ==================== STATUS BADGES ==================== */
+    .status-badge { 
+      display: inline-flex; 
+      align-items: center; 
+      padding: 2px 8px; 
+      border-radius: 10px; 
+      font-size: 10px; 
+      font-weight: 500; 
+      text-transform: uppercase;
+    }
+    .status-badge.approved { background: #d1fae5; color: #059669; }
+    .status-badge.pending { background: #fef3c7; color: #d97706; }
+    .status-badge.draft { background: #e5e7eb; color: #6b7280; }
+    .status-badge.rejected { background: #fee2e2; color: #dc2626; }
+
+    /* ==================== PROGRESS BAR ==================== */
+    .progress-bar { 
+      height: 6px; 
+      background: var(--bg-subtle); 
+      border-radius: 3px; 
+      overflow: hidden; 
+    }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+    .progress-fill.success { background: var(--success); }
+    .progress-fill.warning { background: var(--warning); }
+
+    /* ==================== MODALS ==================== */
+    .modal-overlay { 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.5); 
+      display: none; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal { 
+      background: var(--bg); 
+      border-radius: var(--radius-lg); 
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
+      max-width: 90vw; 
+      max-height: 90vh; 
+      display: flex; 
+      flex-direction: column;
+      min-width: 400px;
+    }
+    .modal-header { 
+      padding: 16px 20px; 
+      border-bottom: 1px solid var(--border); 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+    }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-close { 
+      width: 32px; 
+      height: 32px; 
+      border: none; 
+      background: transparent; 
+      cursor: pointer; 
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+    .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .modal-close svg { width: 20px; height: 20px; }
+    .modal-body { padding: 20px; flex: 1; overflow-y: auto; }
+    .modal-footer { 
+      padding: 16px 20px; 
+      border-top: 1px solid var(--border); 
+      display: flex; 
+      justify-content: flex-end; 
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn { 
+      padding: 8px 16px; 
+      border-radius: var(--radius-sm); 
+      font-size: 13px; 
+      font-weight: 500; 
+      cursor: pointer; 
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text-primary); }
+    .btn-secondary:hover { background: var(--bg-hover); }
+    .btn-danger { background: var(--error); border: 1px solid var(--error); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+
+    /* ==================== TOAST NOTIFICATIONS ==================== */
+    .toast-container { 
+      position: fixed; 
+      bottom: 20px; 
+      right: 20px; 
+      z-index: 2000; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px;
+    }
+    .toast { 
+      padding: 12px 16px; 
+      background: var(--text-primary); 
+      color: white; 
+      border-radius: var(--radius-md); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideIn 0.2s ease-out;
+    }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+    .toast.warning { background: var(--warning); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ==================== SELECTION BAR ==================== */
+    .selection-bar { 
+      position: fixed; 
+      bottom: 20px; 
+      left: 50%; 
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text-primary); 
+      color: white; 
+      padding: 12px 20px; 
+      border-radius: var(--radius-lg); 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s;
+      z-index: 100;
+    }
+    .selection-bar.visible { transform: translateX(-50%) translateY(0); }
+    .selection-count { font-weight: 600; }
+    .selection-actions { display: flex; gap: 8px; }
+    .selection-btn { 
+      padding: 6px 12px; 
+      background: rgba(255,255,255,0.1); 
+      border: none; 
+      border-radius: var(--radius-sm); 
+      color: white; 
+      font-size: 12px; 
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .selection-btn:hover { background: rgba(255,255,255,0.2); }
+    .selection-btn svg { width: 14px; height: 14px; }
+
+    /* ==================== RESIZE HANDLES ==================== */
+    .resize-handle { 
+      width: 4px; 
+      cursor: col-resize; 
+      background: transparent;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .resize-handle:hover { background: var(--accent); }
+
+    /* ==================== PANEL COLLAPSE ==================== */
+    .panel-collapse-btn { 
+      position: absolute; 
+      bottom: 20px; 
+      width: 20px; 
+      height: 40px; 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-sm); 
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    .panel-collapse-btn:hover { background: var(--bg-hover); }
+    .panel-collapse-btn svg { width: 12px; height: 12px; color: var(--text-muted); }
+    .panel-collapse-btn.left { right: -10px; }
+    .panel-collapse-btn.right { left: -10px; }
+    
+    /* Collapsed panel - show minimized bar */
+    .panel.collapsed { 
+      width: 32px !important; 
+      min-width: 32px !important; 
+      max-width: 32px !important;
+      padding: 0; 
+      background: var(--bg-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .panel.collapsed > *:not(.panel-collapsed-bar) { display: none; }
+    .panel-collapsed-bar {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      gap: 8px;
+    }
+    .panel.collapsed .panel-collapsed-bar { display: flex; }
+    .panel-collapsed-bar .expand-btn {
+      width: 24px;
+      height: 40px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .panel-collapsed-bar .expand-btn:hover { background: var(--bg-hover); }
+    .panel-collapsed-bar .expand-btn svg { width: 12px; height: 12px; color: var(--text-muted); }
+    .panel-collapsed-bar .panel-label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ==================== UTILITY CLASSES ==================== */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-1 { flex: 1; }
+    .items-center { align-items: center; }
+    .gap-8 { gap: 8px; }
+    .gap-16 { gap: 16px; }
+    .text-muted { color: var(--text-muted); }
+    .text-sm { font-size: 12px; }
+    .font-medium { font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        PIM
+      </div>
+      <div class="header-spacer"></div>
+      <div class="header-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search products...">
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="header-btn" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="main-nav" id="mainNav"></nav>
+
+    <!-- Breadcrumb Bar -->
+    <div class="breadcrumb-bar">
+      <div class="breadcrumb" id="breadcrumb"></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar" id="toolbar"></div>
+
+    <!-- Selection Bar -->
+    <div class="selection-bar" id="selectionBar">
+      <span><span class="selection-count" id="selectionCount">0</span> selected</span>
+      <div class="selection-actions">
+        <button class="selection-btn" onclick="showReferences()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          References
+        </button>
+        <button class="selection-btn" onclick="inspectProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Inspect
+        </button>
+        <button class="selection-btn" onclick="submitProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Submit
+        </button>
+        <button class="selection-btn" onclick="addToWorkflow()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Add to workflow
+        </button>
+        <button class="selection-btn" onclick="assignProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Assign
+        </button>
+        <button class="selection-btn" onclick="addToCollection()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Collection
+        </button>
+        <button class="selection-btn" onclick="setMasterProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Master product
+        </button>
+        <button class="selection-btn" onclick="setPDXChannels()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          PDX channels
+        </button>
+        <button class="selection-btn" onclick="categorizeProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          Categorize
+        </button>
+        <button class="selection-btn" onclick="businessAction()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Business action
+        </button>
+        <button class="selection-btn" onclick="approveSelected()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Approve
+        </button>
+        <button class="selection-btn" onclick="exportData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="selection-btn" onclick="deleteSelected()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+        <button class="selection-btn" onclick="clearSelection()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+      <!-- Sidebar (Category Tree) -->
+      <aside class="sidebar panel" id="sidebar">
+        <div class="sidebar-header">
+          Categories
+        </div>
+        <div class="sidebar-content" id="categoryTree"></div>
+        <button class="panel-collapse-btn left" onclick="togglePanel('sidebar')" title="Collapse panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="panel-collapsed-bar">
+          <button class="expand-btn" onclick="togglePanel('sidebar')" title="Expand Categories">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <span class="panel-label">Categories</span>
+        </div>
+      </aside>
+      <div class="resize-handle" data-resize="sidebar"></div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Table View -->
+        <div class="table-view" id="tableView">
+          <div class="table-container">
+            <table class="data-table" id="dataTable"></table>
+          </div>
+          <div class="table-footer" id="tableFooter"></div>
+        </div>
+
+        <!-- Gallery View -->
+        <div class="gallery-view hidden" id="galleryView">
+          <div class="gallery-container" id="galleryGrid"></div>
+          <div class="table-footer" id="galleryFooter"></div>
+        </div>
+
+        <!-- Detail View -->
+        <div class="detail-view" id="detailView">
+          <div class="item-list panel" id="itemList"></div>
+          <div class="resize-handle" data-resize="itemList"></div>
+          <div class="detail-main" id="detailMain"></div>
+          <div class="resize-handle" data-resize="detailSidebar"></div>
+          <aside class="detail-sidebar panel" id="detailSidebar"></aside>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <span class="modal-title" id="modalTitle">Modal Title</span>
+          <button class="modal-close" onclick="closeModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer" id="modalFooter"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE ====================
+    const state = {
+      // Navigation
+      activeMainTab: 'external-data',
+      breadcrumb: ['Music', 'Musical Instruments', 'String Instruments (Non Powered)'],
+      
+      // View
+      currentView: 'table', // 'table', 'gallery', 'details'
+      
+      // Selection
+      selectedItems: [],
+      checkedItems: [],
+      
+      // Detail view
+      activeDetailTab: 'basic',
+      selectedItemIndex: 0,
+      
+      // Filters & Sort - Main
+      filters: [],
+      sortField: 'name',
+      sortDirection: 'asc',
+      
+      // Filters & Sort - Relations
+      relationFilters: [],
+      relationSortField: 'name',
+      relationSortDirection: 'asc',
+      
+      // Filters & Sort - Assets
+      assetFilters: [],
+      assetSortField: 'name',
+      assetSortDirection: 'asc',
+      
+      // Panel states
+      sidebarCollapsed: false,
+      itemListCollapsed: false,
+      detailSidebarCollapsed: false,
+      
+      // Sub-view states (for tables within detail tabs)
+      relationView: 'table',
+      specView: 'table',
+      assetView: 'gallery',
+      
+      // Selection within tabs
+      checkedRelations: [],
+      checkedAssets: [],
+      selectedAsset: null,
+      selectedRelationType: 'all',
+      
+      // Category/parent selection
+      selectedCategoryId: null,
+      viewingCategoryAsProduct: false,
+    };
+
+    // ==================== DATA ====================
+    const mainNavTabs = [
+      { id: 'external-data', label: 'External Data Sources', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>' },
+      { id: 'packaging', label: 'Packaging', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' },
+      { id: 'assets', label: 'Assets', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' },
+      { id: 'categories', label: 'Categories', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' },
+      { id: 'workflows', label: 'Workflows', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="9" y="15" width="6" height="6"/><path d="M6 9v3h3M18 9v3h-3M12 12v3"/></svg>' },
+      { id: 'channels', label: 'Channels', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>' },
+    ];
+
+    // Categories are also parent products with their own attributes
+    const categories = [
+      { id: 'cat-1', name: 'Guitars', sku: 'CAT-GUITARS', count: 45, status: 'approved', completeness: 100, price: 0, stock: 0, category: 'Root', children: [
+        { id: 'cat-1-1', name: 'Acoustic Guitars', sku: 'CAT-ACOUSTIC', count: 18, status: 'approved', completeness: 95, price: 0, stock: 0, category: 'Guitars' },
+        { id: 'cat-1-2', name: 'Electric Guitars', sku: 'CAT-ELECTRIC', count: 22, status: 'approved', completeness: 92, price: 0, stock: 0, category: 'Guitars' },
+        { id: 'cat-1-3', name: 'Bass Guitars', sku: 'CAT-BASS', count: 5, status: 'pending', completeness: 78, price: 0, stock: 0, category: 'Guitars' },
+      ]},
+      { id: 'cat-2', name: 'String Instruments', sku: 'CAT-STRINGS', count: 32, status: 'approved', completeness: 88, price: 0, stock: 0, category: 'Root', children: [
+        { id: 'cat-2-1', name: 'Violins', sku: 'CAT-VIOLINS', count: 12, status: 'approved', completeness: 90, price: 0, stock: 0, category: 'String Instruments' },
+        { id: 'cat-2-2', name: 'Cellos', sku: 'CAT-CELLOS', count: 8, status: 'approved', completeness: 85, price: 0, stock: 0, category: 'String Instruments' },
+        { id: 'cat-2-3', name: 'Violas', sku: 'CAT-VIOLAS', count: 6, status: 'draft', completeness: 60, price: 0, stock: 0, category: 'String Instruments' },
+        { id: 'cat-2-4', name: 'Double Bass', sku: 'CAT-DBASS', count: 6, status: 'approved', completeness: 82, price: 0, stock: 0, category: 'String Instruments' },
+      ]},
+      { id: 'cat-3', name: 'Accessories', sku: 'CAT-ACCESS', count: 128, status: 'approved', completeness: 75, price: 0, stock: 0, category: 'Root', children: [
+        { id: 'cat-3-1', name: 'Strings', sku: 'CAT-STRINGS-ACC', count: 45, status: 'approved', completeness: 80, price: 0, stock: 0, category: 'Accessories' },
+        { id: 'cat-3-2', name: 'Cases', sku: 'CAT-CASES', count: 38, status: 'approved', completeness: 70, price: 0, stock: 0, category: 'Accessories' },
+        { id: 'cat-3-3', name: 'Stands', sku: 'CAT-STANDS', count: 25, status: 'pending', completeness: 65, price: 0, stock: 0, category: 'Accessories' },
+        { id: 'cat-3-4', name: 'Picks', sku: 'CAT-PICKS', count: 20, status: 'approved', completeness: 90, price: 0, stock: 0, category: 'Accessories' },
+      ]},
+    ];
+
+    const products = [
+      { id: 'PRD-001', name: 'Gibson Les Paul Standard', sku: 'GIB-LP-STD-001', status: 'approved', price: 2499.00, stock: 12, category: 'Electric Guitars', completeness: 95, image: null },
+      { id: 'PRD-002', name: 'Fender Stratocaster', sku: 'FEN-STRAT-001', status: 'approved', price: 1899.00, stock: 8, category: 'Electric Guitars', completeness: 88, image: null },
+      { id: 'PRD-003', name: 'Martin D-28', sku: 'MAR-D28-001', status: 'pending', price: 3199.00, stock: 5, category: 'Acoustic Guitars', completeness: 72, image: null },
+      { id: 'PRD-004', name: 'Taylor 814ce', sku: 'TAY-814CE-001', status: 'approved', price: 3999.00, stock: 3, category: 'Acoustic Guitars', completeness: 100, image: null },
+      { id: 'PRD-005', name: 'PRS Custom 24', sku: 'PRS-C24-001', status: 'draft', price: 3849.00, stock: 6, category: 'Electric Guitars', completeness: 45, image: null },
+      { id: 'PRD-006', name: 'Ibanez RG550', sku: 'IBA-RG550-001', status: 'approved', price: 999.00, stock: 15, category: 'Electric Guitars', completeness: 82, image: null },
+      { id: 'PRD-007', name: 'Yamaha FG800', sku: 'YAM-FG800-001', status: 'approved', price: 229.00, stock: 42, category: 'Acoustic Guitars', completeness: 90, image: null },
+      { id: 'PRD-008', name: 'Epiphone SG Standard', sku: 'EPI-SG-STD-001', status: 'pending', price: 449.00, stock: 18, category: 'Electric Guitars', completeness: 65, image: null },
+      { id: 'PRD-009', name: 'Stradivarius Replica Violin', sku: 'STR-REP-001', status: 'approved', price: 1299.00, stock: 4, category: 'Violins', completeness: 78, image: null },
+      { id: 'PRD-010', name: 'Fender Jazz Bass', sku: 'FEN-JB-001', status: 'approved', price: 1749.00, stock: 7, category: 'Bass Guitars', completeness: 92, image: null },
+    ];
+
+    const detailTabs = [
+      { id: 'basic', label: 'Basic Information' },
+      { id: 'relations', label: 'Relations' },
+      { id: 'assets', label: 'Assets' },
+      { id: 'pricing', label: 'Pricing & Costs' },
+      { id: 'category', label: 'Category Attributes' },
+    ];
+
+    // Relations data
+    const relations = [
+      // PRD-001 - Gibson Les Paul Standard
+      { id: 'REL-001', productId: 'PRD-001', relatedId: 'PRD-002', type: 'similar', name: 'Fender Stratocaster', sku: 'FEN-STRAT-001', category: 'Electric Guitars' },
+      { id: 'REL-002', productId: 'PRD-001', relatedId: 'PRD-005', type: 'similar', name: 'PRS Custom 24', sku: 'PRS-C24-001', category: 'Electric Guitars' },
+      { id: 'REL-003', productId: 'PRD-001', relatedId: 'PRD-006', type: 'similar', name: 'Ibanez RG550', sku: 'IBA-RG550-001', category: 'Electric Guitars' },
+      { id: 'REL-004', productId: 'PRD-001', relatedId: 'ACC-001', type: 'accessory', name: 'Premium Guitar Strings', sku: 'STR-PREM-001', category: 'Strings' },
+      { id: 'REL-005', productId: 'PRD-001', relatedId: 'ACC-002', type: 'accessory', name: 'Hardshell Case', sku: 'CASE-HS-001', category: 'Cases' },
+      { id: 'REL-006', productId: 'PRD-001', relatedId: 'PRD-008', type: 'upsell', name: 'Epiphone SG Standard', sku: 'EPI-SG-STD-001', category: 'Electric Guitars' },
+      { id: 'REL-007', productId: 'PRD-001', relatedId: 'PRD-PARENT', type: 'parent', name: 'Les Paul Collection', sku: 'GIB-LP-COL', category: 'Collections' },
+      
+      // PRD-002 - Fender Stratocaster
+      { id: 'REL-008', productId: 'PRD-002', relatedId: 'PRD-001', type: 'similar', name: 'Gibson Les Paul Standard', sku: 'GIB-LP-STD-001', category: 'Electric Guitars' },
+      { id: 'REL-009', productId: 'PRD-002', relatedId: 'PRD-010', type: 'similar', name: 'Fender Jazz Bass', sku: 'FEN-JB-001', category: 'Bass Guitars' },
+      { id: 'REL-010', productId: 'PRD-002', relatedId: 'ACC-003', type: 'accessory', name: 'Fender Gig Bag', sku: 'FEN-BAG-001', category: 'Cases' },
+      { id: 'REL-011', productId: 'PRD-002', relatedId: 'ACC-004', type: 'accessory', name: 'Fender Strap', sku: 'FEN-STRAP-001', category: 'Accessories' },
+      { id: 'REL-012', productId: 'PRD-002', relatedId: 'PRD-PARENT2', type: 'parent', name: 'Stratocaster Series', sku: 'FEN-STRAT-SER', category: 'Collections' },
+      
+      // PRD-003 - Martin D-28
+      { id: 'REL-013', productId: 'PRD-003', relatedId: 'PRD-004', type: 'similar', name: 'Taylor 814ce', sku: 'TAY-814CE-001', category: 'Acoustic Guitars' },
+      { id: 'REL-014', productId: 'PRD-003', relatedId: 'PRD-007', type: 'crosssell', name: 'Yamaha FG800', sku: 'YAM-FG800-001', category: 'Acoustic Guitars' },
+      { id: 'REL-015', productId: 'PRD-003', relatedId: 'ACC-005', type: 'accessory', name: 'Martin Strings Set', sku: 'MAR-STR-001', category: 'Strings' },
+      { id: 'REL-016', productId: 'PRD-003', relatedId: 'ACC-006', type: 'accessory', name: 'Acoustic Guitar Stand', sku: 'STAND-AC-001', category: 'Stands' },
+      
+      // PRD-004 - Taylor 814ce
+      { id: 'REL-017', productId: 'PRD-004', relatedId: 'PRD-003', type: 'similar', name: 'Martin D-28', sku: 'MAR-D28-001', category: 'Acoustic Guitars' },
+      { id: 'REL-018', productId: 'PRD-004', relatedId: 'PRD-007', type: 'crosssell', name: 'Yamaha FG800', sku: 'YAM-FG800-001', category: 'Acoustic Guitars' },
+      { id: 'REL-019', productId: 'PRD-004', relatedId: 'ACC-007', type: 'accessory', name: 'Taylor Hardshell Case', sku: 'TAY-CASE-001', category: 'Cases' },
+      { id: 'REL-020', productId: 'PRD-004', relatedId: 'PRD-PARENT3', type: 'parent', name: 'Taylor 800 Series', sku: 'TAY-800-SER', category: 'Collections' },
+      
+      // PRD-005 - PRS Custom 24
+      { id: 'REL-021', productId: 'PRD-005', relatedId: 'PRD-001', type: 'similar', name: 'Gibson Les Paul Standard', sku: 'GIB-LP-STD-001', category: 'Electric Guitars' },
+      { id: 'REL-022', productId: 'PRD-005', relatedId: 'PRD-002', type: 'similar', name: 'Fender Stratocaster', sku: 'FEN-STRAT-001', category: 'Electric Guitars' },
+      { id: 'REL-023', productId: 'PRD-005', relatedId: 'ACC-008', type: 'accessory', name: 'PRS Leather Strap', sku: 'PRS-STRAP-001', category: 'Accessories' },
+      
+      // PRD-006 - Ibanez RG550
+      { id: 'REL-024', productId: 'PRD-006', relatedId: 'PRD-001', type: 'upsell', name: 'Gibson Les Paul Standard', sku: 'GIB-LP-STD-001', category: 'Electric Guitars' },
+      { id: 'REL-025', productId: 'PRD-006', relatedId: 'PRD-008', type: 'similar', name: 'Epiphone SG Standard', sku: 'EPI-SG-STD-001', category: 'Electric Guitars' },
+      { id: 'REL-026', productId: 'PRD-006', relatedId: 'ACC-009', type: 'accessory', name: 'Floyd Rose Tremolo Kit', sku: 'FLOYD-KIT-001', category: 'Parts' },
+      { id: 'REL-027', productId: 'PRD-006', relatedId: 'ACC-010', type: 'accessory', name: 'High Gain Pickup Set', sku: 'PICK-HG-001', category: 'Parts' },
+      
+      // PRD-007 - Yamaha FG800
+      { id: 'REL-028', productId: 'PRD-007', relatedId: 'PRD-003', type: 'upsell', name: 'Martin D-28', sku: 'MAR-D28-001', category: 'Acoustic Guitars' },
+      { id: 'REL-029', productId: 'PRD-007', relatedId: 'PRD-004', type: 'upsell', name: 'Taylor 814ce', sku: 'TAY-814CE-001', category: 'Acoustic Guitars' },
+      { id: 'REL-030', productId: 'PRD-007', relatedId: 'ACC-011', type: 'accessory', name: 'Beginner String Set', sku: 'STR-BEG-001', category: 'Strings' },
+      { id: 'REL-031', productId: 'PRD-007', relatedId: 'ACC-012', type: 'accessory', name: 'Guitar Tuner', sku: 'TUNER-001', category: 'Accessories' },
+      { id: 'REL-032', productId: 'PRD-007', relatedId: 'ACC-013', type: 'accessory', name: 'Capo', sku: 'CAPO-001', category: 'Accessories' },
+      
+      // PRD-008 - Epiphone SG Standard
+      { id: 'REL-033', productId: 'PRD-008', relatedId: 'PRD-001', type: 'upsell', name: 'Gibson Les Paul Standard', sku: 'GIB-LP-STD-001', category: 'Electric Guitars' },
+      { id: 'REL-034', productId: 'PRD-008', relatedId: 'PRD-006', type: 'similar', name: 'Ibanez RG550', sku: 'IBA-RG550-001', category: 'Electric Guitars' },
+      { id: 'REL-035', productId: 'PRD-008', relatedId: 'ACC-014', type: 'accessory', name: 'Epiphone Gig Bag', sku: 'EPI-BAG-001', category: 'Cases' },
+      
+      // PRD-009 - Stradivarius Replica Violin
+      { id: 'REL-036', productId: 'PRD-009', relatedId: 'ACC-015', type: 'accessory', name: 'Violin Bow', sku: 'BOW-VIO-001', category: 'Accessories' },
+      { id: 'REL-037', productId: 'PRD-009', relatedId: 'ACC-016', type: 'accessory', name: 'Rosin', sku: 'ROSIN-001', category: 'Accessories' },
+      { id: 'REL-038', productId: 'PRD-009', relatedId: 'ACC-017', type: 'accessory', name: 'Violin Case', sku: 'CASE-VIO-001', category: 'Cases' },
+      { id: 'REL-039', productId: 'PRD-009', relatedId: 'ACC-018', type: 'accessory', name: 'Violin Strings Set', sku: 'STR-VIO-001', category: 'Strings' },
+      
+      // PRD-010 - Fender Jazz Bass
+      { id: 'REL-040', productId: 'PRD-010', relatedId: 'PRD-002', type: 'similar', name: 'Fender Stratocaster', sku: 'FEN-STRAT-001', category: 'Electric Guitars' },
+      { id: 'REL-041', productId: 'PRD-010', relatedId: 'ACC-019', type: 'accessory', name: 'Bass Strings Set', sku: 'STR-BASS-001', category: 'Strings' },
+      { id: 'REL-042', productId: 'PRD-010', relatedId: 'ACC-020', type: 'accessory', name: 'Bass Amp Cable', sku: 'CABLE-BASS-001', category: 'Cables' },
+      { id: 'REL-043', productId: 'PRD-010', relatedId: 'PRD-PARENT4', type: 'parent', name: 'Fender Bass Collection', sku: 'FEN-BASS-COL', category: 'Collections' },
+    ];
+
+    // Assets data
+    const assets = [
+      { id: 'AST-001', name: 'Front View', type: 'image', format: 'JPG', size: '2.4 MB', dimensions: '2400x1800', isPrimary: true, url: null },
+      { id: 'AST-002', name: 'Back View', type: 'image', format: 'JPG', size: '2.1 MB', dimensions: '2400x1800', isPrimary: false, url: null },
+      { id: 'AST-003', name: 'Side View', type: 'image', format: 'JPG', size: '1.8 MB', dimensions: '2400x1800', isPrimary: false, url: null },
+      { id: 'AST-004', name: 'Detail - Headstock', type: 'image', format: 'JPG', size: '1.2 MB', dimensions: '1600x1200', isPrimary: false, url: null },
+      { id: 'AST-005', name: 'Detail - Pickups', type: 'image', format: 'JPG', size: '980 KB', dimensions: '1600x1200', isPrimary: false, url: null },
+      { id: 'AST-006', name: 'Product Demo', type: 'video', format: 'MP4', size: '45 MB', dimensions: '1920x1080', isPrimary: false, url: null },
+      { id: 'AST-007', name: 'Specifications Sheet', type: 'document', format: 'PDF', size: '520 KB', dimensions: '-', isPrimary: false, url: null },
+      { id: 'AST-008', name: 'User Manual', type: 'document', format: 'PDF', size: '2.8 MB', dimensions: '-', isPrimary: false, url: null },
+    ];
+
+    // ==================== ICONS ====================
+    const icons = {
+      table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>',
+      gallery: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+      details: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>',
+      sort: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>',
+      filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+      columns: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+      plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+      import: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+      export: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+      edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+      refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>',
+      folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+      image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+      more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
+      ai: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>',
+      history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>',
+    };
+
+    // ==================== INITIALIZATION ====================
+    function init() {
+      renderMainNav();
+      renderBreadcrumb();
+      renderToolbar();
+      renderCategoryTree();
+      renderContent();
+      setupResizeHandles();
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderMainNav() {
+      const nav = document.getElementById('mainNav');
+      nav.innerHTML = mainNavTabs.map(tab => `
+        <button class="main-nav-tab ${state.activeMainTab === tab.id ? 'active' : ''}" onclick="switchMainTab('${tab.id}')">
+          ${tab.icon}
+          ${tab.label}
+        </button>
+      `).join('');
+    }
+
+    function renderBreadcrumb() {
+      const bc = document.getElementById('breadcrumb');
+      bc.innerHTML = state.breadcrumb.map((item, i) => {
+        const isLast = i === state.breadcrumb.length - 1;
+        return `
+          <span class="breadcrumb-item ${isLast ? 'current' : ''}" ${!isLast ? `onclick="navigateBreadcrumb(${i})"` : ''}>${item}</span>
+          ${!isLast ? '<span class="breadcrumb-sep">/</span>' : ''}
+        `;
+      }).join('');
+    }
+
+    function renderToolbar() {
+      const toolbar = document.getElementById('toolbar');
+      const isDetailView = state.currentView === 'details';
+      const filteredProducts = getFilteredProducts();
+      
+      // Common product actions (available in both bulk and detail views)
+      const productActions = `
+        <button class="toolbar-btn primary" onclick="createProduct()">
+          ${icons.plus}
+          <span>Create</span>
+        </button>
+        <button class="toolbar-btn" onclick="showReferences()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>References</span>
+        </button>
+        <button class="toolbar-btn" onclick="inspectProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <span>Inspect</span>
+        </button>
+      `;
+      
+      const workflowActions = `
+        <button class="toolbar-btn" onclick="submitProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          <span>Submit</span>
+        </button>
+        <button class="toolbar-btn" onclick="addToWorkflow()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span>Add to workflow</span>
+        </button>
+        <button class="toolbar-btn" onclick="assignProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Assign</span>
+        </button>
+      `;
+      
+      const organizationActions = `
+        <button class="toolbar-btn" onclick="addToCollection()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span>Collection</span>
+        </button>
+        <button class="toolbar-btn" onclick="setMasterProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span>Master product</span>
+        </button>
+        <button class="toolbar-btn" onclick="setPDXChannels()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>PDX channels</span>
+        </button>
+        <button class="toolbar-btn" onclick="categorizeProduct()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          <span>Categorize</span>
+        </button>
+      `;
+      
+      const finalActions = `
+        <button class="toolbar-btn" onclick="businessAction()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <span>Business action</span>
+        </button>
+        <button class="toolbar-btn" onclick="approveProduct()">
+          ${icons.check}
+          <span>Approve</span>
+        </button>
+        <button class="toolbar-btn" onclick="exportData()">
+          ${icons.export}
+          <span>Export</span>
+        </button>
+      `;
+      
+      if (isDetailView) {
+        // Details view: all product actions without sort/filter
+        toolbar.innerHTML = `
+          <div class="toolbar-group">${productActions}</div>
+          <div class="toolbar-sep"></div>
+          <div class="toolbar-group">${workflowActions}</div>
+          <div class="toolbar-sep"></div>
+          <div class="toolbar-group">${organizationActions}</div>
+          <div class="toolbar-sep"></div>
+          <div class="toolbar-group">${finalActions}</div>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-right">
+            <div class="view-switcher">
+              <button class="view-btn" onclick="switchView('table')">
+                ${icons.table}
+                <span>Table</span>
+              </button>
+              <button class="view-btn" onclick="switchView('gallery')">
+                ${icons.gallery}
+                <span>Gallery</span>
+              </button>
+              <button class="view-btn active" onclick="switchView('details')">
+                ${icons.details}
+                <span>Details</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        // Table/Gallery view: sort/filter + create only (selection actions in contextual bar)
+        toolbar.innerHTML = `
+          <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="showSortMenu('products')">
+              ${icons.sort}
+              <span>Sort</span>
+            </button>
+            <button class="toolbar-btn ${state.filters.length > 0 ? 'active' : ''}" onclick="showFilterPanel('products')">
+              ${icons.filter}
+              <span>Filter${state.filters.length > 0 ? ` (${state.filters.length})` : ''}</span>
+            </button>
+          </div>
+          <div class="toolbar-sep"></div>
+          <div class="toolbar-group">
+            <button class="toolbar-btn primary" onclick="createProduct()">
+              ${icons.plus}
+              <span>Create</span>
+            </button>
+            <button class="toolbar-btn" onclick="importData()">
+              ${icons.import}
+              <span>Import</span>
+            </button>
+          </div>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-right">
+            <div class="view-switcher">
+              <button class="view-btn ${state.currentView === 'table' ? 'active' : ''}" onclick="switchView('table')">
+                ${icons.table}
+                <span>Table</span>
+              </button>
+              <button class="view-btn ${state.currentView === 'gallery' ? 'active' : ''}" onclick="switchView('gallery')">
+                ${icons.gallery}
+                <span>Gallery</span>
+              </button>
+              <button class="view-btn" onclick="switchView('details')">
+                ${icons.details}
+                <span>Details</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderCategoryTree() {
+      const tree = document.getElementById('categoryTree');
+      tree.innerHTML = categories.map(cat => renderTreeNode(cat)).join('');
+    }
+
+    function renderTreeNode(node, level = 0) {
+      const hasChildren = node.children && node.children.length > 0;
+      const isSelected = state.selectedCategoryId === node.id;
+      return `
+        <div class="tree-node">
+          <div class="tree-node-content ${isSelected ? 'active' : ''}" onclick="selectCategory('${node.id}')">
+            <span class="tree-node-expand ${hasChildren ? 'expanded' : ''}" onclick="event.stopPropagation(); toggleTreeNode('${node.id}')">
+              ${hasChildren ? icons.chevronRight : ''}
+            </span>
+            <span class="tree-node-icon">${icons.folder}</span>
+            <span class="tree-node-label">${node.name}</span>
+            <span class="tree-node-count">${node.count}</span>
+            <button class="tree-node-action" onclick="event.stopPropagation(); viewCategoryDetails('${node.id}')" title="View details">
+              ${icons.details}
+            </button>
+          </div>
+          ${hasChildren ? `<div class="tree-children">${node.children.map(child => renderTreeNode(child, level + 1)).join('')}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function renderContent() {
+      switch (state.currentView) {
+        case 'table':
+          renderTableView();
+          break;
+        case 'gallery':
+          renderGalleryView();
+          break;
+        case 'details':
+          renderDetailView();
+          break;
+      }
+      updateViewVisibility();
+    }
+
+    function updateViewVisibility() {
+      const isDetails = state.currentView === 'details';
+      document.getElementById('tableView').classList.toggle('hidden', state.currentView !== 'table');
+      document.getElementById('galleryView').classList.toggle('hidden', state.currentView !== 'gallery');
+      document.getElementById('detailView').classList.toggle('active', isDetails);
+    }
+
+    function renderTableView() {
+      const table = document.getElementById('dataTable');
+      const filteredProducts = getFilteredProducts();
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th style="width:40px;"><div class="checkbox ${state.checkedItems.length === filteredProducts.length && filteredProducts.length > 0 ? 'checked' : ''}" onclick="toggleAllCheckboxes()"></div></th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>SKU</th>
+            <th>Status</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Completeness</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredProducts.map((p, i) => {
+            const originalIndex = products.indexOf(p);
+            return `
+            <tr class="${state.checkedItems.includes(originalIndex) ? 'selected' : ''}" ondblclick="openDetail(${originalIndex})">
+              <td><div class="checkbox ${state.checkedItems.includes(originalIndex) ? 'checked' : ''}" onclick="toggleCheckbox(${originalIndex}, event)"></div></td>
+              <td>${p.id}</td>
+              <td><strong>${p.name}</strong></td>
+              <td>${p.sku}</td>
+              <td><span class="status-badge ${p.status}">${p.status}</span></td>
+              <td>${p.category}</td>
+              <td>$${p.price.toFixed(2)}</td>
+              <td>${p.stock}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-bar" style="flex:1;max-width:100px;">
+                    <div class="progress-fill ${p.completeness >= 80 ? 'success' : p.completeness >= 50 ? 'warning' : ''}" style="width:${p.completeness}%"></div>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted);">${p.completeness}%</span>
+                </div>
+              </td>
+            </tr>
+          `}).join('')}
+        </tbody>
+      `;
+      
+      document.getElementById('tableFooter').innerHTML = `
+        <span>${filteredProducts.length}${filteredProducts.length !== products.length ? ' of ' + products.length : ''} items</span>
+      `;
+    }
+
+    function renderGalleryView() {
+      const gallery = document.getElementById('galleryGrid');
+      const filteredProducts = getFilteredProducts();
+      gallery.innerHTML = `
+        <div class="gallery-grid">
+          ${filteredProducts.map((p, i) => {
+            const originalIndex = products.indexOf(p);
+            return `
+            <div class="gallery-card ${state.checkedItems.includes(originalIndex) ? 'selected' : ''}" ondblclick="openDetail(${originalIndex})">
+              <div class="gallery-card-checkbox">
+                <div class="checkbox ${state.checkedItems.includes(originalIndex) ? 'checked' : ''}" onclick="toggleCheckbox(${originalIndex}, event)"></div>
+              </div>
+              <div class="gallery-card-image">
+                ${p.image ? `<img src="${p.image}" alt="${p.name}">` : icons.image}
+              </div>
+              <div class="gallery-card-body">
+                <div class="gallery-card-title">${p.name}</div>
+                <div class="gallery-card-subtitle">${p.sku}</div>
+                <div class="gallery-card-meta">
+                  <span class="status-badge ${p.status}">${p.status}</span>
+                  <span>$${p.price.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          `}).join('')}
+        </div>
+      `;
+      
+      document.getElementById('galleryFooter').innerHTML = `
+        <span>${filteredProducts.length}${filteredProducts.length !== products.length ? ' of ' + products.length : ''} items</span>
+      `;
+    }
+
+    function renderDetailView() {
+      renderItemList();
+      renderDetailMain();
+      renderDetailSidebar();
+    }
+
+    function renderItemList() {
+      const list = document.getElementById('itemList');
+      list.innerHTML = `
+        <div class="item-list-header">${products.length} products</div>
+        <div class="item-list-content">
+          ${products.map((p, i) => `
+            <div class="item-card ${state.selectedItemIndex === i ? 'active' : ''}" onclick="selectItem(${i})">
+              <div class="item-card-thumb">
+                ${p.image ? `<img src="${p.image}" alt="">` : icons.image}
+              </div>
+              <div class="item-card-info">
+                <div class="item-card-title">${p.name}</div>
+                <div class="item-card-subtitle">${p.sku}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="item-list-footer">
+          <span>${products.length} items</span>
+        </div>
+        <button class="panel-collapse-btn left" onclick="togglePanel('itemList')" title="Collapse panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="panel-collapsed-bar">
+          <button class="expand-btn" onclick="togglePanel('itemList')" title="Expand Item List">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <span class="panel-label">Items</span>
+        </div>
+      `;
+    }
+
+    function getCurrentProduct() {
+      // Return either a category (parent product) or a regular product
+      if (state.viewingCategoryAsProduct && state.selectedCategoryId) {
+        return findCategoryById(state.selectedCategoryId);
+      }
+      return products[state.selectedItemIndex];
+    }
+
+    function renderDetailMain() {
+      const main = document.getElementById('detailMain');
+      const p = getCurrentProduct();
+      if (!p) return;
+
+      const isParentProduct = state.viewingCategoryAsProduct;
+      const typeLabel = isParentProduct ? 'Parent Product' : 'Product';
+
+      main.innerHTML = `
+        <div class="detail-header">
+          <div class="detail-header-content">
+            <div class="detail-title">
+              ${isParentProduct ? `<span style="color:var(--accent);font-size:11px;font-weight:500;text-transform:uppercase;margin-right:8px;">${typeLabel}</span>` : ''}
+              ${p.name}
+            </div>
+            <div class="detail-subtitle">${p.id} • ${p.sku}</div>
+          </div>
+          <span class="status-badge ${p.status}">${p.status}</span>
+        </div>
+        <div class="detail-tabs">
+          ${detailTabs.map(tab => `
+            <div class="detail-tab ${state.activeDetailTab === tab.id ? 'active' : ''}" onclick="switchDetailTab('${tab.id}')">${tab.label}</div>
+          `).join('')}
+        </div>
+        <div class="detail-content">
+          ${renderDetailTabContent()}
+        </div>
+      `;
+    }
+
+    function renderDetailTabContent() {
+      const p = getCurrentProduct();
+      if (!p) return '';
+
+      switch (state.activeDetailTab) {
+        case 'basic':
+          return renderBasicInfoTab(p);
+        case 'relations':
+          return renderRelationsTab(p);
+        case 'assets':
+          return renderAssetsTab(p);
+        case 'pricing':
+          return renderPricingTab(p);
+        default:
+          return '<div class="tab-form-scroll"><p class="text-muted">Tab content coming soon...</p></div>';
+      }
+    }
+
+    function renderBasicInfoTab(p) {
+      return `
+        <div class="tab-form-scroll">
+          <div class="form-section">
+            <div class="form-section-title">Identifiers</div>
+            ${renderFormField('Product ID', p.id, 'id', { readonly: true })}
+            ${renderFormField('SKU', p.sku, 'sku')}
+            ${renderFormField('Name', p.name, 'name', { required: true })}
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">Description</div>
+            ${renderFormField('Short Description', '', 'shortDesc')}
+            ${renderFormField('Long Description', '', 'longDesc', { type: 'textarea' })}
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">Classification</div>
+            ${renderFormField('Category', p.category, 'category', { type: 'select' })}
+            ${renderFormField('Brand', 'Gibson', 'brand')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFormField(label, value, field, options = {}) {
+      const { type = 'text', required = false, readonly = false, inherited = false } = options;
+      
+      let inputHtml;
+      if (type === 'textarea') {
+        inputHtml = `<textarea class="form-textarea ${inherited ? 'inherited' : ''}" ${readonly ? 'readonly' : ''}>${value}</textarea>`;
+      } else if (type === 'select') {
+        inputHtml = `<select class="form-select ${inherited ? 'inherited' : ''}">${categories.flatMap(c => [c, ...(c.children || [])]).map(c => `<option ${c.name === value ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
+      } else {
+        inputHtml = `<input type="text" class="form-input ${inherited ? 'inherited' : ''}" value="${value}" ${readonly ? 'readonly' : ''}>`;
+      }
+
+      return `
+        <div class="form-field">
+          <label class="form-label ${required ? 'required' : ''}">${label}</label>
+          <div class="form-input-wrapper">
+            ${inputHtml}
+            <div class="field-actions">
+              <button class="field-action-btn" title="AI Assist">${icons.ai}</button>
+              <button class="field-action-btn" title="History">${icons.history}</button>
+              <button class="field-action-btn" title="More">${icons.more}</button>
+            </div>
+            ${inherited ? '<div class="inherited-indicator"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg> Inherited from parent</div>' : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRelationsTab(p) {
+      const allProductRelations = relations.filter(r => r.productId === p.id);
+      const selectedType = state.selectedRelationType || 'all';
+      let productRelations = selectedType === 'all' 
+        ? allProductRelations 
+        : allProductRelations.filter(r => r.type === selectedType);
+      // Apply filters and sort
+      productRelations = getFilteredRelations(productRelations);
+      const checkedRelations = state.checkedRelations || [];
+      
+      // Get relation type counts
+      const typeCounts = {
+        all: allProductRelations.length,
+        parent: allProductRelations.filter(r => r.type === 'parent').length,
+        similar: allProductRelations.filter(r => r.type === 'similar').length,
+        accessory: allProductRelations.filter(r => r.type === 'accessory').length,
+        upsell: allProductRelations.filter(r => r.type === 'upsell').length,
+        crosssell: allProductRelations.filter(r => r.type === 'crosssell').length,
+      };
+
+      const relationTypes = [
+        { id: 'all', label: 'All Relations', icon: icons.folder },
+        { id: 'parent', label: 'Parent', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>' },
+        { id: 'similar', label: 'Similar', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>' },
+        { id: 'accessory', label: 'Accessories', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>' },
+        { id: 'upsell', label: 'Upsell', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
+        { id: 'crosssell', label: 'Cross-sell', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>' },
+      ];
+
+      const tree = `
+        <div style="width:200px;min-width:160px;border-right:1px solid var(--border);padding:12px;background:var(--bg-surface);">
+          <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;">Relation Types</div>
+          ${relationTypes.map(type => `
+            <div class="tree-node">
+              <div class="tree-node-content ${selectedType === type.id ? 'active' : ''}" onclick="selectRelationType('${type.id}')" style="padding:8px 10px;">
+                <span class="tree-node-icon">${type.icon}</span>
+                <span class="tree-node-label">${type.label}</span>
+                ${typeCounts[type.id] > 0 ? `<span class="tree-node-count">${typeCounts[type.id]}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      const toolbar = `
+        <div style="display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--border-light);background:var(--bg-surface);">
+          <button class="toolbar-btn" onclick="showSortMenu('relations')">
+            ${icons.sort}
+            <span>Sort</span>
+          </button>
+          <button class="toolbar-btn ${state.relationFilters.length > 0 ? 'active' : ''}" onclick="showFilterPanel('relations')">
+            ${icons.filter}
+            <span>Filter${state.relationFilters.length > 0 ? ` (${state.relationFilters.length})` : ''}</span>
+          </button>
+          <button class="toolbar-btn primary" onclick="showToast('Add relation', 'info')">
+            ${icons.plus}
+            <span>Add</span>
+          </button>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-right">
+            <span class="toolbar-info">${productRelations.length} of ${allProductRelations.length}</span>
+            <div class="view-switcher">
+              <button class="view-btn ${state.relationView === 'table' ? 'active' : ''}" onclick="switchRelationView('table')">
+                ${icons.table}
+                <span>Table</span>
+              </button>
+              <button class="view-btn ${state.relationView === 'gallery' ? 'active' : ''}" onclick="switchRelationView('gallery')">
+                ${icons.gallery}
+                <span>Gallery</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      const selectionBar = checkedRelations.length > 0 ? `
+        <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--text-primary);color:white;padding:10px 16px;border-radius:var(--radius-lg);box-shadow:0 4px 20px rgba(0,0,0,0.2);display:flex;align-items:center;gap:16px;z-index:10;">
+          <span><strong>${checkedRelations.length}</strong> selected</span>
+          <div style="display:flex;gap:8px;">
+            <button class="selection-btn" onclick="showToast('Edit relations', 'info')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="selection-btn" onclick="deleteRelations()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete
+            </button>
+            <button class="selection-btn" onclick="state.checkedRelations=[];renderDetailMain();">Clear</button>
+          </div>
+        </div>
+      ` : '';
+
+      let tableOrGallery;
+      if (state.relationView === 'table') {
+        tableOrGallery = `
+          <div class="tab-content-scroll">
+            <table class="data-table" style="margin:0;">
+              <thead>
+                <tr>
+                  <th style="width:40px;"><div class="checkbox ${checkedRelations.length === productRelations.length && productRelations.length > 0 ? 'checked' : ''}" onclick="toggleAllRelationCheckboxes()"></div></th>
+                  <th>Type</th>
+                  <th>Name</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th style="width:80px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${productRelations.length > 0 ? productRelations.map((r, i) => `
+                  <tr class="${checkedRelations.includes(i) ? 'selected' : ''}">
+                    <td><div class="checkbox ${checkedRelations.includes(i) ? 'checked' : ''}" onclick="toggleRelationCheckbox(${i}, event)"></div></td>
+                    <td><span class="status-badge ${r.type === 'parent' ? 'approved' : r.type === 'accessory' ? 'pending' : 'draft'}">${r.type}</span></td>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.sku}</td>
+                    <td>${r.category}</td>
+                    <td>
+                      <button class="field-action-btn" onclick="showToast('Edit relation', 'info')" title="Edit">${icons.edit}</button>
+                      <button class="field-action-btn" onclick="showToast('View details', 'info')" title="View">${icons.more}</button>
+                    </td>
+                  </tr>
+                `).join('') : `
+                  <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">No ${selectedType === 'all' ? '' : selectedType + ' '}relations found.</td></tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        tableOrGallery = `
+          <div class="tab-content-scroll" style="padding:16px;">
+            <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));">
+              ${productRelations.length > 0 ? productRelations.map((r, i) => `
+                <div class="gallery-card ${checkedRelations.includes(i) ? 'selected' : ''}">
+                  <div class="gallery-card-checkbox">
+                    <div class="checkbox ${checkedRelations.includes(i) ? 'checked' : ''}" onclick="toggleRelationCheckbox(${i}, event)"></div>
+                  </div>
+                  <div class="gallery-card-image" style="height:100px;">
+                    ${icons.image}
+                  </div>
+                  <div class="gallery-card-body">
+                    <div class="gallery-card-title" style="font-size:12px;">${r.name}</div>
+                    <div class="gallery-card-subtitle">${r.sku}</div>
+                    <div class="gallery-card-meta">
+                      <span class="status-badge ${r.type === 'parent' ? 'approved' : r.type === 'accessory' ? 'pending' : 'draft'}">${r.type}</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('') : `
+                <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No ${selectedType === 'all' ? '' : selectedType + ' '}relations found.</div>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      const footer = `<div class="view-footer">${productRelations.length}${productRelations.length !== allProductRelations.length ? ' of ' + allProductRelations.length : ''} relations</div>`;
+
+      return `
+        <div class="tab-content-container" style="flex-direction:row;">
+          ${tree}
+          <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+            ${toolbar}
+            ${tableOrGallery}
+            ${footer}
+          </div>
+          ${selectionBar}
+        </div>
+      `;
+    }
+
+    function renderAssetsTab(p) {
+      const checkedAssets = state.checkedAssets || [];
+      const filteredAssets = getFilteredAssets();
+      
+      const toolbar = `
+        <div style="display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--border-light);background:var(--bg-surface);">
+          <button class="toolbar-btn" onclick="showSortMenu('assets')">
+            ${icons.sort}
+            <span>Sort</span>
+          </button>
+          <button class="toolbar-btn ${state.assetFilters.length > 0 ? 'active' : ''}" onclick="showFilterPanel('assets')">
+            ${icons.filter}
+            <span>Filter${state.assetFilters.length > 0 ? ` (${state.assetFilters.length})` : ''}</span>
+          </button>
+          <button class="toolbar-btn primary" onclick="showToast('Upload asset', 'info')">
+            ${icons.plus}
+            <span>Upload</span>
+          </button>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-right">
+            <span class="toolbar-info">${filteredAssets.length} of ${assets.length}</span>
+            <div class="view-switcher">
+              <button class="view-btn ${state.assetView === 'table' ? 'active' : ''}" onclick="switchAssetView('table')">
+                ${icons.table}
+                <span>Table</span>
+              </button>
+              <button class="view-btn ${state.assetView === 'gallery' ? 'active' : ''}" onclick="switchAssetView('gallery')">
+                ${icons.gallery}
+                <span>Gallery</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      const selectionBar = checkedAssets.length > 0 ? `
+        <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--text-primary);color:white;padding:10px 16px;border-radius:var(--radius-lg);box-shadow:0 4px 20px rgba(0,0,0,0.2);display:flex;align-items:center;gap:16px;z-index:10;">
+          <span><strong>${checkedAssets.length}</strong> selected</span>
+          <div style="display:flex;gap:8px;">
+            <button class="selection-btn" onclick="showToast('Download assets', 'info')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+            <button class="selection-btn" onclick="showToast('Move assets', 'info')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Move
+            </button>
+            <button class="selection-btn" onclick="deleteAssets()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete
+            </button>
+            <button class="selection-btn" onclick="state.checkedAssets=[];renderDetailMain();">Clear</button>
+          </div>
+        </div>
+      ` : '';
+
+      let tableOrGallery;
+      if (state.assetView === 'table') {
+        tableOrGallery = `
+          <div class="tab-content-scroll">
+            <table class="data-table" style="margin:0;">
+              <thead>
+                <tr>
+                  <th style="width:40px;"><div class="checkbox ${checkedAssets.length === filteredAssets.length && filteredAssets.length > 0 ? 'checked' : ''}" onclick="toggleAllAssetCheckboxes()"></div></th>
+                  <th style="width:60px;"></th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Format</th>
+                  <th>Size</th>
+                  <th>Dimensions</th>
+                  <th style="width:80px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredAssets.map((a, i) => `
+                  <tr class="${checkedAssets.includes(i) ? 'selected' : ''}">
+                    <td><div class="checkbox ${checkedAssets.includes(i) ? 'checked' : ''}" onclick="toggleAssetCheckbox(${i}, event)"></div></td>
+                    <td>
+                      <div style="width:40px;height:40px;background:var(--bg-subtle);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;">
+                        ${a.type === 'image' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--text-muted);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' : 
+                          a.type === 'video' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--text-muted);"><polygon points="5 3 19 12 5 21 5 3"/></svg>' :
+                          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--text-muted);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'}
+                      </div>
+                    </td>
+                    <td>
+                      <strong>${a.name}</strong>
+                      ${a.isPrimary ? '<span class="status-badge approved" style="margin-left:8px;">Primary</span>' : ''}
+                    </td>
+                    <td style="text-transform:capitalize;">${a.type}</td>
+                    <td>${a.format}</td>
+                    <td>${a.size}</td>
+                    <td>${a.dimensions}</td>
+                    <td>
+                      <button class="field-action-btn" onclick="showToast('Download asset', 'info')" title="Download">${icons.export}</button>
+                      <button class="field-action-btn" onclick="showToast('Edit asset', 'info')" title="Edit">${icons.edit}</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        tableOrGallery = `
+          <div class="tab-content-scroll" style="padding:16px;">
+            <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));">
+              ${filteredAssets.map((a, i) => `
+                <div class="gallery-card ${checkedAssets.includes(i) ? 'selected' : ''}" onclick="selectAsset(${i})">
+                  <div class="gallery-card-checkbox">
+                    <div class="checkbox ${checkedAssets.includes(i) ? 'checked' : ''}" onclick="toggleAssetCheckbox(${i}, event)"></div>
+                  </div>
+                  ${a.isPrimary ? '<div style="position:absolute;top:8px;right:8px;background:var(--success);color:white;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600;">PRIMARY</div>' : ''}
+                  <div class="gallery-card-image" style="height:120px;">
+                    ${a.type === 'image' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px;height:40px;color:var(--text-muted);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' : 
+                      a.type === 'video' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px;height:40px;color:var(--text-muted);"><polygon points="5 3 19 12 5 21 5 3"/></svg>' :
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px;height:40px;color:var(--text-muted);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'}
+                  </div>
+                  <div class="gallery-card-body" style="padding:8px 10px;">
+                    <div class="gallery-card-title" style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name}</div>
+                    <div class="gallery-card-subtitle" style="font-size:10px;">${a.format} • ${a.size}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      const footer = `<div class="view-footer">${filteredAssets.length}${filteredAssets.length !== assets.length ? ' of ' + assets.length : ''} assets</div>`;
+
+      return `
+        <div class="tab-content-container">
+          ${toolbar}
+          ${tableOrGallery}
+          ${footer}
+          ${selectionBar}
+        </div>
+      `;
+    }
+
+    function renderPricingTab(p) {
+      return `
+        <div class="tab-form-scroll">
+          <div class="form-section">
+            <div class="form-section-title">Pricing</div>
+            ${renderFormField('Base Price', '$' + p.price.toFixed(2), 'price')}
+            ${renderFormField('Cost', '$0.00', 'cost')}
+            ${renderFormField('MSRP', '$0.00', 'msrp')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDetailSidebar() {
+      const sidebar = document.getElementById('detailSidebar');
+      const p = products[state.selectedItemIndex];
+      if (!p) return;
+
+      sidebar.innerHTML = `
+        <button class="panel-collapse-btn right" onclick="togglePanel('detailSidebar')" title="Collapse panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${state.detailSidebarCollapsed ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7'}"/></svg>
+        </button>
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Completeness</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <div class="progress-bar" style="flex:1;">
+              <div class="progress-fill ${p.completeness >= 80 ? 'success' : p.completeness >= 50 ? 'warning' : ''}" style="width:${p.completeness}%"></div>
+            </div>
+            <span style="font-weight:600;">${p.completeness}%</span>
+          </div>
+          <div class="text-sm text-muted">5 of 12 required fields completed</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Workflows</div>
+          <div class="text-sm text-muted">No active workflows</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Sufficiency Score</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span>Amazon</span>
+              <span style="color:var(--success);">92%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span>Shopify</span>
+              <span style="color:var(--warning);">78%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span>eBay</span>
+              <span style="color:var(--error);">45%</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel-collapsed-bar">
+          <button class="expand-btn" onclick="togglePanel('detailSidebar')" title="Expand Info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="panel-label">Info</span>
+        </div>
+      `;
+    }
+
+    // ==================== EVENT HANDLERS ====================
+    function switchMainTab(tabId) {
+      state.activeMainTab = tabId;
+      renderMainNav();
+      showToast(`Switched to ${mainNavTabs.find(t => t.id === tabId)?.label}`, 'info');
+    }
+
+    function switchView(view) {
+      state.currentView = view;
+      renderToolbar();
+      renderContent();
+    }
+
+    function switchDetailTab(tabId) {
+      state.activeDetailTab = tabId;
+      renderDetailMain();
+    }
+
+    function switchRelationView(view) {
+      state.relationView = view;
+      renderDetailMain();
+    }
+
+    function selectRelationType(type) {
+      state.selectedRelationType = type;
+      state.checkedRelations = []; // Clear selection when changing type
+      renderDetailMain();
+    }
+
+    function switchAssetView(view) {
+      state.assetView = view;
+      renderDetailMain();
+    }
+
+    // Relations checkbox handlers
+    function toggleRelationCheckbox(index, event) {
+      event.stopPropagation();
+      const idx = state.checkedRelations.indexOf(index);
+      if (idx > -1) {
+        state.checkedRelations.splice(idx, 1);
+      } else {
+        state.checkedRelations.push(index);
+      }
+      renderDetailMain();
+    }
+
+    function toggleAllRelationCheckboxes() {
+      const p = products[state.selectedItemIndex];
+      const productRelations = relations.filter(r => r.productId === p.id);
+      if (state.checkedRelations.length === productRelations.length) {
+        state.checkedRelations = [];
+      } else {
+        state.checkedRelations = productRelations.map((_, i) => i);
+      }
+      renderDetailMain();
+    }
+
+    function deleteRelations() {
+      showToast(`Deleted ${state.checkedRelations.length} relation(s)`, 'success');
+      state.checkedRelations = [];
+      renderDetailMain();
+    }
+
+    // Assets checkbox handlers
+    function toggleAssetCheckbox(index, event) {
+      event.stopPropagation();
+      const idx = state.checkedAssets.indexOf(index);
+      if (idx > -1) {
+        state.checkedAssets.splice(idx, 1);
+      } else {
+        state.checkedAssets.push(index);
+      }
+      renderDetailMain();
+    }
+
+    function toggleAllAssetCheckboxes() {
+      if (state.checkedAssets.length === assets.length) {
+        state.checkedAssets = [];
+      } else {
+        state.checkedAssets = assets.map((_, i) => i);
+      }
+      renderDetailMain();
+    }
+
+    function selectAsset(index) {
+      state.selectedAsset = index;
+      renderDetailMain();
+    }
+
+    function deleteAssets() {
+      showToast(`Deleted ${state.checkedAssets.length} asset(s)`, 'success');
+      state.checkedAssets = [];
+      renderDetailMain();
+    }
+
+    function selectCategory(id) {
+      state.selectedCategoryId = id;
+      state.viewingCategoryAsProduct = false;
+      renderCategoryTree();
+      // Filter products by this category if needed
+      showToast(`Viewing children of: ${findCategoryById(id)?.name}`, 'info');
+    }
+
+    function viewCategoryDetails(id) {
+      const category = findCategoryById(id);
+      if (category) {
+        state.selectedCategoryId = id;
+        state.viewingCategoryAsProduct = true;
+        state.currentView = 'details';
+        renderCategoryTree();
+        renderToolbar();
+        renderContent();
+      }
+    }
+
+    function findCategoryById(id, cats = categories) {
+      for (const cat of cats) {
+        if (cat.id === id) return cat;
+        if (cat.children) {
+          const found = findCategoryById(id, cat.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    function toggleTreeNode(id) {
+      // Toggle tree expansion
+    }
+
+    function selectItem(index) {
+      state.selectedItemIndex = index;
+      renderItemList();
+      renderDetailMain();
+      renderDetailSidebar();
+      renderToolbar();
+    }
+
+    function openDetail(index) {
+      state.selectedItemIndex = index;
+      state.currentView = 'details';
+      renderToolbar();
+      renderContent();
+    }
+
+    function toggleCheckbox(index, event) {
+      event.stopPropagation();
+      const idx = state.checkedItems.indexOf(index);
+      if (idx > -1) {
+        state.checkedItems.splice(idx, 1);
+      } else {
+        state.checkedItems.push(index);
+      }
+      renderContent();
+      updateSelectionBar();
+    }
+
+    function toggleAllCheckboxes() {
+      if (state.checkedItems.length === products.length) {
+        state.checkedItems = [];
+      } else {
+        state.checkedItems = products.map((_, i) => i);
+      }
+      renderContent();
+      updateSelectionBar();
+    }
+
+    function updateSelectionBar() {
+      const bar = document.getElementById('selectionBar');
+      document.getElementById('selectionCount').textContent = state.checkedItems.length;
+      bar.classList.toggle('visible', state.checkedItems.length > 0);
+    }
+
+    function clearSelection() {
+      state.checkedItems = [];
+      renderContent();
+      updateSelectionBar();
+    }
+
+    // ==================== SORT & FILTER DEFINITIONS ====================
+    const sortFields = {
+      products: [
+        { id: 'name', label: 'Name' },
+        { id: 'sku', label: 'SKU' },
+        { id: 'price', label: 'Price' },
+        { id: 'stock', label: 'Stock' },
+        { id: 'status', label: 'Status' },
+        { id: 'category', label: 'Category' },
+        { id: 'completeness', label: 'Completeness' },
+      ],
+      relations: [
+        { id: 'name', label: 'Name' },
+        { id: 'type', label: 'Type' },
+        { id: 'sku', label: 'SKU' },
+        { id: 'category', label: 'Category' },
+      ],
+      assets: [
+        { id: 'name', label: 'Name' },
+        { id: 'type', label: 'Type' },
+        { id: 'format', label: 'Format' },
+        { id: 'size', label: 'Size' },
+      ],
+    };
+
+    const filterOperators = [
+      { id: 'contains', label: 'Contains' },
+      { id: 'equals', label: 'Equals' },
+      { id: 'not_equals', label: 'Does not equal' },
+      { id: 'starts_with', label: 'Starts with' },
+      { id: 'ends_with', label: 'Ends with' },
+      { id: 'is_empty', label: 'Is empty' },
+      { id: 'is_not_empty', label: 'Is not empty' },
+    ];
+
+    // ==================== SORT FUNCTIONS ====================
+    function showSortMenu(context = 'products') {
+      const fields = sortFields[context];
+      const currentSort = context === 'products' ? state.sortField : 
+                          context === 'relations' ? state.relationSortField : state.assetSortField;
+      const currentDir = context === 'products' ? state.sortDirection : 
+                         context === 'relations' ? state.relationSortDirection : state.assetSortDirection;
+      
+      const body = `
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;margin-bottom:8px;">Sort by</label>
+            <select id="sortField" class="form-select" style="width:100%;">
+              ${fields.map(f => `<option value="${f.id}" ${currentSort === f.id ? 'selected' : ''}>${f.label}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;margin-bottom:8px;">Direction</label>
+            <div style="display:flex;gap:8px;">
+              <button class="btn ${currentDir === 'asc' ? 'btn-primary' : 'btn-secondary'}" onclick="document.getElementById('sortDir').value='asc';this.classList.add('btn-primary');this.classList.remove('btn-secondary');this.nextElementSibling.classList.remove('btn-primary');this.nextElementSibling.classList.add('btn-secondary');" style="flex:1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                Ascending
+              </button>
+              <button class="btn ${currentDir === 'desc' ? 'btn-primary' : 'btn-secondary'}" onclick="document.getElementById('sortDir').value='desc';this.classList.add('btn-primary');this.classList.remove('btn-secondary');this.previousElementSibling.classList.remove('btn-primary');this.previousElementSibling.classList.add('btn-secondary');" style="flex:1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                Descending
+              </button>
+            </div>
+            <input type="hidden" id="sortDir" value="${currentDir}">
+          </div>
+        </div>
+      `;
+      
+      const footer = `
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applySort('${context}')">Apply Sort</button>
+      `;
+      
+      showModal('Sort', body, footer);
+    }
+
+    function applySort(context) {
+      const field = document.getElementById('sortField').value;
+      const direction = document.getElementById('sortDir').value;
+      
+      if (context === 'products') {
+        state.sortField = field;
+        state.sortDirection = direction;
+        sortProducts();
+        renderContent();
+      } else if (context === 'relations') {
+        state.relationSortField = field;
+        state.relationSortDirection = direction;
+        renderDetailMain();
+      } else if (context === 'assets') {
+        state.assetSortField = field;
+        state.assetSortDirection = direction;
+        renderDetailMain();
+      }
+      
+      closeModal();
+      showToast(`Sorted by ${field} (${direction})`, 'success');
+    }
+
+    function sortProducts() {
+      const field = state.sortField;
+      const dir = state.sortDirection === 'asc' ? 1 : -1;
+      
+      products.sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+        if (valA < valB) return -1 * dir;
+        if (valA > valB) return 1 * dir;
+        return 0;
+      });
+    }
+
+    function getSortedRelations(productRelations) {
+      const field = state.relationSortField;
+      const dir = state.relationSortDirection === 'asc' ? 1 : -1;
+      
+      return [...productRelations].sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+        if (valA < valB) return -1 * dir;
+        if (valA > valB) return 1 * dir;
+        return 0;
+      });
+    }
+
+    function getSortedAssets() {
+      const field = state.assetSortField;
+      const dir = state.assetSortDirection === 'asc' ? 1 : -1;
+      
+      return [...assets].sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+        if (valA < valB) return -1 * dir;
+        if (valA > valB) return 1 * dir;
+        return 0;
+      });
+    }
+
+    // ==================== FILTER FUNCTIONS ====================
+    function showFilterPanel(context = 'products') {
+      const fields = sortFields[context];
+      const currentFilters = context === 'products' ? state.filters : 
+                             context === 'relations' ? state.relationFilters : state.assetFilters;
+      
+      const body = `
+        <div id="filterContainer">
+          ${currentFilters.length === 0 ? `
+            <p style="color:var(--text-muted);text-align:center;padding:20px;">No filters applied. Click "Add Filter" to create one.</p>
+          ` : currentFilters.map((f, i) => renderFilterRow(f, i, fields, context)).join('')}
+        </div>
+        <button class="btn btn-secondary" onclick="addFilter('${context}')" style="margin-top:12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M12 5v14M5 12h14"/></svg>
+          Add Filter
+        </button>
+      `;
+      
+      const footer = `
+        <button class="btn btn-secondary" onclick="clearFilters('${context}')">Clear All</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyFilters('${context}')">Apply Filters</button>
+      `;
+      
+      showModal('Filter', body, footer);
+    }
+
+    function renderFilterRow(filter, index, fields, context) {
+      return `
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:12px;background:var(--bg-subtle);border-radius:var(--radius-sm);">
+          <select class="form-select" style="flex:1;" onchange="updateFilter('${context}', ${index}, 'field', this.value)">
+            ${fields.map(f => `<option value="${f.id}" ${filter.field === f.id ? 'selected' : ''}>${f.label}</option>`).join('')}
+          </select>
+          <select class="form-select" style="flex:1;" onchange="updateFilter('${context}', ${index}, 'operator', this.value)">
+            ${filterOperators.map(op => `<option value="${op.id}" ${filter.operator === op.id ? 'selected' : ''}>${op.label}</option>`).join('')}
+          </select>
+          <input type="text" class="form-input" style="flex:1;" value="${filter.value || ''}" 
+                 onchange="updateFilter('${context}', ${index}, 'value', this.value)"
+                 placeholder="Value..." ${filter.operator === 'is_empty' || filter.operator === 'is_not_empty' ? 'disabled' : ''}>
+          <button class="field-action-btn" onclick="removeFilter('${context}', ${index})" title="Remove">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      `;
+    }
+
+    function addFilter(context) {
+      const fields = sortFields[context];
+      const filters = context === 'products' ? state.filters : 
+                      context === 'relations' ? state.relationFilters : state.assetFilters;
+      
+      filters.push({ field: fields[0].id, operator: 'contains', value: '' });
+      showFilterPanel(context); // Re-render modal
+    }
+
+    function removeFilter(context, index) {
+      const filters = context === 'products' ? state.filters : 
+                      context === 'relations' ? state.relationFilters : state.assetFilters;
+      filters.splice(index, 1);
+      showFilterPanel(context); // Re-render modal
+    }
+
+    function updateFilter(context, index, key, value) {
+      const filters = context === 'products' ? state.filters : 
+                      context === 'relations' ? state.relationFilters : state.assetFilters;
+      filters[index][key] = value;
+      
+      // Disable value input for empty/not empty operators
+      if (key === 'operator' && (value === 'is_empty' || value === 'is_not_empty')) {
+        filters[index].value = '';
+      }
+    }
+
+    function clearFilters(context) {
+      if (context === 'products') {
+        state.filters = [];
+      } else if (context === 'relations') {
+        state.relationFilters = [];
+      } else if (context === 'assets') {
+        state.assetFilters = [];
+      }
+      closeModal();
+      
+      if (context === 'products') {
+        renderToolbar();
+        renderContent();
+      } else {
+        renderDetailMain();
+      }
+      showToast('Filters cleared', 'info');
+    }
+
+    function applyFilters(context) {
+      closeModal();
+      
+      if (context === 'products') {
+        renderToolbar();
+        renderContent();
+      } else {
+        renderDetailMain();
+      }
+      
+      const count = context === 'products' ? state.filters.length : 
+                    context === 'relations' ? state.relationFilters.length : state.assetFilters.length;
+      showToast(`Applied ${count} filter(s)`, 'success');
+    }
+
+    function matchesFilter(item, filter) {
+      const value = String(item[filter.field] || '').toLowerCase();
+      const filterValue = (filter.value || '').toLowerCase();
+      
+      switch (filter.operator) {
+        case 'contains': return value.includes(filterValue);
+        case 'equals': return value === filterValue;
+        case 'not_equals': return value !== filterValue;
+        case 'starts_with': return value.startsWith(filterValue);
+        case 'ends_with': return value.endsWith(filterValue);
+        case 'is_empty': return !value || value.trim() === '';
+        case 'is_not_empty': return value && value.trim() !== '';
+        default: return true;
+      }
+    }
+
+    function getFilteredProducts() {
+      if (state.filters.length === 0) return products;
+      return products.filter(p => state.filters.every(f => matchesFilter(p, f)));
+    }
+
+    function getFilteredRelations(productRelations) {
+      let result = productRelations;
+      if (state.relationFilters.length > 0) {
+        result = result.filter(r => state.relationFilters.every(f => matchesFilter(r, f)));
+      }
+      return getSortedRelations(result);
+    }
+
+    function getFilteredAssets() {
+      let result = assets;
+      if (state.assetFilters.length > 0) {
+        result = result.filter(a => state.assetFilters.every(f => matchesFilter(a, f)));
+      }
+      return getSortedAssets();
+    }
+
+    // ==================== ACTIONS ====================
+    function showColumnSettings() { showToast('Column settings', 'info'); }
+    function createProduct() { showToast('Create product', 'info'); }
+    function importData() { showToast('Import data', 'info'); }
+    function exportData() { showToast('Export data', 'info'); }
+    function bulkEdit() { showToast('Bulk edit', 'info'); }
+    function refreshData() { showToast('Refreshing...', 'info'); renderContent(); }
+    function approveSelected() { showToast(`Approved ${state.checkedItems.length} items`, 'success'); clearSelection(); }
+    function deleteSelected() { showToast(`Deleted ${state.checkedItems.length} items`, 'success'); clearSelection(); }
+    function navigateBreadcrumb(index) { showToast(`Navigate to: ${state.breadcrumb[index]}`, 'info'); }
+    
+    // Product actions
+    function showReferences() { showToast('References', 'info'); }
+    function inspectProduct() { showToast('Inspect product', 'info'); }
+    function submitProduct() { showToast('Submit product', 'info'); }
+    function addToWorkflow() { showToast('Add to workflow', 'info'); }
+    function assignProduct() { showToast('Assign product', 'info'); }
+    function addToCollection() { showToast('Add to collection', 'info'); }
+    function setMasterProduct() { showToast('Set master product', 'info'); }
+    function setPDXChannels() { showToast('PDX channels', 'info'); }
+    function categorizeProduct() { showToast('Categorize product', 'info'); }
+    function businessAction() { showToast('Business action', 'info'); }
+    function approveProduct() { showToast('Approve product', 'info'); }
+    
+    function navigateItem(direction) {
+      const newIndex = state.selectedItemIndex + direction;
+      if (newIndex >= 0 && newIndex < products.length) {
+        state.selectedItemIndex = newIndex;
+        renderToolbar();
+        renderItemList();
+        renderDetailMain();
+        renderDetailSidebar();
+      }
+    }
+    
+    function duplicateProduct() {
+      const p = products[state.selectedItemIndex];
+      showToast(`Duplicate: ${p.name}`, 'info');
+    }
+    
+    function deleteProduct() {
+      const p = products[state.selectedItemIndex];
+      showModal('Delete Product', `
+        <p>Are you sure you want to delete <strong>${p.name}</strong>?</p>
+        <p style="color:var(--text-muted);font-size:12px;margin-top:8px;">This action cannot be undone.</p>
+      `, `
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmDeleteProduct()">Delete</button>
+      `);
+    }
+    
+    function confirmDeleteProduct() {
+      const p = products[state.selectedItemIndex];
+      showToast(`Deleted: ${p.name}`, 'success');
+      closeModal();
+      // In real app, would remove from array and navigate
+      if (state.selectedItemIndex > 0) {
+        state.selectedItemIndex--;
+      }
+      renderContent();
+    }
+
+    // ==================== PANEL CONTROLS ====================
+    function togglePanel(panelId) {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      
+      const isCollapsed = panel.classList.toggle('collapsed');
+      
+      // Update state
+      state[panelId + 'Collapsed'] = isCollapsed;
+    }
+
+    // ==================== UTILITIES ====================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function showModal(title, body, footer = '') {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = body;
+      document.getElementById('modalFooter').innerHTML = footer;
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function setupResizeHandles() {
+      document.querySelectorAll('.resize-handle').forEach(handle => {
+        handle.addEventListener('mousedown', initResize);
+      });
+    }
+
+    function initResize(e) {
+      const handle = e.target;
+      const targetId = handle.dataset.resize;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      const startX = e.clientX;
+      const startWidth = target.offsetWidth;
+      const isRight = handle.previousElementSibling === target;
+
+      function doResize(e) {
+        const diff = e.clientX - startX;
+        const newWidth = isRight ? startWidth + diff : startWidth - diff;
+        target.style.width = Math.max(150, Math.min(500, newWidth)) + 'px';
+      }
+
+      function stopResize() {
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
+      }
+
+      document.addEventListener('mousemove', doResize);
+      document.addEventListener('mouseup', stopResize);
+    }
+
+    // ==================== INITIALIZE ====================
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

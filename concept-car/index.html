@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>App Framework</title>
+    <style>
+      :root {
+        --panel-width: 320px;
+        --panel-collapsed-width: 32px;
+        --top-bar-height: 56px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .top-bar {
+        height: var(--top-bar-height);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        border-bottom: 1px solid #e0e0e0;
+        background: #fafafa;
+      }
+
+      .top-bar-left,
+      .top-bar-center,
+      .top-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .top-bar-left {
+        flex: 0 0 auto;
+      }
+
+      .top-bar-center {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      .top-bar-right {
+        flex: 0 0 auto;
+        margin-left: 16px;
+      }
+
+      .app-switcher,
+      .company-logo {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        border: 1px solid #d0d0d0;
+        background: #ffffff;
+      }
+
+      .app-switcher::before {
+        content: "≡";
+        display: block;
+        text-align: center;
+        line-height: 22px;
+        font-size: 14px;
+        color: #555555;
+      }
+
+      .company-logo::before {
+        content: "";
+        display: block;
+        width: 14px;
+        height: 14px;
+        margin: 4px auto;
+        border-radius: 3px;
+        background: #4f46e5;
+      }
+
+      .product-name {
+        min-width: 0;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+      }
+
+      .top-bar-search {
+        width: 100%;
+        max-width: 480px;
+      }
+
+      .top-bar-search input {
+        width: 100%;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #cccccc;
+        font-size: 14px;
+      }
+
+      .environment-info,
+      .notifications {
+        min-width: 0;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid #e0e0e0;
+        background: #ffffff;
+        font-size: 12px;
+        color: #555555;
+      }
+
+      .notifications::before {
+        content: "🔔";
+        margin-right: 4px;
+      }
+
+      .app-layout {
+        flex: 1 1 auto;
+        display: flex;
+        min-height: 0;
+      }
+
+      .panel {
+        flex: 0 0 var(--panel-width);
+        max-width: var(--panel-width);
+        min-width: 0;
+        border-right: 1px solid #e0e0e0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: #fbfbfb;
+      }
+
+      .panel.collapsed {
+        flex: 0 0 var(--panel-collapsed-width);
+        flex-basis: var(--panel-collapsed-width);
+        max-width: var(--panel-collapsed-width);
+        min-width: var(--panel-collapsed-width);
+      }
+
+      .panel-right {
+        border-right: none;
+        border-left: 1px solid #e0e0e0;
+      }
+
+      .main-wrapper {
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
+        min-width: 0;
+        min-height: 0;
+        background: #ffffff;
+      }
+
+      .main-content {
+        flex: 1 1 auto;
+        max-width: 1024px;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+        padding: 16px;
+        background-image: 
+          repeating-linear-gradient(
+            to right,
+            transparent 0,
+            transparent calc((100% - 11 * 16px) / 12),
+            rgba(224, 224, 224, 0.5) calc((100% - 11 * 16px) / 12),
+            rgba(224, 224, 224, 0.5) calc((100% - 11 * 16px) / 12 + 1px)
+          );
+      }
+
+      .panel-resize-handle {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 8px;
+        cursor: col-resize;
+        background: transparent;
+        transition: background 0.15s ease-out;
+      }
+
+      .panel-resize-handle::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 2px;
+        height: 24px;
+        background: #d0d0d0;
+        transform: translate(-50%, -50%);
+        border-radius: 999px;
+      }
+
+      .panel-resize-handle:hover {
+        background: rgba(79, 70, 229, 0.08);
+      }
+
+      .panel-left-resize {
+        right: -2px;
+      }
+
+      .panel-right-resize {
+        left: -2px;
+      }
+
+      .panel-toggle {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        border-radius: 999px;
+        border: 1px solid #d0d0d0;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #555555;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02);
+        transition: background 0.15s ease-out, color 0.15s ease-out,
+          border-color 0.15s ease-out;
+      }
+
+      .panel-toggle:hover {
+        background: #eef2ff;
+        border-color: #4f46e5;
+        color: #111827;
+      }
+
+      .panel-right .panel-toggle {
+        right: auto;
+        left: 8px;
+      }
+
+      .panel-toggle[data-toggle="nav"]::before {
+        content: "⟨";
+      }
+
+      .panel-toggle[data-toggle="secondary"]::before {
+        content: "⟨";
+      }
+
+      .panel-right .panel-toggle[data-toggle="right"]::before {
+        content: "⟩";
+      }
+
+      .panel-toggle[data-collapsed="true"][data-toggle="nav"]::before,
+      .panel-toggle[data-collapsed="true"][data-toggle="secondary"]::before {
+        content: "⟩";
+      }
+
+      .panel-right .panel-toggle[data-collapsed="true"][data-toggle="right"]::before {
+        content: "⟨";
+      }
+
+      .panel.collapsed .panel-toggle {
+        top: 50%;
+        right: 50%;
+        left: auto;
+        transform: translate(50%, -50%);
+      }
+
+      .panel-right.collapsed .panel-toggle {
+        right: auto;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .nav-panel-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 36px 0 12px;
+        overflow-y: auto;
+      }
+
+      .nav-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        color: #374151;
+        text-decoration: none;
+        font-size: 14px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+      }
+
+      .nav-item:hover {
+        background: #f3f4f6;
+      }
+
+      .nav-item .nav-dots {
+        margin-left: auto;
+        color: #6b7280;
+        font-size: 14px;
+        opacity: 0;
+      }
+
+      .nav-item:hover .nav-dots,
+      .nav-item-active .nav-dots {
+        opacity: 1;
+      }
+
+      .nav-item .nav-icon {
+        flex-shrink: 0;
+        width: 20px;
+        text-align: center;
+      }
+
+      .nav-item .nav-chevron {
+        margin-left: auto;
+        color: #9ca3af;
+        font-size: 12px;
+      }
+
+      .nav-category {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+        color: #374151;
+        background: #e0f2fe;
+        border: none;
+        cursor: pointer;
+      }
+
+      .nav-category-chevron {
+        flex-shrink: 0;
+        color: #0ea5e9;
+      }
+
+      .nav-subsection {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .nav-subcategory {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px 6px 24px;
+        width: 100%;
+        text-align: left;
+        font-size: 13px;
+        color: #374151;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+
+      .nav-subcategory:hover {
+        background: #f3f4f6;
+      }
+
+      .nav-subcategory-chevron {
+        flex-shrink: 0;
+        width: 16px;
+        color: #6b7280;
+      }
+
+      .nav-tag {
+        margin-left: auto;
+        padding: 2px 8px;
+        font-size: 11px;
+        color: #6b7280;
+        background: #e5e7eb;
+        border-radius: 999px;
+      }
+
+      .nav-items {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .nav-item-nested {
+        padding-left: 48px;
+      }
+
+      .nav-item-active {
+        background: #e0f2fe;
+      }
+
+      .nav-item-active .nav-dots {
+        opacity: 1;
+      }
+
+      .nav-separator {
+        margin: 8px 16px;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .nav-inapp-comms {
+        margin: 8px 16px;
+        padding: 12px;
+        background: #e0f2fe;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #0c4a6e;
+        position: relative;
+      }
+
+      .nav-inapp-close {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: #64748b;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .nav-footer {
+        margin-top: auto;
+        padding: 16px;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .nav-logo {
+        font-size: 14px;
+        color: #0f766e;
+      }
+
+      .nav-tagline {
+        font-size: 11px;
+        color: #6b7280;
+        margin-top: 2px;
+      }
+
+      .nav-section-work-areas .nav-subsection-content {
+        display: block;
+      }
+
+      .nav-section-work-areas.nav-section-collapsed .nav-subsection-content {
+        display: none;
+      }
+
+      .nav-subsection.nav-subsection-collapsed .nav-items {
+        display: none;
+      }
+
+      .nav-subsection.nav-subsection-collapsed .nav-subcategory-chevron::before {
+        content: "›";
+      }
+
+      .nav-subsection:not(.nav-subsection-collapsed) .nav-subcategory-chevron::before {
+        content: "⌄";
+      }
+
+      .nav-section-work-areas.nav-section-expanded .nav-category-chevron::before {
+        content: "⌄";
+      }
+
+      .nav-section-work-areas.nav-section-collapsed .nav-category-chevron::before {
+        content: "›";
+      }
+
+      .nav-inapp-comms.is-hidden {
+        display: none;
+      }
+
+      @media (max-width: 1023px) {
+        .app-layout {
+          position: relative;
+        }
+
+        .panel {
+          position: absolute !important;
+          top: 0;
+          bottom: 0;
+          width: var(--panel-width) !important;
+          max-width: var(--panel-width) !important;
+          min-width: var(--panel-width) !important;
+          flex: none !important;
+          flex-basis: auto !important;
+          z-index: 100;
+          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+          transition: transform 0.3s ease-out;
+        }
+
+        .panel-nav {
+          left: 0;
+          z-index: 101;
+        }
+
+        .panel-secondary {
+          left: 0;
+          z-index: 100;
+        }
+
+        .panel-right {
+          right: 0;
+          left: auto;
+          box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .panel.collapsed {
+          width: var(--panel-collapsed-width) !important;
+          max-width: var(--panel-collapsed-width) !important;
+          min-width: var(--panel-collapsed-width) !important;
+          transform: translateX(calc(-100% + var(--panel-collapsed-width)));
+        }
+
+        .panel-right.collapsed {
+          transform: translateX(calc(100% - var(--panel-collapsed-width)));
+        }
+
+        .main-wrapper {
+          width: 100%;
+          max-width: 100%;
+        }
+
+        .main-content {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <div class="app-switcher" data-apps="PDX, WebUI, Workbench"></div>
+        <div class="company-logo"></div>
+        <div class="product-name">Instrument</div>
+      </div>
+      <div class="top-bar-center">
+        <div class="top-bar-search">
+          <input type="search" />
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <div class="environment-info"></div>
+        <div class="notifications"></div>
+      </div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="panel panel-nav" data-panel="nav">
+        <div class="panel-toggle" data-toggle="nav"></div>
+        <div class="panel-resize-handle panel-left-resize" data-resize="nav"></div>
+        <div class="nav-panel-content">
+          <nav class="nav-section">
+            <a class="nav-item" href="#"><span class="nav-icon">🕐</span> Recent <span class="nav-chevron">›</span></a>
+            <a class="nav-item" href="#"><span class="nav-icon">★</span> Starred <span class="nav-chevron">›</span></a>
+          </nav>
+          <div class="nav-section nav-section-work-areas nav-section-expanded">
+            <button type="button" class="nav-category nav-section-expanded" aria-expanded="true">
+              <span class="nav-category-chevron"></span> Work areas
+            </button>
+            <div class="nav-subsection-content">
+              <div class="nav-subsection">
+                <button type="button" class="nav-subcategory" aria-expanded="true">
+                  <span class="nav-subcategory-chevron"></span> Work area 1 <span class="nav-tag">CUSTOM</span>
+                </button>
+                <div class="nav-items">
+                <a class="nav-item nav-item-nested" href="#"><span class="nav-icon nav-icon-doc">📄</span> Perspective 1 <span class="nav-dots">⋯</span></a>
+                <a class="nav-item nav-item-nested nav-item-active" href="#">
+                  <span class="nav-icon nav-icon-layers">⊞</span> Perspective 2 <span class="nav-dots">⋯</span>
+                </a>
+                </div>
+              </div>
+              <div class="nav-subsection nav-subsection-collapsed">
+                <button type="button" class="nav-subcategory" aria-expanded="false">
+                  <span class="nav-subcategory-chevron"></span> Work area 2 <span class="nav-tag">CUSTOM</span>
+                </button>
+                <div class="nav-items"></div>
+              </div>
+              <div class="nav-subsection nav-subsection-collapsed">
+                <button type="button" class="nav-subcategory" aria-expanded="false">
+                  <span class="nav-subcategory-chevron"></span> Work area 2 <span class="nav-tag">CUSTOM</span>
+                </button>
+                <div class="nav-items"></div>
+              </div>
+            </div>
+          </div>
+          <hr class="nav-separator" />
+          <nav class="nav-section">
+            <a class="nav-item" href="#"><span class="nav-icon">↗</span> Quick links <span class="nav-chevron">›</span></a>
+            <a class="nav-item" href="#"><span class="nav-icon">📊</span> Dashboards</a>
+            <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Configuration tool</a>
+          </nav>
+          <hr class="nav-separator" />
+          <nav class="nav-section">
+            <a class="nav-item" href="#"><span class="nav-icon">👤</span> John Doe <span class="nav-chevron">›</span></a>
+          </nav>
+          <div class="nav-inapp-comms">
+            <span>In-app comms</span>
+            <button type="button" class="nav-inapp-close" aria-label="Close">×</button>
+          </div>
+          <div class="nav-footer">
+            <div class="nav-logo">□ <strong>ACME</strong></div>
+            <div class="nav-tagline">MASTER DATA MANAGEMENT</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel panel-secondary" data-panel="secondary">
+        <div class="panel-toggle" data-toggle="secondary"></div>
+        <div
+          class="panel-resize-handle panel-left-resize"
+          data-resize="secondary"
+        ></div>
+      </section>
+
+      <div class="main-wrapper">
+        <main class="main-content"></main>
+      </div>
+
+      <section class="panel panel-right" data-panel="right">
+        <div class="panel-toggle" data-toggle="right"></div>
+        <div
+          class="panel-resize-handle panel-right-resize"
+          data-resize="right"
+        ></div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        var MIN_WIDTH = 160;
+        var MAX_WIDTH = 640;
+
+        var state = {
+          nav: { width: 320, collapsed: false },
+          secondary: { width: 320, collapsed: false },
+          right: { width: 320, collapsed: false },
+        };
+
+        function updateSecondaryPanelPosition() {
+          if (!isOverlayMode()) return;
+          
+          var navPanel = document.querySelector('[data-panel="nav"]');
+          var secondaryPanel = document.querySelector('[data-panel="secondary"]');
+          if (!navPanel || !secondaryPanel) return;
+          
+          if (state.nav.collapsed) {
+            // Nav is collapsed (toggle strip visible), secondary overlays main starting at left edge
+            // Nav's toggle is still accessible due to higher z-index
+            secondaryPanel.style.left = "0px";
+          } else {
+            // Nav is expanded, secondary is collapsed (due to toggle logic), position after nav
+            secondaryPanel.style.left = state.nav.width + "px";
+          }
+        }
+
+        function applyPanelState(panelName) {
+          var panel = document.querySelector('[data-panel="' + panelName + '"]');
+          if (!panel) return;
+
+          var info = state[panelName];
+          var toggle = panel.querySelector('.panel-toggle');
+          var handles = panel.querySelectorAll('.panel-resize-handle');
+
+          if (info.collapsed) {
+            panel.classList.add("collapsed");
+            panel.style.flex = "";
+            panel.style.flexBasis = "";
+            panel.style.maxWidth = "";
+            panel.style.minWidth = "";
+            panel.style.overflow = "hidden";
+            handles.forEach(function (h) {
+              h.style.display = "none";
+            });
+            if (toggle) {
+              toggle.setAttribute("data-collapsed", "true");
+            }
+          } else {
+            panel.classList.remove("collapsed");
+            panel.style.flex = "0 0 " + info.width + "px";
+            panel.style.flexBasis = info.width + "px";
+            panel.style.maxWidth = info.width + "px";
+            panel.style.overflow = "";
+            handles.forEach(function (h) {
+              h.style.display = "";
+            });
+            if (toggle) {
+              toggle.removeAttribute("data-collapsed");
+            }
+          }
+          
+          // Update secondary panel position when nav state changes
+          if (panelName === "nav") {
+            updateSecondaryPanelPosition();
+          }
+        }
+
+        function isOverlayMode() {
+          return window.innerWidth < 1024;
+        }
+
+        function onToggleClick(e) {
+          var panelName = e.target.getAttribute("data-toggle");
+          if (!panelName || !state[panelName]) return;
+          
+          var wasCollapsed = state[panelName].collapsed;
+          state[panelName].collapsed = !wasCollapsed;
+          
+          // In overlay mode, if expanding a left panel, collapse the other left panel
+          if (isOverlayMode() && wasCollapsed && (panelName === "nav" || panelName === "secondary")) {
+            var otherLeftPanel = panelName === "nav" ? "secondary" : "nav";
+            if (!state[otherLeftPanel].collapsed) {
+              state[otherLeftPanel].collapsed = true;
+              applyPanelState(otherLeftPanel);
+            }
+          }
+          
+          applyPanelState(panelName);
+        }
+
+        function initToggles() {
+          var toggles = document.querySelectorAll(".panel-toggle");
+          toggles.forEach(function (toggle) {
+            toggle.addEventListener("click", onToggleClick);
+          });
+        }
+
+        function initNavInteractivity() {
+          var navPanel = document.querySelector(".panel-nav");
+          if (!navPanel) return;
+
+          // Work areas category: expand/collapse
+          var categoryBtn = navPanel.querySelector(".nav-section-work-areas .nav-category");
+          var workAreasSection = navPanel.querySelector(".nav-section-work-areas");
+          if (categoryBtn && workAreasSection) {
+            categoryBtn.addEventListener("click", function () {
+              var expanded = workAreasSection.classList.toggle("nav-section-expanded");
+              workAreasSection.classList.toggle("nav-section-collapsed", !expanded);
+              categoryBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+            });
+          }
+
+          // Subcategories: expand/collapse
+          navPanel.querySelectorAll(".nav-subsection .nav-subcategory").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              var subsection = btn.closest(".nav-subsection");
+              if (!subsection) return;
+              subsection.classList.toggle("nav-subsection-collapsed");
+              var collapsed = subsection.classList.contains("nav-subsection-collapsed");
+              btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+            });
+          });
+
+          // In-app comms: close button
+          var inappClose = navPanel.querySelector(".nav-inapp-close");
+          var inappComms = navPanel.querySelector(".nav-inapp-comms");
+          if (inappClose && inappComms) {
+            inappClose.addEventListener("click", function () {
+              inappComms.classList.add("is-hidden");
+            });
+          }
+
+          // Nav items: prevent default for #, set active state
+          navPanel.querySelectorAll(".nav-item").forEach(function (item) {
+            item.addEventListener("click", function (e) {
+              if (item.getAttribute("href") === "#") {
+                e.preventDefault();
+              }
+              navPanel.querySelectorAll(".nav-item-active").forEach(function (active) {
+                active.classList.remove("nav-item-active");
+              });
+              item.classList.add("nav-item-active");
+            });
+          });
+        }
+
+        function initResize() {
+          var active = null;
+
+          function onMouseDown(e) {
+            var panelName = e.target.getAttribute("data-resize");
+            if (!panelName || !state[panelName]) return;
+            var panel = document.querySelector(
+              '[data-panel="' + panelName + '"]'
+            );
+            if (!panel) return;
+
+            var rect = panel.getBoundingClientRect();
+            active = {
+              panelName: panelName,
+              startX: e.clientX,
+              startWidth: rect.width,
+              handle: e.target,
+            };
+
+            e.preventDefault();
+          }
+
+          function onMouseMove(e) {
+            if (!active) return;
+            var delta =
+              e.clientX - active.startX;
+
+            if (
+              active.handle.classList.contains("panel-right-resize")
+            ) {
+              delta = -delta;
+            }
+
+            var newWidth = active.startWidth + delta;
+            newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
+
+            state[active.panelName].width = newWidth;
+            applyPanelState(active.panelName);
+            
+            if (active.panelName === "nav") {
+              updateSecondaryPanelPosition();
+            }
+          }
+
+          function onMouseUp() {
+            active = null;
+          }
+
+          var handles = document.querySelectorAll(".panel-resize-handle");
+          handles.forEach(function (h) {
+            h.addEventListener("mousedown", onMouseDown);
+          });
+
+          window.addEventListener("mousemove", onMouseMove);
+          window.addEventListener("mouseup", onMouseUp);
+        }
+
+        // Initialize panel states for overlay mode
+        if (isOverlayMode()) {
+          state.nav.collapsed = true;
+          state.secondary.collapsed = false; // Secondary overlays main by default
+        }
+        
+        ["nav", "secondary", "right"].forEach(applyPanelState);
+        initToggles();
+        initResize();
+        initNavInteractivity();
+        updateSecondaryPanelPosition();
+        
+        window.addEventListener("resize", function() {
+          // Update nav collapsed state when entering/exiting overlay mode
+          var wasOverlay = state.nav.collapsed && window.innerWidth >= 1024;
+          if (isOverlayMode() && !wasOverlay) {
+            state.nav.collapsed = true;
+            applyPanelState("nav");
+          }
+          updateSecondaryPanelPosition();
+        });
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-context Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-size: 13px;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        /* Header */
+        .app-header {
+            background: #0a5f5f;
+            color: white;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon {
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a5f5f;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .app-title {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .app-subtitle {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .app-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-context {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .search-box {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            color: white;
+            width: 180px;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toolbar-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px 8px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 11px;
+            gap: 2px;
+            border-radius: 3px;
+        }
+
+        .toolbar-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .toolbar-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 32px;
+            background: #ddd;
+            margin: 0 8px;
+        }
+
+        /* Tabs */
+        .tabs-bar {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab.active {
+            color: #0a5f5f;
+            border-bottom-color: #0a5f5f;
+        }
+
+        .tab:hover {
+            background: #f5f5f5;
+        }
+
+        .tab-add {
+            padding: 10px 12px;
+            color: #999;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-bar {
+            background: #fff;
+            padding: 8px 16px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .breadcrumb a {
+            color: #0a5f5f;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-sep {
+            color: #999;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 180px);
+        }
+
+        /* Left Collapsed Panel */
+        .left-panel-collapsed {
+            width: 28px;
+            background: #f5f5f5;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 8px;
+        }
+
+        .left-panel-tab {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            padding: 12px 6px;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            margin-left: -1px;
+        }
+
+        .left-panel-tab:hover {
+            background: #e8e8e8;
+            color: #333;
+        }
+
+        .left-panel-tab.active {
+            border-left-color: #0a5f5f;
+            color: #0a5f5f;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .main-content.with-panel {
+            /* Content shrinks when panel opens */
+        }
+
+        /* Product Header */
+        .product-header {
+            background: #fff;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .product-icon {
+            width: 48px;
+            height: 48px;
+            background: #e8e8e8;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .product-info h1 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .product-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Sub Tabs */
+        .sub-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 16px;
+        }
+
+        .sub-tab {
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .sub-tab.active {
+            color: #0a5f5f;
+            border-bottom-color: #0a5f5f;
+            font-weight: 500;
+        }
+
+        /* Table Toolbar */
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            margin-bottom: 8px;
+        }
+
+        .table-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .small-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            font-size: 11px;
+            color: #555;
+            border-radius: 3px;
+        }
+
+        .small-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .zoom-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .zoom-slider {
+            width: 100px;
+        }
+
+        /* Multi-context Table */
+        .mc-table {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .mc-table-header {
+            display: grid;
+            grid-template-columns: 250px 1fr 1fr 1fr;
+            background: #0a5f5f;
+            color: white;
+            font-weight: 500;
+        }
+
+        .mc-table-header-cell {
+            padding: 10px 12px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .mc-table-header-cell:last-child {
+            border-right: none;
+        }
+
+        .mc-section {
+            border-bottom: 1px solid #eee;
+        }
+
+        .mc-section:last-child {
+            border-bottom: none;
+        }
+
+        .mc-section-header {
+            padding: 8px 12px;
+            background: #f8f8f8;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .mc-section-header:hover {
+            background: #f0f0f0;
+        }
+
+        .mc-section-toggle {
+            color: #666;
+            transition: transform 0.2s;
+        }
+
+        .mc-section-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .mc-row {
+            display: grid;
+            grid-template-columns: 250px 1fr 1fr 1fr;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mc-row:last-child {
+            border-bottom: none;
+        }
+
+        .mc-row:hover {
+            background: #fafafa;
+        }
+
+        .mc-cell {
+            padding: 8px 12px;
+            border-right: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mc-cell:last-child {
+            border-right: none;
+        }
+
+        .mc-cell.label {
+            background: #fafafa;
+        }
+
+        .mc-cell-icon {
+            color: #0a5f5f;
+            flex-shrink: 0;
+        }
+
+        .mc-link {
+            color: #0a5f5f;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mc-link:hover {
+            text-decoration: underline;
+        }
+
+        .mc-link-expand {
+            color: #0a5f5f;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mc-link-expand:hover {
+            text-decoration: underline;
+        }
+
+        .mc-link-expand::after {
+            content: "›";
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+
+        .mc-badge {
+            background: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .cell-na {
+            background: repeating-linear-gradient(
+                -45deg,
+                #f5f5f5,
+                #f5f5f5 4px,
+                #e8e8e8 4px,
+                #e8e8e8 8px
+            );
+            color: transparent;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            width: 0;
+            min-width: 0;
+            background: #fff;
+            border-left: 1px solid #ddd;
+            overflow: hidden;
+            transition: width 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .right-panel.open {
+            width: 480px;
+            min-width: 280px;
+            max-width: 80vw;
+        }
+
+        .right-panel.resizing {
+            transition: none;
+            user-select: none;
+        }
+
+        .panel-resize-handle {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .panel-resize-handle:hover,
+        .panel-resize-handle.active {
+            background: rgba(10, 95, 95, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #ddd;
+            background: #fafafa;
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #666;
+            padding: 4px;
+        }
+
+        .panel-close:hover {
+            color: #333;
+        }
+
+        .panel-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+        }
+
+        /* Panel Table */
+        .panel-table-header {
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr 1fr;
+            background: #0a5f5f;
+            color: white;
+            font-size: 12px;
+            position: sticky;
+            top: 0;
+        }
+
+        .panel-table-header-cell {
+            padding: 8px 10px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .panel-section {
+            border-bottom: 1px solid #eee;
+        }
+
+        .panel-section-header {
+            padding: 8px 10px;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .panel-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr 1fr;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        .panel-cell {
+            padding: 6px 10px;
+            border-right: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .panel-cell.label {
+            background: #fafafa;
+        }
+
+        .panel-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background: #fafafa;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            border-radius: 3px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-primary {
+            background: #0a5f5f;
+            border: 1px solid #0a5f5f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #084d4d;
+        }
+
+        /* Modal (for comparison) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 6px;
+            width: 800px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .modal-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-content {
+            flex: 1;
+            overflow: auto;
+            padding: 0 20px 20px;
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        /* Toggle Controls */
+        .toggle-bar {
+            background: #fff;
+            padding: 12px 16px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toggle-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .toggle-group {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .toggle-option {
+            padding: 6px 12px;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            border-right: 1px solid #ddd;
+        }
+
+        .toggle-option:last-child {
+            border-right: none;
+        }
+
+        .toggle-option.active {
+            background: #0a5f5f;
+            color: white;
+        }
+
+        .toggle-option:hover:not(.active) {
+            background: #f5f5f5;
+        }
+
+        /* Checkbox */
+        .checkbox {
+            width: 14px;
+            height: 14px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        /* Emoji Icons */
+        .emoji-icon {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="app-header-left">
+            <div class="app-icon">S</div>
+            <div>
+                <div class="app-title">Summer collection 2026</div>
+                <div class="app-subtitle">Nothing to save</div>
+            </div>
+        </div>
+        <div class="app-header-right">
+            <div class="header-context">
+                <span>English (US)</span>
+                <span>|</span>
+                <span>Main</span>
+            </div>
+            <input type="text" class="search-box" placeholder="Search">
+        </div>
+    </header>
+
+    <!-- Main Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                Sort
+            </button>
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                Filter
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Create
+            </button>
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                References
+            </button>
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+                Inspect
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                Submit
+            </button>
+            <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M21 3L9 15M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                Add to workflow
+            </button>
+        </div>
+        <div class="toolbar-group">
+            <div class="zoom-control">
+                <span>-</span>
+                <input type="range" class="zoom-slider" min="0.5" max="2" step="0.1" value="0.5">
+                <span>+</span>
+                <span style="margin-left: 8px;">Zoom level (0.5x)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Bar (prototype control) -->
+    <div class="toggle-bar">
+        <span class="toggle-label">Link click behavior:</span>
+        <div class="toggle-group">
+            <button class="toggle-option active" onclick="setMode('panel')">Open in Panel</button>
+            <button class="toggle-option" onclick="setMode('modal')">Open in Modal</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+        <button class="tab active">
+            <span style="color: gold;">&#9733;</span> Shoes
+        </button>
+        <button class="tab tab-add">+</button>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+        <button class="nav-btn">&larr;</button>
+        <button class="nav-btn">&rarr;</button>
+        <button class="nav-btn">&uarr;</button>
+        <div class="breadcrumb">
+            <a href="#">Shoes</a>
+            <span class="breadcrumb-sep">/</span>
+            <span>Zephyr Glide shoe</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Collapsed Panel -->
+        <div class="left-panel-collapsed">
+            <div class="left-panel-tab active">Tasks</div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <!-- Product Header -->
+            <div class="product-header">
+                <div class="product-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                    </svg>
+                </div>
+                <div class="product-info">
+                    <div style="font-size: 11px; color: #666;">Home / Shoes</div>
+                    <h1>Zephyr Glide shoe</h1>
+                    <div class="product-meta">Revision: 0.1 | Last edited by: Peder Madsen, 10 months 3 weeks ago | Approved</div>
+                </div>
+            </div>
+
+            <!-- Sub Tabs -->
+            <div class="sub-tabs">
+                <button class="sub-tab">Attribute tab page</button>
+                <button class="sub-tab">Compare tab page</button>
+                <button class="sub-tab">Asset tab page</button>
+                <button class="sub-tab">PDX channels</button>
+                <button class="sub-tab active">Multi-context</button>
+                <button class="sub-tab">Packaging</button>
+            </div>
+
+            <!-- Table Toolbar -->
+            <div class="table-toolbar">
+                <div class="table-toolbar-left">
+                    <button class="small-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                        Filter
+                    </button>
+                    <button class="small-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        References
+                    </button>
+                    <button class="small-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        Approve
+                    </button>
+                </div>
+                <div class="table-toolbar-right">
+                    <div class="zoom-control">
+                        <span>-</span>
+                        <input type="range" class="zoom-slider" style="width: 80px;">
+                        <span>+</span>
+                    </div>
+                    <button class="small-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                    </button>
+                    <button class="small-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        Customize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Multi-context Table -->
+            <div class="mc-table">
+                <div class="mc-table-header">
+                    <div class="mc-table-header-cell"></div>
+                    <div class="mc-table-header-cell">English (US)</div>
+                    <div class="mc-table-header-cell">Spanish (Mexico)</div>
+                    <div class="mc-table-header-cell">Danish (Denmark)</div>
+                </div>
+
+                <!-- Ungrouped -->
+                <div class="mc-section">
+                    <div class="mc-section-header">
+                        <span class="mc-section-toggle">&#9660;</span>
+                        Ungrouped (2)
+                    </div>
+                    <div class="mc-row">
+                        <div class="mc-cell label">
+                            <span class="mc-cell-icon">&#8853;</span>
+                            Name
+                        </div>
+                        <div class="mc-cell">Zephyr Glide shoe</div>
+                        <div class="mc-cell">Zapato Zephyr Glide</div>
+                        <div class="mc-cell">Zephyr Glide sko</div>
+                    </div>
+                    <div class="mc-row">
+                        <div class="mc-cell label">Approval status</div>
+                        <div class="mc-cell">Approved</div>
+                        <div class="mc-cell">Not approved</div>
+                        <div class="mc-cell">Partially approved</div>
+                    </div>
+                </div>
+
+                <!-- Attribute groups -->
+                <div class="mc-section">
+                    <div class="mc-section-header">
+                        <span class="mc-section-toggle">&#9660;</span>
+                        Attribute groups (2)
+                    </div>
+
+                    <!-- Feature bullets -->
+                    <div class="mc-section" style="margin-left: 20px;">
+                        <div class="mc-section-header" style="background: #fff;">
+                            <span class="mc-section-toggle">&#9660;</span>
+                            Feature bullets (2)
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">
+                                <span class="mc-cell-icon">&#8853;</span>
+                                Feature bullet 1
+                            </div>
+                            <div class="mc-cell">Supreme Cushioning: Innovative foa...</div>
+                            <div class="mc-cell">Amortiguación suprema: tecnología...</div>
+                            <div class="mc-cell">Suveræn Stødabsorbering: Innovativ...</div>
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">
+                                <span class="mc-cell-icon">&#8853;</span>
+                                Feature bullet 2
+                            </div>
+                            <div class="mc-cell">Enhanced Stability: Provides support...</div>
+                            <div class="mc-cell">Estabilidad mejorada: proporciona s...</div>
+                            <div class="mc-cell">Forbedret Stabilitet: Giver støtte og...</div>
+                        </div>
+                    </div>
+
+                    <!-- Descriptions -->
+                    <div class="mc-section" style="margin-left: 20px;">
+                        <div class="mc-section-header" style="background: #fff;">
+                            <span class="mc-section-toggle">&#9660;</span>
+                            Descriptions (2)
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">
+                                <span class="mc-cell-icon">&#8853;</span>
+                                Long description
+                            </div>
+                            <div class="mc-cell">The Zephyr Glide is engineered for t...</div>
+                            <div class="mc-cell">El Zephyr Glide está diseñado para a...</div>
+                            <div class="mc-cell">Zephyr Glide er udviklet til dem, der...</div>
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">
+                                <span class="mc-cell-icon">&#8853;</span>
+                                Short description
+                            </div>
+                            <div class="mc-cell">Experience unparalleled comfort an...</div>
+                            <div class="mc-cell">Experimente una comodidad y un re...</div>
+                            <div class="mc-cell">Oplev uovertruffen komfort og ydee...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reference types -->
+                <div class="mc-section">
+                    <div class="mc-section-header">
+                        <span class="mc-section-toggle">&#9660;</span>
+                        Reference types (3)
+                    </div>
+                    <div class="mc-row">
+                        <div class="mc-cell label">
+                            <span class="mc-cell-icon">&#8853;</span>
+                            <span class="mc-link-expand">Cross-sell products</span>
+                        </div>
+                        <div class="mc-cell"></div>
+                        <div class="mc-cell"></div>
+                        <div class="mc-cell"></div>
+                    </div>
+                    <div class="mc-row">
+                        <div class="mc-cell label">
+                            <span class="mc-cell-icon">&#8853;</span>
+                            <span class="mc-link-expand" onclick="openRelatedProducts()">Related products</span>
+                        </div>
+                        <div class="mc-cell">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a5f5f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                            Nimbus Runner shoe
+                            <span class="mc-badge">+1</span>
+                        </div>
+                        <div class="mc-cell">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a5f5f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                            Nimbus Runner shoe
+                        </div>
+                        <div class="mc-cell">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a5f5f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                            Terra Trekker shoe
+                        </div>
+                    </div>
+                    <div class="mc-row">
+                        <div class="mc-cell label">
+                            <span class="mc-cell-icon">&#8853;</span>
+                            <span class="mc-link-expand">Primary image</span>
+                        </div>
+                        <div class="mc-cell">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a5f5f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+                            Image 234
+                        </div>
+                        <div class="mc-cell">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a5f5f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+                            Image 234
+                        </div>
+                        <div class="mc-cell"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel" id="rightPanel">
+            <div class="panel-resize-handle" id="panelResizeHandle"></div>
+            <div class="panel-header">
+                <div class="panel-title">
+                    Related products
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/></svg>
+                </div>
+                <button class="panel-close" onclick="closePanel()">&times;</button>
+            </div>
+            <div class="panel-toolbar">
+                <div class="table-toolbar-left">
+                    <button class="small-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                        Add
+                    </button>
+                    <button class="small-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+                        Remove
+                    </button>
+                </div>
+                <div class="table-toolbar-right">
+                    <div class="zoom-control">
+                        <span style="font-size: 10px;">-</span>
+                        <input type="range" class="zoom-slider" style="width: 60px;">
+                        <span style="font-size: 10px;">+</span>
+                    </div>
+                    <button class="small-btn" style="font-size: 10px;">View</button>
+                    <button class="small-btn" style="font-size: 10px;">Customize</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div class="panel-table-header">
+                    <div class="panel-table-header-cell"></div>
+                    <div class="panel-table-header-cell">English (US)</div>
+                    <div class="panel-table-header-cell">Spanish (Mexico)</div>
+                    <div class="panel-table-header-cell">Danish (Denmark)</div>
+                </div>
+
+                <!-- Nimbus Runner shoe -->
+                <div class="panel-section">
+                    <div class="panel-section-header">
+                        <span class="mc-section-toggle">&#9660;</span>
+                        <span class="checkbox"></span>
+                        Nimbus Runner shoe
+                    </div>
+                    <div class="panel-row">
+                        <div class="panel-cell label">Name</div>
+                        <div class="panel-cell">Nimbus Runner shoe</div>
+                        <div class="panel-cell">Zapato Nimbus Runner</div>
+                        <div class="panel-cell cell-na">&nbsp;</div>
+                    </div>
+                    <div class="panel-row">
+                        <div class="panel-cell label">
+                            <span class="mc-cell-icon" style="font-size: 11px;">&#8853;</span>
+                            Meta data
+                        </div>
+                        <div class="panel-cell">Meta data in English</div>
+                        <div class="panel-cell">Meta data in Spanish</div>
+                        <div class="panel-cell cell-na">&nbsp;</div>
+                    </div>
+                </div>
+
+                <!-- Terra Trekker shoe -->
+                <div class="panel-section">
+                    <div class="panel-section-header">
+                        <span class="mc-section-toggle">&#9660;</span>
+                        <span class="checkbox"></span>
+                        Terra Trekker shoe
+                    </div>
+                    <div class="panel-row">
+                        <div class="panel-cell label">Name</div>
+                        <div class="panel-cell">Terra Trekker shoe</div>
+                        <div class="panel-cell cell-na">&nbsp;</div>
+                        <div class="panel-cell">Terra Trekker sko</div>
+                    </div>
+                    <div class="panel-row">
+                        <div class="panel-cell label">
+                            <span class="mc-cell-icon" style="font-size: 11px;">&#8853;</span>
+                            Meta data
+                        </div>
+                        <div class="panel-cell">Meta data in English</div>
+                        <div class="panel-cell cell-na">&nbsp;</div>
+                        <div class="panel-cell">Meta data in Danish</div>
+                    </div>
+                </div>
+
+                <div style="padding: 8px 10px; font-size: 11px; color: #666;">2 items</div>
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-secondary" onclick="closePanel()">Cancel</button>
+                <button class="btn btn-primary">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Related products</div>
+                <button class="panel-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-toolbar">
+                <div class="table-toolbar-left">
+                    <button class="small-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                        Add
+                    </button>
+                    <button class="small-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+                        Remove
+                    </button>
+                </div>
+                <div class="table-toolbar-right">
+                    <div class="zoom-control">
+                        <span>-</span>
+                        <input type="range" class="zoom-slider" style="width: 80px;">
+                        <span>+</span>
+                    </div>
+                    <button class="small-btn">View</button>
+                    <button class="small-btn">Customize</button>
+                </div>
+            </div>
+            <div class="modal-content">
+                <div class="mc-table" style="margin-top: 16px;">
+                    <div class="mc-table-header">
+                        <div class="mc-table-header-cell"></div>
+                        <div class="mc-table-header-cell">English (US)</div>
+                        <div class="mc-table-header-cell">Spanish (Mexico)</div>
+                        <div class="mc-table-header-cell">Danish (Denmark)</div>
+                    </div>
+
+                    <!-- Nimbus Runner shoe -->
+                    <div class="mc-section">
+                        <div class="mc-section-header">
+                            <span class="mc-section-toggle">&#9660;</span>
+                            <span class="checkbox"></span>
+                            Nimbus Runner shoe
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">Name</div>
+                            <div class="mc-cell">Nimbus Runner shoe</div>
+                            <div class="mc-cell">Zapato Nimbus Runner</div>
+                            <div class="mc-cell cell-na">&nbsp;</div>
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">
+                                <span class="mc-cell-icon">&#8853;</span>
+                                Meta data
+                            </div>
+                            <div class="mc-cell">Meta data in English</div>
+                            <div class="mc-cell">Meta data in Spanish</div>
+                            <div class="mc-cell cell-na">&nbsp;</div>
+                        </div>
+                    </div>
+
+                    <!-- Terra Trekker shoe -->
+                    <div class="mc-section">
+                        <div class="mc-section-header">
+                            <span class="mc-section-toggle">&#9660;</span>
+                            <span class="checkbox"></span>
+                            Terra Trekker shoe
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">Name</div>
+                            <div class="mc-cell">Terra Trekker shoe</div>
+                            <div class="mc-cell cell-na">&nbsp;</div>
+                            <div class="mc-cell">Terra Trekker sko</div>
+                        </div>
+                        <div class="mc-row">
+                            <div class="mc-cell label">
+                                <span class="mc-cell-icon">&#8853;</span>
+                                Meta data
+                            </div>
+                            <div class="mc-cell">Meta data in English</div>
+                            <div class="mc-cell cell-na">&nbsp;</div>
+                            <div class="mc-cell">Meta data in Danish</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 8px 0; font-size: 12px; color: #666;">2 items</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'panel';
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.toggle-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Close any open panels/modals when switching modes
+            closePanel();
+            closeModal();
+        }
+
+        function openRelatedProducts() {
+            if (currentMode === 'panel') {
+                openPanel();
+            } else {
+                openModal();
+            }
+        }
+
+        function openPanel() {
+            document.getElementById('rightPanel').classList.add('open');
+            document.getElementById('mainContent').classList.add('with-panel');
+        }
+
+        function closePanel() {
+            document.getElementById('rightPanel').classList.remove('open');
+            document.getElementById('mainContent').classList.remove('with-panel');
+        }
+
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById('modalOverlay')) {
+                document.getElementById('modalOverlay').classList.remove('open');
+            }
+        }
+
+        // Close panel/modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePanel();
+                closeModal();
+            }
+        });
+
+        // Panel resize functionality
+        const rightPanel = document.getElementById('rightPanel');
+        const resizeHandle = document.getElementById('panelResizeHandle');
+        let isResizing = false;
+        let startX, startWidth;
+
+        resizeHandle.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = rightPanel.offsetWidth;
+            rightPanel.classList.add('resizing');
+            resizeHandle.classList.add('active');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            
+            const deltaX = startX - e.clientX;
+            const newWidth = Math.min(Math.max(startWidth + deltaX, 280), window.innerWidth * 0.8);
+            rightPanel.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isResizing) {
+                isResizing = false;
+                rightPanel.classList.remove('resizing');
+                resizeHandle.classList.remove('active');
+                document.body.style.cursor = '';
+            }
+        });
+    </script>
+</body>
+</html>

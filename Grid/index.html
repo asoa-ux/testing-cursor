@@ -1,0 +1,3560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrument - Product Master Data Management</title>
+    <style>
+        /* ========================================
+           CSS CUSTOM PROPERTIES (Design Tokens)
+           ======================================== */
+        :root {
+            /* Colors */
+            --color-background: #FFFFFF;
+            --color-surface: #F7F8F9;
+            --color-surface-raised: #FFFFFF;
+            --color-surface-sunken: #F1F2F4;
+            --color-border: #DFE1E6;
+            --color-border-bold: #C1C7D0;
+            
+            --color-text: #172B4D;
+            --color-text-subtle: #626F86;
+            --color-text-subtlest: #8993A5;
+            --color-text-inverse: #FFFFFF;
+            
+            --color-brand: #0052CC;
+            --color-brand-bold: #0747A6;
+            --color-brand-subtle: #DEEBFF;
+            
+            --color-success: #00875A;
+            --color-success-subtle: #E3FCEF;
+            --color-warning: #FF8B00;
+            --color-warning-subtle: #FFFAE6;
+            --color-danger: #DE350B;
+            --color-danger-subtle: #FFEBE6;
+            --color-info: #0065FF;
+            --color-info-subtle: #E6F2FF;
+            
+            --color-selected: #E9F2FF;
+            --color-hover: #F4F5F7;
+            --color-active: #EBECF0;
+            
+            /* Product Colors */
+            --color-instrument: #6554C0;
+            --color-instrument-subtle: #EAE6FF;
+            
+            /* Spacing */
+            --space-025: 2px;
+            --space-050: 4px;
+            --space-075: 6px;
+            --space-100: 8px;
+            --space-150: 12px;
+            --space-200: 16px;
+            --space-300: 24px;
+            --space-400: 32px;
+            --space-500: 40px;
+            --space-600: 48px;
+            
+            /* Typography */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-md: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 20px;
+            --font-size-xxl: 24px;
+            --font-size-xxxl: 29px;
+            
+            --font-weight-regular: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.4;
+            --line-height-relaxed: 1.6;
+            
+            /* Border Radius */
+            --radius-sm: 3px;
+            --radius-md: 4px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.08);
+            --shadow-md: 0 4px 8px rgba(9, 30, 66, 0.08), 0 0 1px rgba(9, 30, 66, 0.16);
+            --shadow-lg: 0 8px 16px rgba(9, 30, 66, 0.12), 0 0 1px rgba(9, 30, 66, 0.16);
+            --shadow-xl: 0 16px 32px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.16);
+            
+            /* Layout Dimensions */
+            --banner-height: 0px;
+            --top-nav-height: 56px;
+            --side-nav-width: 280px;
+            --side-nav-collapsed-width: 56px;
+            --panel-width: 400px;
+            --tree-indent: 24px;
+            
+            /* Transitions */
+            --transition-fast: 0.1s ease;
+            --transition-normal: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+        
+        /* ========================================
+           RESET & BASE STYLES
+           ======================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            height: 100%;
+            font-family: var(--font-family);
+            font-size: var(--font-size-md);
+            color: var(--color-text);
+            background: var(--color-surface);
+            line-height: var(--line-height-normal);
+        }
+        
+        /* ========================================
+           LAYOUT STRUCTURE
+           ======================================== */
+        .layout {
+            display: grid;
+            grid-template-areas:
+                "top-nav top-nav top-nav"
+                "side-nav main panel";
+            grid-template-columns: var(--side-nav-width) 1fr var(--panel-width);
+            grid-template-rows: var(--top-nav-height) 1fr;
+            height: 100vh;
+            transition: grid-template-columns var(--transition-normal);
+        }
+        
+        .layout.side-nav-collapsed {
+            grid-template-columns: var(--side-nav-collapsed-width) 1fr var(--panel-width);
+        }
+        
+        .layout.panel-collapsed {
+            grid-template-columns: var(--side-nav-width) 1fr 0px;
+        }
+        
+        .layout.side-nav-collapsed.panel-collapsed {
+            grid-template-columns: var(--side-nav-collapsed-width) 1fr 0px;
+        }
+        
+        /* ========================================
+           TOP NAVIGATION
+           ======================================== */
+        .top-nav {
+            grid-area: top-nav;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-200);
+            background: var(--color-background);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 100;
+        }
+        
+        .top-nav__start {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        .top-nav__middle {
+            display: flex;
+            align-items: center;
+            gap: var(--space-050);
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .top-nav__end {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        /* App Switcher */
+        .app-switcher {
+            position: relative;
+        }
+        
+        .app-switcher__trigger {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+        }
+        
+        .app-switcher__trigger:hover {
+            background: var(--color-hover);
+        }
+        
+        .app-switcher__menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: var(--space-100);
+            background: var(--color-background);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            padding: var(--space-150);
+            min-width: 280px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .app-switcher__menu.open {
+            display: block;
+        }
+        
+        .app-switcher__section-title {
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-subtlest);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: var(--space-100) var(--space-100);
+        }
+        
+        .app-switcher__item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-150);
+            padding: var(--space-100) var(--space-100);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--color-text);
+        }
+        
+        .app-switcher__item:hover {
+            background: var(--color-hover);
+        }
+        
+        .app-switcher__item.active {
+            background: var(--color-instrument-subtle);
+        }
+        
+        .app-switcher__item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-inverse);
+        }
+        
+        .app-switcher__item-icon.instrument { background: var(--color-instrument); }
+        .app-switcher__item-icon.catalog { background: #00875A; }
+        .app-switcher__item-icon.supplier { background: #0065FF; }
+        
+        .app-switcher__item-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-switcher__item-name {
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .app-switcher__item-desc {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+        }
+        
+        /* Product Logo */
+        .product-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+            padding: var(--space-050) var(--space-100);
+            text-decoration: none;
+            color: var(--color-text);
+        }
+        
+        .product-logo__icon {
+            width: 28px;
+            height: 28px;
+            background: var(--color-instrument);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-inverse);
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-sm);
+        }
+        
+        .product-logo__text {
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-lg);
+        }
+        
+        /* Search */
+        .global-search {
+            position: relative;
+            width: 400px;
+            max-width: 100%;
+        }
+        
+        .global-search__input {
+            width: 100%;
+            padding: var(--space-100) var(--space-150);
+            padding-left: 36px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-md);
+            background: var(--color-surface);
+            transition: all var(--transition-fast);
+        }
+        
+        .global-search__input:focus {
+            outline: none;
+            border-color: var(--color-brand);
+            background: var(--color-background);
+            box-shadow: 0 0 0 2px var(--color-brand-subtle);
+        }
+        
+        .global-search__input::placeholder {
+            color: var(--color-text-subtlest);
+        }
+        
+        .global-search__icon {
+            position: absolute;
+            left: var(--space-150);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-subtlest);
+        }
+        
+        .global-search__shortcut {
+            position: absolute;
+            right: var(--space-100);
+            top: 50%;
+            transform: translateY(-50%);
+            padding: var(--space-025) var(--space-075);
+            background: var(--color-surface-sunken);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            color: var(--color-text-subtlest);
+        }
+        
+        /* Icon Buttons */
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+            position: relative;
+        }
+        
+        .icon-btn:hover {
+            background: var(--color-hover);
+            color: var(--color-text);
+        }
+        
+        .icon-btn__badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background: var(--color-danger);
+            border-radius: 50%;
+        }
+        
+        /* Avatar */
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--color-brand);
+            color: var(--color-text-inverse);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+        }
+        
+        /* ========================================
+           SIDE NAVIGATION
+           ======================================== */
+        .side-nav {
+            grid-area: side-nav;
+            display: flex;
+            flex-direction: column;
+            background: var(--color-background);
+            border-right: 1px solid var(--color-border);
+            overflow: hidden;
+            transition: width var(--transition-normal);
+        }
+        
+        .side-nav__header {
+            padding: var(--space-200);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .side-nav__title {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .side-nav-collapsed .side-nav__title {
+            display: none;
+        }
+        
+        .side-nav__toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+            flex-shrink: 0;
+        }
+        
+        .side-nav__toggle:hover {
+            background: var(--color-hover);
+        }
+        
+        .side-nav__content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-100);
+        }
+        
+        /* Tree Navigation */
+        .tree {
+            list-style: none;
+        }
+        
+        .tree-item {
+            user-select: none;
+        }
+        
+        .tree-item__row {
+            display: flex;
+            align-items: center;
+            padding: var(--space-075) var(--space-100);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            gap: var(--space-050);
+            position: relative;
+        }
+        
+        .tree-item__row:hover {
+            background: var(--color-hover);
+        }
+        
+        .tree-item__row.selected {
+            background: var(--color-selected);
+        }
+        
+        .tree-item__row.selected::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 3px;
+            background: var(--color-brand);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        .tree-item__expand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--color-text-subtlest);
+            flex-shrink: 0;
+            transition: transform var(--transition-fast);
+        }
+        
+        .tree-item__expand:hover {
+            background: var(--color-active);
+            color: var(--color-text);
+        }
+        
+        .tree-item__expand.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .tree-item__expand.hidden {
+            visibility: hidden;
+        }
+        
+        .tree-item__icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-subtle);
+            flex-shrink: 0;
+        }
+        
+        .tree-item__icon.folder { color: #FFAB00; }
+        .tree-item__icon.product { color: var(--color-instrument); }
+        .tree-item__icon.category { color: #00875A; }
+        
+        .tree-item__label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: var(--font-size-md);
+        }
+        
+        .tree-item__count {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-subtlest);
+            background: var(--color-surface-sunken);
+            padding: var(--space-025) var(--space-075);
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+        }
+        
+        .tree-item__children {
+            list-style: none;
+            padding-left: var(--tree-indent);
+            display: none;
+        }
+        
+        .tree-item__children.expanded {
+            display: block;
+        }
+        
+        /* Loading indicator for lazy load */
+        .tree-item__loading {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+            padding: var(--space-075) var(--space-100);
+            padding-left: calc(var(--space-100) + 20px);
+            color: var(--color-text-subtlest);
+            font-size: var(--font-size-sm);
+        }
+        
+        .tree-item__loading-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-brand);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Side nav collapsed state */
+        .side-nav-collapsed .tree-item__label,
+        .side-nav-collapsed .tree-item__count,
+        .side-nav-collapsed .tree-item__expand,
+        .side-nav-collapsed .tree-item__children {
+            display: none;
+        }
+        
+        .side-nav-collapsed .tree-item__row {
+            justify-content: center;
+            padding: var(--space-100);
+        }
+        
+        .side-nav-collapsed .tree-item__icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        /* Quick Actions in Side Nav */
+        .side-nav__actions {
+            padding: var(--space-150);
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .side-nav__action-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+            width: 100%;
+            padding: var(--space-100) var(--space-150);
+            border: 1px dashed var(--color-border);
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+            font-size: var(--font-size-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .side-nav__action-btn:hover {
+            border-color: var(--color-brand);
+            color: var(--color-brand);
+            background: var(--color-brand-subtle);
+        }
+        
+        .side-nav-collapsed .side-nav__actions {
+            padding: var(--space-100);
+        }
+        
+        .side-nav-collapsed .side-nav__action-btn span {
+            display: none;
+        }
+        
+        .side-nav-collapsed .side-nav__action-btn {
+            justify-content: center;
+            padding: var(--space-100);
+        }
+        
+        /* ========================================
+           MAIN CONTENT AREA
+           ======================================== */
+        .main {
+            grid-area: main;
+            overflow-y: auto;
+            background: var(--color-surface);
+        }
+        
+        .main__header {
+            position: sticky;
+            top: 0;
+            background: var(--color-background);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--space-200) var(--space-300);
+            z-index: 10;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--space-050);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+            margin-bottom: var(--space-150);
+        }
+        
+        .breadcrumb__item {
+            color: var(--color-text-subtle);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .breadcrumb__item:hover {
+            color: var(--color-brand);
+            text-decoration: underline;
+        }
+        
+        .breadcrumb__item.current {
+            color: var(--color-text);
+            cursor: default;
+        }
+        
+        .breadcrumb__item.current:hover {
+            text-decoration: none;
+            color: var(--color-text);
+        }
+        
+        .breadcrumb__separator {
+            color: var(--color-text-subtlest);
+        }
+        
+        .main__title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-200);
+        }
+        
+        .main__title-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-050);
+        }
+        
+        .main__title {
+            font-size: var(--font-size-xxl);
+            font-weight: var(--font-weight-semibold);
+            line-height: var(--line-height-tight);
+            display: flex;
+            align-items: center;
+            gap: var(--space-150);
+        }
+        
+        .main__title-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-instrument-subtle);
+            color: var(--color-instrument);
+            border-radius: var(--radius-md);
+        }
+        
+        .main__subtitle {
+            font-size: var(--font-size-md);
+            color: var(--color-text-subtle);
+        }
+        
+        .main__actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-075);
+            padding: var(--space-100) var(--space-200);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+        
+        .btn--primary {
+            background: var(--color-brand);
+            color: var(--color-text-inverse);
+        }
+        
+        .btn--primary:hover {
+            background: var(--color-brand-bold);
+        }
+        
+        .btn--secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+        
+        .btn--secondary:hover {
+            background: var(--color-hover);
+        }
+        
+        .btn--subtle {
+            background: transparent;
+            color: var(--color-text-subtle);
+        }
+        
+        .btn--subtle:hover {
+            background: var(--color-hover);
+            color: var(--color-text);
+        }
+        
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-150) var(--space-300);
+            background: var(--color-background);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .toolbar__left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-200);
+        }
+        
+        .toolbar__right {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        .toolbar__search {
+            position: relative;
+        }
+        
+        .toolbar__search-input {
+            padding: var(--space-075) var(--space-150);
+            padding-left: 32px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            width: 200px;
+            background: var(--color-background);
+        }
+        
+        .toolbar__search-input:focus {
+            outline: none;
+            border-color: var(--color-brand);
+            box-shadow: 0 0 0 2px var(--color-brand-subtle);
+        }
+        
+        .toolbar__search-icon {
+            position: absolute;
+            left: var(--space-100);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-subtlest);
+        }
+        
+        .toolbar__filter-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-075);
+            padding: var(--space-075) var(--space-150);
+            border: 1px solid var(--color-border);
+            background: var(--color-background);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+            cursor: pointer;
+        }
+        
+        .toolbar__filter-btn:hover {
+            background: var(--color-hover);
+            border-color: var(--color-border-bold);
+        }
+        
+        .toolbar__view-toggle {
+            display: flex;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .toolbar__view-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 28px;
+            border: none;
+            background: var(--color-background);
+            color: var(--color-text-subtle);
+            cursor: pointer;
+        }
+        
+        .toolbar__view-btn:hover {
+            background: var(--color-hover);
+        }
+        
+        .toolbar__view-btn.active {
+            background: var(--color-selected);
+            color: var(--color-brand);
+        }
+        
+        /* Main Content */
+        .main__content {
+            padding: var(--space-300);
+        }
+        
+        /* Content Tabs (Children vs Details view) */
+        .content-tabs {
+            display: flex;
+            gap: var(--space-050);
+            margin-bottom: var(--space-300);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--space-050);
+        }
+        
+        .content-tab {
+            display: flex;
+            align-items: center;
+            gap: var(--space-075);
+            padding: var(--space-100) var(--space-200);
+            border: none;
+            background: transparent;
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-subtle);
+            cursor: pointer;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            position: relative;
+            transition: all var(--transition-fast);
+        }
+        
+        .content-tab:hover {
+            color: var(--color-text);
+            background: var(--color-hover);
+        }
+        
+        .content-tab.active {
+            color: var(--color-brand);
+            background: var(--color-brand-subtle);
+        }
+        
+        .content-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-brand);
+        }
+        
+        .content-tab__count {
+            font-size: var(--font-size-xs);
+            padding: var(--space-025) var(--space-075);
+            background: var(--color-surface-sunken);
+            border-radius: var(--radius-sm);
+            color: var(--color-text-subtlest);
+        }
+        
+        .content-tab.active .content-tab__count {
+            background: var(--color-brand);
+            color: var(--color-text-inverse);
+        }
+        
+        /* Tab Content Views */
+        .content-view {
+            display: none;
+        }
+        
+        .content-view.active {
+            display: block;
+        }
+        
+        /* Details View in Main Content */
+        .details-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-300);
+        }
+        
+        @media (max-width: 1024px) {
+            .details-view {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .details-card {
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .details-card--full {
+            grid-column: 1 / -1;
+        }
+        
+        .details-card__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-200);
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-surface-sunken);
+        }
+        
+        .details-card__title {
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-semibold);
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        .details-card__title-icon {
+            color: var(--color-text-subtle);
+        }
+        
+        .details-card__content {
+            padding: var(--space-200);
+        }
+        
+        .details-card__actions {
+            display: flex;
+            gap: var(--space-100);
+        }
+        
+        /* Attribute Grid in Details View */
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-200);
+        }
+        
+        @media (max-width: 768px) {
+            .attribute-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .attribute-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-050);
+        }
+        
+        .attribute-field--full {
+            grid-column: 1 / -1;
+        }
+        
+        .attribute-field__label {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-subtle);
+        }
+        
+        .attribute-field__value {
+            font-size: var(--font-size-md);
+            color: var(--color-text);
+            padding: var(--space-100) var(--space-150);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .attribute-field__value--editable {
+            background: var(--color-background);
+            cursor: text;
+        }
+        
+        .attribute-field__value--editable:hover {
+            border-color: var(--color-border-bold);
+        }
+        
+        .attribute-field__value--editable:focus {
+            outline: none;
+            border-color: var(--color-brand);
+            box-shadow: 0 0 0 2px var(--color-brand-subtle);
+        }
+        
+        /* Quick Stats in Details */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-150);
+        }
+        
+        @media (max-width: 768px) {
+            .quick-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .quick-stat {
+            text-align: center;
+            padding: var(--space-150);
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+        }
+        
+        .quick-stat__value {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text);
+        }
+        
+        .quick-stat__label {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-subtle);
+            margin-top: var(--space-025);
+        }
+        
+        /* Status indicator large */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        .status-indicator__dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-indicator__dot--active { background: var(--color-success); }
+        .status-indicator__dot--draft { background: var(--color-text-subtlest); }
+        .status-indicator__dot--review { background: var(--color-warning); }
+        .status-indicator__dot--archived { background: var(--color-danger); }
+        
+        /* Details Navigation Bar */
+        .details-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-200);
+            padding: var(--space-150) var(--space-200);
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+        }
+        
+        /* Sibling Navigation - Full Width Bar */
+        .sibling-nav-bar {
+            display: flex;
+            align-items: stretch;
+            margin-bottom: var(--space-200);
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .sibling-nav-bar.hidden {
+            display: none;
+        }
+        
+        .sibling-nav__prev,
+        .sibling-nav__next {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: var(--space-150);
+            padding: var(--space-200);
+            border: none;
+            background: var(--color-background);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: left;
+            min-width: 0;
+        }
+        
+        .sibling-nav__prev {
+            border-right: 1px solid var(--color-border);
+        }
+        
+        .sibling-nav__next {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+        
+        .sibling-nav__prev:hover:not(:disabled),
+        .sibling-nav__next:hover:not(:disabled) {
+            background: var(--color-brand-subtle);
+        }
+        
+        .sibling-nav__prev:disabled,
+        .sibling-nav__next:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: var(--color-surface-sunken);
+        }
+        
+        .sibling-nav__arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            color: var(--color-text-subtle);
+            flex-shrink: 0;
+        }
+        
+        .sibling-nav__prev:hover:not(:disabled) .sibling-nav__arrow,
+        .sibling-nav__next:hover:not(:disabled) .sibling-nav__arrow {
+            background: var(--color-brand);
+            color: var(--color-text-inverse);
+        }
+        
+        .sibling-nav__text {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-025);
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .sibling-nav__label {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-subtlest);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-075);
+        }
+        
+        .sibling-nav__shortcut {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 var(--space-050);
+            background: var(--color-surface-sunken);
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            color: var(--color-text-subtlest);
+            min-width: 18px;
+            height: 16px;
+        }
+        
+        .sibling-nav__name {
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .sibling-nav__prev:disabled .sibling-nav__name,
+        .sibling-nav__next:disabled .sibling-nav__name {
+            color: var(--color-text-subtle);
+        }
+        
+        /* Current position indicator */
+        .sibling-nav__center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-100) var(--space-200);
+            background: var(--color-surface-sunken);
+            min-width: 100px;
+        }
+        
+        .sibling-nav__position {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text);
+        }
+        
+        .sibling-nav__total {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-subtle);
+        }
+        
+        /* Old sibling nav - keep for backward compatibility but hidden */
+        .sibling-nav {
+            display: none;
+        }
+        
+        /* Relationships Preview */
+        .relationship-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-100);
+        }
+        
+        .relationship-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-150);
+            padding: var(--space-150);
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .relationship-item:hover {
+            background: var(--color-hover);
+        }
+        
+        .relationship-item__icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-background);
+            border-radius: var(--radius-md);
+            color: var(--color-text-subtle);
+        }
+        
+        .relationship-item__text {
+            flex: 1;
+        }
+        
+        .relationship-item__name {
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .relationship-item__type {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+        }
+        
+        .relationship-item__arrow {
+            color: var(--color-text-subtlest);
+        }
+        
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-200);
+            margin-bottom: var(--space-300);
+        }
+        
+        .stat-card {
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-200);
+        }
+        
+        .stat-card__label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+            margin-bottom: var(--space-050);
+        }
+        
+        .stat-card__value {
+            font-size: var(--font-size-xxl);
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .stat-card__change {
+            font-size: var(--font-size-sm);
+            color: var(--color-success);
+            margin-top: var(--space-050);
+        }
+        
+        .stat-card__change.negative {
+            color: var(--color-danger);
+        }
+        
+        /* Children List / Data Table */
+        .data-section {
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .data-section__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-200);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .data-section__title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: var(--space-150) var(--space-200);
+            background: var(--color-surface-sunken);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-subtle);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .data-table td {
+            padding: var(--space-150) var(--space-200);
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-table tr:hover td {
+            background: var(--color-hover);
+        }
+        
+        .data-table__row--clickable {
+            cursor: pointer;
+        }
+        
+        .data-table__name {
+            display: flex;
+            align-items: center;
+            gap: var(--space-150);
+        }
+        
+        .data-table__name-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            color: var(--color-text-subtle);
+        }
+        
+        .data-table__name-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .data-table__name-primary {
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text);
+        }
+        
+        .data-table__name-secondary {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-050);
+            padding: var(--space-025) var(--space-100);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .status-badge--active {
+            background: var(--color-success-subtle);
+            color: var(--color-success);
+        }
+        
+        .status-badge--draft {
+            background: var(--color-surface-sunken);
+            color: var(--color-text-subtle);
+        }
+        
+        .status-badge--review {
+            background: var(--color-warning-subtle);
+            color: var(--color-warning);
+        }
+        
+        .status-badge--archived {
+            background: var(--color-danger-subtle);
+            color: var(--color-danger);
+        }
+        
+        /* Quality Indicator */
+        .quality-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+        }
+        
+        .quality-bar {
+            width: 60px;
+            height: 6px;
+            background: var(--color-surface-sunken);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .quality-bar__fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width var(--transition-normal);
+        }
+        
+        .quality-bar__fill.high { background: var(--color-success); }
+        .quality-bar__fill.medium { background: var(--color-warning); }
+        .quality-bar__fill.low { background: var(--color-danger); }
+        
+        .quality-value {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+            min-width: 32px;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-150) var(--space-200);
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .pagination__info {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+        }
+        
+        .pagination__controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-050);
+        }
+        
+        .pagination__btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--color-border);
+            background: var(--color-background);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+        }
+        
+        .pagination__btn:hover:not(:disabled) {
+            background: var(--color-hover);
+            border-color: var(--color-border-bold);
+        }
+        
+        .pagination__btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination__btn.active {
+            background: var(--color-brand);
+            border-color: var(--color-brand);
+            color: var(--color-text-inverse);
+        }
+        
+        /* Load More */
+        .load-more {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-200);
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .load-more__btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-100);
+            padding: var(--space-100) var(--space-200);
+            border: 1px solid var(--color-border);
+            background: var(--color-background);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+            cursor: pointer;
+        }
+        
+        .load-more__btn:hover {
+            background: var(--color-hover);
+            border-color: var(--color-border-bold);
+        }
+        
+        /* ========================================
+           RIGHT PANEL
+           ======================================== */
+        .panel {
+            grid-area: panel;
+            background: var(--color-background);
+            border-left: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width var(--transition-normal);
+        }
+        
+        .panel-collapsed .panel {
+            display: none;
+        }
+        
+        .panel__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-200);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .panel__title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .panel__close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+        }
+        
+        .panel__close:hover {
+            background: var(--color-hover);
+        }
+        
+        .panel__tabs {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .panel__tab {
+            flex: 1;
+            padding: var(--space-150);
+            border: none;
+            background: transparent;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-subtle);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .panel__tab:hover {
+            color: var(--color-text);
+            background: var(--color-hover);
+        }
+        
+        .panel__tab.active {
+            color: var(--color-brand);
+        }
+        
+        .panel__tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-brand);
+        }
+        
+        .panel__content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-200);
+        }
+        
+        /* Attributes Section */
+        .attributes-group {
+            margin-bottom: var(--space-300);
+        }
+        
+        .attributes-group__title {
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-subtlest);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-150);
+        }
+        
+        .attribute-row {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-050);
+            padding: var(--space-100) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .attribute-row:last-child {
+            border-bottom: none;
+        }
+        
+        .attribute-row__label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-subtle);
+        }
+        
+        .attribute-row__value {
+            font-size: var(--font-size-md);
+            color: var(--color-text);
+        }
+        
+        .attribute-row__value--editable {
+            padding: var(--space-075) var(--space-100);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            margin: calc(var(--space-075) * -1) calc(var(--space-100) * -1);
+            cursor: text;
+        }
+        
+        .attribute-row__value--editable:hover {
+            background: var(--color-hover);
+            border-color: var(--color-border);
+        }
+        
+        /* Panel Footer */
+        .panel__footer {
+            padding: var(--space-200);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: var(--space-100);
+        }
+        
+        /* ========================================
+           FLOATING PANEL TOGGLE
+           ======================================== */
+        .panel-toggle-fab {
+            position: fixed;
+            bottom: var(--space-300);
+            right: var(--space-300);
+            width: 48px;
+            height: 48px;
+            border: none;
+            background: var(--color-brand);
+            color: var(--color-text-inverse);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        .panel-toggle-fab:hover {
+            background: var(--color-brand-bold);
+        }
+        
+        .panel-collapsed .panel-toggle-fab {
+            display: flex;
+        }
+        
+        /* ========================================
+           EMPTY STATE
+           ======================================== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-600);
+            text-align: center;
+        }
+        
+        .empty-state__icon {
+            width: 64px;
+            height: 64px;
+            background: var(--color-surface-sunken);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-200);
+            color: var(--color-text-subtlest);
+        }
+        
+        .empty-state__title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-100);
+        }
+        
+        .empty-state__description {
+            font-size: var(--font-size-md);
+            color: var(--color-text-subtle);
+            margin-bottom: var(--space-300);
+            max-width: 400px;
+        }
+        
+        /* ========================================
+           TOAST NOTIFICATION
+           ======================================== */
+        .toast-container {
+            position: fixed;
+            bottom: var(--space-300);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-100);
+        }
+        
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: var(--space-150);
+            padding: var(--space-150) var(--space-200);
+            background: var(--color-text);
+            color: var(--color-text-inverse);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            font-size: var(--font-size-md);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ========================================
+           SVG ICONS (inline)
+           ======================================== */
+        .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .icon--sm {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .icon--lg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .icon--xl {
+            width: 24px;
+            height: 24px;
+        }
+        
+        /* ========================================
+           RESPONSIVE STYLES
+           ======================================== */
+        @media (max-width: 1200px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .layout {
+                grid-template-columns: var(--side-nav-width) 1fr;
+            }
+            
+            .layout.side-nav-collapsed {
+                grid-template-columns: var(--side-nav-collapsed-width) 1fr;
+            }
+            
+            .panel {
+                position: fixed;
+                top: var(--top-nav-height);
+                right: 0;
+                bottom: 0;
+                width: var(--panel-width);
+                z-index: 200;
+                box-shadow: var(--shadow-xl);
+            }
+            
+            .panel-collapsed .panel {
+                display: none;
+            }
+            
+            .panel-overlay {
+                position: fixed;
+                inset: 0;
+                top: var(--top-nav-height);
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 199;
+                display: none;
+            }
+            
+            .layout:not(.panel-collapsed) .panel-overlay {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .side-nav {
+                position: fixed;
+                top: var(--top-nav-height);
+                left: 0;
+                bottom: 0;
+                width: var(--side-nav-width);
+                z-index: 200;
+                transform: translateX(-100%);
+                transition: transform var(--transition-normal);
+            }
+            
+            .layout.side-nav-open .side-nav {
+                transform: translateX(0);
+            }
+            
+            .side-nav-overlay {
+                position: fixed;
+                inset: 0;
+                top: var(--top-nav-height);
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 199;
+                display: none;
+            }
+            
+            .layout.side-nav-open .side-nav-overlay {
+                display: block;
+            }
+            
+            .global-search {
+                display: none;
+            }
+            
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .main__content {
+                padding: var(--space-200);
+            }
+            
+            .toolbar {
+                flex-wrap: wrap;
+                gap: var(--space-150);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout panel-collapsed" id="layout">
+        <!-- ====== TOP NAVIGATION ====== -->
+        <header class="top-nav">
+            <div class="top-nav__start">
+                <!-- App Switcher -->
+                <div class="app-switcher">
+                    <button class="app-switcher__trigger" onclick="toggleAppSwitcher()" title="Switch products">
+                        <svg class="icon--lg" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                    </button>
+                    <div class="app-switcher__menu" id="appSwitcherMenu">
+                        <div class="app-switcher__section-title">MDM Products</div>
+                        <a class="app-switcher__item active" href="#" onclick="switchProduct('instrument')">
+                            <div class="app-switcher__item-icon instrument">IN</div>
+                            <div class="app-switcher__item-text">
+                                <span class="app-switcher__item-name">Instrument</span>
+                                <span class="app-switcher__item-desc">Product Master Data</span>
+                            </div>
+                        </a>
+                        <a class="app-switcher__item" href="#" onclick="switchProduct('catalog')">
+                            <div class="app-switcher__item-icon catalog">CA</div>
+                            <div class="app-switcher__item-text">
+                                <span class="app-switcher__item-name">Catalog</span>
+                                <span class="app-switcher__item-desc">Product Information</span>
+                            </div>
+                        </a>
+                        <a class="app-switcher__item" href="#" onclick="switchProduct('supplier')">
+                            <div class="app-switcher__item-icon supplier">SU</div>
+                            <div class="app-switcher__item-text">
+                                <span class="app-switcher__item-name">Supplier Hub</span>
+                                <span class="app-switcher__item-desc">Vendor Management</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Product Logo -->
+                <a href="#" class="product-logo" onclick="navigateToRoot()">
+                    <div class="product-logo__icon">IN</div>
+                    <span class="product-logo__text">Instrument</span>
+                </a>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="icon-btn side-nav-mobile-toggle" onclick="toggleSideNav()" style="display: none;">
+                    <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="top-nav__middle">
+                <!-- Global Search -->
+                <div class="global-search">
+                    <svg class="global-search__icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" class="global-search__input" placeholder="Search products, categories, attributes...">
+                    <span class="global-search__shortcut">⌘K</span>
+                </div>
+            </div>
+            
+            <div class="top-nav__end">
+                <button class="icon-btn" title="Help">
+                    <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Notifications">
+                    <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="icon-btn__badge"></span>
+                </button>
+                <button class="icon-btn" title="Settings">
+                    <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+                <div class="avatar" title="John Doe">JD</div>
+            </div>
+        </header>
+        
+        <!-- ====== SIDE NAVIGATION ====== -->
+        <aside class="side-nav">
+            <div class="side-nav__header">
+                <span class="side-nav__title">Product Hierarchy</span>
+                <button class="side-nav__toggle" onclick="toggleSideNavCollapse()" title="Collapse sidebar">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="side-nav__content">
+                <!-- Hierarchy Tree -->
+                <ul class="tree" id="hierarchyTree">
+                    <!-- Tree items will be populated by JavaScript -->
+                </ul>
+            </div>
+            
+            <div class="side-nav__actions">
+                <button class="side-nav__action-btn" onclick="createNewNode()">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>New Category</span>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- ====== MOBILE OVERLAYS ====== -->
+        <div class="side-nav-overlay" onclick="closeSideNav()"></div>
+        <div class="panel-overlay" onclick="closePanel()"></div>
+        
+        <!-- ====== MAIN CONTENT ====== -->
+        <main class="main">
+            <div class="main__header">
+                <nav class="breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb__item" onclick="navigateTo('root')">Instrument</span>
+                    <span class="breadcrumb__separator">/</span>
+                    <span class="breadcrumb__item current">All Products</span>
+                </nav>
+                <div class="main__title-row">
+                    <div class="main__title-group">
+                        <h1 class="main__title" id="mainTitle">
+                            <span class="main__title-icon">
+                                <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9,22 9,12 15,12 15,22"/>
+                                </svg>
+                            </span>
+                            All Products
+                        </h1>
+                        <p class="main__subtitle" id="mainSubtitle">Manage your product master data hierarchy</p>
+                    </div>
+                    <div class="main__actions">
+                        <button class="btn btn--secondary" onclick="switchContentView('details')" id="viewDetailsBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            View Details
+                        </button>
+                        <button class="btn btn--subtle" onclick="togglePanel()" title="Toggle side panel">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M15 3v18"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn--primary" onclick="createNewNode()">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Add Product
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar__left">
+                    <div class="toolbar__search">
+                        <svg class="toolbar__search-icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <input type="text" class="toolbar__search-input" placeholder="Filter items..." id="filterInput" oninput="filterItems()">
+                    </div>
+                    <button class="toolbar__filter-btn">
+                        <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
+                        </svg>
+                        Filters
+                    </button>
+                </div>
+                <div class="toolbar__right">
+                    <span style="font-size: var(--font-size-sm); color: var(--color-text-subtle);" id="itemCount">245 items</span>
+                    <div class="toolbar__view-toggle">
+                        <button class="toolbar__view-btn active" title="List view">
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                            </svg>
+                        </button>
+                        <button class="toolbar__view-btn" title="Grid view">
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="main__content">
+                <!-- Content View Tabs -->
+                <div class="content-tabs" id="contentTabs">
+                    <button class="content-tab active" onclick="switchContentView('children')" data-view="children">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Children
+                        <span class="content-tab__count" id="childrenCount">5</span>
+                    </button>
+                    <button class="content-tab" onclick="switchContentView('details')" data-view="details">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        Details
+                    </button>
+                </div>
+                
+                <!-- Children View -->
+                <div class="content-view active" id="childrenView">
+                    <!-- Stats Row -->
+                    <div class="stats-row" id="statsRow">
+                    <div class="stat-card">
+                        <div class="stat-card__label">Total Products</div>
+                        <div class="stat-card__value">12,847</div>
+                        <div class="stat-card__change">+234 this week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__label">Categories</div>
+                        <div class="stat-card__value">156</div>
+                        <div class="stat-card__change">+12 this month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__label">Data Quality</div>
+                        <div class="stat-card__value">94.2%</div>
+                        <div class="stat-card__change">+2.1% improvement</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__label">Pending Review</div>
+                        <div class="stat-card__value">48</div>
+                        <div class="stat-card__change negative">+8 since yesterday</div>
+                    </div>
+                </div>
+                
+                <!-- Data Table -->
+                <div class="data-section">
+                    <div class="data-section__header">
+                        <h2 class="data-section__title" id="sectionTitle">Child Nodes</h2>
+                        <button class="btn btn--subtle btn--sm">
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7,10 12,15 17,10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%">Name</th>
+                                <th style="width: 15%">Type</th>
+                                <th style="width: 10%">Children</th>
+                                <th style="width: 15%">Status</th>
+                                <th style="width: 20%">Data Quality</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <!-- Data rows populated by JavaScript -->
+                        </tbody>
+                    </table>
+                    <div class="load-more" id="loadMore">
+                        <button class="load-more__btn" onclick="loadMoreItems()">
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="7,13 12,18 17,13"/>
+                                <polyline points="7,6 12,11 17,6"/>
+                            </svg>
+                            Load more (showing 25 of 245)
+                        </button>
+                    </div>
+                </div>
+                </div><!-- End Children View -->
+                
+                <!-- Details View -->
+                <div class="content-view" id="detailsView">
+                    <!-- Sibling Navigation Bar (Full Width) -->
+                    <div class="sibling-nav-bar" id="siblingNavBar">
+                        <button class="sibling-nav__prev" id="prevSiblingBtn" onclick="navigateToPrevSibling()">
+                            <div class="sibling-nav__arrow">
+                                <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="sibling-nav__text">
+                                <span class="sibling-nav__label">
+                                    Previous
+                                    <span class="sibling-nav__shortcut">←</span>
+                                </span>
+                                <span class="sibling-nav__name" id="prevSiblingName">—</span>
+                            </div>
+                        </button>
+                        <div class="sibling-nav__center">
+                            <span class="sibling-nav__position" id="siblingPosition">1</span>
+                            <span class="sibling-nav__total" id="siblingTotal">of 5</span>
+                        </div>
+                        <button class="sibling-nav__next" id="nextSiblingBtn" onclick="navigateToNextSibling()">
+                            <div class="sibling-nav__arrow">
+                                <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </div>
+                            <div class="sibling-nav__text">
+                                <span class="sibling-nav__label">
+                                    Next
+                                    <span class="sibling-nav__shortcut">→</span>
+                                </span>
+                                <span class="sibling-nav__name" id="nextSiblingName">—</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <!-- Details Action Bar -->
+                    <div class="details-nav">
+                        <button class="btn btn--subtle" onclick="switchContentView('children')">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
+                            </svg>
+                            Back to List
+                        </button>
+                        
+                        <div style="display: flex; gap: var(--space-100);">
+                            <button class="btn btn--secondary" onclick="editAttributes()">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                Edit
+                            </button>
+                            <button class="btn btn--primary" onclick="saveDetails()">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                    <polyline points="17,21 17,13 7,13 7,21"/>
+                                    <polyline points="7,3 7,8 15,8"/>
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="details-view">
+                        <!-- Quick Stats Card -->
+                        <div class="details-card details-card--full">
+                            <div class="details-card__header">
+                                <h3 class="details-card__title">
+                                    <svg class="details-card__title-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                        <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                                    </svg>
+                                    Overview
+                                </h3>
+                            </div>
+                            <div class="details-card__content">
+                                <div class="quick-stats" id="detailsQuickStats">
+                                    <div class="quick-stat">
+                                        <div class="quick-stat__value" id="detailChildCount">5</div>
+                                        <div class="quick-stat__label">Direct Children</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="quick-stat__value" id="detailTotalCount">1,247</div>
+                                        <div class="quick-stat__label">Total Descendants</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="quick-stat__value" id="detailQuality">94%</div>
+                                        <div class="quick-stat__label">Data Quality</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="quick-stat__value" id="detailLevel">1</div>
+                                        <div class="quick-stat__label">Hierarchy Level</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Core Attributes Card -->
+                        <div class="details-card">
+                            <div class="details-card__header">
+                                <h3 class="details-card__title">
+                                    <svg class="details-card__title-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                        <path d="M3 9h18"/>
+                                        <path d="M9 21V9"/>
+                                    </svg>
+                                    Core Attributes
+                                </h3>
+                                <div class="details-card__actions">
+                                    <button class="btn btn--subtle btn--sm" onclick="editAttributes()">
+                                        <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="details-card__content">
+                                <div class="attribute-grid" id="detailsCoreAttributes">
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">ID</label>
+                                        <div class="attribute-field__value" id="detailId">ROOT</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Code</label>
+                                        <div class="attribute-field__value attribute-field__value--editable" contenteditable="true" id="detailCode">-</div>
+                                    </div>
+                                    <div class="attribute-field attribute-field--full">
+                                        <label class="attribute-field__label">Name</label>
+                                        <div class="attribute-field__value attribute-field__value--editable" contenteditable="true" id="detailName">All Products</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Type</label>
+                                        <div class="attribute-field__value" id="detailType">Root</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Status</label>
+                                        <div class="attribute-field__value">
+                                            <span class="status-indicator" id="detailStatus">
+                                                <span class="status-indicator__dot status-indicator__dot--active"></span>
+                                                Active
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Classification Card -->
+                        <div class="details-card">
+                            <div class="details-card__header">
+                                <h3 class="details-card__title">
+                                    <svg class="details-card__title-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+                                    </svg>
+                                    Classification
+                                </h3>
+                            </div>
+                            <div class="details-card__content">
+                                <div class="attribute-grid">
+                                    <div class="attribute-field attribute-field--full">
+                                        <label class="attribute-field__label">Hierarchy Path</label>
+                                        <div class="attribute-field__value" id="detailPath" style="font-family: monospace; font-size: var(--font-size-sm);">/All Products</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Parent Node</label>
+                                        <div class="attribute-field__value" id="detailParent">-</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Hierarchy Level</label>
+                                        <div class="attribute-field__value" id="detailLevelField">0 (Root)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Relationships Card -->
+                        <div class="details-card">
+                            <div class="details-card__header">
+                                <h3 class="details-card__title">
+                                    <svg class="details-card__title-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="8.5" cy="7" r="4"/>
+                                        <line x1="20" y1="8" x2="20" y2="14"/>
+                                        <line x1="23" y1="11" x2="17" y2="11"/>
+                                    </svg>
+                                    Related Nodes
+                                </h3>
+                                <div class="details-card__actions">
+                                    <button class="btn btn--subtle btn--sm">View All</button>
+                                </div>
+                            </div>
+                            <div class="details-card__content">
+                                <div class="relationship-list" id="detailsRelationships">
+                                    <div class="relationship-item" onclick="navigateToNode('electronics')">
+                                        <div class="relationship-item__icon">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="relationship-item__text">
+                                            <div class="relationship-item__name">Electronics</div>
+                                            <div class="relationship-item__type">Child Category</div>
+                                        </div>
+                                        <span class="relationship-item__arrow">
+                                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M9 18l6-6-6-6"/>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <div class="relationship-item" onclick="navigateToNode('apparel')">
+                                        <div class="relationship-item__icon">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="relationship-item__text">
+                                            <div class="relationship-item__name">Apparel & Clothing</div>
+                                            <div class="relationship-item__type">Child Category</div>
+                                        </div>
+                                        <span class="relationship-item__arrow">
+                                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M9 18l6-6-6-6"/>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Metadata Card -->
+                        <div class="details-card details-card--full">
+                            <div class="details-card__header">
+                                <h3 class="details-card__title">
+                                    <svg class="details-card__title-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12,6 12,12 16,14"/>
+                                    </svg>
+                                    Audit Information
+                                </h3>
+                            </div>
+                            <div class="details-card__content">
+                                <div class="attribute-grid">
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Created Date</label>
+                                        <div class="attribute-field__value">January 15, 2025</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Created By</label>
+                                        <div class="attribute-field__value">System</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Last Modified</label>
+                                        <div class="attribute-field__value">February 8, 2026</div>
+                                    </div>
+                                    <div class="attribute-field">
+                                        <label class="attribute-field__label">Modified By</label>
+                                        <div class="attribute-field__value">John Doe</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Details View -->
+            </div>
+        </main>
+        
+        <!-- ====== RIGHT PANEL ====== -->
+        <aside class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title" id="panelTitle">Node Details</h2>
+                <button class="panel__close" onclick="closePanel()" title="Close panel">
+                    <svg class="icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="panel__tabs">
+                <button class="panel__tab active" onclick="switchPanelTab('attributes')">Attributes</button>
+                <button class="panel__tab" onclick="switchPanelTab('relationships')">Relationships</button>
+                <button class="panel__tab" onclick="switchPanelTab('history')">History</button>
+            </div>
+            <div class="panel__content" id="panelContent">
+                <!-- Attributes Tab Content -->
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Identification</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">ID</span>
+                        <span class="attribute-row__value">PRD-001234</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Name</span>
+                        <span class="attribute-row__value attribute-row__value--editable" contenteditable="true">Electronics</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Code</span>
+                        <span class="attribute-row__value attribute-row__value--editable" contenteditable="true">ELEC</span>
+                    </div>
+                </div>
+                
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Classification</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Type</span>
+                        <span class="attribute-row__value">Category</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Level</span>
+                        <span class="attribute-row__value">1</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Path</span>
+                        <span class="attribute-row__value" style="font-size: var(--font-size-sm);">/Electronics</span>
+                    </div>
+                </div>
+                
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Metadata</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Created</span>
+                        <span class="attribute-row__value">Jan 15, 2025</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Modified</span>
+                        <span class="attribute-row__value">Feb 8, 2026</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Modified By</span>
+                        <span class="attribute-row__value">John Doe</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel__footer">
+                <button class="btn btn--secondary" style="flex: 1;">Cancel</button>
+                <button class="btn btn--primary" style="flex: 1;">Save Changes</button>
+            </div>
+        </aside>
+        
+        <!-- Panel Toggle FAB -->
+        <button class="panel-toggle-fab" onclick="togglePanel()" title="Show details panel">
+            <svg class="icon--xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M15 3v18"/>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script>
+        // ========================================
+        // DATA STRUCTURE - Simulated MDM Hierarchy
+        // ========================================
+        const hierarchyData = {
+            id: 'root',
+            name: 'All Products',
+            type: 'root',
+            children: [
+                {
+                    id: 'electronics',
+                    name: 'Electronics',
+                    code: 'ELEC',
+                    type: 'category',
+                    status: 'active',
+                    quality: 96,
+                    childCount: 4,
+                    children: [
+                        {
+                            id: 'computers',
+                            name: 'Computers & Laptops',
+                            code: 'COMP',
+                            type: 'category',
+                            status: 'active',
+                            quality: 94,
+                            childCount: 156,
+                            children: [] // Would be lazy loaded
+                        },
+                        {
+                            id: 'smartphones',
+                            name: 'Smartphones & Tablets',
+                            code: 'SMRT',
+                            type: 'category',
+                            status: 'active',
+                            quality: 98,
+                            childCount: 234,
+                            children: []
+                        },
+                        {
+                            id: 'audio',
+                            name: 'Audio & Headphones',
+                            code: 'AUDI',
+                            type: 'category',
+                            status: 'active',
+                            quality: 89,
+                            childCount: 87,
+                            children: []
+                        },
+                        {
+                            id: 'accessories',
+                            name: 'Accessories',
+                            code: 'ACCS',
+                            type: 'category',
+                            status: 'draft',
+                            quality: 72,
+                            childCount: 312,
+                            children: []
+                        }
+                    ]
+                },
+                {
+                    id: 'apparel',
+                    name: 'Apparel & Clothing',
+                    code: 'APRL',
+                    type: 'category',
+                    status: 'active',
+                    quality: 91,
+                    childCount: 8,
+                    children: [
+                        {
+                            id: 'mens',
+                            name: "Men's Clothing",
+                            code: 'MENS',
+                            type: 'category',
+                            status: 'active',
+                            quality: 93,
+                            childCount: 445,
+                            children: []
+                        },
+                        {
+                            id: 'womens',
+                            name: "Women's Clothing",
+                            code: 'WMNS',
+                            type: 'category',
+                            status: 'active',
+                            quality: 95,
+                            childCount: 523,
+                            children: []
+                        },
+                        {
+                            id: 'kids',
+                            name: "Kids' Clothing",
+                            code: 'KIDS',
+                            type: 'category',
+                            status: 'review',
+                            quality: 78,
+                            childCount: 234,
+                            children: []
+                        }
+                    ]
+                },
+                {
+                    id: 'home',
+                    name: 'Home & Garden',
+                    code: 'HOME',
+                    type: 'category',
+                    status: 'active',
+                    quality: 88,
+                    childCount: 6,
+                    children: [
+                        {
+                            id: 'furniture',
+                            name: 'Furniture',
+                            code: 'FURN',
+                            type: 'category',
+                            status: 'active',
+                            quality: 92,
+                            childCount: 178,
+                            children: []
+                        },
+                        {
+                            id: 'kitchen',
+                            name: 'Kitchen & Dining',
+                            code: 'KTCH',
+                            type: 'category',
+                            status: 'active',
+                            quality: 85,
+                            childCount: 256,
+                            children: []
+                        }
+                    ]
+                },
+                {
+                    id: 'sports',
+                    name: 'Sports & Outdoors',
+                    code: 'SPRT',
+                    type: 'category',
+                    status: 'active',
+                    quality: 90,
+                    childCount: 5,
+                    children: []
+                },
+                {
+                    id: 'automotive',
+                    name: 'Automotive',
+                    code: 'AUTO',
+                    type: 'category',
+                    status: 'draft',
+                    quality: 65,
+                    childCount: 0,
+                    children: []
+                }
+            ]
+        };
+        
+        // Current state
+        let currentNode = hierarchyData;
+        let navigationPath = [hierarchyData];
+        let expandedNodes = new Set(['root']);
+        let selectedNodeId = 'root';
+        let currentContentView = 'children'; // 'children' or 'details'
+        
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTree();
+            renderMainContent();
+            setupResponsiveHandlers();
+        });
+        
+        // ========================================
+        // TREE NAVIGATION
+        // ========================================
+        function renderTree() {
+            const treeContainer = document.getElementById('hierarchyTree');
+            treeContainer.innerHTML = renderTreeNode(hierarchyData, 0);
+        }
+        
+        function renderTreeNode(node, level) {
+            const hasChildren = node.children && node.children.length > 0;
+            const isExpanded = expandedNodes.has(node.id);
+            const isSelected = selectedNodeId === node.id;
+            
+            const iconType = node.type === 'root' ? 'folder' : 
+                            node.type === 'category' ? 'category' : 'product';
+            
+            let html = `
+                <li class="tree-item" data-id="${node.id}">
+                    <div class="tree-item__row ${isSelected ? 'selected' : ''}" 
+                         onclick="selectNode('${node.id}')"
+                         ondblclick="navigateToNode('${node.id}')">
+                        <button class="tree-item__expand ${hasChildren ? (isExpanded ? 'expanded' : '') : 'hidden'}"
+                                onclick="event.stopPropagation(); toggleTreeNode('${node.id}')">
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                        <span class="tree-item__icon ${iconType}">
+                            ${getNodeIcon(node.type)}
+                        </span>
+                        <span class="tree-item__label">${node.name}</span>
+                        ${node.childCount > 0 ? `<span class="tree-item__count">${node.childCount}</span>` : ''}
+                    </div>
+            `;
+            
+            if (hasChildren) {
+                html += `<ul class="tree-item__children ${isExpanded ? 'expanded' : ''}">`;
+                for (const child of node.children) {
+                    html += renderTreeNode(child, level + 1);
+                }
+                html += '</ul>';
+            }
+            
+            html += '</li>';
+            return html;
+        }
+        
+        function getNodeIcon(type) {
+            switch (type) {
+                case 'root':
+                    return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>`;
+                case 'category':
+                    return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>`;
+                default:
+                    return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/>
+                    </svg>`;
+            }
+        }
+        
+        function toggleTreeNode(nodeId) {
+            if (expandedNodes.has(nodeId)) {
+                expandedNodes.delete(nodeId);
+            } else {
+                expandedNodes.add(nodeId);
+                // Simulate lazy loading
+                simulateLazyLoad(nodeId);
+            }
+            renderTree();
+        }
+        
+        function simulateLazyLoad(nodeId) {
+            // In a real app, this would fetch children from an API
+            const node = findNodeById(hierarchyData, nodeId);
+            if (node && node.childCount > 0 && node.children.length === 0) {
+                // Show loading state briefly
+                showToast(`Loading children of ${node.name}...`);
+            }
+        }
+        
+        function selectNode(nodeId) {
+            selectedNodeId = nodeId;
+            const node = findNodeById(hierarchyData, nodeId);
+            if (node) {
+                updatePanelContent(node);
+            }
+            renderTree();
+        }
+        
+        function navigateToNode(nodeId) {
+            const node = findNodeById(hierarchyData, nodeId);
+            if (node) {
+                currentNode = node;
+                selectedNodeId = nodeId;
+                
+                // Build navigation path
+                navigationPath = buildPathToNode(hierarchyData, nodeId);
+                
+                // Auto-expand parent nodes
+                navigationPath.forEach(n => expandedNodes.add(n.id));
+                
+                renderTree();
+                renderMainContent();
+                updatePanelContent(node);
+                showToast(`Navigated to ${node.name}`);
+            }
+        }
+        
+        function findNodeById(root, id) {
+            if (root.id === id) return root;
+            if (root.children) {
+                for (const child of root.children) {
+                    const found = findNodeById(child, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+        
+        function buildPathToNode(root, targetId, path = []) {
+            path.push(root);
+            if (root.id === targetId) return path;
+            if (root.children) {
+                for (const child of root.children) {
+                    const result = buildPathToNode(child, targetId, [...path]);
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+        
+        // ========================================
+        // MAIN CONTENT RENDERING
+        // ========================================
+        function renderMainContent() {
+            // Update breadcrumb
+            const breadcrumb = document.getElementById('breadcrumb');
+            breadcrumb.innerHTML = navigationPath.map((node, index) => {
+                const isLast = index === navigationPath.length - 1;
+                return `
+                    <span class="breadcrumb__item ${isLast ? 'current' : ''}" 
+                          ${!isLast ? `onclick="navigateToNode('${node.id}')"` : ''}>
+                        ${node.name}
+                    </span>
+                    ${!isLast ? '<span class="breadcrumb__separator">/</span>' : ''}
+                `;
+            }).join('');
+            
+            // Update title
+            document.getElementById('mainTitle').innerHTML = `
+                <span class="main__title-icon">
+                    ${getNodeIcon(currentNode.type)}
+                </span>
+                ${currentNode.name}
+            `;
+            
+            // Update subtitle
+            const childCount = currentNode.children ? currentNode.children.length : 0;
+            document.getElementById('mainSubtitle').textContent = 
+                currentNode.type === 'root' 
+                    ? 'Manage your product master data hierarchy'
+                    : `${childCount} direct children • ${currentNode.childCount || 0} total items`;
+            
+            // Update section title
+            document.getElementById('sectionTitle').textContent = 
+                currentNode.type === 'root' ? 'Top-Level Categories' : 'Child Nodes';
+            
+            // Update item count
+            document.getElementById('itemCount').textContent = `${childCount} items`;
+            
+            // Update children count in tab
+            document.getElementById('childrenCount').textContent = childCount;
+            
+            // Render data table
+            renderDataTable();
+            
+            // Update details view if it's active
+            if (currentContentView === 'details') {
+                updateDetailsView();
+            }
+        }
+        
+        function renderDataTable() {
+            const tbody = document.getElementById('dataTableBody');
+            const children = currentNode.children || [];
+            
+            if (children.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state__icon">
+                                    <svg class="icon--xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="empty-state__title">No child nodes</h3>
+                                <p class="empty-state__description">
+                                    This node doesn't have any children yet. Create a new category or product to get started.
+                                </p>
+                                <button class="btn btn--primary" onclick="createNewNode()">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 5v14M5 12h14"/>
+                                    </svg>
+                                    Add Child
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('loadMore').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('loadMore').style.display = 'flex';
+            
+            tbody.innerHTML = children.map(child => `
+                <tr class="data-table__row--clickable" onclick="navigateToNode('${child.id}')">
+                    <td>
+                        <div class="data-table__name">
+                            <div class="data-table__name-icon">
+                                ${getNodeIcon(child.type)}
+                            </div>
+                            <div class="data-table__name-text">
+                                <span class="data-table__name-primary">${child.name}</span>
+                                <span class="data-table__name-secondary">${child.code || child.id}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${child.type.charAt(0).toUpperCase() + child.type.slice(1)}</td>
+                    <td>${child.childCount || 0}</td>
+                    <td>
+                        <span class="status-badge status-badge--${child.status || 'draft'}">
+                            ${(child.status || 'draft').charAt(0).toUpperCase() + (child.status || 'draft').slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="quality-indicator">
+                            <div class="quality-bar">
+                                <div class="quality-bar__fill ${getQualityClass(child.quality || 0)}" 
+                                     style="width: ${child.quality || 0}%"></div>
+                            </div>
+                            <span class="quality-value">${child.quality || 0}%</span>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function getQualityClass(quality) {
+            if (quality >= 80) return 'high';
+            if (quality >= 50) return 'medium';
+            return 'low';
+        }
+        
+        // ========================================
+        // CONTENT VIEW SWITCHING
+        // ========================================
+        function switchContentView(view) {
+            currentContentView = view;
+            
+            // Update tab states
+            document.querySelectorAll('.content-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.view === view) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update view visibility
+            document.querySelectorAll('.content-view').forEach(v => {
+                v.classList.remove('active');
+            });
+            
+            if (view === 'children') {
+                document.getElementById('childrenView').classList.add('active');
+            } else if (view === 'details') {
+                document.getElementById('detailsView').classList.add('active');
+                updateDetailsView();
+            }
+        }
+        
+        function updateDetailsView() {
+            const node = currentNode;
+            const childCount = node.children ? node.children.length : 0;
+            
+            // Update sibling navigation
+            updateSiblingNav();
+            
+            // Update children count badge in tab
+            document.getElementById('childrenCount').textContent = childCount;
+            
+            // Update quick stats
+            document.getElementById('detailChildCount').textContent = childCount;
+            document.getElementById('detailTotalCount').textContent = (node.childCount || childCount).toLocaleString();
+            document.getElementById('detailQuality').textContent = (node.quality || 0) + '%';
+            document.getElementById('detailLevel').textContent = navigationPath.length - 1;
+            
+            // Update core attributes
+            document.getElementById('detailId').textContent = node.id.toUpperCase();
+            document.getElementById('detailCode').textContent = node.code || '-';
+            document.getElementById('detailName').textContent = node.name;
+            document.getElementById('detailType').textContent = node.type.charAt(0).toUpperCase() + node.type.slice(1);
+            
+            // Update status
+            const status = node.status || 'active';
+            document.getElementById('detailStatus').innerHTML = `
+                <span class="status-indicator__dot status-indicator__dot--${status}"></span>
+                ${status.charAt(0).toUpperCase() + status.slice(1)}
+            `;
+            
+            // Update classification
+            document.getElementById('detailPath').textContent = '/' + navigationPath.map(n => n.name).join('/');
+            
+            const parentNode = navigationPath.length > 1 ? navigationPath[navigationPath.length - 2] : null;
+            document.getElementById('detailParent').textContent = parentNode ? parentNode.name : '-';
+            
+            const level = navigationPath.length - 1;
+            document.getElementById('detailLevelField').textContent = level === 0 ? '0 (Root)' : level;
+            
+            // Update relationships (show first few children)
+            const relationshipsContainer = document.getElementById('detailsRelationships');
+            const children = node.children || [];
+            
+            if (children.length === 0) {
+                relationshipsContainer.innerHTML = `
+                    <div style="text-align: center; padding: var(--space-300); color: var(--color-text-subtle);">
+                        No child nodes
+                    </div>
+                `;
+            } else {
+                const displayChildren = children.slice(0, 5);
+                relationshipsContainer.innerHTML = displayChildren.map(child => `
+                    <div class="relationship-item" onclick="navigateToNode('${child.id}')">
+                        <div class="relationship-item__icon">
+                            ${getNodeIcon(child.type)}
+                        </div>
+                        <div class="relationship-item__text">
+                            <div class="relationship-item__name">${child.name}</div>
+                            <div class="relationship-item__type">Child ${child.type.charAt(0).toUpperCase() + child.type.slice(1)}</div>
+                        </div>
+                        <span class="relationship-item__arrow">
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </span>
+                    </div>
+                `).join('');
+                
+                if (children.length > 5) {
+                    relationshipsContainer.innerHTML += `
+                        <div class="relationship-item" onclick="switchContentView('children')" style="justify-content: center; color: var(--color-brand);">
+                            <span>View all ${children.length} children</span>
+                            <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        function editAttributes() {
+            showToast('Edit mode enabled - click on editable fields to modify');
+        }
+        
+        function saveDetails() {
+            showToast('Changes saved successfully');
+        }
+        
+        // ========================================
+        // SIBLING NAVIGATION
+        // ========================================
+        function getSiblings() {
+            // Get the parent node to find siblings
+            if (navigationPath.length < 2) {
+                // Current node is root, no siblings
+                return { siblings: [], currentIndex: -1 };
+            }
+            
+            const parentNode = navigationPath[navigationPath.length - 2];
+            const siblings = parentNode.children || [];
+            const currentIndex = siblings.findIndex(s => s.id === currentNode.id);
+            
+            return { siblings, currentIndex };
+        }
+        
+        function updateSiblingNav() {
+            const { siblings, currentIndex } = getSiblings();
+            const siblingNavBar = document.getElementById('siblingNavBar');
+            const prevBtn = document.getElementById('prevSiblingBtn');
+            const nextBtn = document.getElementById('nextSiblingBtn');
+            const prevName = document.getElementById('prevSiblingName');
+            const nextName = document.getElementById('nextSiblingName');
+            const position = document.getElementById('siblingPosition');
+            const total = document.getElementById('siblingTotal');
+            
+            if (siblings.length <= 1 || currentIndex === -1) {
+                // No siblings or root node - hide sibling nav bar
+                siblingNavBar.classList.add('hidden');
+                return;
+            }
+            
+            siblingNavBar.classList.remove('hidden');
+            
+            // Update position indicator
+            position.textContent = currentIndex + 1;
+            total.textContent = `of ${siblings.length}`;
+            
+            // Update previous button
+            if (currentIndex > 0) {
+                prevBtn.disabled = false;
+                prevName.textContent = siblings[currentIndex - 1].name;
+            } else {
+                prevBtn.disabled = true;
+                prevName.textContent = 'No previous';
+            }
+            
+            // Update next button
+            if (currentIndex < siblings.length - 1) {
+                nextBtn.disabled = false;
+                nextName.textContent = siblings[currentIndex + 1].name;
+            } else {
+                nextBtn.disabled = true;
+                nextName.textContent = 'No next';
+            }
+        }
+        
+        function navigateToPrevSibling() {
+            const { siblings, currentIndex } = getSiblings();
+            
+            if (currentIndex > 0) {
+                const prevSibling = siblings[currentIndex - 1];
+                navigateToSibling(prevSibling.id);
+            }
+        }
+        
+        function navigateToNextSibling() {
+            const { siblings, currentIndex } = getSiblings();
+            
+            if (currentIndex < siblings.length - 1) {
+                const nextSibling = siblings[currentIndex + 1];
+                navigateToSibling(nextSibling.id);
+            }
+        }
+        
+        function navigateToSibling(nodeId) {
+            const node = findNodeById(hierarchyData, nodeId);
+            if (node) {
+                currentNode = node;
+                selectedNodeId = nodeId;
+                
+                // Update navigation path (replace last item with sibling)
+                navigationPath[navigationPath.length - 1] = node;
+                
+                renderTree();
+                
+                // Update main content but stay in details view
+                renderMainContentHeader();
+                updateDetailsView();
+                updateSiblingNav();
+                
+                showToast(`Viewing ${node.name}`);
+            }
+        }
+        
+        function renderMainContentHeader() {
+            // Update breadcrumb
+            const breadcrumb = document.getElementById('breadcrumb');
+            breadcrumb.innerHTML = navigationPath.map((node, index) => {
+                const isLast = index === navigationPath.length - 1;
+                return `
+                    <span class="breadcrumb__item ${isLast ? 'current' : ''}" 
+                          ${!isLast ? `onclick="navigateToNode('${node.id}')"` : ''}>
+                        ${node.name}
+                    </span>
+                    ${!isLast ? '<span class="breadcrumb__separator">/</span>' : ''}
+                `;
+            }).join('');
+            
+            // Update title
+            document.getElementById('mainTitle').innerHTML = `
+                <span class="main__title-icon">
+                    ${getNodeIcon(currentNode.type)}
+                </span>
+                ${currentNode.name}
+            `;
+            
+            // Update subtitle
+            const childCount = currentNode.children ? currentNode.children.length : 0;
+            document.getElementById('mainSubtitle').textContent = 
+                currentNode.type === 'root' 
+                    ? 'Manage your product master data hierarchy'
+                    : `${childCount} direct children • ${currentNode.childCount || 0} total items`;
+            
+            // Update children count in tab
+            document.getElementById('childrenCount').textContent = childCount;
+        }
+        
+        // ========================================
+        // PANEL FUNCTIONS
+        // ========================================
+        function togglePanel() {
+            const layout = document.getElementById('layout');
+            layout.classList.toggle('panel-collapsed');
+        }
+        
+        function closePanel() {
+            const layout = document.getElementById('layout');
+            layout.classList.add('panel-collapsed');
+        }
+        
+        function updatePanelContent(node) {
+            document.getElementById('panelTitle').textContent = node.name;
+            
+            const content = document.getElementById('panelContent');
+            content.innerHTML = `
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Identification</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">ID</span>
+                        <span class="attribute-row__value">${node.id.toUpperCase()}</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Name</span>
+                        <span class="attribute-row__value attribute-row__value--editable" contenteditable="true">${node.name}</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Code</span>
+                        <span class="attribute-row__value attribute-row__value--editable" contenteditable="true">${node.code || '-'}</span>
+                    </div>
+                </div>
+                
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Classification</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Type</span>
+                        <span class="attribute-row__value">${node.type.charAt(0).toUpperCase() + node.type.slice(1)}</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Level</span>
+                        <span class="attribute-row__value">${navigationPath.length}</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Path</span>
+                        <span class="attribute-row__value" style="font-size: var(--font-size-sm);">/${navigationPath.map(n => n.name).join('/')}</span>
+                    </div>
+                </div>
+                
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Statistics</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Direct Children</span>
+                        <span class="attribute-row__value">${node.children ? node.children.length : 0}</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Total Descendants</span>
+                        <span class="attribute-row__value">${node.childCount || 0}</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Data Quality</span>
+                        <div class="quality-indicator" style="margin-top: var(--space-050);">
+                            <div class="quality-bar" style="width: 100px;">
+                                <div class="quality-bar__fill ${getQualityClass(node.quality || 0)}" 
+                                     style="width: ${node.quality || 0}%"></div>
+                            </div>
+                            <span class="quality-value">${node.quality || 0}%</span>
+                        </div>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Status</span>
+                        <span class="status-badge status-badge--${node.status || 'draft'}">
+                            ${(node.status || 'draft').charAt(0).toUpperCase() + (node.status || 'draft').slice(1)}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="attributes-group">
+                    <div class="attributes-group__title">Metadata</div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Created</span>
+                        <span class="attribute-row__value">Jan 15, 2025</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Last Modified</span>
+                        <span class="attribute-row__value">Feb 8, 2026</span>
+                    </div>
+                    <div class="attribute-row">
+                        <span class="attribute-row__label">Modified By</span>
+                        <span class="attribute-row__value">John Doe</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function switchPanelTab(tabName) {
+            // Update tab states
+            document.querySelectorAll('.panel__tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase() === tabName) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // In a real app, this would switch the panel content
+            showToast(`Switched to ${tabName} tab`);
+        }
+        
+        // ========================================
+        // SIDE NAV FUNCTIONS
+        // ========================================
+        function toggleSideNav() {
+            const layout = document.getElementById('layout');
+            layout.classList.toggle('side-nav-open');
+        }
+        
+        function closeSideNav() {
+            const layout = document.getElementById('layout');
+            layout.classList.remove('side-nav-open');
+        }
+        
+        function toggleSideNavCollapse() {
+            const layout = document.getElementById('layout');
+            layout.classList.toggle('side-nav-collapsed');
+            
+            // Update toggle icon direction
+            const toggle = document.querySelector('.side-nav__toggle svg');
+            if (layout.classList.contains('side-nav-collapsed')) {
+                toggle.innerHTML = '<path d="M9 18l6-6-6-6"/>';
+            } else {
+                toggle.innerHTML = '<path d="M15 18l-6-6 6-6"/>';
+            }
+        }
+        
+        // ========================================
+        // APP SWITCHER
+        // ========================================
+        function toggleAppSwitcher() {
+            const menu = document.getElementById('appSwitcherMenu');
+            menu.classList.toggle('open');
+        }
+        
+        function switchProduct(product) {
+            // Close app switcher
+            document.getElementById('appSwitcherMenu').classList.remove('open');
+            
+            // Update active state
+            document.querySelectorAll('.app-switcher__item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            showToast(`Switching to ${product}...`);
+        }
+        
+        // Close app switcher when clicking outside
+        document.addEventListener('click', (e) => {
+            const appSwitcher = document.querySelector('.app-switcher');
+            if (!appSwitcher.contains(e.target)) {
+                document.getElementById('appSwitcherMenu').classList.remove('open');
+            }
+        });
+        
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
+        function navigateToRoot() {
+            currentNode = hierarchyData;
+            selectedNodeId = 'root';
+            navigationPath = [hierarchyData];
+            renderTree();
+            renderMainContent();
+        }
+        
+        function navigateTo(nodeId) {
+            navigateToNode(nodeId);
+        }
+        
+        function createNewNode() {
+            showToast('Create new node dialog would open here');
+        }
+        
+        function filterItems() {
+            const filter = document.getElementById('filterInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+        
+        function loadMoreItems() {
+            showToast('Loading more items...');
+            // In a real app, this would fetch more data from the API
+        }
+        
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+                ${message}
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // ========================================
+        // RESPONSIVE HANDLERS
+        // ========================================
+        function setupResponsiveHandlers() {
+            // Show/hide mobile menu toggle
+            const checkWidth = () => {
+                const mobileToggle = document.querySelector('.side-nav-mobile-toggle');
+                if (window.innerWidth <= 768) {
+                    mobileToggle.style.display = 'flex';
+                } else {
+                    mobileToggle.style.display = 'none';
+                    closeSideNav();
+                }
+            };
+            
+            window.addEventListener('resize', checkWidth);
+            checkWidth();
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl + K for search
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                document.querySelector('.global-search__input').focus();
+            }
+            
+            // Escape to close panel
+            if (e.key === 'Escape') {
+                closePanel();
+                closeSideNav();
+                document.getElementById('appSwitcherMenu').classList.remove('open');
+            }
+            
+            // Arrow keys for sibling navigation (only in details view)
+            if (currentContentView === 'details') {
+                // Don't navigate if user is typing in an input/editable field
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+                    return;
+                }
+                
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    navigateToPrevSibling();
+                }
+                
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    navigateToNextSibling();
+                }
+                
+                // Backspace to go back to list
+                if (e.key === 'Backspace' && !e.target.isContentEditable) {
+                    e.preventDefault();
+                    switchContentView('children');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

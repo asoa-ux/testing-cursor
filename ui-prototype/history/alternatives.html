@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attribute History Popover Alternatives - PIM Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-darkest: #f8fafc;
+      --bg-dark: #ffffff;
+      --bg-medium: #f8fafc;
+      --bg-light: #f1f5f9;
+      --bg-hover: #0097a715;
+      --bg-selected: #0097a720;
+      --border: #d1d5db;
+      --border-light: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #0097a7;
+      --accent-hover: #00838f;
+      --accent-glow: #0097a725;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --purple: #8b5cf6;
+      --diff-add-bg: #dcfce7;
+      --diff-add-text: #166534;
+      --diff-remove-bg: #fee2e2;
+      --diff-remove-text: #991b1b;
+      --transition-fast: 150ms ease;
+      --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      padding: 20px 32px;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* Main Layout */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Pattern Selector */
+    .pattern-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .pattern-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .pattern-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .pattern-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* Pattern Container */
+    .pattern-container {
+      display: none;
+    }
+
+    .pattern-container.active {
+      display: block;
+    }
+
+    /* Pattern Header */
+    .pattern-header {
+      background: white;
+      padding: 20px 24px;
+      border-radius: 12px 12px 0 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pattern-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .pattern-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .pros, .cons {
+      font-size: 13px;
+    }
+
+    .pros h4, .cons h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .pros h4 { color: var(--success); }
+    .cons h4 { color: var(--error); }
+
+    .pros ul, .cons ul {
+      list-style: none;
+      color: var(--text-secondary);
+    }
+
+    .pros li, .cons li {
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .pros li::before {
+      content: '+';
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .cons li::before {
+      content: '−';
+      position: absolute;
+      left: 0;
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    /* Demo Area */
+    .demo-area {
+      background: var(--bg-medium);
+      border-radius: 0 0 12px 12px;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 500px;
+    }
+
+    .demo-label {
+      padding: 12px 24px;
+      background: var(--bg-medium);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ===================== */
+    /* POPOVER BASE STYLES   */
+    /* ===================== */
+    .popover {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-light);
+      width: 420px;
+      max-height: 520px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .popover-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .popover-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .popover-header .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .popover-close {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all var(--transition-fast);
+    }
+
+    .popover-close:hover {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .popover-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .popover-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-light);
+      background: var(--bg-darkest);
+      flex-shrink: 0;
+    }
+
+    .popover-footer a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background var(--transition-fast);
+    }
+
+    .popover-footer a:hover {
+      background: var(--bg-hover);
+    }
+
+    /* ===================== */
+    /* ALT 1: TIMELINE       */
+    /* ===================== */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border-light);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -24px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid var(--accent);
+      z-index: 1;
+    }
+
+    .timeline-dot.unchanged {
+      border-color: var(--border);
+      background: var(--bg-light);
+    }
+
+    .timeline-dot.initial {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    .timeline-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .timeline-version {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .timeline-version.unchanged {
+      color: var(--text-muted);
+      background: var(--bg-light);
+    }
+
+    .timeline-version.initial {
+      color: var(--success);
+      background: #dcfce7;
+    }
+
+    .timeline-date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .timeline-user {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .timeline-value-card {
+      background: var(--bg-darkest);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .timeline-value-card.collapsed {
+      background: transparent;
+      border-style: dashed;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+
+    .timeline-value-card.collapsed:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+      color: var(--text-secondary);
+    }
+
+    .timeline-unchanged-count {
+      font-size: 11px;
+      background: var(--bg-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ===================== */
+    /* ALT 2: DIFF VIEW      */
+    /* ===================== */
+    .diff-card {
+      background: var(--bg-darkest);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .diff-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .diff-card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+    }
+
+    .diff-card-version {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .diff-card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .diff-card-body {
+      padding: 16px;
+    }
+
+    .diff-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+
+    .diff-add {
+      background: var(--diff-add-bg);
+      color: var(--diff-add-text);
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-decoration: none;
+    }
+
+    .diff-remove {
+      background: var(--diff-remove-bg);
+      color: var(--diff-remove-text);
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-decoration: line-through;
+    }
+
+    .diff-show-full {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      margin-top: 12px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .diff-show-full:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .diff-unchanged {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-light);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .diff-unchanged svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Toolbar */
+    .diff-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--bg-darkest);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .diff-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .diff-toolbar input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
+    /* ===================== */
+    /* ALT 3: SMART TABLE    */
+    /* ===================== */
+    .smart-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .smart-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-darkest);
+    }
+
+    .smart-table td {
+      padding: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+
+    .smart-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .smart-table .expandable-row {
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .smart-table .expandable-row:hover {
+      background: var(--bg-hover);
+    }
+
+    .smart-table .expand-icon {
+      display: inline-flex;
+      width: 20px;
+      height: 20px;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      margin-right: 4px;
+      transition: transform var(--transition-fast);
+    }
+
+    .smart-table .expandable-row.expanded .expand-icon {
+      transform: rotate(90deg);
+    }
+
+    .smart-table .expanded-content {
+      display: none;
+      background: var(--bg-darkest);
+    }
+
+    .smart-table .expanded-content.show {
+      display: table-row;
+    }
+
+    .smart-table .expanded-content td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .expanded-value {
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .expanded-prev-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .expanded-prev-value {
+      background: var(--bg-light);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .unchanged-row {
+      background: var(--bg-light);
+    }
+
+    .unchanged-row td {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .unchanged-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-style: normal;
+    }
+
+    /* Table toolbar */
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--bg-darkest);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .table-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .table-toolbar select {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      background: white;
+      color: var(--text-secondary);
+    }
+
+    /* ===================== */
+    /* ALT 4: COMPARISON     */
+    /* ===================== */
+    .comparison-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--bg-darkest);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .comparison-selector label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .comparison-selector select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: white;
+      color: var(--text-primary);
+      min-width: 100px;
+    }
+
+    .comparison-vs {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .comparison-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border-light);
+    }
+
+    .comparison-panel {
+      background: white;
+      padding: 16px;
+    }
+
+    .comparison-panel-header {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .comparison-panel-version {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .comparison-panel-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .comparison-panel-body {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+
+    .comparison-panel.left .diff-remove,
+    .comparison-panel.right .diff-add {
+      font-weight: 500;
+    }
+
+    .comparison-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--bg-darkest);
+      border-top: 1px solid var(--border-light);
+    }
+
+    .comparison-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .comparison-nav-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .comparison-nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .comparison-nav-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ===================== */
+    /* ALT 5: ACTIVITY FEED  */
+    /* ===================== */
+    .activity-feed {
+      padding: 0;
+    }
+
+    .activity-item {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .activity-icon.changed {
+      background: #fef3c7;
+      color: var(--warning);
+    }
+
+    .activity-icon.added {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .activity-icon.removed {
+      background: #fee2e2;
+      color: var(--error);
+    }
+
+    .activity-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .activity-header {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .activity-header-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .activity-title strong {
+      font-weight: 600;
+    }
+
+    .activity-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .activity-value {
+      margin-top: 10px;
+      margin-left: 34px;
+      background: var(--bg-darkest);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .activity-prev {
+      margin-top: 8px;
+      margin-left: 34px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .activity-prev span {
+      color: var(--text-secondary);
+    }
+
+    .activity-unchanged {
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .activity-unchanged::before,
+    .activity-unchanged::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+
+    .activity-unchanged-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-light);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .activity-unchanged-text:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+    }
+
+    /* Summary header for activity */
+    .activity-summary {
+      padding: 12px 20px;
+      background: var(--bg-darkest);
+      border-bottom: 1px solid var(--border-light);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .activity-summary strong {
+      color: var(--text-secondary);
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 16px;
+      transition: color var(--transition-fast);
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    .back-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Wide popover for comparison */
+    .popover.wide {
+      width: 580px;
+    }
+
+    /* No padding content */
+    .popover-content.no-padding {
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Attribute History Popover - Alternative Designs</h1>
+    <p>Exploring different approaches to display attribute value history in a PIM context</p>
+  </div>
+
+  <div class="main-container">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      Back to main patterns
+    </a>
+
+    <div class="pattern-nav">
+      <button class="pattern-btn active" data-pattern="timeline">1. Timeline Cards</button>
+      <button class="pattern-btn" data-pattern="diff">2. Diff-First View</button>
+      <button class="pattern-btn" data-pattern="table">3. Smart Table</button>
+      <button class="pattern-btn" data-pattern="comparison">4. Side-by-Side</button>
+      <button class="pattern-btn" data-pattern="activity">5. Activity Feed</button>
+    </div>
+
+    <!-- Pattern 1: Timeline -->
+    <div class="pattern-container active" data-pattern="timeline">
+      <div class="pattern-header">
+        <h2>Alternative 1: Timeline with Collapsible Value Cards</h2>
+        <p>A vertical timeline where each change is a card. Unchanged revision spans are collapsed but visible. Works well for long text fields as content wraps naturally.</p>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros</h4>
+            <ul>
+              <li>Clear visual flow of time</li>
+              <li>Long descriptions wrap naturally</li>
+              <li>Unchanged spans are acknowledged but not cluttering</li>
+              <li>Expandable for details when needed</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons</h4>
+            <ul>
+              <li>Takes more vertical space than a table</li>
+              <li>Comparing non-adjacent versions requires scrolling</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="demo-area">
+        <div class="popover">
+          <div class="popover-header">
+            <div>
+              <h3>Description, Long</h3>
+              <div class="subtitle">3 changes across 8 revisions</div>
+            </div>
+            <button class="popover-close">×</button>
+          </div>
+          <div class="popover-content">
+            <div class="timeline">
+              <!-- CHANGE: v0.8 -->
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-meta">
+                  <span class="timeline-version">v0.8 (current)</span>
+                  <span class="timeline-date">Feb 13, 2025</span>
+                </div>
+                <div class="timeline-user">Peder Madsen</div>
+                <div class="timeline-value-card">
+                  Premium French champagne from the legendary Ruinart house, established in 1729. Features delicate notes of citrus, white flowers, and brioche with a refined, persistent finish.
+                </div>
+              </div>
+
+              <!-- UNCHANGED: v0.3-0.7 (same value as v0.2) -->
+              <div class="timeline-item">
+                <div class="timeline-dot unchanged"></div>
+                <div class="timeline-meta">
+                  <span class="timeline-version unchanged">v0.3 – v0.7</span>
+                  <span class="timeline-unchanged-count">5 revisions unchanged</span>
+                </div>
+                <div class="timeline-value-card collapsed" onclick="this.classList.toggle('expanded'); this.innerHTML = this.classList.contains('expanded') ? 'Same value as v0.2 below' : '<svg width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M9 18l6-6-6-6\'/></svg> Same as v0.2 below';">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                  Same as v0.2 below
+                </div>
+              </div>
+
+              <!-- CHANGE: v0.2 (different from v0.1) -->
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-meta">
+                  <span class="timeline-version">v0.2</span>
+                  <span class="timeline-date">Jan 15, 2025</span>
+                </div>
+                <div class="timeline-user">Maria Garcia</div>
+                <div class="timeline-value-card">
+                  Premium French champagne from the historic Ruinart house, established in 1729. Features subtle notes of citrus and brioche with a refined finish.
+                </div>
+              </div>
+
+              <!-- INITIAL: v0.1 -->
+              <div class="timeline-item">
+                <div class="timeline-dot initial"></div>
+                <div class="timeline-meta">
+                  <span class="timeline-version initial">v0.1</span>
+                  <span class="timeline-date">Jan 2, 2025</span>
+                </div>
+                <div class="timeline-user">System Import</div>
+                <div class="timeline-value-card">
+                  Ruinart Champagne 750ml
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="popover-footer">
+            <a href="#">
+              <span>View full history in Revisions tab</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pattern 2: Diff View -->
+    <div class="pattern-container" data-pattern="diff">
+      <div class="pattern-header">
+        <h2>Alternative 2: Diff-First View</h2>
+        <p>Shows what changed using inline diff highlighting (like Git). For long descriptions where only a few words changed, this is far more useful than showing full before/after values.</p>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros</h4>
+            <ul>
+              <li>Immediately see what changed, not just that it changed</li>
+              <li>Very compact for large text fields</li>
+              <li>Familiar pattern from code review tools</li>
+              <li>Option to show full value when needed</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons</h4>
+            <ul>
+              <li>Diff algorithm can be confusing for major rewrites</li>
+              <li>More complex to implement</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="demo-area">
+        <div class="popover">
+          <div class="popover-header">
+            <div>
+              <h3>Description, Long</h3>
+              <div class="subtitle">3 changes across 8 revisions</div>
+            </div>
+            <button class="popover-close">×</button>
+          </div>
+          <div class="diff-toolbar">
+            <label>
+              <input type="checkbox" checked>
+              Show diff highlighting
+            </label>
+          </div>
+          <div class="popover-content">
+            <!-- CHANGE: v0.8 (diff from v0.7/v0.2) -->
+            <div class="diff-card">
+              <div class="diff-card-header">
+                <span class="diff-card-version">v0.8 (current)</span>
+                <span class="diff-card-meta">Feb 13 • Peder Madsen</span>
+              </div>
+              <div class="diff-card-body">
+                <div class="diff-text">
+                  Premium French champagne from the <span class="diff-remove">historic</span> <span class="diff-add">legendary</span> Ruinart house, established in 1729. Features <span class="diff-remove">subtle</span> <span class="diff-add">delicate</span> notes of citrus<span class="diff-add">, white flowers,</span> and brioche with a refined<span class="diff-add">, persistent</span> finish.
+                </div>
+                <button class="diff-show-full">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Show full value
+                </button>
+              </div>
+            </div>
+
+            <!-- UNCHANGED: v0.3-0.7 (same as v0.2) -->
+            <div class="diff-unchanged">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+              <span><strong>v0.3 – v0.7:</strong> Unchanged (5 revisions, same as v0.2)</span>
+            </div>
+
+            <!-- CHANGE: v0.2 (diff from v0.1) -->
+            <div class="diff-card">
+              <div class="diff-card-header">
+                <span class="diff-card-version">v0.2</span>
+                <span class="diff-card-meta">Jan 15 • Maria Garcia</span>
+              </div>
+              <div class="diff-card-body">
+                <div class="diff-text">
+                  <span class="diff-remove">Ruinart Champagne 750ml</span> <span class="diff-add">Premium French champagne from the historic Ruinart house, established in 1729. Features subtle notes of citrus and brioche with a refined finish.</span>
+                </div>
+                <button class="diff-show-full">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Show full value
+                </button>
+              </div>
+            </div>
+
+            <!-- INITIAL: v0.1 -->
+            <div class="diff-card">
+              <div class="diff-card-header">
+                <span class="diff-card-version">v0.1</span>
+                <span class="diff-card-meta">Jan 2 • System Import</span>
+              </div>
+              <div class="diff-card-body">
+                <div class="diff-text" style="color: var(--text-muted); font-style: italic;">
+                  Initial value: "Ruinart Champagne 750ml"
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="popover-footer">
+            <a href="#">
+              <span>View full history in Revisions tab</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pattern 3: Smart Table -->
+    <div class="pattern-container" data-pattern="table">
+      <div class="pattern-header">
+        <h2>Alternative 3: Expandable Table with Smart Grouping</h2>
+        <p>Keeps the familiar table layout but makes it smarter: rows expand to show full values, and unchanged revision ranges are collapsed into single rows.</p>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros</h4>
+            <ul>
+              <li>Familiar table layout for data-oriented users</li>
+              <li>Expandable rows handle long text</li>
+              <li>Filtering by editor</li>
+              <li>Clear grouping of unchanged revisions</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons</h4>
+            <ul>
+              <li>Expansion pattern may not be obvious</li>
+              <li>Can still feel cramped for very long text</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="demo-area">
+        <div class="popover" style="width: 480px;">
+          <div class="popover-header">
+            <div>
+              <h3>Description, Long</h3>
+              <div class="subtitle">3 changes across 8 revisions</div>
+            </div>
+            <button class="popover-close">×</button>
+          </div>
+          <div class="table-toolbar">
+            <label>
+              <input type="checkbox" checked id="groupUnchanged">
+              Group unchanged revisions
+            </label>
+            <select>
+              <option>All editors</option>
+              <option>Peder Madsen</option>
+              <option>Maria Garcia</option>
+              <option>System Import</option>
+            </select>
+          </div>
+          <div class="popover-content no-padding">
+            <table class="smart-table">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">Rev</th>
+                  <th style="width: 110px;">When</th>
+                  <th style="width: 100px;">By</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- CHANGE: v0.8 -->
+                <tr class="expandable-row" onclick="this.classList.toggle('expanded'); this.nextElementSibling.classList.toggle('show');">
+                  <td><span class="expand-icon">▸</span> 0.8</td>
+                  <td>Feb 13, 13:23</td>
+                  <td>P. Madsen</td>
+                  <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Premium French champagne...</td>
+                </tr>
+                <tr class="expanded-content">
+                  <td colspan="4">
+                    <div class="expanded-value">
+                      Premium French champagne from the legendary Ruinart house, established in 1729. Features delicate notes of citrus, white flowers, and brioche with a refined, persistent finish.
+                    </div>
+                    <div class="expanded-prev-label">Changed from:</div>
+                    <div class="expanded-prev-value">
+                      Premium French champagne from the historic Ruinart house, established in 1729. Features subtle notes of citrus and brioche with a refined finish.
+                    </div>
+                  </td>
+                </tr>
+                <!-- UNCHANGED: v0.3-0.7 (same as v0.2) -->
+                <tr class="unchanged-row">
+                  <td colspan="2">
+                    <span class="unchanged-badge">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M5 12h14"/></svg>
+                      0.3 – 0.7
+                    </span>
+                  </td>
+                  <td>Various</td>
+                  <td style="font-style: normal;">(same as v0.2)</td>
+                </tr>
+                <!-- CHANGE: v0.2 -->
+                <tr class="expandable-row" onclick="this.classList.toggle('expanded'); this.nextElementSibling.classList.toggle('show');">
+                  <td><span class="expand-icon">▸</span> 0.2</td>
+                  <td>Jan 15, 14:30</td>
+                  <td>M. Garcia</td>
+                  <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Premium French champagne...</td>
+                </tr>
+                <tr class="expanded-content">
+                  <td colspan="4">
+                    <div class="expanded-value">
+                      Premium French champagne from the historic Ruinart house, established in 1729. Features subtle notes of citrus and brioche with a refined finish.
+                    </div>
+                    <div class="expanded-prev-label">Changed from:</div>
+                    <div class="expanded-prev-value">
+                      Ruinart Champagne 750ml
+                    </div>
+                  </td>
+                </tr>
+                <!-- INITIAL: v0.1 -->
+                <tr class="expandable-row" onclick="this.classList.toggle('expanded'); this.nextElementSibling.classList.toggle('show');">
+                  <td><span class="expand-icon">▸</span> 0.1</td>
+                  <td>Jan 2, 09:00</td>
+                  <td>System</td>
+                  <td style="color: var(--text-muted); font-style: italic;">Initial value</td>
+                </tr>
+                <tr class="expanded-content">
+                  <td colspan="4">
+                    <div class="expanded-value">
+                      Ruinart Champagne 750ml
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="popover-footer">
+            <a href="#">
+              <span>View full history in Revisions tab</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pattern 4: Side-by-Side Comparison -->
+    <div class="pattern-container" data-pattern="comparison">
+      <div class="pattern-header">
+        <h2>Alternative 4: Two-Panel Comparison View</h2>
+        <p>Side-by-side comparison of any two versions. Users choose which versions to compare using dropdowns. Excellent for long text where you need to see full context.</p>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros</h4>
+            <ul>
+              <li>Excellent for long text comparison</li>
+              <li>User controls what to compare</li>
+              <li>Clear when values are identical</li>
+              <li>Shows full context, not just snippets</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons</h4>
+            <ul>
+              <li>Requires wider popover</li>
+              <li>Less useful for attributes with few changes</li>
+              <li>Doesn't show full timeline at once</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="demo-area">
+        <div class="popover wide">
+          <div class="popover-header">
+            <div>
+              <h3>Description, Long</h3>
+              <div class="subtitle">Compare versions</div>
+            </div>
+            <button class="popover-close">×</button>
+          </div>
+          <div class="comparison-selector">
+            <label>Compare:</label>
+            <select>
+              <option>v0.7</option>
+              <option>v0.6</option>
+              <option>v0.5</option>
+              <option>v0.1</option>
+            </select>
+            <span class="comparison-vs">vs</span>
+            <select>
+              <option>v0.8 (current)</option>
+              <option>v0.7</option>
+              <option>v0.6</option>
+            </select>
+          </div>
+          <div class="popover-content no-padding">
+            <div class="comparison-panels">
+              <div class="comparison-panel left">
+                <div class="comparison-panel-header">
+                  <div class="comparison-panel-version">v0.7</div>
+                  <div class="comparison-panel-meta">Feb 10, 2025 • Maria Garcia</div>
+                </div>
+                <div class="comparison-panel-body">
+                  Premium French champagne from the <span class="diff-remove">historic</span> Ruinart house, established in 1729. Features <span class="diff-remove">subtle</span> notes of citrus and brioche with a refined finish.
+                </div>
+              </div>
+              <div class="comparison-panel right">
+                <div class="comparison-panel-header">
+                  <div class="comparison-panel-version">v0.8 (current)</div>
+                  <div class="comparison-panel-meta">Feb 13, 2025 • Peder Madsen</div>
+                </div>
+                <div class="comparison-panel-body">
+                  Premium French champagne from the <span class="diff-add">legendary</span> Ruinart house, established in 1729. Features <span class="diff-add">delicate</span> notes of citrus<span class="diff-add">, white flowers,</span> and brioche with a refined<span class="diff-add">, persistent</span> finish.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="comparison-nav">
+            <button class="comparison-nav-btn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Previous change
+            </button>
+            <button class="comparison-nav-btn">
+              Next change
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pattern 5: Activity Feed -->
+    <div class="pattern-container" data-pattern="activity">
+      <div class="pattern-header">
+        <h2>Alternative 5: Activity Feed Style</h2>
+        <p>A conversational, activity-feed approach similar to Git commits or Slack updates. More human-readable with natural language descriptions of changes.</p>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros</h4>
+            <ul>
+              <li>Modern, familiar pattern</li>
+              <li>Natural language is easy to scan</li>
+              <li>Visual distinction between change types</li>
+              <li>Feels less "database-y"</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons</h4>
+            <ul>
+              <li>Takes more vertical space</li>
+              <li>Less precise than a table for audit purposes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="demo-area">
+        <div class="popover">
+          <div class="popover-header">
+            <div>
+              <h3>Description, Long</h3>
+            </div>
+            <button class="popover-close">×</button>
+          </div>
+          <div class="activity-summary">
+            <strong>3 changes</strong> across 8 revisions • Last updated Feb 13, 2025
+          </div>
+          <div class="popover-content">
+            <div class="activity-feed">
+              <!-- CHANGE: v0.8 -->
+              <div class="activity-item">
+                <div class="activity-header">
+                  <span class="activity-icon changed">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </span>
+                  <div class="activity-header-content">
+                    <div class="activity-title"><strong>Peder Madsen</strong> updated the value</div>
+                    <div class="activity-meta">Feb 13, 2025 at 13:23 • v0.8</div>
+                  </div>
+                </div>
+                <div class="activity-value">
+                  Premium French champagne from the legendary Ruinart house, established in 1729. Features delicate notes of citrus, white flowers, and brioche with a refined, persistent finish.
+                </div>
+                <div class="activity-prev">
+                  was: <span>"...from the historic Ruinart house..."</span>
+                </div>
+              </div>
+
+              <!-- UNCHANGED: v0.3-0.7 (same as v0.2) -->
+              <div class="activity-unchanged">
+                <span class="activity-unchanged-text">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M5 12h14"/></svg>
+                  v0.3 – v0.7 unchanged (same as v0.2)
+                </span>
+              </div>
+
+              <!-- CHANGE: v0.2 -->
+              <div class="activity-item">
+                <div class="activity-header">
+                  <span class="activity-icon changed">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </span>
+                  <div class="activity-header-content">
+                    <div class="activity-title"><strong>Maria Garcia</strong> rewrote the description</div>
+                    <div class="activity-meta">Jan 15, 2025 at 14:30 • v0.2</div>
+                  </div>
+                </div>
+                <div class="activity-value">
+                  Premium French champagne from the historic Ruinart house, established in 1729. Features subtle notes of citrus and brioche with a refined finish.
+                </div>
+                <div class="activity-prev">
+                  was: <span>"Ruinart Champagne 750ml"</span>
+                </div>
+              </div>
+
+              <!-- INITIAL: v0.1 -->
+              <div class="activity-item">
+                <div class="activity-header">
+                  <span class="activity-icon added">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                  </span>
+                  <div class="activity-header-content">
+                    <div class="activity-title"><strong>System Import</strong> set initial value</div>
+                    <div class="activity-meta">Jan 2, 2025 at 09:00 • v0.1</div>
+                  </div>
+                </div>
+                <div class="activity-value" style="color: var(--text-muted);">
+                  Ruinart Champagne 750ml
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="popover-footer">
+            <a href="#">
+              <span>View full history in Revisions tab</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pattern Navigation
+    document.querySelectorAll('.pattern-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.pattern-container').forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        const pattern = btn.dataset.pattern;
+        document.querySelector(`.pattern-container[data-pattern="${pattern}"]`).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

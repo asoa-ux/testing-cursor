@@ -1,0 +1,3163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIM - Product Information Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --drawer-width: 420px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .search-box {
+            margin-top: 12px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 13px;
+            background: var(--gray-50);
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--gray-400);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 8px;
+        }
+
+        .nav-section-title {
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+        }
+
+        /* Tree Navigation */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+        }
+
+        .tree-item:hover {
+            background: var(--gray-50);
+        }
+
+        .tree-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .tree-item.active .tree-icon {
+            color: var(--primary);
+        }
+
+        .tree-toggle {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            color: var(--gray-400);
+            flex-shrink: 0;
+        }
+
+        .tree-toggle svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.2s;
+        }
+
+        .tree-toggle.expanded svg {
+            transform: rotate(90deg);
+        }
+
+        .tree-toggle.no-children {
+            visibility: hidden;
+        }
+
+        .tree-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            color: var(--gray-500);
+            flex-shrink: 0;
+        }
+
+        .tree-label {
+            flex: 1;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tree-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .badge-completeness {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-completeness.high {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-completeness.medium {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-completeness.low {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-issues {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .tree-children {
+            display: none;
+            padding-left: 24px;
+        }
+
+        .tree-children.expanded {
+            display: block;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .content-header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 24px;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border: 1px solid var(--gray-200);
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .back-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .breadcrumb-item {
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb-item.current {
+            color: var(--gray-800);
+            font-weight: 500;
+            cursor: default;
+        }
+
+        .breadcrumb-separator {
+            color: var(--gray-300);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-icon {
+            padding: 8px;
+        }
+
+        /* Content Body */
+        .content-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .content-split {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Overview Panel */
+        .overview-panel {
+            width: 320px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .overview-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .overview-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .overview-subtitle {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .overview-status {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-draft {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .status-review {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .status-published {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .overview-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .overview-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            margin-bottom: 12px;
+        }
+
+        .overview-field {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .overview-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .field-label {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .field-value {
+            font-size: 13px;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        /* Completeness Meter */
+        .completeness-meter {
+            margin-top: 8px;
+        }
+
+        .meter-bar {
+            height: 6px;
+            background: var(--gray-200);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .meter-fill.high {
+            background: var(--success);
+        }
+
+        .meter-fill.medium {
+            background: var(--warning);
+        }
+
+        .meter-fill.low {
+            background: var(--danger);
+        }
+
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        /* Enrichment Panel */
+        .enrichment-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--gray-50);
+        }
+
+        .tabs-container {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 20px;
+            display: flex;
+            align-items: flex-end;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-500);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--gray-700);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-label.required::after {
+            content: '*';
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-input.error {
+            border-color: var(--danger);
+        }
+
+        .form-input.error:focus {
+            box-shadow: 0 0 0 3px var(--danger-light);
+        }
+
+        .form-error {
+            font-size: 11px;
+            color: var(--danger);
+            margin-top: 4px;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 36px;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Accordion */
+        .accordion {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: white;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .accordion-header:hover {
+            background: var(--gray-50);
+        }
+
+        .accordion-title {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .accordion-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--gray-400);
+            transition: transform 0.2s;
+        }
+
+        .accordion-item.expanded .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 16px;
+            background: var(--gray-50);
+        }
+
+        .accordion-item.expanded .accordion-content {
+            display: block;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-weight: 600;
+            color: var(--gray-600);
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--gray-100);
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover td {
+            background: var(--gray-50);
+        }
+
+        .data-table tr.selected td {
+            background: var(--primary-light);
+        }
+
+        .table-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .table-link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .table-link:hover {
+            text-decoration: underline;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        /* Reference Chips */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--gray-100);
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .chip:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .chip svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Drawer */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: var(--drawer-width);
+            background: white;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .drawer-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .drawer-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--gray-500);
+            transition: all 0.15s;
+        }
+
+        .drawer-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Mini tabs in drawer */
+        .mini-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 20px;
+        }
+
+        .mini-tab {
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-500);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .mini-tab:hover {
+            color: var(--gray-700);
+        }
+
+        .mini-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .mini-tab-content {
+            padding: 16px 20px;
+        }
+
+        /* Asset Preview */
+        .asset-preview {
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .asset-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .asset-preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-400);
+        }
+
+        .asset-preview-placeholder svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        /* Tree Selection */
+        .tree-select {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .tree-select-search {
+            padding: 12px;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            background: white;
+        }
+
+        .tree-select-item {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .tree-select-item:hover {
+            background: var(--gray-50);
+        }
+
+        .tree-select-item.selected {
+            background: var(--primary-light);
+        }
+
+        .tree-select-checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Inline Edit */
+        .inline-edit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inline-edit-value {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .inline-edit-value:hover {
+            background: var(--gray-100);
+        }
+
+        .inline-edit-input {
+            padding: 4px 8px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-500);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            color: var(--gray-300);
+        }
+
+        .empty-state-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .empty-state-text {
+            font-size: 13px;
+        }
+
+        /* Validation Icon */
+        .validation-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .validation-icon.valid {
+            color: var(--success);
+        }
+
+        .validation-icon.warning {
+            color: var(--warning);
+        }
+
+        .validation-icon.error {
+            color: var(--danger);
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
+            z-index: 50;
+            display: none;
+        }
+
+        .dropdown-menu.open {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--gray-50);
+        }
+
+        .dropdown-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--gray-500);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--gray-100);
+            margin: 4px 0;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            background: var(--gray-800);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+
+        /* Filter Toggle */
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+
+        .filter-toggle input {
+            cursor: pointer;
+        }
+
+        /* Column Config */
+        .column-config-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        /* Grid for assets */
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .asset-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .asset-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .asset-card-preview {
+            aspect-ratio: 16/10;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .asset-card-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .asset-card-info {
+            padding: 12px;
+        }
+
+        .asset-card-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .asset-card-meta {
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                    PIM Pro
+                </div>
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" placeholder="Search products, families, assets..." id="globalSearch">
+                </div>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav">
+                <!-- Navigation tree will be rendered here -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <button class="back-btn" id="backBtn" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                        Back
+                    </button>
+                    <nav class="breadcrumbs" id="breadcrumbs">
+                        <!-- Breadcrumbs will be rendered here -->
+                    </nav>
+                </div>
+                <div class="header-actions" id="headerActions">
+                    <!-- Actions will be rendered here -->
+                </div>
+            </header>
+            <div class="content-body" id="contentBody">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gray-500);">
+                    <div style="text-align: center;">
+                        <p>Loading...</p>
+                        <p style="font-size: 12px; margin-top: 8px;">If this persists, check browser console for errors.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Drawer Overlay -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    
+    <!-- Reference Drawer -->
+    <div class="drawer" id="referenceDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="drawerTitle">Item Details</h3>
+            <button class="drawer-close" id="drawerClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="drawer-body" id="drawerBody">
+            <!-- Drawer content will be rendered here -->
+        </div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" id="drawerCloseBtn">Close</button>
+            <button class="btn btn-primary" id="drawerOpenFull">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Open Full Page
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================
+        // MOCK DATA
+        // ============================================
+        const mockData = {
+            families: [
+                {
+                    id: 'fam-001',
+                    name: 'Electronics',
+                    type: 'family',
+                    sku: 'FAM-ELEC-001',
+                    status: 'published',
+                    completeness: 92,
+                    issues: 0,
+                    lastEdited: '2026-01-22T14:30:00',
+                    owner: 'Sarah Chen',
+                    description: 'Consumer electronics including smartphones, tablets, laptops, and accessories.',
+                    attributeSet: 'Electronics Standard',
+                    categories: ['Technology', 'Consumer Goods'],
+                    children: ['prod-001', 'prod-002', 'prod-003', 'prod-004']
+                },
+                {
+                    id: 'fam-002',
+                    name: 'Home & Garden',
+                    type: 'family',
+                    sku: 'FAM-HOME-002',
+                    status: 'review',
+                    completeness: 78,
+                    issues: 3,
+                    lastEdited: '2026-01-21T09:15:00',
+                    owner: 'Michael Torres',
+                    description: 'Home improvement, furniture, garden tools, and outdoor living products.',
+                    attributeSet: 'Home Products',
+                    categories: ['Home', 'Garden', 'Outdoor'],
+                    children: ['prod-005', 'prod-006', 'prod-007', 'prod-008', 'prod-009']
+                },
+                {
+                    id: 'fam-003',
+                    name: 'Sports & Fitness',
+                    type: 'family',
+                    sku: 'FAM-SPRT-003',
+                    status: 'draft',
+                    completeness: 45,
+                    issues: 8,
+                    lastEdited: '2026-01-20T16:45:00',
+                    owner: 'Emma Wilson',
+                    description: 'Athletic equipment, fitness gear, sportswear, and outdoor recreation products.',
+                    attributeSet: 'Sports Equipment',
+                    categories: ['Sports', 'Fitness', 'Recreation'],
+                    children: ['prod-010', 'prod-011', 'prod-012', 'prod-013', 'prod-014', 'prod-015']
+                }
+            ],
+            products: [
+                {
+                    id: 'prod-001',
+                    familyId: 'fam-001',
+                    name: 'ProMax Smartphone X12',
+                    type: 'product',
+                    sku: 'ELEC-SPH-X12',
+                    status: 'published',
+                    completeness: 100,
+                    issues: 0,
+                    lastEdited: '2026-01-22T10:00:00',
+                    owner: 'Sarah Chen',
+                    description: 'Latest flagship smartphone with advanced AI capabilities, 6.7" OLED display, and 5G connectivity.',
+                    price: 999.99,
+                    brand: 'TechPro',
+                    weight: '185g',
+                    dimensions: '160 x 75 x 8mm',
+                    attributes: {
+                        screenSize: '6.7 inches',
+                        storage: '256GB',
+                        ram: '12GB',
+                        battery: '5000mAh',
+                        color: 'Midnight Black'
+                    },
+                    assets: ['asset-001', 'asset-002', 'asset-003'],
+                    relations: [
+                        { type: 'Accessory', targetId: 'prod-002' },
+                        { type: 'Replacement for', targetId: 'prod-004' }
+                    ],
+                    categories: ['Smartphones', 'Android', 'Flagship']
+                },
+                {
+                    id: 'prod-002',
+                    familyId: 'fam-001',
+                    name: 'ProMax Phone Case',
+                    type: 'product',
+                    sku: 'ELEC-ACC-PC01',
+                    status: 'published',
+                    completeness: 95,
+                    issues: 0,
+                    lastEdited: '2026-01-21T14:20:00',
+                    owner: 'Sarah Chen',
+                    description: 'Premium protective case for ProMax Smartphone X12 with shock absorption.',
+                    price: 49.99,
+                    brand: 'TechPro',
+                    weight: '35g',
+                    dimensions: '165 x 80 x 12mm',
+                    attributes: {
+                        material: 'Polycarbonate + TPU',
+                        color: 'Clear',
+                        compatibility: 'ProMax X12'
+                    },
+                    assets: ['asset-004'],
+                    relations: [
+                        { type: 'Accessory for', targetId: 'prod-001' }
+                    ],
+                    categories: ['Phone Accessories', 'Cases']
+                },
+                {
+                    id: 'prod-003',
+                    familyId: 'fam-001',
+                    name: 'UltraBook Pro 15',
+                    type: 'product',
+                    sku: 'ELEC-LAP-UB15',
+                    status: 'review',
+                    completeness: 88,
+                    issues: 2,
+                    lastEdited: '2026-01-20T11:30:00',
+                    owner: 'David Kim',
+                    description: 'Professional-grade laptop with Intel i9 processor, 32GB RAM, and 15.6" 4K display.',
+                    price: 1899.99,
+                    brand: 'TechPro',
+                    weight: '1.8kg',
+                    dimensions: '355 x 235 x 16mm',
+                    attributes: {
+                        processor: 'Intel Core i9-13900H',
+                        storage: '1TB NVMe SSD',
+                        ram: '32GB DDR5',
+                        graphics: 'NVIDIA RTX 4060',
+                        display: '15.6" 4K OLED'
+                    },
+                    assets: ['asset-005', 'asset-006'],
+                    relations: [
+                        { type: 'Bundle', targetId: 'prod-002' }
+                    ],
+                    categories: ['Laptops', 'Professional', 'Workstation']
+                },
+                {
+                    id: 'prod-004',
+                    familyId: 'fam-001',
+                    name: 'ProMax Smartphone X11',
+                    type: 'product',
+                    sku: 'ELEC-SPH-X11',
+                    status: 'published',
+                    completeness: 100,
+                    issues: 0,
+                    lastEdited: '2025-09-15T09:00:00',
+                    owner: 'Sarah Chen',
+                    description: 'Previous generation flagship smartphone with excellent performance.',
+                    price: 699.99,
+                    brand: 'TechPro',
+                    weight: '180g',
+                    dimensions: '158 x 74 x 8mm',
+                    attributes: {
+                        screenSize: '6.5 inches',
+                        storage: '128GB',
+                        ram: '8GB',
+                        battery: '4500mAh',
+                        color: 'Silver'
+                    },
+                    assets: ['asset-007'],
+                    relations: [
+                        { type: 'Replaced by', targetId: 'prod-001' }
+                    ],
+                    categories: ['Smartphones', 'Android']
+                },
+                {
+                    id: 'prod-005',
+                    familyId: 'fam-002',
+                    name: 'ErgoComfort Office Chair',
+                    type: 'product',
+                    sku: 'HOME-FRN-EC01',
+                    status: 'published',
+                    completeness: 90,
+                    issues: 1,
+                    lastEdited: '2026-01-19T15:45:00',
+                    owner: 'Michael Torres',
+                    description: 'Ergonomic office chair with lumbar support, adjustable armrests, and breathable mesh back.',
+                    price: 449.99,
+                    brand: 'ComfortLiving',
+                    weight: '18kg',
+                    dimensions: '68 x 68 x 115cm',
+                    attributes: {
+                        material: 'Mesh + Steel Frame',
+                        maxWeight: '150kg',
+                        warranty: '5 years',
+                        color: 'Black/Gray'
+                    },
+                    assets: ['asset-008', 'asset-009'],
+                    relations: [
+                        { type: 'Accessory', targetId: 'prod-006' }
+                    ],
+                    categories: ['Furniture', 'Office', 'Seating']
+                },
+                {
+                    id: 'prod-006',
+                    familyId: 'fam-002',
+                    name: 'SmartDesk Pro',
+                    type: 'product',
+                    sku: 'HOME-FRN-SD01',
+                    status: 'review',
+                    completeness: 75,
+                    issues: 2,
+                    lastEdited: '2026-01-18T10:20:00',
+                    owner: 'Michael Torres',
+                    description: 'Electric standing desk with memory presets, cable management, and bamboo top.',
+                    price: 699.99,
+                    brand: 'ComfortLiving',
+                    weight: '45kg',
+                    dimensions: '150 x 75 x 120cm',
+                    attributes: {
+                        material: 'Bamboo + Steel',
+                        heightRange: '60-125cm',
+                        loadCapacity: '100kg',
+                        motorType: 'Dual Motor'
+                    },
+                    assets: ['asset-010'],
+                    relations: [
+                        { type: 'Bundle', targetId: 'prod-005' }
+                    ],
+                    categories: ['Furniture', 'Office', 'Desks']
+                },
+                {
+                    id: 'prod-007',
+                    familyId: 'fam-002',
+                    name: 'GardenMaster Tool Set',
+                    type: 'product',
+                    sku: 'HOME-GDN-TL01',
+                    status: 'draft',
+                    completeness: 60,
+                    issues: 4,
+                    lastEdited: '2026-01-17T08:30:00',
+                    owner: 'Lisa Park',
+                    description: 'Complete 12-piece garden tool set with ergonomic handles and storage bag.',
+                    price: 89.99,
+                    brand: 'GardenPro',
+                    weight: '3.5kg',
+                    dimensions: '45 x 30 x 15cm',
+                    attributes: {
+                        pieces: '12',
+                        material: 'Stainless Steel + Wood',
+                        includes: 'Trowel, Rake, Pruner, Weeder, Fork, Cultivator'
+                    },
+                    assets: ['asset-011'],
+                    relations: [],
+                    categories: ['Garden', 'Tools']
+                },
+                {
+                    id: 'prod-008',
+                    familyId: 'fam-002',
+                    name: 'Solar Pathway Lights',
+                    type: 'product',
+                    sku: 'HOME-GDN-SL01',
+                    status: 'published',
+                    completeness: 85,
+                    issues: 0,
+                    lastEdited: '2026-01-16T14:00:00',
+                    owner: 'Lisa Park',
+                    description: 'Set of 8 solar-powered LED pathway lights with automatic dusk-to-dawn operation.',
+                    price: 59.99,
+                    brand: 'GardenPro',
+                    weight: '2kg',
+                    dimensions: '10 x 10 x 40cm each',
+                    attributes: {
+                        quantity: '8',
+                        lightType: 'Warm White LED',
+                        runtime: '8-10 hours',
+                        waterproof: 'IP65'
+                    },
+                    assets: ['asset-012'],
+                    relations: [],
+                    categories: ['Garden', 'Lighting', 'Solar']
+                },
+                {
+                    id: 'prod-009',
+                    familyId: 'fam-002',
+                    name: 'Patio Umbrella Deluxe',
+                    type: 'product',
+                    sku: 'HOME-OUT-PU01',
+                    status: 'draft',
+                    completeness: 55,
+                    issues: 3,
+                    lastEdited: '2026-01-15T11:15:00',
+                    owner: 'Michael Torres',
+                    description: 'Large cantilever patio umbrella with UV protection and 360° rotation.',
+                    price: 349.99,
+                    brand: 'OutdoorLife',
+                    weight: '25kg',
+                    dimensions: '300cm diameter',
+                    attributes: {
+                        material: 'Polyester + Aluminum',
+                        uvProtection: 'UPF 50+',
+                        tiltAngle: '30°'
+                    },
+                    assets: ['asset-013'],
+                    relations: [],
+                    categories: ['Outdoor', 'Patio', 'Shade']
+                },
+                {
+                    id: 'prod-010',
+                    familyId: 'fam-003',
+                    name: 'ProFit Treadmill X500',
+                    type: 'product',
+                    sku: 'SPRT-FIT-TR01',
+                    status: 'review',
+                    completeness: 70,
+                    issues: 3,
+                    lastEdited: '2026-01-14T09:30:00',
+                    owner: 'Emma Wilson',
+                    description: 'Commercial-grade treadmill with 15% incline, 12mph max speed, and integrated touchscreen.',
+                    price: 1499.99,
+                    brand: 'ProFit',
+                    weight: '95kg',
+                    dimensions: '180 x 85 x 150cm',
+                    attributes: {
+                        motor: '3.5 HP',
+                        maxSpeed: '12 mph',
+                        incline: '0-15%',
+                        beltSize: '152 x 51cm',
+                        display: '10" HD Touchscreen'
+                    },
+                    assets: ['asset-014', 'asset-015'],
+                    relations: [
+                        { type: 'Accessory', targetId: 'prod-011' }
+                    ],
+                    categories: ['Fitness', 'Cardio', 'Treadmills']
+                },
+                {
+                    id: 'prod-011',
+                    familyId: 'fam-003',
+                    name: 'Heart Rate Monitor Band',
+                    type: 'product',
+                    sku: 'SPRT-ACC-HR01',
+                    status: 'published',
+                    completeness: 95,
+                    issues: 0,
+                    lastEdited: '2026-01-13T16:00:00',
+                    owner: 'Emma Wilson',
+                    description: 'ANT+ and Bluetooth heart rate monitor chest strap for accurate tracking.',
+                    price: 49.99,
+                    brand: 'ProFit',
+                    weight: '50g',
+                    dimensions: 'Adjustable 65-95cm',
+                    attributes: {
+                        connectivity: 'ANT+ / Bluetooth 5.0',
+                        battery: 'CR2032 (1 year)',
+                        waterproof: 'IPX7'
+                    },
+                    assets: ['asset-016'],
+                    relations: [
+                        { type: 'Accessory for', targetId: 'prod-010' }
+                    ],
+                    categories: ['Fitness', 'Accessories', 'Wearables']
+                },
+                {
+                    id: 'prod-012',
+                    familyId: 'fam-003',
+                    name: 'Adjustable Dumbbell Set',
+                    type: 'product',
+                    sku: 'SPRT-WGT-DB01',
+                    status: 'draft',
+                    completeness: 40,
+                    issues: 5,
+                    lastEdited: '2026-01-12T13:45:00',
+                    owner: 'James Roberts',
+                    description: 'Quick-adjust dumbbell set ranging from 5-52.5 lbs per hand.',
+                    price: 399.99,
+                    brand: 'IronForce',
+                    weight: '48kg total',
+                    dimensions: '42 x 22 x 23cm each',
+                    attributes: {
+                        weightRange: '5-52.5 lbs',
+                        increments: '2.5 lbs',
+                        material: 'Steel + Rubber coating'
+                    },
+                    assets: ['asset-017'],
+                    relations: [],
+                    categories: ['Fitness', 'Weights', 'Strength Training']
+                },
+                {
+                    id: 'prod-013',
+                    familyId: 'fam-003',
+                    name: 'Yoga Mat Premium',
+                    type: 'product',
+                    sku: 'SPRT-YGA-MT01',
+                    status: 'published',
+                    completeness: 88,
+                    issues: 1,
+                    lastEdited: '2026-01-11T10:00:00',
+                    owner: 'Emma Wilson',
+                    description: 'Extra thick 6mm yoga mat with alignment lines and carrying strap.',
+                    price: 69.99,
+                    brand: 'ZenFlex',
+                    weight: '1.2kg',
+                    dimensions: '183 x 68 x 0.6cm',
+                    attributes: {
+                        thickness: '6mm',
+                        material: 'TPE Eco-friendly',
+                        texture: 'Non-slip dual layer'
+                    },
+                    assets: ['asset-018'],
+                    relations: [
+                        { type: 'Bundle', targetId: 'prod-014' }
+                    ],
+                    categories: ['Fitness', 'Yoga', 'Mats']
+                },
+                {
+                    id: 'prod-014',
+                    familyId: 'fam-003',
+                    name: 'Yoga Block Set',
+                    type: 'product',
+                    sku: 'SPRT-YGA-BL01',
+                    status: 'draft',
+                    completeness: 35,
+                    issues: 6,
+                    lastEdited: '2026-01-10T15:30:00',
+                    owner: 'Emma Wilson',
+                    description: 'Set of 2 high-density foam yoga blocks for support and deeper stretches.',
+                    price: 24.99,
+                    brand: 'ZenFlex',
+                    weight: '400g',
+                    dimensions: '23 x 15 x 10cm each',
+                    attributes: {
+                        quantity: '2',
+                        material: 'High-density EVA foam',
+                        density: 'Medium-firm'
+                    },
+                    assets: ['asset-019'],
+                    relations: [
+                        { type: 'Bundle with', targetId: 'prod-013' }
+                    ],
+                    categories: ['Fitness', 'Yoga', 'Props']
+                },
+                {
+                    id: 'prod-015',
+                    familyId: 'fam-003',
+                    name: 'Trail Running Shoes',
+                    type: 'product',
+                    sku: 'SPRT-SHO-TR01',
+                    status: 'review',
+                    completeness: 65,
+                    issues: 2,
+                    lastEdited: '2026-01-09T12:00:00',
+                    owner: 'James Roberts',
+                    description: 'Lightweight trail running shoes with aggressive tread and rock plate.',
+                    price: 149.99,
+                    brand: 'TrailBlazer',
+                    weight: '280g each',
+                    dimensions: 'Sizes 6-13',
+                    attributes: {
+                        upperMaterial: 'Breathable mesh',
+                        sole: 'Vibram Megagrip',
+                        dropHeight: '6mm',
+                        cushioning: 'EVA midsole'
+                    },
+                    assets: ['asset-020'],
+                    relations: [],
+                    categories: ['Footwear', 'Running', 'Trail']
+                }
+            ],
+            assets: [
+                { id: 'asset-001', name: 'promax-x12-front.jpg', type: 'image', format: 'JPEG', size: '2.4 MB', dimensions: '3000x2000', uploadDate: '2026-01-20', usedBy: ['prod-001'] },
+                { id: 'asset-002', name: 'promax-x12-back.jpg', type: 'image', format: 'JPEG', size: '2.1 MB', dimensions: '3000x2000', uploadDate: '2026-01-20', usedBy: ['prod-001'] },
+                { id: 'asset-003', name: 'promax-x12-spec-sheet.pdf', type: 'document', format: 'PDF', size: '1.8 MB', pages: 4, uploadDate: '2026-01-19', usedBy: ['prod-001'] },
+                { id: 'asset-004', name: 'phone-case-clear.jpg', type: 'image', format: 'JPEG', size: '1.5 MB', dimensions: '2000x2000', uploadDate: '2026-01-18', usedBy: ['prod-002'] },
+                { id: 'asset-005', name: 'ultrabook-pro-hero.jpg', type: 'image', format: 'JPEG', size: '3.2 MB', dimensions: '4000x2500', uploadDate: '2026-01-17', usedBy: ['prod-003'] },
+                { id: 'asset-006', name: 'ultrabook-pro-lifestyle.jpg', type: 'image', format: 'JPEG', size: '2.8 MB', dimensions: '3500x2300', uploadDate: '2026-01-17', usedBy: ['prod-003'] },
+                { id: 'asset-007', name: 'promax-x11-main.jpg', type: 'image', format: 'JPEG', size: '2.0 MB', dimensions: '2500x1800', uploadDate: '2025-09-10', usedBy: ['prod-004'] },
+                { id: 'asset-008', name: 'ergo-chair-front.jpg', type: 'image', format: 'JPEG', size: '1.8 MB', dimensions: '2500x2500', uploadDate: '2026-01-15', usedBy: ['prod-005'] },
+                { id: 'asset-009', name: 'ergo-chair-detail.jpg', type: 'image', format: 'JPEG', size: '1.6 MB', dimensions: '2200x2200', uploadDate: '2026-01-15', usedBy: ['prod-005'] },
+                { id: 'asset-010', name: 'smartdesk-setup.jpg', type: 'image', format: 'JPEG', size: '2.5 MB', dimensions: '3500x2000', uploadDate: '2026-01-14', usedBy: ['prod-006'] },
+                { id: 'asset-011', name: 'garden-tools-set.jpg', type: 'image', format: 'JPEG', size: '2.2 MB', dimensions: '3000x2000', uploadDate: '2026-01-12', usedBy: ['prod-007'] },
+                { id: 'asset-012', name: 'solar-lights-night.jpg', type: 'image', format: 'JPEG', size: '1.9 MB', dimensions: '2800x1900', uploadDate: '2026-01-11', usedBy: ['prod-008'] },
+                { id: 'asset-013', name: 'patio-umbrella.jpg', type: 'image', format: 'JPEG', size: '2.1 MB', dimensions: '3000x2000', uploadDate: '2026-01-10', usedBy: ['prod-009'] },
+                { id: 'asset-014', name: 'treadmill-hero.jpg', type: 'image', format: 'JPEG', size: '2.7 MB', dimensions: '3500x2500', uploadDate: '2026-01-08', usedBy: ['prod-010'] },
+                { id: 'asset-015', name: 'treadmill-display.jpg', type: 'image', format: 'JPEG', size: '1.4 MB', dimensions: '2000x1500', uploadDate: '2026-01-08', usedBy: ['prod-010'] },
+                { id: 'asset-016', name: 'hr-monitor-band.jpg', type: 'image', format: 'JPEG', size: '0.9 MB', dimensions: '1500x1500', uploadDate: '2026-01-06', usedBy: ['prod-011'] },
+                { id: 'asset-017', name: 'dumbbell-set.jpg', type: 'image', format: 'JPEG', size: '1.7 MB', dimensions: '2500x2000', uploadDate: '2026-01-05', usedBy: ['prod-012'] },
+                { id: 'asset-018', name: 'yoga-mat-purple.jpg', type: 'image', format: 'JPEG', size: '1.3 MB', dimensions: '2200x1600', uploadDate: '2026-01-04', usedBy: ['prod-013'] },
+                { id: 'asset-019', name: 'yoga-blocks.jpg', type: 'image', format: 'JPEG', size: '0.8 MB', dimensions: '1800x1400', uploadDate: '2026-01-03', usedBy: ['prod-014'] },
+                { id: 'asset-020', name: 'trail-shoes-action.jpg', type: 'image', format: 'JPEG', size: '2.4 MB', dimensions: '3200x2100', uploadDate: '2026-01-02', usedBy: ['prod-015'] }
+            ],
+            categories: {
+                'Technology': { id: 'cat-001', name: 'Technology', children: ['Smartphones', 'Laptops', 'Accessories'] },
+                'Smartphones': { id: 'cat-002', name: 'Smartphones', parent: 'Technology', children: ['Android', 'iOS', 'Flagship'] },
+                'Laptops': { id: 'cat-003', name: 'Laptops', parent: 'Technology', children: ['Professional', 'Gaming', 'Workstation'] },
+                'Home': { id: 'cat-004', name: 'Home', children: ['Furniture', 'Lighting', 'Decor'] },
+                'Furniture': { id: 'cat-005', name: 'Furniture', parent: 'Home', children: ['Office', 'Living Room', 'Seating', 'Desks'] },
+                'Garden': { id: 'cat-006', name: 'Garden', children: ['Tools', 'Lighting', 'Planters'] },
+                'Sports': { id: 'cat-007', name: 'Sports', children: ['Fitness', 'Outdoor', 'Team Sports'] },
+                'Fitness': { id: 'cat-008', name: 'Fitness', parent: 'Sports', children: ['Cardio', 'Weights', 'Yoga', 'Accessories'] }
+            }
+        };
+
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+        const state = {
+            currentRoute: null,
+            currentEntity: null,
+            currentTab: 0,
+            navigationHistory: [],
+            expandedNodes: new Set(['fam-001', 'fam-002', 'fam-003']),
+            drawerOpen: false,
+            drawerEntity: null,
+            selectedTableRows: new Set(),
+            searchQuery: ''
+        };
+
+        // ============================================
+        // ICONS
+        // ============================================
+        const icons = {
+            family: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+            product: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
+            asset: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+            chevron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>`,
+            check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+            warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+            error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+            save: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+            validate: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+            publish: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`,
+            more: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`,
+            external: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+            link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+            edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+            trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+            copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+            download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+            file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+            folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+            grid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+            list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+            filter: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
+            columns: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>`,
+            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
+        };
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function getCompletenessClass(value) {
+            if (value >= 80) return 'high';
+            if (value >= 50) return 'medium';
+            return 'low';
+        }
+
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+
+        function getEntity(type, id) {
+            if (type === 'family') return mockData.families.find(f => f.id === id);
+            if (type === 'product') return mockData.products.find(p => p.id === id);
+            if (type === 'asset') return mockData.assets.find(a => a.id === id);
+            return null;
+        }
+
+        function getEntityType(id) {
+            if (id.startsWith('fam-')) return 'family';
+            if (id.startsWith('prod-')) return 'product';
+            if (id.startsWith('asset-')) return 'asset';
+            return null;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ============================================
+        // ROUTER
+        // ============================================
+        function navigate(path, pushState = true) {
+            try {
+                if (state.currentRoute && state.currentRoute !== path) {
+                    state.navigationHistory.push(state.currentRoute);
+                }
+                state.currentRoute = path;
+                
+                if (pushState) {
+                    // Use hash-based routing for file:// protocol compatibility
+                    window.location.hash = path;
+                }
+                
+                renderPage();
+                updateBackButton();
+                updateSidebarActive();
+            } catch (error) {
+                console.error('Navigation error:', error);
+            }
+        }
+
+        function goBack() {
+            if (state.navigationHistory.length > 0) {
+                const prevRoute = state.navigationHistory.pop();
+                state.currentRoute = prevRoute;
+                window.location.hash = prevRoute;
+                renderPage();
+                updateBackButton();
+                updateSidebarActive();
+            }
+        }
+
+        function updateBackButton() {
+            const backBtn = document.getElementById('backBtn');
+            if (backBtn) {
+                backBtn.style.display = state.navigationHistory.length > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function parseRoute(path) {
+            if (!path) return { type: 'home' };
+            const parts = path.split('/').filter(Boolean);
+            if (parts.length === 0) return { type: 'home' };
+            if (parts[0] === 'families' && parts[1]) return { type: 'family', id: parts[1] };
+            if (parts[0] === 'products' && parts[1]) return { type: 'product', id: parts[1] };
+            if (parts[0] === 'assets' && parts[1]) return { type: 'asset', id: parts[1] };
+            return { type: 'home' };
+        }
+
+        // ============================================
+        // SIDEBAR RENDERING
+        // ============================================
+        function renderSidebar() {
+            const nav = document.getElementById('sidebarNav');
+            nav.innerHTML = `
+                <div class="nav-section">
+                    <div class="nav-section-title">Product Families</div>
+                    ${mockData.families.map(family => renderFamilyTree(family)).join('')}
+                </div>
+            `;
+            attachTreeListeners();
+        }
+
+        function renderFamilyTree(family) {
+            const isExpanded = state.expandedNodes.has(family.id);
+            const isActive = state.currentEntity?.id === family.id;
+            const children = mockData.products.filter(p => p.familyId === family.id);
+            
+            return `
+                <div class="tree-node" data-id="${family.id}">
+                    <div class="tree-item ${isActive ? 'active' : ''}" data-id="${family.id}" data-type="family">
+                        <span class="tree-toggle ${isExpanded ? 'expanded' : ''} ${children.length === 0 ? 'no-children' : ''}">${icons.chevron}</span>
+                        <span class="tree-icon">${icons.family}</span>
+                        <span class="tree-label">${family.name}</span>
+                        <div class="tree-badges">
+                            <span class="badge badge-completeness ${getCompletenessClass(family.completeness)}">${family.completeness}%</span>
+                            ${family.issues > 0 ? `<span class="badge badge-issues">${family.issues}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="tree-children ${isExpanded ? 'expanded' : ''}">
+                        ${children.map(product => renderProductTree(product)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductTree(product) {
+            const isActive = state.currentEntity?.id === product.id;
+            
+            return `
+                <div class="tree-item ${isActive ? 'active' : ''}" data-id="${product.id}" data-type="product">
+                    <span class="tree-toggle no-children">${icons.chevron}</span>
+                    <span class="tree-icon">${icons.product}</span>
+                    <span class="tree-label">${product.name}</span>
+                    <div class="tree-badges">
+                        <span class="badge badge-completeness ${getCompletenessClass(product.completeness)}">${product.completeness}%</span>
+                        ${product.issues > 0 ? `<span class="badge badge-issues">${product.issues}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function attachTreeListeners() {
+            document.querySelectorAll('.tree-toggle:not(.no-children)').forEach(toggle => {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const nodeId = toggle.closest('.tree-node').dataset.id;
+                    if (state.expandedNodes.has(nodeId)) {
+                        state.expandedNodes.delete(nodeId);
+                    } else {
+                        state.expandedNodes.add(nodeId);
+                    }
+                    renderSidebar();
+                });
+            });
+
+            document.querySelectorAll('.tree-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    const type = item.dataset.type;
+                    if (type === 'family') navigate(`/families/${id}`);
+                    else if (type === 'product') navigate(`/products/${id}`);
+                });
+            });
+        }
+
+        function updateSidebarActive() {
+            document.querySelectorAll('.tree-item').forEach(item => {
+                item.classList.remove('active');
+                if (state.currentEntity && item.dataset.id === state.currentEntity.id) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // ============================================
+        // MAIN PAGE RENDERING
+        // ============================================
+        function renderPage() {
+            try {
+                const route = parseRoute(state.currentRoute || '/families/fam-001');
+                state.currentTab = 0;
+                
+                console.log('Rendering page for route:', route);
+                
+                if (route.type === 'family') {
+                    const family = getEntity('family', route.id);
+                    if (family) {
+                        state.currentEntity = family;
+                        renderFamilyPage(family);
+                    } else {
+                        console.error('Family not found:', route.id);
+                        // Default to first family
+                        const defaultFamily = mockData.families[0];
+                        state.currentEntity = defaultFamily;
+                        renderFamilyPage(defaultFamily);
+                    }
+                } else if (route.type === 'product') {
+                    const product = getEntity('product', route.id);
+                    if (product) {
+                        state.currentEntity = product;
+                        renderProductPage(product);
+                    } else {
+                        console.error('Product not found:', route.id);
+                    }
+                } else if (route.type === 'asset') {
+                    const asset = getEntity('asset', route.id);
+                    if (asset) {
+                        state.currentEntity = asset;
+                        renderAssetPage(asset);
+                    } else {
+                        console.error('Asset not found:', route.id);
+                    }
+                } else {
+                    // Default to first family
+                    const defaultFamily = mockData.families[0];
+                    state.currentEntity = defaultFamily;
+                    renderFamilyPage(defaultFamily);
+                }
+            } catch (error) {
+                console.error('Error rendering page:', error);
+            }
+        }
+
+        function renderBreadcrumbs(items) {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            breadcrumbs.innerHTML = items.map((item, index) => {
+                const isLast = index === items.length - 1;
+                return `
+                    <span class="breadcrumb-item ${isLast ? 'current' : ''}" ${!isLast ? `onclick="navigate('${item.path}')"` : ''}>${item.label}</span>
+                    ${!isLast ? '<span class="breadcrumb-separator">/</span>' : ''}
+                `;
+            }).join('');
+        }
+
+        function renderHeaderActions(entity) {
+            const isValid = entity.issues === 0;
+            document.getElementById('headerActions').innerHTML = `
+                <button class="btn btn-secondary" onclick="handleSave()">
+                    ${icons.save} Save
+                </button>
+                <button class="btn btn-secondary" onclick="handleValidate()">
+                    ${icons.validate} Validate
+                </button>
+                <button class="btn btn-success" ${!isValid ? 'disabled' : ''} onclick="handlePublish()">
+                    ${icons.publish} Publish
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-icon" onclick="toggleDropdown(this)">
+                        ${icons.more}
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item">${icons.copy} Duplicate</div>
+                        <div class="dropdown-item">${icons.download} Export</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" style="color: var(--danger)">${icons.trash} Delete</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // FAMILY PAGE
+        // ============================================
+        function renderFamilyPage(family) {
+            renderBreadcrumbs([
+                { label: 'Product Families', path: '/families/fam-001' },
+                { label: family.name, path: `/families/${family.id}` }
+            ]);
+            renderHeaderActions(family);
+
+            const tabs = ['Overview', 'Children', 'Attributes', 'Assets', 'Relations'];
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div class="content-split">
+                    ${renderOverviewPanel(family)}
+                    <div class="enrichment-panel">
+                        <div class="tabs-container">
+                            ${tabs.map((tab, i) => `<div class="tab ${i === state.currentTab ? 'active' : ''}" onclick="switchTab(${i})">${tab}</div>`).join('')}
+                        </div>
+                        <div class="tab-content" id="tabContent">
+                            ${renderFamilyTabContent(family, state.currentTab)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFamilyTabContent(family, tabIndex) {
+            switch(tabIndex) {
+                case 0: return renderFamilyOverviewTab(family);
+                case 1: return renderChildrenTab(family);
+                case 2: return renderAttributesTab(family);
+                case 3: return renderFamilyAssetsTab(family);
+                case 4: return renderRelationsTab(family);
+                default: return '';
+            }
+        }
+
+        function renderFamilyOverviewTab(family) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Family Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label required">Name</label>
+                            <input type="text" class="form-input" value="${family.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">SKU</label>
+                            <input type="text" class="form-input" value="${family.sku}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input">${family.description}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Attribute Set</label>
+                            <div class="chip" onclick="openDrawer('attributeSet', '${family.attributeSet}')">
+                                ${icons.link} ${family.attributeSet}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Categories</label>
+                            <div class="chips-container">
+                                ${family.categories.map(cat => `<span class="chip">${icons.folder} ${cat}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderChildrenTab(family) {
+            const children = mockData.products.filter(p => p.familyId === family.id);
+            return `
+                <div class="card">
+                    <div class="table-actions">
+                        <button class="btn btn-primary btn-sm">+ Add Product</button>
+                        <button class="btn btn-secondary btn-sm">${icons.filter} Filter</button>
+                        <button class="btn btn-secondary btn-sm column-config-btn">${icons.columns} Columns</button>
+                        <label class="filter-toggle" style="margin-left: auto">
+                            <input type="checkbox"> Show incomplete only
+                        </label>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" class="table-checkbox" onclick="toggleAllRows(this)"></th>
+                                    <th>Name</th>
+                                    <th>SKU</th>
+                                    <th>Status</th>
+                                    <th>Completeness</th>
+                                    <th>Issues</th>
+                                    <th>Last Modified</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${children.map(product => `
+                                    <tr>
+                                        <td><input type="checkbox" class="table-checkbox" data-id="${product.id}"></td>
+                                        <td><span class="table-link" onclick="navigate('/products/${product.id}')">${product.name}</span></td>
+                                        <td>${product.sku}</td>
+                                        <td><span class="status-badge ${getStatusClass(product.status)}">${product.status}</span></td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <div class="meter-bar" style="width: 60px;">
+                                                    <div class="meter-fill ${getCompletenessClass(product.completeness)}" style="width: ${product.completeness}%"></div>
+                                                </div>
+                                                <span>${product.completeness}%</span>
+                                            </div>
+                                        </td>
+                                        <td>${product.issues > 0 ? `<span class="badge badge-issues">${product.issues}</span>` : '<span class="validation-icon valid">' + icons.check + '</span>'}</td>
+                                        <td>${formatDate(product.lastEdited)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // PRODUCT PAGE
+        // ============================================
+        function renderProductPage(product) {
+            const family = getEntity('family', product.familyId);
+            
+            renderBreadcrumbs([
+                { label: 'Product Families', path: '/families/fam-001' },
+                { label: family.name, path: `/families/${family.id}` },
+                { label: product.name, path: `/products/${product.id}` }
+            ]);
+            renderHeaderActions(product);
+
+            const tabs = ['Overview', 'Details', 'Media / Assets', 'Classification', 'Relations'];
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div class="content-split">
+                    ${renderOverviewPanel(product)}
+                    <div class="enrichment-panel">
+                        <div class="tabs-container">
+                            ${tabs.map((tab, i) => `<div class="tab ${i === state.currentTab ? 'active' : ''}" onclick="switchTab(${i})">${tab}</div>`).join('')}
+                        </div>
+                        <div class="tab-content" id="tabContent">
+                            ${renderProductTabContent(product, state.currentTab)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductTabContent(product, tabIndex) {
+            switch(tabIndex) {
+                case 0: return renderProductOverviewTab(product);
+                case 1: return renderProductDetailsTab(product);
+                case 2: return renderProductAssetsTab(product);
+                case 3: return renderClassificationTab(product);
+                case 4: return renderProductRelationsTab(product);
+                default: return '';
+            }
+        }
+
+        function renderProductOverviewTab(product) {
+            const family = getEntity('family', product.familyId);
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Product Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label required">Name</label>
+                            <input type="text" class="form-input" value="${product.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">SKU</label>
+                            <input type="text" class="form-input" value="${product.sku}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input">${product.description}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product Family</label>
+                            <div class="chip" onclick="openDrawer('family', '${family.id}')">
+                                ${icons.family} ${family.name}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <input type="text" class="form-input" value="${product.brand}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Price</label>
+                            <input type="text" class="form-input" value="$${product.price}">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductDetailsTab(product) {
+            return `
+                <div class="accordion">
+                    <div class="accordion-item expanded">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span class="accordion-title">
+                                <span class="validation-icon valid">${icons.check}</span>
+                                Physical Specifications
+                            </span>
+                            <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="form-group">
+                                <label class="form-label">Weight</label>
+                                <input type="text" class="form-input" value="${product.weight}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dimensions</label>
+                                <input type="text" class="form-input" value="${product.dimensions}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item expanded">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span class="accordion-title">
+                                ${product.issues > 0 ? `<span class="validation-icon warning">${icons.warning}</span>` : `<span class="validation-icon valid">${icons.check}</span>`}
+                                Technical Attributes
+                            </span>
+                            <svg class="accordion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="accordion-content">
+                            ${Object.entries(product.attributes || {}).map(([key, value]) => `
+                                <div class="form-group">
+                                    <label class="form-label">${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</label>
+                                    <input type="text" class="form-input" value="${value}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 16px;">
+                    <label class="filter-toggle">
+                        <input type="checkbox"> Show only missing required fields
+                    </label>
+                </div>
+            `;
+        }
+
+        function renderProductAssetsTab(product) {
+            const assets = product.assets.map(aid => getEntity('asset', aid)).filter(Boolean);
+            return `
+                <div class="card">
+                    <div class="table-actions">
+                        <button class="btn btn-primary btn-sm">+ Upload Asset</button>
+                        <button class="btn btn-secondary btn-sm">Link Existing</button>
+                        <div style="margin-left: auto; display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-icon btn-sm">${icons.grid}</button>
+                            <button class="btn btn-secondary btn-icon btn-sm">${icons.list}</button>
+                        </div>
+                    </div>
+                    <div style="padding: 16px;">
+                        <div class="asset-grid">
+                            ${assets.map(asset => `
+                                <div class="asset-card" onclick="openDrawer('asset', '${asset.id}')">
+                                    <div class="asset-card-preview">
+                                        ${asset.type === 'image' 
+                                            ? `<div style="color: var(--gray-400)">${icons.asset}</div>`
+                                            : `<div style="color: var(--gray-400)">${icons.file}</div>`
+                                        }
+                                    </div>
+                                    <div class="asset-card-info">
+                                        <div class="asset-card-name">${asset.name}</div>
+                                        <div class="asset-card-meta">${asset.format} • ${asset.size}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderClassificationTab(product) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Categories</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="tree-select">
+                            <div class="tree-select-search">
+                                <input type="text" class="form-input" placeholder="Search categories...">
+                            </div>
+                            ${renderCategoryTree(product.categories)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCategoryTree(selectedCategories) {
+            const topCategories = ['Technology', 'Home', 'Garden', 'Sports'];
+            return topCategories.map(cat => {
+                const catData = mockData.categories[cat];
+                if (!catData) return '';
+                const isSelected = selectedCategories.includes(cat);
+                return `
+                    <div class="tree-select-item ${isSelected ? 'selected' : ''}" style="padding-left: 12px;">
+                        <input type="checkbox" class="tree-select-checkbox" ${isSelected ? 'checked' : ''}>
+                        <span>${cat}</span>
+                    </div>
+                    ${(catData.children || []).map(child => {
+                        const isChildSelected = selectedCategories.includes(child);
+                        return `
+                            <div class="tree-select-item ${isChildSelected ? 'selected' : ''}" style="padding-left: 32px;">
+                                <input type="checkbox" class="tree-select-checkbox" ${isChildSelected ? 'checked' : ''}>
+                                <span>${child}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                `;
+            }).join('');
+        }
+
+        function renderProductRelationsTab(product) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Related Products</h3>
+                        <button class="btn btn-secondary btn-sm">+ Add Relation</button>
+                    </div>
+                    <div class="card-body">
+                        ${product.relations.length === 0 
+                            ? `<div class="empty-state">
+                                    ${icons.link}
+                                    <div class="empty-state-title">No relations defined</div>
+                                    <div class="empty-state-text">Add relations to link this product to others</div>
+                               </div>`
+                            : `<div class="chips-container" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+                                ${product.relations.map(rel => {
+                                    const target = getEntity('product', rel.targetId);
+                                    if (!target) return '';
+                                    return `
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <span style="color: var(--gray-500); font-size: 12px; min-width: 100px;">${rel.type}:</span>
+                                            <span class="chip" onclick="openDrawer('product', '${target.id}')">
+                                                ${icons.product} ${target.name}
+                                            </span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                               </div>`
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // ASSET PAGE
+        // ============================================
+        function renderAssetPage(asset) {
+            renderBreadcrumbs([
+                { label: 'Assets', path: '/assets/asset-001' },
+                { label: asset.name, path: `/assets/${asset.id}` }
+            ]);
+            
+            document.getElementById('headerActions').innerHTML = `
+                <button class="btn btn-secondary" onclick="handleSave()">
+                    ${icons.save} Save
+                </button>
+                <button class="btn btn-secondary">
+                    ${icons.download} Download
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-icon" onclick="toggleDropdown(this)">
+                        ${icons.more}
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item">${icons.copy} Duplicate</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" style="color: var(--danger)">${icons.trash} Delete</div>
+                    </div>
+                </div>
+            `;
+
+            const tabs = ['Preview', 'Metadata', 'Usage'];
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div class="content-split">
+                    ${renderAssetOverviewPanel(asset)}
+                    <div class="enrichment-panel">
+                        <div class="tabs-container">
+                            ${tabs.map((tab, i) => `<div class="tab ${i === state.currentTab ? 'active' : ''}" onclick="switchTab(${i})">${tab}</div>`).join('')}
+                        </div>
+                        <div class="tab-content" id="tabContent">
+                            ${renderAssetTabContent(asset, state.currentTab)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAssetOverviewPanel(asset) {
+            return `
+                <div class="overview-panel">
+                    <div class="overview-header">
+                        <div class="asset-preview" style="margin-bottom: 16px;">
+                            <div class="asset-preview-placeholder">
+                                ${asset.type === 'image' ? icons.asset : icons.file}
+                                <span>${asset.type === 'image' ? 'Image Preview' : 'Document'}</span>
+                            </div>
+                        </div>
+                        <h2 class="overview-title">${asset.name}</h2>
+                        <p class="overview-subtitle">${asset.type} • ${asset.format}</p>
+                    </div>
+                    <div class="overview-section">
+                        <h4 class="overview-section-title">File Information</h4>
+                        <div class="overview-field">
+                            <span class="field-label">Size</span>
+                            <span class="field-value">${asset.size}</span>
+                        </div>
+                        ${asset.dimensions ? `
+                            <div class="overview-field">
+                                <span class="field-label">Dimensions</span>
+                                <span class="field-value">${asset.dimensions}</span>
+                            </div>
+                        ` : ''}
+                        ${asset.pages ? `
+                            <div class="overview-field">
+                                <span class="field-label">Pages</span>
+                                <span class="field-value">${asset.pages}</span>
+                            </div>
+                        ` : ''}
+                        <div class="overview-field">
+                            <span class="field-label">Uploaded</span>
+                            <span class="field-value">${formatDate(asset.uploadDate)}</span>
+                        </div>
+                    </div>
+                    <div class="overview-section">
+                        <h4 class="overview-section-title">Usage</h4>
+                        <div class="overview-field">
+                            <span class="field-label">Used by</span>
+                            <span class="field-value">${asset.usedBy.length} product(s)</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAssetTabContent(asset, tabIndex) {
+            switch(tabIndex) {
+                case 0: return renderAssetPreviewTab(asset);
+                case 1: return renderAssetMetadataTab(asset);
+                case 2: return renderAssetUsageTab(asset);
+                default: return '';
+            }
+        }
+
+        function renderAssetPreviewTab(asset) {
+            return `
+                <div class="card">
+                    <div class="card-body" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                        <div class="asset-preview" style="width: 100%; max-width: 600px;">
+                            <div class="asset-preview-placeholder">
+                                ${asset.type === 'image' ? icons.asset : icons.file}
+                                <span style="font-size: 14px;">${asset.name}</span>
+                                <span style="font-size: 12px; color: var(--gray-400);">${asset.format} • ${asset.size}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAssetMetadataTab(asset) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Asset Metadata</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label required">File Name</label>
+                            <input type="text" class="form-input" value="${asset.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Alt Text</label>
+                            <input type="text" class="form-input" placeholder="Describe the image for accessibility...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-input" placeholder="Enter a title...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input" placeholder="Enter a description..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tags</label>
+                            <input type="text" class="form-input" placeholder="Enter tags separated by commas...">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAssetUsageTab(asset) {
+            const products = asset.usedBy.map(pid => getEntity('product', pid)).filter(Boolean);
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Products Using This Asset</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>SKU</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${products.map(product => `
+                                    <tr>
+                                        <td><span class="table-link" onclick="navigate('/products/${product.id}')">${product.name}</span></td>
+                                        <td>${product.sku}</td>
+                                        <td><span class="status-badge ${getStatusClass(product.status)}">${product.status}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // SHARED COMPONENTS
+        // ============================================
+        function renderOverviewPanel(entity) {
+            return `
+                <div class="overview-panel">
+                    <div class="overview-header">
+                        <h2 class="overview-title">${entity.name}</h2>
+                        <p class="overview-subtitle">${entity.sku}</p>
+                        <div class="overview-status">
+                            <span class="status-badge ${getStatusClass(entity.status)}">${entity.status}</span>
+                            ${entity.issues > 0 ? `<span class="status-badge status-draft">${entity.issues} issues</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="overview-section">
+                        <h4 class="overview-section-title">Completeness</h4>
+                        <div class="completeness-meter">
+                            <div class="meter-bar">
+                                <div class="meter-fill ${getCompletenessClass(entity.completeness)}" style="width: ${entity.completeness}%"></div>
+                            </div>
+                            <div class="meter-label">
+                                <span>${entity.completeness}% complete</span>
+                                <span>${100 - entity.completeness}% remaining</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overview-section">
+                        <h4 class="overview-section-title">Details</h4>
+                        <div class="overview-field">
+                            <span class="field-label">Last edited</span>
+                            <span class="field-value">${formatDate(entity.lastEdited)}</span>
+                        </div>
+                        <div class="overview-field">
+                            <span class="field-label">Owner</span>
+                            <span class="field-value">${entity.owner}</span>
+                        </div>
+                        ${entity.type === 'product' ? `
+                            <div class="overview-field">
+                                <span class="field-label">Price</span>
+                                <span class="field-value">$${entity.price}</span>
+                            </div>
+                            <div class="overview-field">
+                                <span class="field-label">Brand</span>
+                                <span class="field-value">${entity.brand}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${entity.type === 'product' ? `
+                        <div class="overview-section">
+                            <h4 class="overview-section-title">Quick Links</h4>
+                            <div class="chips-container" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                                <span class="chip" onclick="openDrawer('family', '${entity.familyId}')">${icons.family} View Family</span>
+                                <span class="chip" onclick="switchTab(2)">${icons.asset} ${entity.assets?.length || 0} Assets</span>
+                                <span class="chip" onclick="switchTab(4)">${icons.link} ${entity.relations?.length || 0} Relations</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderAttributesTab(entity) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Attributes</h3>
+                        <button class="btn btn-secondary btn-sm">Edit Template</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Attribute Set</label>
+                            <select class="form-input form-select">
+                                <option>${entity.attributeSet}</option>
+                            </select>
+                        </div>
+                        <p style="color: var(--gray-500); font-size: 13px; margin-top: 16px;">
+                            Attribute values are inherited by child products. Override specific values at the product level.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFamilyAssetsTab(family) {
+            const allAssets = [];
+            mockData.products
+                .filter(p => p.familyId === family.id)
+                .forEach(p => {
+                    p.assets.forEach(aid => {
+                        const asset = getEntity('asset', aid);
+                        if (asset && !allAssets.find(a => a.id === asset.id)) {
+                            allAssets.push(asset);
+                        }
+                    });
+                });
+
+            return `
+                <div class="card">
+                    <div class="table-actions">
+                        <button class="btn btn-secondary btn-sm">${icons.filter} Filter</button>
+                        <span style="color: var(--gray-500); font-size: 12px; margin-left: auto;">${allAssets.length} assets across all products</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Format</th>
+                                    <th>Size</th>
+                                    <th>Used By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${allAssets.map(asset => `
+                                    <tr>
+                                        <td><span class="table-link" onclick="openDrawer('asset', '${asset.id}')">${asset.name}</span></td>
+                                        <td>${asset.type}</td>
+                                        <td>${asset.format}</td>
+                                        <td>${asset.size}</td>
+                                        <td>${asset.usedBy.length} product(s)</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRelationsTab(entity) {
+            const children = mockData.products.filter(p => p.familyId === entity.id);
+            const allRelations = [];
+            children.forEach(p => {
+                p.relations.forEach(rel => {
+                    allRelations.push({ ...rel, sourceId: p.id, sourceName: p.name });
+                });
+            });
+
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Product Relations</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Source Product</th>
+                                    <th>Relation Type</th>
+                                    <th>Target Product</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${allRelations.map(rel => {
+                                    const target = getEntity('product', rel.targetId);
+                                    return `
+                                        <tr>
+                                            <td><span class="table-link" onclick="navigate('/products/${rel.sourceId}')">${rel.sourceName}</span></td>
+                                            <td>${rel.type}</td>
+                                            <td><span class="table-link" onclick="openDrawer('product', '${rel.targetId}')">${target?.name || 'Unknown'}</span></td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // DRAWER
+        // ============================================
+        function openDrawer(type, id) {
+            state.drawerOpen = true;
+            let entity;
+            
+            if (type === 'family') {
+                entity = getEntity('family', id);
+            } else if (type === 'product') {
+                entity = getEntity('product', id);
+            } else if (type === 'asset') {
+                entity = getEntity('asset', id);
+            } else if (type === 'attributeSet') {
+                entity = { name: id, type: 'attributeSet' };
+            }
+            
+            state.drawerEntity = { ...entity, entityType: type };
+            renderDrawer();
+            
+            document.getElementById('drawerOverlay').classList.add('open');
+            document.getElementById('referenceDrawer').classList.add('open');
+        }
+
+        function closeDrawer() {
+            state.drawerOpen = false;
+            state.drawerEntity = null;
+            document.getElementById('drawerOverlay').classList.remove('open');
+            document.getElementById('referenceDrawer').classList.remove('open');
+        }
+
+        function renderDrawer() {
+            const entity = state.drawerEntity;
+            if (!entity) return;
+
+            document.getElementById('drawerTitle').textContent = entity.name;
+            
+            let content = '';
+            const entityType = entity.entityType;
+            
+            if (entityType === 'product') {
+                const family = getEntity('family', entity.familyId);
+                content = `
+                    <div class="mini-tabs">
+                        <div class="mini-tab active">Overview</div>
+                        <div class="mini-tab">Details</div>
+                        <div class="mini-tab">Assets</div>
+                    </div>
+                    <div class="mini-tab-content">
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">SKU</span>
+                            <span class="field-value">${entity.sku}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Status</span>
+                            <span class="status-badge ${getStatusClass(entity.status)}">${entity.status}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Family</span>
+                            <span class="field-value">${family?.name || 'N/A'}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Price</span>
+                            <span class="field-value">$${entity.price}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Completeness</span>
+                            <span class="field-value">${entity.completeness}%</span>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <p style="font-size: 13px; color: var(--gray-600);">${entity.description}</p>
+                        </div>
+                    </div>
+                `;
+            } else if (entityType === 'family') {
+                const childCount = mockData.products.filter(p => p.familyId === entity.id).length;
+                content = `
+                    <div class="mini-tabs">
+                        <div class="mini-tab active">Overview</div>
+                        <div class="mini-tab">Children</div>
+                    </div>
+                    <div class="mini-tab-content">
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">SKU</span>
+                            <span class="field-value">${entity.sku}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Status</span>
+                            <span class="status-badge ${getStatusClass(entity.status)}">${entity.status}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Products</span>
+                            <span class="field-value">${childCount}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Completeness</span>
+                            <span class="field-value">${entity.completeness}%</span>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <p style="font-size: 13px; color: var(--gray-600);">${entity.description}</p>
+                        </div>
+                    </div>
+                `;
+            } else if (entityType === 'asset') {
+                content = `
+                    <div class="mini-tabs">
+                        <div class="mini-tab active">Preview</div>
+                        <div class="mini-tab">Metadata</div>
+                    </div>
+                    <div class="mini-tab-content">
+                        <div class="asset-preview" style="margin-bottom: 16px;">
+                            <div class="asset-preview-placeholder">
+                                ${entity.type === 'image' ? icons.asset : icons.file}
+                                <span>Preview</span>
+                            </div>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Type</span>
+                            <span class="field-value">${entity.type}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Format</span>
+                            <span class="field-value">${entity.format}</span>
+                        </div>
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Size</span>
+                            <span class="field-value">${entity.size}</span>
+                        </div>
+                        ${entity.dimensions ? `
+                            <div class="overview-field" style="margin-bottom: 12px;">
+                                <span class="field-label">Dimensions</span>
+                                <span class="field-value">${entity.dimensions}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else if (entityType === 'attributeSet') {
+                content = `
+                    <div class="mini-tab-content">
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Name</span>
+                            <span class="field-value">${entity.name}</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--gray-600); margin-top: 16px;">
+                            This attribute set defines the fields and validation rules for products in this family.
+                        </p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('drawerBody').innerHTML = content;
+            
+            // Update Open Full Page button
+            const openFullBtn = document.getElementById('drawerOpenFull');
+            if (entityType === 'product') {
+                openFullBtn.onclick = () => { closeDrawer(); navigate(`/products/${entity.id}`); };
+                openFullBtn.style.display = 'flex';
+            } else if (entityType === 'family') {
+                openFullBtn.onclick = () => { closeDrawer(); navigate(`/families/${entity.id}`); };
+                openFullBtn.style.display = 'flex';
+            } else if (entityType === 'asset') {
+                openFullBtn.onclick = () => { closeDrawer(); navigate(`/assets/${entity.id}`); };
+                openFullBtn.style.display = 'flex';
+            } else {
+                openFullBtn.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // EVENT HANDLERS
+        // ============================================
+        function switchTab(index) {
+            state.currentTab = index;
+            
+            // Update tab UI
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            
+            // Update content
+            const route = parseRoute(state.currentRoute);
+            let content = '';
+            
+            if (route.type === 'family') {
+                content = renderFamilyTabContent(state.currentEntity, index);
+            } else if (route.type === 'product') {
+                content = renderProductTabContent(state.currentEntity, index);
+            } else if (route.type === 'asset') {
+                content = renderAssetTabContent(state.currentEntity, index);
+            }
+            
+            document.getElementById('tabContent').innerHTML = content;
+        }
+
+        function toggleAccordion(header) {
+            const item = header.closest('.accordion-item');
+            item.classList.toggle('expanded');
+        }
+
+        function toggleDropdown(button) {
+            const menu = button.nextElementSibling;
+            menu.classList.toggle('open');
+            
+            // Close when clicking outside
+            const closeDropdown = (e) => {
+                if (!button.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.remove('open');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeDropdown), 0);
+        }
+
+        function toggleAllRows(checkbox) {
+            const checkboxes = document.querySelectorAll('tbody .table-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        function handleSave() {
+            showToast('Changes saved successfully', 'success');
+        }
+
+        function handleValidate() {
+            if (state.currentEntity.issues > 0) {
+                showToast(`Validation found ${state.currentEntity.issues} issues`, 'error');
+            } else {
+                showToast('Validation passed!', 'success');
+            }
+        }
+
+        function handlePublish() {
+            if (state.currentEntity.issues === 0) {
+                showToast('Published successfully!', 'success');
+            }
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        function setupSearch() {
+            const searchInput = document.getElementById('globalSearch');
+            searchInput.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value.toLowerCase();
+                // In a real app, this would filter/search results
+            });
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            console.log('PIM Init starting...');
+            try {
+                console.log('Rendering sidebar...');
+                renderSidebar();
+                console.log('Setting up search...');
+                setupSearch();
+                
+                console.log('Setting up event listeners...');
+                // Set up drawer close handlers
+                const drawerOverlay = document.getElementById('drawerOverlay');
+                const drawerClose = document.getElementById('drawerClose');
+                const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+                const backBtn = document.getElementById('backBtn');
+                
+                if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+                if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+                if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
+                if (backBtn) backBtn.addEventListener('click', goBack);
+                
+                // Handle browser back/forward with hash changes
+                window.addEventListener('hashchange', () => {
+                    const newPath = window.location.hash.substring(1) || '/families/fam-001';
+                    if (newPath !== state.currentRoute) {
+                        state.currentRoute = newPath;
+                        renderPage();
+                        updateBackButton();
+                        updateSidebarActive();
+                    }
+                });
+                
+                // Initial navigation - always start with families for local file viewing
+                // Check hash for navigation (works better with file:// protocol)
+                let initialPath = '/families/fam-001';
+                if (window.location.hash && window.location.hash.length > 1) {
+                    initialPath = window.location.hash.substring(1);
+                }
+                console.log('Navigating to:', initialPath);
+                navigate(initialPath, true);
+                console.log('PIM Init complete!');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                // Show error in the UI
+                const contentBody = document.getElementById('contentBody');
+                if (contentBody) {
+                    contentBody.innerHTML = '<div style="padding: 40px; color: red;">Error: ' + error.message + '</div>';
+                }
+            }
+        }
+
+        // Start the app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // Fallback: also try on window load
+        window.addEventListener('load', function() {
+            if (!state.currentEntity) {
+                console.log('Fallback initialization...');
+                init();
+            }
+        });
+    </script>
+</body>
+</html>

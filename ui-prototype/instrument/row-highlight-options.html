@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Row Highlight Options</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --primary-light: #e8f4fd;
+            --text: #333;
+            --text-muted: #666;
+            --text-light: #888;
+            --border: #e0e0e0;
+            --bg-subtle: #f8f9fa;
+            --bg-hover: #f0f0f0;
+            --radius: 6px;
+            
+            /* Filter/Sort indicator colors from your patterns */
+            --filter-bg: #f8e8f4;  /* Pink/magenta for filter */
+            --sort-border: #ccc;    /* Border for sort */
+            
+            /* New special row options */
+            --special-amber: #f59e0b;
+            --special-amber-light: #fef3c7;
+            --special-green: #10b981;
+            --special-green-light: #d1fae5;
+            --special-purple: #8b5cf6;
+            --special-purple-light: #ede9fe;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            font-size: 14px; 
+            color: var(--text); 
+            padding: 40px;
+            background: #f5f5f5;
+        }
+        
+        h1 { margin-bottom: 8px; font-size: 24px; }
+        .subtitle { color: var(--text-muted); margin-bottom: 32px; }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 32px;
+            padding: 16px 20px;
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .legend-title {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .legend-swatch {
+            width: 80px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .swatch-filter { background: var(--filter-bg); }
+        .swatch-sort { background: #fff; border: 2px solid var(--sort-border); }
+        .swatch-selected { background: var(--primary-light); }
+        
+        /* Section */
+        .section {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-subtle);
+        }
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .section-header p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .recommendation {
+            display: inline-block;
+            background: var(--special-green-light);
+            color: #059669;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { 
+            font-size: 11px; 
+            color: var(--text-light); 
+            font-weight: 600; 
+            letter-spacing: 0.5px; 
+            text-transform: uppercase;
+            background: var(--bg-subtle);
+        }
+        td { font-size: 13px; }
+        tr:last-child td { border-bottom: none; }
+        
+        .link { color: var(--primary); cursor: pointer; text-decoration: none; }
+        .link:hover { text-decoration: underline; }
+        .text-muted { color: var(--text-light); }
+        
+        /* Existing patterns */
+        tr.selected td { background: var(--primary-light); }
+        
+        /* === OPTION 1: Left Border Accent === */
+        tr.special-border td:first-child {
+            border-left: 4px solid var(--special-amber);
+            padding-left: 12px;
+        }
+        /* Can combine with selection */
+        tr.special-border.selected td:first-child {
+            border-left: 4px solid var(--special-amber);
+        }
+        
+        /* === OPTION 2: Icon/Badge Indicator === */
+        .special-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: var(--special-amber);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .special-indicator.star::before { content: "★"; }
+        .special-indicator.flag::before { content: "⚑"; font-size: 12px; }
+        .special-indicator.dot {
+            width: 8px;
+            height: 8px;
+            min-width: 8px;
+        }
+        
+        /* === OPTION 3: Warm Background Tint === */
+        tr.special-yellow td { background: #fef9c3; }
+        tr.special-yellow.selected td { 
+            background: linear-gradient(135deg, var(--primary-light) 0%, #fef9c3 100%);
+        }
+        
+        tr.special-green td { background: #dcfce7; }
+        tr.special-peach td { background: #ffedd5; }
+        
+        /* === OPTION 4: Text Treatment === */
+        tr.special-bold td { font-weight: 600; }
+        tr.special-bold .link { font-weight: 600; }
+        
+        /* === OPTION 5: Subtle Pattern === */
+        tr.special-striped td {
+            background: repeating-linear-gradient(
+                135deg,
+                transparent,
+                transparent 4px,
+                rgba(245, 158, 11, 0.08) 4px,
+                rgba(245, 158, 11, 0.08) 8px
+            );
+        }
+        
+        /* === OPTION 6: Combined - Border + Subtle Background === */
+        tr.special-combined td {
+            background: var(--special-amber-light);
+        }
+        tr.special-combined td:first-child {
+            border-left: 4px solid var(--special-amber);
+            padding-left: 12px;
+        }
+        tr.special-combined.selected td {
+            background: linear-gradient(90deg, var(--special-amber-light) 0%, var(--primary-light) 30%);
+        }
+        
+        /* Interactive demo */
+        .demo-controls {
+            padding: 16px 20px;
+            background: var(--bg-subtle);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .demo-controls label {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        
+        /* Notes */
+        .notes {
+            padding: 16px 20px;
+            background: #fffbeb;
+            border-top: 1px solid #fde68a;
+            font-size: 13px;
+            color: #92400e;
+        }
+        .notes strong { color: #78350f; }
+        
+        /* Combination demo table */
+        .combo-table tr:nth-child(2) td { background: var(--primary-light); } /* Selected */
+        .combo-table tr:nth-child(3) td:first-child { border-left: 4px solid var(--special-amber); padding-left: 12px; } /* Special */
+        .combo-table tr:nth-child(4) td { background: var(--primary-light); } /* Selected + Special */
+        .combo-table tr:nth-child(4) td:first-child { border-left: 4px solid var(--special-amber); padding-left: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Special Row Highlight Options</h1>
+    <p class="subtitle">Patterns that don't compete with Filter (pink), Sort (border), or Selection (blue)</p>
+    
+    <!-- Current Patterns Legend -->
+    <div class="legend">
+        <div>
+            <div class="legend-title">Your Current Patterns</div>
+            <div style="display: flex; gap: 24px;">
+                <div class="legend-item">
+                    <div class="legend-swatch swatch-filter">Sample</div>
+                    <span>Filter Applied</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-swatch swatch-sort">Sample</div>
+                    <span>Sort Applied</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-swatch swatch-selected">Sample</div>
+                    <span>Selected/Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Option 1: Left Border -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Option 1: Left Border Accent <span class="recommendation">Recommended</span></h2>
+            <p>A colored vertical stripe on the left edge. Works in a different visual dimension than backgrounds.</p>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Items</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-border">
+                    <td><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-border selected">
+                    <td><span class="link">iPhone 15 Pro 1TB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>✓ Pros:</strong> Combines well with selection highlight. Clear visual hierarchy. Doesn't compete with backgrounds.
+        </div>
+    </div>
+    
+    <!-- Option 2: Icon/Badge -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Option 2: Icon/Badge Indicator</h2>
+            <p>Small visual markers inline with content. Keeps row backgrounds neutral.</p>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Items</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr>
+                    <td><span class="special-indicator star"></span><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr>
+                    <td><span class="special-indicator flag"></span><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="selected">
+                    <td><span class="special-indicator dot"></span><span class="link">iPhone 15 Pro 1TB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>✓ Pros:</strong> Very flexible - can have different icon meanings. Works with any row state.<br>
+            <strong>✗ Cons:</strong> Less scannable at a glance than background/border treatments.
+        </div>
+    </div>
+    
+    <!-- Option 3: Warm Background -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Option 3: Warm Background Tint</h2>
+            <p>Light warm colors (yellow, green, peach) that are clearly distinct from blue selection.</p>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Items</th></tr></thead>
+            <tbody>
+                <tr class="special-yellow">
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-green">
+                    <td><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-peach">
+                    <td><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-yellow selected">
+                    <td><span class="link">iPhone 15 Pro 1TB</span> (special + selected)</td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>✓ Pros:</strong> Highly visible. Can encode different meanings with different colors.<br>
+            <strong>✗ Cons:</strong> May compete with pink filter indicator. Combined state with selection needs careful handling.
+        </div>
+    </div>
+    
+    <!-- Option 4: Text Treatment -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Option 4: Text Treatment</h2>
+            <p>Bold text to indicate special rows without changing backgrounds at all.</p>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Items</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-bold">
+                    <td><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td>Variant</td>
+                    <td>Active</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-bold selected">
+                    <td><span class="link">iPhone 15 Pro 1TB</span></td>
+                    <td>Variant</td>
+                    <td>Active</td>
+                    <td>—</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>✓ Pros:</strong> Completely compatible with all other states. Subtle and professional.<br>
+            <strong>✗ Cons:</strong> Less noticeable. May not be sufficient for important callouts.
+        </div>
+    </div>
+    
+    <!-- Option 5: Pattern -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Option 5: Subtle Pattern</h2>
+            <p>Diagonal stripes that read as "special" but don't block other visual treatments.</p>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Items</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-striped">
+                    <td><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td class="text-muted">—</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>✓ Pros:</strong> Distinctive. Doesn't use solid colors that might conflict.<br>
+            <strong>✗ Cons:</strong> Can look busy. May cause visual fatigue with many special rows.
+        </div>
+    </div>
+    
+    <!-- Option 6: Combined -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Option 6: Combined - Border + Background</h2>
+            <p>Left border accent with very subtle background for maximum visibility.</p>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Items</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-combined">
+                    <td><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td class="text-muted">—</td>
+                </tr>
+                <tr class="special-combined selected">
+                    <td><span class="link">iPhone 15 Pro 1TB</span> (special + selected)</td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">—</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>✓ Pros:</strong> Very clear. Gradient transition works for combined states.<br>
+            <strong>✗ Cons:</strong> More complex. The amber background may feel close to filter pink.
+        </div>
+    </div>
+    
+    <!-- Final Comparison -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Real-World Scenario: All States Together</h2>
+            <p>How the recommended left-border approach works with normal, selected, and special rows.</p>
+        </div>
+        <table class="combo-table">
+            <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>State</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 128GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td class="text-muted">Normal</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 256GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td>Selected</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 512GB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Draft</td>
+                    <td>Special (flagged)</td>
+                </tr>
+                <tr>
+                    <td><span class="link">iPhone 15 Pro 1TB</span></td>
+                    <td class="text-muted">Variant</td>
+                    <td>Active</td>
+                    <td>Special + Selected</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="notes">
+            <strong>Summary:</strong> The left-border accent (Option 1) works best because it uses a different visual dimension (edge vs. fill), 
+            doesn't interfere with selection highlighting, and clearly distinguishes "special" from filter/sort indicators.
+        </div>
+    </div>
+</body>
+</html>

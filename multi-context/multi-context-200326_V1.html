@@ -1,0 +1,5079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Context Tab - Product Details</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    /* ==================== MAIN PAGE STYLES ==================== */
+
+    /* Top Header Bar */
+    .top-header {
+      background: #004F5F;
+      color: white;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 64px;
+      box-sizing: border-box;
+    }
+
+    .top-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .product-icon {
+      width: 32px;
+      height: 32px;
+      background: #1e5f8a;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .product-subtitle {
+      font-size: 11px;
+      color: #8ecae6;
+    }
+
+    .top-header-center {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .context-badge {
+      background: rgba(255,255,255,0.15);
+      padding: 4px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
+    .top-header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-box {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      color: white;
+      width: 200px;
+    }
+
+    .search-box::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Toolbar */
+    .main-toolbar {
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .toolbar-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      min-width: 80px;
+      width: 80px;
+      gap: 4px;
+    }
+
+    .toolbar-btn:hover .toolbar-btn-icon {
+      background: #d8d8d8;
+    }
+
+    .toolbar-btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      width: 64px;
+      height: 24px;
+      color: #444;
+      background: #e8e8e8;
+      border-radius: 4px;
+    }
+
+    .toolbar-btn-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .toolbar-btn-caret {
+      font-size: 8px;
+      color: #666;
+      margin-left: 1px;
+    }
+
+    .toolbar-btn-label {
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .view-dropdown-container {
+      position: relative;
+    }
+
+    .view-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 200;
+      min-width: 140px;
+    }
+
+    .view-dropdown.show {
+      display: block;
+    }
+
+    .view-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .view-option:hover {
+      background: #f5f5f5;
+    }
+
+    .view-option input[type="checkbox"] {
+      margin: 0;
+      accent-color: #0078d4;
+    }
+
+    .toolbar-separator {
+      width: 1px;
+      height: 28px;
+      background: #d0d0d0;
+      margin: 0 4px;
+    }
+
+    .toolbar-spacer {
+      flex: 1;
+    }
+
+    /* Inline zoom control - styled like toolbar-btn */
+    .zoom-control-inline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px;
+      border: none;
+      background: transparent;
+      min-width: 40px;
+      gap: 4px;
+    }
+
+    .zoom-control-inline .zoom-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #444;
+      font-size: 12px;
+      background: #e8e8e8;
+      border-radius: 4px;
+      padding: 0 8px;
+      height: 24px;
+    }
+
+    .zoom-control-inline:hover .zoom-slider-row {
+      background: #d8d8d8;
+    }
+
+    .zoom-control-inline input[type="range"] {
+      width: 50px;
+      height: 4px;
+    }
+
+    .zoom-control-inline .zoom-label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* Tabs Row */
+    .tabs-row {
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 16px;
+      display: flex;
+      gap: 0;
+    }
+
+    .tab-item {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-item:hover {
+      color: #333;
+    }
+
+    .tab-item.active {
+      color: #0078d4;
+      border-bottom-color: #0078d4;
+    }
+
+    .tab-icon {
+      color: #999;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb-container {
+      background: #e8e8e8;
+      padding: 8px 16px;
+      border-bottom: 1px solid #d0d0d0;
+    }
+
+    .breadcrumb {
+      background: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .breadcrumb a {
+      color: #0078d4;
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* Product Header */
+    .product-header {
+      background: white;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .product-image {
+      width: 64px;
+      height: 64px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 24px;
+    }
+
+    .product-info h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .product-meta {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Content Tabs */
+    .content-tabs {
+      background: white;
+      padding: 0 20px;
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .content-tab {
+      padding: 12px 20px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .content-tab:hover {
+      color: #333;
+    }
+
+    .content-tab.active {
+      color: #333;
+      border-bottom-color: #0078d4;
+      font-weight: 500;
+    }
+
+    /* Content Area */
+    .content-area {
+      background: white;
+      margin: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Multi-context Toolbar */
+    .mc-toolbar {
+      padding: 8px 16px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      position: sticky;
+      top: 0;
+      z-index: 150;
+    }
+
+    .mc-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mc-toolbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Zoom label styling */
+    .zoom-label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .zoom-minus, .zoom-plus {
+      cursor: pointer;
+      user-select: none;
+      z-index: 100;
+    }
+
+    /* Row highlighting for different values */
+    .mc-table tr.row-different td {
+      background: #fff8e6 !important;
+    }
+
+    .mc-table tr.row-different td:first-child {
+      background: #fff3cc !important;
+    }
+    
+    /* For accordion child rows, keep first cell white and apply yellow to inner content */
+    .mc-table tr.row-different.attr-row[data-section-child] td:first-child {
+      background: white !important;
+    }
+    
+    .mc-table tr.row-different.attr-row[data-section-child] td:first-child .attr-name {
+      background: #fff3cc !important;
+    }
+    
+    .mc-table tr.row-different.attr-row[data-section-child] td:not(:first-child) {
+      background: #fff8e6 !important;
+    }
+
+    .mc-table tr.row-hidden {
+      display: none;
+    }
+    
+    /* Row hover state */
+    .mc-table tr.attr-row:hover td {
+      background: #f5f7fa !important;
+    }
+    
+    .mc-table tr.attr-row:hover td:first-child {
+      background: #e8ebef !important;
+    }
+    
+    /* For accordion child rows, keep first cell white and apply hover to inner content */
+    .mc-table tr.attr-row[data-section-child]:hover td:first-child {
+      background: white !important;
+    }
+    
+    .mc-table tr.attr-row[data-section-child]:hover td:first-child .attr-name {
+      background: #e8ebef !important;
+    }
+    
+    .mc-table tr.attr-row[data-section-child]:hover td:not(:first-child) {
+      background: #f5f7fa !important;
+    }
+    
+    /* Hover combined with row-different */
+    .mc-table tr.row-different.attr-row:hover td {
+      background: #fff0cc !important;
+    }
+    
+    .mc-table tr.row-different.attr-row:hover td:first-child {
+      background: #ffe8a8 !important;
+    }
+    
+    .mc-table tr.row-different.attr-row[data-section-child]:hover td:first-child {
+      background: white !important;
+    }
+    
+    .mc-table tr.row-different.attr-row[data-section-child]:hover td:first-child .attr-name {
+      background: #ffe8a8 !important;
+    }
+    
+    .mc-table tr.row-different.attr-row[data-section-child]:hover td:not(:first-child) {
+      background: #fff0cc !important;
+    }
+
+    .zoom-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .zoom-control input[type="range"] {
+      width: 80px;
+    }
+
+    /* ========================================
+       SHARED DATA TABLE COMPONENT
+       Used by both main table and modal table
+       ======================================== */
+    
+    /* Table Container */
+    .data-table-container {
+      background: white;
+      overflow: auto;
+      border: 1px solid #d0d0d0;
+    }
+
+    .data-table-container::before {
+      content: '';
+      display: block;
+      height: 12px;
+      position: sticky;
+      top: 0;
+      left: 0;
+      background: white;
+      z-index: 130;
+    }
+
+    /* Base Table */
+    .data-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border: none;
+    }
+
+    .data-table th,
+    .data-table td {
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* Table Header */
+    .data-table th {
+      background: #B0BEC5;
+      color: #333;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 8px 12px;
+      text-align: left;
+      position: sticky;
+      top: 12px;
+      z-index: 120;
+      border-bottom: 1px solid #9aa8b0;
+      border-left: 1px solid #9aa8b0;
+    }
+
+    .data-table th:first-child {
+      border-left: none;
+      position: sticky;
+      left: 0;
+      z-index: 125;
+    }
+
+    /* Table Cells */
+    .data-table td {
+      padding: 8px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #d0d0d0;
+      border-left: 1px solid #d0d0d0;
+      vertical-align: middle;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .data-table td:first-child {
+      border-left: none;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: #eef0f2;
+    }
+
+    /* Collapsible Section Row */
+    .data-table .collapsible-row td {
+      background: white;
+      padding: 0;
+      border: none;
+    }
+
+    .data-table .collapsible-row td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: white;
+    }
+
+    .collapsible-toggle {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      padding: 8px 8px 8px 12px;
+    }
+
+    .collapsible-toggle:hover {
+      background: #eef0f2;
+    }
+
+    .collapsible-toggle-icon {
+      font-size: 16px;
+      color: #555;
+      transition: transform 0.15s ease;
+      width: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(90deg);
+    }
+
+    .collapsible-row.collapsed .collapsible-toggle-icon {
+      transform: rotate(0deg);
+    }
+
+    /* Content Rows (indented within sections) */
+    .data-table .content-row td {
+      padding: 0;
+      vertical-align: stretch;
+      background: white;
+    }
+
+    .data-table .content-row td:first-child {
+      border: none;
+      background: white;
+    }
+
+    .data-table .content-row td:first-child .cell-content {
+      margin-left: 24px;
+      padding: 8px 12px;
+      background: #eef0f2;
+      border-left: 1px solid #d0d0d0;
+      border-bottom: 1px solid #d0d0d0;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+    }
+
+    .data-table .content-row td:not(:first-child) {
+      border-bottom: 1px solid #d0d0d0;
+      border-left: 1px solid #d0d0d0;
+      padding: 8px 12px;
+    }
+
+    .data-table .content-row td:last-child {
+      border-right: 1px solid #d0d0d0;
+    }
+
+    /* First content row after collapsible - add top border */
+    .collapsible-row + .content-row td:first-child .cell-content {
+      border-top: 1px solid #d0d0d0;
+    }
+
+    .collapsible-row + .content-row td:not(:first-child) {
+      border-top: 1px solid #d0d0d0;
+    }
+
+    /* Hidden rows when collapsed */
+    .data-table .row-hidden {
+      display: none !important;
+    }
+
+    /* Read-only cells */
+    .data-table td.readonly {
+      background: #eef0f2;
+      color: #666;
+      cursor: default;
+    }
+
+    .data-table .content-row td.readonly {
+      background: #eef0f2;
+    }
+
+    /* Column resize handle */
+    .col-resize-handle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 25;
+    }
+
+    .col-resize-handle:hover,
+    .col-resize-handle.resizing {
+      background: #0078d4;
+    }
+
+    /* Cell content wrapper */
+    .cell-content {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cell-content .icon {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      flex-shrink: 0;
+    }
+
+    .cell-content .icon.placeholder {
+      visibility: hidden;
+    }
+
+    /* ========================================
+       MAIN PAGE SPECIFIC OVERRIDES
+       ======================================== */
+
+    /* Multi-context Table */
+    .mc-table-container {
+      padding: 0;
+      background: white;
+      flex: 1;
+      overflow: auto;
+      margin: 0 16px 16px 16px;
+    }
+
+    .mc-table-container::before {
+      content: '';
+      display: block;
+      height: 12px;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 130;
+    }
+
+    .mc-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border: 1px solid #d0d0d0;
+      width: 840px; /* 240 + 3*200 */
+    }
+
+    .mc-table th {
+      background: #B0BEC5;
+      color: #333;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 8px 12px;
+      text-align: left;
+      position: sticky;
+      top: 12px;
+      z-index: 120;
+      border-bottom: 1px solid #9aa8b0;
+      border-left: 1px solid #9aa8b0;
+    }
+
+    .mc-table th:first-child {
+      width: 240px;
+      min-width: 100px;
+      border-left: none;
+      position: sticky;
+      left: 0;
+      z-index: 125;
+    }
+
+    /* Column resize handle */
+    .col-resize-handle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 25;
+    }
+
+    .col-resize-handle:hover,
+    .col-resize-handle.resizing {
+      background: #0078d4;
+    }
+
+    .mc-table th:not(:first-child) {
+      width: 200px;
+      min-width: 80px;
+    }
+
+    .mc-table td {
+      padding: 8px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #d0d0d0;
+      border-left: 1px solid #d0d0d0;
+      vertical-align: middle;
+      height: var(--row-height, 30px);
+      max-height: var(--row-height, 30px);
+      overflow: hidden;
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .mc-table td:first-child {
+      border-left: none;
+      background: #eef0f2;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+    }
+
+    /* Sticky rows for Name and Approval status - must come after .mc-table td rules */
+    .sticky-row td {
+      position: sticky;
+      z-index: 110;
+      background: white;
+    }
+
+    .sticky-row-1 td {
+      top: 45px;
+      border-bottom: 1px solid #d0d0d0;
+    }
+
+    .sticky-row-2 td {
+      top: 75px;
+      border-bottom: 1px solid #d0d0d0;
+    }
+
+    .sticky-row td:first-child {
+      background: #eef0f2;
+      z-index: 115;
+      left: 0;
+    }
+
+    .sticky-row td[contenteditable="true"] {
+      background: white;
+    }
+
+    .sticky-row td.mc-readonly {
+      background: #eef0f2;
+    }
+
+    /* Section Headers (Main Table) */
+    .section-row td {
+      background: white !important;
+      padding: 0 !important;
+      border: none !important;
+      height: 36px;
+      box-sizing: border-box;
+    }
+    
+    .mc-table .section-row td.section-header-cell {
+      position: sticky;
+      left: 0;
+      inset-inline-start: 0;
+      z-index: 5;
+      background: white !important;
+      padding: 0 !important;
+      border-left: none !important;
+      overflow: visible;
+    }
+
+    .section-toggle {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      padding: 0 8px 0 12px;
+      height: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .section-toggle:hover {
+      background: #eef0f2;
+    }
+
+    .section-toggle-icon {
+      font-size: 16px;
+      color: #555;
+      transition: transform 0.15s ease;
+      width: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(90deg);
+      margin: 0;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .section-row.collapsed .section-toggle-icon {
+      transform: rotate(0deg);
+    }
+
+    .section-row.collapsed + .attr-row,
+    .section-row.collapsed ~ .attr-row:not(.section-row ~ .attr-row) {
+      display: none;
+    }
+
+    tr.section-child-hidden {
+      display: none !important;
+    }
+
+    /* Attribute Row */
+    .attr-row td:first-child {
+      padding-left: 12px;
+    }
+
+    /* Rows within sections - indented sub-table effect */
+    .attr-row[data-section-child] td {
+      padding: 0 !important;
+      height: var(--row-height, 30px);
+      vertical-align: stretch;
+    }
+    
+    .attr-row[data-section-child] td:not(.mc-readonly):not(:first-child) {
+      background: white;
+    }
+    
+    .attr-row[data-section-child] td.mc-readonly {
+      background: #eef0f2 !important;
+    }
+    
+    .attr-row[data-section-child] td:first-child {
+      border-left: none !important;
+      border-bottom: none !important;
+      background: white !important;
+    }
+    
+    .attr-row[data-section-child] td:first-child .attr-name {
+      margin-left: 24px;
+      padding: 8px 12px;
+      background: #eef0f2;
+      border-left: 1px solid #d0d0d0;
+      border-bottom: 1px solid #d0d0d0;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+    }
+    
+    .attr-row[data-section-child] td:not(:first-child) {
+      border-bottom: 1px solid #d0d0d0;
+      border-left: 1px solid #d0d0d0 !important;
+      padding: 8px 12px !important;
+    }
+    
+    .attr-row[data-section-child] td:last-child {
+      border-right: 1px solid #d0d0d0;
+    }
+    
+    /* First row of section - add top border to content */
+    .section-row + .attr-row[data-section-child] td:first-child .attr-name {
+      border-top: 1px solid #d0d0d0;
+    }
+    
+    .section-row + .attr-row[data-section-child] td:not(:first-child) {
+      border-top: 1px solid #d0d0d0;
+    }
+
+    .attr-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .attr-name-text {
+      display: inline-block;
+    }
+
+    .attr-icon {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: help;
+    }
+
+    .attr-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .attr-icon.placeholder {
+      visibility: hidden;
+    }
+
+    /* Reference Links */
+    .ref-link {
+      color: #0078d4;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .ref-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Reference Chips */
+    .ref-chips {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 4px;
+      align-items: center;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .ref-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      position: relative;
+      border-radius: 3px;
+      padding: 2px 8px;
+      font-size: 12px;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+      min-width: 60px;
+    }
+
+    .ref-chip-icon {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .ref-chip-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .ref-chip-more {
+      background: #e8e8e8;
+      color: #666;
+      flex-shrink: 0;
+      padding: 2px 6px;
+      min-width: auto;
+    }
+
+    .ref-chip-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 2px;
+      object-fit: cover;
+      background: #ddd;
+      flex-shrink: 0;
+    }
+
+    .ref-chip-thumb-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .ref-chip-thumb-wrapper .thumb-tooltip {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 4px;
+      pointer-events: none;
+    }
+
+    .thumb-tooltip img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 2px;
+      display: block;
+    }
+
+    .modal-thumbnail {
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    .thumbnail-cell {
+      padding: 4px 8px !important;
+    }
+
+    .thumbnail-row .property-value {
+      min-height: auto;
+    }
+
+    /* Hatched Pattern */
+    .not-available {
+      background: repeating-linear-gradient(
+        -55deg,
+        #f8f8f8,
+        #f8f8f8 2px,
+        #efefef 2px,
+        #efefef 4px
+      ) !important;
+    }
+
+    .mc-readonly {
+      background: #eef0f2 !important;
+      color: #666;
+      cursor: default;
+    }
+
+    .mc-editable {
+      cursor: text;
+    }
+
+    .mc-editable:hover {
+      background: #f0f7ff;
+    }
+
+    .mc-editable:focus {
+      outline: 2px solid #0078d4;
+      outline-offset: -2px;
+      background: white;
+    }
+
+    .mc-table td[contenteditable="true"] {
+      cursor: text;
+      background: white;
+    }
+
+    .mc-table td[contenteditable="true"]:hover {
+      background: #f0f7ff;
+    }
+
+    .mc-table td[contenteditable="true"]:focus {
+      outline: 2px solid #0078d4;
+      outline-offset: -2px;
+      background: white;
+    }
+
+    .mc-cell-clickable {
+      cursor: pointer;
+      background: white;
+    }
+
+    .mc-cell-clickable:hover {
+      background: #f0f7ff;
+    }
+
+    .mc-readonly.mc-cell-clickable:hover {
+      background: #f0f0f0;
+    }
+
+    /* Inline Add Popover */
+    .inline-add-popover {
+      position: fixed;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      width: 280px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .inline-add-popover.visible {
+      display: block;
+    }
+
+    .inline-add-search {
+      padding: 8px 12px;
+    }
+
+    .inline-add-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .inline-add-input:focus {
+      outline: none;
+      border-color: #0078d4;
+    }
+
+    .inline-existing-chips {
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      border-top: 1px solid #eee;
+      min-height: 36px;
+    }
+
+    .inline-existing-chips:empty {
+      display: none;
+    }
+
+    .inline-existing-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 4px 6px;
+      font-size: 12px;
+      color: #333;
+    }
+
+    .inline-existing-chip img {
+      width: 20px;
+      height: 20px;
+      border-radius: 2px;
+      object-fit: cover;
+    }
+
+    .inline-chip-remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #888;
+      padding: 0;
+      margin-left: 2px;
+      border-radius: 50%;
+    }
+
+    .inline-chip-remove:hover {
+      background: #ddd;
+      color: #333;
+    }
+
+    .inline-add-results {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .inline-add-item {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inline-add-item:hover {
+      background: #f0f7ff;
+    }
+    
+    .inline-add-item.already-added {
+      color: #888;
+      cursor: default;
+    }
+    
+    .inline-add-item.already-added:hover {
+      background: transparent;
+    }
+    
+    .inline-add-item.already-added .inline-add-item-icon {
+      color: #4caf50;
+    }
+
+    .inline-add-item-icon {
+      color: #666;
+    }
+
+    .inline-add-empty {
+      padding: 12px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+
+    /* Page Container */
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Main Layout with Sidebar */
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Main Top Section (toolbar, tabs, breadcrumb, product header, content tabs) */
+    .main-top-section {
+      flex-shrink: 0;
+    }
+
+    /* Main Content Section (sidebar + content area) */
+    .main-content-section {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Collapsed Sidebar Panel */
+    .sidebar-panel {
+      width: 48px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 12px 8px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-size: 16px;
+      color: #666;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    .sidebar-label:hover {
+      color: #333;
+    }
+
+    /* Item Count */
+    .item-count {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #888;
+      background: #fafafa;
+      border: 1px solid #d0d0d0;
+      border-top: none;
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      width: fit-content;
+      min-width: 840px;
+      box-sizing: border-box;
+    }
+
+    /* ==================== MODAL STYLES ==================== */
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 95%;
+      max-width: 1000px;
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #e5e5e5;
+      position: relative;
+    }
+
+    .modal-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      color: #888;
+      cursor: help;
+    }
+
+    .header-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .modal-header .subtitle {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #888;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    /* Modal Toolbar */
+    .modal-toolbar {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      border-bottom: 1px solid #e5e5e5;
+      gap: 8px;
+      background: white;
+    }
+
+    .modal-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .modal-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-left: auto;
+    }
+    
+    .modal-view-dropdown-container {
+      position: relative;
+    }
+    
+    .modal-view-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 200;
+      min-width: 160px;
+      padding: 8px 0;
+    }
+    
+    .modal-view-dropdown.show {
+      display: block;
+    }
+
+    .modal-toolbar-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px;
+      min-width: 80px;
+      width: 80px;
+      gap: 4px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .modal-toolbar-btn:hover .modal-toolbar-btn-top {
+      background: #d8d8d8;
+    }
+
+    .modal-toolbar-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-toolbar-btn-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      background: #e8e8e8;
+      border-radius: 4px;
+      width: 64px;
+      height: 24px;
+    }
+
+    .modal-toolbar-btn-icon {
+      font-size: 16px;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .modal-toolbar-btn-caret {
+      font-size: 8px;
+      color: #666;
+    }
+
+    .modal-toolbar-btn-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Modal Content */
+    .modal-content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================================
+       MODAL TABLE
+       Extends shared .data-table component
+       ======================================== */
+
+    /* Container - extends .data-table-container */
+    .reference-table-container {
+      background: white;
+      overflow: auto;
+      margin: 12px 16px 16px 16px;
+      flex: 1;
+    }
+
+    /* Table - extends .data-table */
+    .reference-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border: 1px solid #d0d0d0;
+    }
+
+    .reference-table th {
+      background: #B0BEC5;
+      color: #333;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 8px 12px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 120;
+      border-bottom: 1px solid #9aa8b0;
+      border-left: 1px solid #9aa8b0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .reference-table th:first-child {
+      border-left: none;
+      position: sticky;
+      left: 0;
+      z-index: 125;
+    }
+
+    .reference-table td {
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* Accordion Row - extends .collapsible-row */
+    .accordion-row td {
+      background: white;
+      padding: 0;
+      border: none;
+      height: 36px;
+      overflow: hidden;
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .accordion-row td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: white;
+    }
+
+    .accordion-row:hover td {
+      background: #eef0f2;
+    }
+
+    /* Accordion Header - extends .collapsible-toggle */
+    .accordion-header {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      padding: 0 8px 0 12px;
+      height: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .accordion-toggle {
+      font-size: 16px;
+      color: #555;
+      transition: transform 0.15s ease;
+      width: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(90deg);
+    }
+
+    .accordion-row:not(.expanded) .accordion-toggle {
+      transform: rotate(0deg);
+    }
+
+    .accordion-checkbox {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      margin: 0;
+      accent-color: #0078d4;
+    }
+
+    .accordion-title {
+      font-size: 13px;
+      color: #333;
+      margin-left: 4px;
+    }
+
+    /* Property Row - extends .content-row */
+    .property-row td {
+      padding: 0;
+      font-size: 13px;
+      vertical-align: middle;
+      overflow: hidden;
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      background: white;
+      height: 36px;
+    }
+
+    .property-row td:first-child {
+      border: none;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: white;
+    }
+
+    .property-row td:first-child .property-name {
+      margin-left: 24px;
+      padding: 0 12px;
+      background: #eef0f2;
+      border-left: 1px solid #d0d0d0;
+      border-bottom: 1px solid #d0d0d0;
+      height: 36px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+    }
+
+    .property-row td:not(:first-child) {
+      border-bottom: 1px solid #d0d0d0;
+      border-left: 1px solid #d0d0d0;
+      padding: 0 12px;
+      vertical-align: middle;
+      height: 36px;
+    }
+
+    .property-row td:last-child {
+      border-right: 1px solid #d0d0d0;
+    }
+
+    /* First property row after accordion - add top border */
+    .accordion-row + .property-row td:first-child .property-name {
+      border-top: 1px solid #d0d0d0;
+    }
+
+    .accordion-row + .property-row td:not(:first-child) {
+      border-top: 1px solid #d0d0d0;
+    }
+
+    .property-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #333;
+    }
+
+    .property-name .icon {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      cursor: help;
+    }
+
+    .property-name .icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .property-name .icon.placeholder {
+      visibility: hidden;
+    }
+
+    /* Property value styling */
+    .property-value {
+      color: #333;
+      padding: 4px 8px;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+    }
+
+    .property-value.readonly {
+      color: #666;
+      background: #eef0f2;
+      cursor: default;
+    }
+    
+    /* Modal table row hover state */
+    .reference-table tr.property-row:hover td:first-child {
+      background: white !important;
+    }
+    
+    .reference-table tr.property-row:hover td:first-child .property-name {
+      background: #e8ebef !important;
+    }
+    
+    .reference-table tr.property-row:hover td:not(:first-child) {
+      background: #f5f7fa !important;
+    }
+
+    /* Make entire cell grey for read-only rows */
+    td:has(.property-value.readonly) {
+      background: #eef0f2;
+    }
+
+    .thumbnail-row td:not(:first-child) {
+      background: #eef0f2;
+    }
+
+    .property-value.editable {
+      cursor: text;
+      border-radius: 3px;
+      background: white;
+    }
+
+    .property-value.editable:hover {
+      background: #f0f0f0;
+    }
+
+    .property-value.editable:focus {
+      outline: 2px solid #0078d4;
+      background: white;
+    }
+
+    .ref-not-available {
+      background: repeating-linear-gradient(
+        -55deg,
+        #f8f8f8,
+        #f8f8f8 2px,
+        #efefef 2px,
+        #efefef 4px
+      ) !important;
+    }
+
+    /* Modal Item Count */
+    .modal-item-count {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #888;
+      background: #fafafa;
+      border: 1px solid #d0d0d0;
+      border-top: none;
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      box-sizing: border-box;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 24px;
+      border-top: 1px solid #d5dce3;
+      background: linear-gradient(to bottom, #e8edf2 0%, #dde3e9 100%);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #f5f5f5;
+    }
+
+    .btn-secondary {
+      background: white;
+      border-color: #bbb;
+      color: #333;
+    }
+
+    .btn-primary {
+      background: #0096d6;
+      border-color: #0096d6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #007ab8;
+    }
+
+    .btn-primary:disabled {
+      background: #b8d4e8;
+      border-color: #b8d4e8;
+      cursor: not-allowed;
+    }
+
+    .btn-danger {
+      background: #d32f2f;
+      border-color: #d32f2f;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #b71c1c;
+    }
+
+    /* Popover */
+    .popover {
+      position: fixed;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+      width: 400px;
+      z-index: 1100;
+      display: none;
+    }
+
+    .popover.visible {
+      display: block;
+    }
+
+    .popover-header {
+      padding: 18px 20px 16px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    .popover-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .popover-body {
+      padding: 18px 20px 12px;
+    }
+
+    .info-banner {
+      background: #e8f4fd;
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      align-items: flex-start;
+    }
+
+    .info-banner-icon {
+      color: #0078d4;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .info-banner-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .info-banner-text {
+      color: #555;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 8px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-label.required::before {
+      content: '* ';
+      color: #c41e3a;
+    }
+
+    .form-value {
+      font-size: 13px;
+      color: #333;
+      padding: 2px 0;
+    }
+
+    /* Items Field */
+    .items-field-container {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      position: relative;
+    }
+
+    .items-field-container:focus-within {
+      border-color: #0078d4;
+      box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+    }
+
+    .items-search-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .items-tags-list {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 120px;
+      overflow-y: auto;
+      border-bottom: 1px solid #eee;
+    }
+
+    .items-tags-list:empty {
+      display: none;
+      border-bottom: none;
+    }
+
+    .item-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .item-tag-icon {
+      color: #666;
+    }
+
+    .item-tag-name {
+      flex: 1;
+    }
+
+    .item-tag-remove {
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      padding: 0 4px;
+      font-size: 14px;
+    }
+
+    .item-tag-remove:hover {
+      color: #666;
+    }
+
+    .open-picker-link {
+      display: block;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #0078d4;
+      text-decoration: none;
+      border-top: 1px solid #eee;
+    }
+
+    .open-picker-link:hover {
+      background: #f8f8f8;
+      text-decoration: underline;
+    }
+
+    /* Typeahead */
+    .typeahead-dropdown {
+      position: absolute;
+      top: 100%;
+      left: -1px;
+      right: -1px;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .typeahead-dropdown.visible {
+      display: block;
+    }
+
+    .typeahead-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .typeahead-item:hover {
+      background: #f5f5f5;
+    }
+
+    .typeahead-item-icon {
+      color: #666;
+    }
+
+
+    .popover-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 20px;
+      border-top: 1px solid #e8e8e8;
+      background: #fafafa;
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* Remove Modal */
+    .remove-modal {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 440px;
+      max-width: 95%;
+    }
+
+    .remove-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .remove-modal-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .remove-modal-body {
+      padding: 20px 24px;
+    }
+
+    .remove-items-summary {
+      background: #f5f5f5;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .context-select-list {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .context-select-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .context-select-item:last-child {
+      border-bottom: none;
+    }
+
+    .context-select-item:hover {
+      background: #f8f8f8;
+    }
+
+    .context-select-item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      accent-color: #0078d4;
+    }
+
+    .remove-select-actions {
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .select-link {
+      color: #0078d4;
+      text-decoration: none;
+    }
+
+    .select-link:hover {
+      text-decoration: underline;
+    }
+
+    .select-divider {
+      color: #ccc;
+      margin: 0 6px;
+    }
+
+    .remove-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 24px;
+      border-top: 1px solid #e5e5e5;
+    }
+
+    /* Advanced Picker Modal */
+    .advanced-picker {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 700px;
+      max-width: 95%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .picker-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .picker-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .picker-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .picker-sidebar {
+      width: 200px;
+      border-right: 1px solid #e5e5e5;
+      padding: 12px 0;
+      overflow-y: auto;
+    }
+
+    .picker-sidebar-item {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .picker-sidebar-item:hover {
+      background: #f5f5f5;
+    }
+
+    .picker-sidebar-item.active {
+      background: #e3f2fd;
+      color: #1565c0;
+      font-weight: 500;
+    }
+
+    .picker-main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .picker-search {
+      margin-bottom: 16px;
+    }
+
+    .picker-search input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .picker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .picker-item {
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .picker-item:hover {
+      border-color: #0078d4;
+      background: #f8f8f8;
+    }
+
+    .picker-item.selected {
+      border-color: #0078d4;
+      background: #e3f2fd;
+    }
+
+    .picker-item-icon {
+      width: 40px;
+      height: 40px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .picker-item-name {
+      font-size: 12px;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .picker-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e5e5e5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .picker-selected-count {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      z-index: 2000;
+      transition: transform 0.3s ease;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #666;
+      padding: 40px;
+    }
+
+    .empty-state-icon {
+      width: 44px;
+      height: 44px;
+      background: #d0d0d0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: white;
+    }
+
+    .empty-state h3 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      margin-bottom: 14px;
+      color: #666;
+    }
+
+    .empty-state .link {
+      color: #0078d4;
+      cursor: pointer;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <!-- Top Header -->
+    <div class="top-header">
+      <div class="top-header-left">
+        <div class="product-icon">📦</div>
+        <div>
+          <div class="product-title">Summer collection 2026</div>
+          <div class="product-subtitle">Nothing to save</div>
+        </div>
+      </div>
+      <div class="top-header-center">
+        <span class="context-badge">English (US)</span>
+        <span class="context-badge">Main</span>
+      </div>
+      <div class="top-header-right">
+        <input type="text" class="search-box" placeholder="Search">
+      </div>
+    </div>
+
+    <!-- Main Layout with Sidebar -->
+    <div class="main-layout">
+      <!-- Top Section (full width toolbar and tabs) -->
+      <div class="main-top-section">
+        <!-- Main Toolbar -->
+        <div class="main-toolbar">
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 4h8M5 7h4M7 10h0"/>
+              </svg>
+            </span>
+            <span class="toolbar-btn-label">Sort</span>
+          </button>
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M2 4h10M4 7h6M6 10h2"/>
+              </svg>
+            </span>
+            <span class="toolbar-btn-label">Filter</span>
+          </button>
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="7" y1="3" x2="7" y2="11"/>
+                <line x1="3" y1="7" x2="11" y2="7"/>
+              </svg>
+              <span class="toolbar-btn-caret">▾</span>
+            </span>
+            <span class="toolbar-btn-label">Create</span>
+          </button>
+          <div class="toolbar-separator"></div>
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="2" width="4" height="4" rx="0.5"/>
+                <rect x="8" y="2" width="4" height="4" rx="0.5"/>
+                <rect x="2" y="8" width="4" height="4" rx="0.5"/>
+                <rect x="8" y="8" width="4" height="4" rx="0.5"/>
+              </svg>
+            </span>
+            <span class="toolbar-btn-label">References</span>
+          </button>
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="6" cy="6" r="4"/>
+                <line x1="9" y1="9" x2="12" y2="12"/>
+              </svg>
+            </span>
+            <span class="toolbar-btn-label">Inspect</span>
+          </button>
+          <div class="toolbar-spacer"></div>
+          <div class="zoom-control-inline">
+            <div class="zoom-slider-row">
+              <span class="zoom-minus">−</span>
+              <input type="range" min="0.3" max="1" step="0.1" value="0.5">
+              <span class="zoom-plus">+</span>
+            </div>
+            <span class="zoom-label">Zoom</span>
+          </div>
+        </div>
+
+    <!-- Tabs Row -->
+    <div class="tabs-row">
+      <div class="tab-item"><span class="tab-icon">★</span> Tab title</div>
+      <div class="tab-item active"><span class="tab-icon">★</span> Tab title</div>
+      <div class="tab-item"><span class="tab-icon">★</span> Tab title with a larger na...</div>
+      <div class="tab-item"><span class="tab-icon">★</span> Tab title</div>
+      <div class="tab-item"><span class="tab-icon">★</span> Tab title</div>
+      <div class="tab-item">+</div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+      <div class="breadcrumb">
+        <span>← →</span>
+        <span>↑</span>
+        <a href="#">Home</a> / 
+        <a href="#">Breadcrumb item 1</a> / 
+        <a href="#">Breadcrumb item 2</a> / 
+        <a href="#">Breadcrumb item 3</a> / 
+        <span>Last item</span>
+      </div>
+    </div>
+
+    <!-- Product Header -->
+    <div class="product-header">
+      <div class="product-image">
+        <img src="https://picsum.photos/seed/zephyrglide/64/64" alt="Zephyr Glide shoe" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+      </div>
+      <div class="product-info">
+        <div style="font-size: 11px; color: #888;">Home / Last item</div>
+        <h1>Zephyr Glide shoe</h1>
+        <div class="product-meta">Revision: 0.1 | Last edited by: Peder Madsen, 10 months 3 weeks ago | Approved</div>
+      </div>
+    </div>
+
+    <!-- Content Tabs -->
+    <div class="content-tabs">
+      <div class="content-tab">Attribute tab page</div>
+      <div class="content-tab">Compare tab page</div>
+      <div class="content-tab">Asset tab page</div>
+      <div class="content-tab">PDX channels</div>
+      <div class="content-tab active">Multi-context</div>
+      <div class="content-tab">Packaging</div>
+    </div>
+    </div><!-- end main-top-section -->
+
+    <!-- Main Content Section with Sidebar -->
+    <div class="main-content-section">
+      <!-- Collapsed Sidebar Panel -->
+      <div class="sidebar-panel">
+        <span class="sidebar-label">Tasks</span>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area">
+      <!-- MC Toolbar -->
+      <div class="mc-toolbar">
+        <div class="mc-toolbar-left">
+          <div class="view-dropdown-container">
+            <button class="toolbar-btn" id="viewBtn">
+              <span class="toolbar-btn-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="7" cy="7" r="5"/>
+                  <circle cx="7" cy="7" r="2"/>
+                </svg>
+              </span>
+              <span class="toolbar-btn-label">View</span>
+            </button>
+            <div class="view-dropdown" id="viewDropdown">
+              <label class="view-option">
+                <input type="checkbox" id="hideEqualCheckbox">
+                <span>Hide equal</span>
+              </label>
+              <label class="view-option">
+                <input type="checkbox" id="markDifferentCheckbox">
+                <span>Mark different</span>
+              </label>
+            </div>
+          </div>
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="2,7 5,10 12,3"/>
+              </svg>
+            </span>
+            <span class="toolbar-btn-label">Approve</span>
+          </button>
+        </div>
+        <div class="mc-toolbar-right">
+          <div class="zoom-control-inline">
+            <div class="zoom-slider-row">
+              <span class="zoom-minus">−</span>
+              <input type="range" id="mainTableZoomSlider" min="0.3" max="1" step="0.1" value="0.5">
+              <span class="zoom-plus">+</span>
+            </div>
+            <span class="zoom-label">Zoom</span>
+          </div>
+          <button class="toolbar-btn">
+            <span class="toolbar-btn-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="1" y="1" width="5" height="5" rx="1"/>
+                <rect x="8" y="1" width="5" height="5" rx="1"/>
+                <rect x="1" y="8" width="5" height="5" rx="1"/>
+                <rect x="8" y="8" width="5" height="5" rx="1"/>
+              </svg>
+            </span>
+            <span class="toolbar-btn-label">Customize</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MC Table -->
+      <div class="mc-table-container">
+        <table class="mc-table">
+          <colgroup>
+            <col style="width: 240px;">
+            <col style="width: 200px;">
+            <col style="width: 200px;">
+            <col style="width: 200px;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th>English (US)</th>
+              <th>Spanish (Mexico)</th>
+              <th>Danish (Denmark)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Top level attributes (sticky) -->
+            <tr class="attr-row sticky-row sticky-row-1">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  Name
+                </div>
+              </td>
+              <td contenteditable="true">Zephyr Glide shoe</td>
+              <td contenteditable="true">Zapato Zephyr Glide</td>
+              <td contenteditable="true">Zephyr Glide sko</td>
+            </tr>
+            <tr class="attr-row sticky-row sticky-row-2">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon placeholder"></span>
+                  Approval status
+                </div>
+              </td>
+              <td class="mc-readonly">Approved</td>
+              <td class="mc-readonly">Not approved</td>
+              <td class="mc-readonly">Partially approved</td>
+            </tr>
+
+            <!-- Section: Attribute group -->
+            <tr class="section-row">
+              <td class="section-header-cell">
+                <div class="section-toggle" data-section="attribute-group">
+                  <span class="section-toggle-icon">›</span>
+                  Attribute group with attributes + linked reference <span class="section-count">(0)</span>
+                </div>
+              </td>
+              <td></td><td></td><td></td>
+            </tr>
+            <tr class="attr-row" data-section-child="attribute-group" data-ref-type="linked-1">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="linked-1" data-ref-name="Linked ref. type 1">Linked ref. type 1</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/nimbus/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/nimbus/300/300" alt="Nimbus Runner shoe"></span>
+                    </span>
+                    <span class="ref-chip-text">Nimbus Runner shoe</span>
+                  </span>
+                  <span class="ref-chip ref-chip-more">+1</span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="es-mx">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/nimbus/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/nimbus/300/300" alt="Zapato Nimbus Runner"></span>
+                    </span>
+                    <span class="ref-chip-text">Zapato Nimbus Runner</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="da-dk">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/terra/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/terra/300/300" alt="Terra Trekker sko"></span>
+                    </span>
+                    <span class="ref-chip-text">Terra Trekker sko</span>
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <tr class="attr-row" data-section-child="attribute-group" data-ref-type="linked-2">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="linked-2" data-ref-name="Linked ref. type 2">Linked ref. type 2</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/img234/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/img234/300/300" alt="Image 234"></span>
+                    </span>
+                    <span class="ref-chip-text">Image 234</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="es-mx">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/img234/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/img234/300/300" alt="Image 234"></span>
+                    </span>
+                    <span class="ref-chip-text">Image 234</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="da-dk"></td>
+            </tr>
+            <tr class="attr-row" data-section-child="attribute-group" data-global-attr="true">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon placeholder"></span>
+                  Example attribute
+                </div>
+              </td>
+              <td contenteditable="true" data-global-source="true">🔧</td>
+              <td class="mc-readonly">🔧</td>
+              <td class="mc-readonly">🔧</td>
+            </tr>
+
+            <!-- Section: Feature bullets -->
+            <tr class="section-row">
+              <td class="section-header-cell">
+                <div class="section-toggle" data-section="feature-bullets">
+                  <span class="section-toggle-icon">›</span>
+                  Feature bullets <span class="section-count">(0)</span>
+                </div>
+              </td>
+              <td></td><td></td><td></td>
+            </tr>
+            <tr class="attr-row" data-section-child="feature-bullets">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  Feature bullet 1
+                </div>
+              </td>
+              <td contenteditable="true">Supreme Cushioning: Innovative foam...</td>
+              <td contenteditable="true">Amortiguación suprema: tecnología d...</td>
+              <td contenteditable="true">Suveræn Stødabsorbering: Innovativ s...</td>
+            </tr>
+            <tr class="attr-row" data-section-child="feature-bullets">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  Feature bullet 2
+                </div>
+              </td>
+              <td contenteditable="true">Enhanced Stability: Provides support a...</td>
+              <td contenteditable="true">Estabilidad mejorada: proporciona so...</td>
+              <td contenteditable="true">Forbedret Stabilitet: Giver støtte og ba...</td>
+            </tr>
+            <tr class="attr-row" data-section-child="feature-bullets" data-global-attr="true">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon placeholder"></span>
+                  Non-context dependent
+                </div>
+              </td>
+              <td contenteditable="true" data-global-source="true">😊</td>
+              <td class="mc-readonly">😊</td>
+              <td class="mc-readonly">😊</td>
+            </tr>
+
+            <!-- Section: Descriptions -->
+            <tr class="section-row">
+              <td class="section-header-cell">
+                <div class="section-toggle" data-section="descriptions">
+                  <span class="section-toggle-icon">›</span>
+                  Descriptions <span class="section-count">(0)</span>
+                </div>
+              </td>
+              <td></td><td></td><td></td>
+            </tr>
+            <tr class="attr-row" data-section-child="descriptions">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  Long description
+                </div>
+              </td>
+              <td contenteditable="true">The Zephyr Glide is engineered for th...</td>
+              <td contenteditable="true">El Zephyr Glide está diseñado para aq...</td>
+              <td contenteditable="true">Zephyr Glide er udviklet til dem, der k...</td>
+            </tr>
+            <tr class="attr-row" data-section-child="descriptions">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  Short description
+                </div>
+              </td>
+              <td contenteditable="true">Experience unparalleled comfort and...</td>
+              <td contenteditable="true">Experimente una comodidad y un ren...</td>
+              <td contenteditable="true">Oplev uovertruffen komfort og ydeev...</td>
+            </tr>
+            <tr class="attr-row" data-section-child="descriptions" data-global-attr="true">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon placeholder"></span>
+                  Non-context dependent
+                </div>
+              </td>
+              <td contenteditable="true" data-global-source="true">📎</td>
+              <td class="mc-readonly">📎</td>
+              <td class="mc-readonly">📎</td>
+            </tr>
+
+            <!-- Section: Ungrouped reference types -->
+            <tr class="section-row">
+              <td class="section-header-cell">
+                <div class="section-toggle" data-section="ungrouped-refs">
+                  <span class="section-toggle-icon">›</span>
+                  Ungrouped reference types <span class="section-count">(0)</span>
+                </div>
+              </td>
+              <td></td><td></td><td></td>
+            </tr>
+            <!-- Context-dependent reference type (editable in all contexts, has data in some) -->
+            <tr class="attr-row" data-section-child="ungrouped-refs" data-ref-type="ungrouped-1">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="ungrouped-1" data-ref-name="Ungrouped ref. type 1">Ungrouped ref. type 1</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/nimbus/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/nimbus/300/300" alt="Nimbus Runner shoe"></span>
+                    </span>
+                    <span class="ref-chip-text">Nimbus Runner shoe</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="es-mx">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/nimbus/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/nimbus/300/300" alt="Zapato Nimbus Runner"></span>
+                    </span>
+                    <span class="ref-chip-text">Zapato Nimbus Runner</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="da-dk"></td>
+            </tr>
+            <!-- Global reference type (editable in English US, read-only in others) -->
+            <tr class="attr-row" data-section-child="ungrouped-refs" data-ref-type="ungrouped-2" data-is-global="true">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon placeholder"></span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="ungrouped-2" data-ref-name="Ungrouped ref. type 2" data-is-global="true">Ungrouped ref. type 2</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/global1/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/global1/300/300" alt="Global item 1"></span>
+                    </span>
+                    <span class="ref-chip-text">Global item 1</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-readonly" data-context="es-mx">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/global1/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/global1/300/300" alt="Global item 1"></span>
+                    </span>
+                    <span class="ref-chip-text">Global item 1</span>
+                  </span>
+                </div>
+              </td>
+              <td class="mc-readonly" data-context="da-dk">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/global1/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/global1/300/300" alt="Global item 1"></span>
+                    </span>
+                    <span class="ref-chip-text">Global item 1</span>
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <!-- Context-dependent reference type (editable, no data yet) -->
+            <tr class="attr-row" data-section-child="ungrouped-refs" data-ref-type="ungrouped-3">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="ungrouped-3" data-ref-name="Ungrouped ref. type 3">Ungrouped ref. type 3</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us"></td>
+              <td class="mc-cell-clickable" data-context="es-mx"></td>
+              <td class="mc-cell-clickable" data-context="da-dk"></td>
+            </tr>
+            <!-- Global reference type with no data (empty in primary, read-only in others) -->
+            <tr class="attr-row" data-section-child="ungrouped-refs" data-ref-type="ungrouped-4" data-is-global="true">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon placeholder"></span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="ungrouped-4" data-ref-name="Ungrouped ref. type 4" data-is-global="true">Ungrouped ref. type 4</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us"></td>
+              <td class="mc-readonly" data-context="es-mx"></td>
+              <td class="mc-readonly" data-context="da-dk"></td>
+            </tr>
+            <!-- Dimension-dependent reference type with many references -->
+            <tr class="attr-row" data-section-child="ungrouped-refs" data-ref-type="related-products">
+              <td>
+                <div class="attr-name">
+                  <span class="attr-icon" title="Language dependent">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                      <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  </span>
+                  <a href="#" class="ref-link ref-type-link" data-ref-type="related-products" data-ref-name="Related products">Related products</a>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="en-us">
+                <div class="ref-chips">
+                  <span class="ref-chip">
+                    <span class="ref-chip-thumb-wrapper">
+                      <img class="ref-chip-thumb" src="https://picsum.photos/seed/airglide/40/40" alt="">
+                      <span class="thumb-tooltip"><img src="https://picsum.photos/seed/airglide/300/300" alt="AirGlide Max"></span>
+                    </span>
+                    <span class="ref-chip-text">AirGlide Max</span>
+                  </span>
+                  <span class="ref-chip ref-chip-more">+19</span>
+                </div>
+              </td>
+              <td class="mc-cell-clickable" data-context="es-mx"></td>
+              <td class="mc-cell-clickable" data-context="da-dk"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="item-count" id="mainTableItemCount">0 items</div>
+      </div>
+      </div><!-- end content-area -->
+    </div><!-- end main-content-section -->
+    </div><!-- end main-layout -->
+  </div><!-- end page-container -->
+
+  <!-- Inline Add Popover for Main Table -->
+  <div class="inline-add-popover" id="inlineAddPopover">
+    <div class="inline-add-search">
+      <input type="text" class="inline-add-input" id="inlineAddInput" placeholder="Search...">
+    </div>
+    <div class="inline-add-results" id="inlineAddResults"></div>
+    <div class="inline-existing-chips" id="inlineExistingChips"></div>
+  </div>
+
+  <!-- Reference Modal -->
+  <div class="modal-overlay hidden" id="refModalOverlay">
+    <div class="modal" id="refModal">
+      <div class="modal-header">
+        <h1>
+          <span class="header-icon" title="Context dependent reference type">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="2.5" y1="5" x2="13.5" y2="5" stroke="currentColor" stroke-width="0.8"/>
+              <line x1="2.5" y1="11" x2="13.5" y2="11" stroke="currentColor" stroke-width="0.8"/>
+            </svg>
+          </span>
+          Ungrouped ref. type 1
+        </h1>
+        <div class="subtitle">Product reference</div>
+        <button class="modal-close" id="closeRefModal">&times;</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <div class="modal-toolbar-left">
+          <div class="modal-view-dropdown-container">
+            <button class="modal-toolbar-btn" id="modalViewBtn">
+              <span class="modal-toolbar-btn-top">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="8" cy="8" r="3"/>
+                  <path d="M1 8 C3 4, 6 2, 8 2 C10 2, 13 4, 15 8 C13 12, 10 14, 8 14 C6 14, 3 12, 1 8"/>
+                </svg>
+              </span>
+              <span class="modal-toolbar-btn-label">View</span>
+            </button>
+            <div class="modal-view-dropdown" id="modalViewDropdown">
+              <label class="view-option">
+                <input type="checkbox" id="hideMetaDataCheckbox">
+                <span>Hide meta data</span>
+              </label>
+            </div>
+          </div>
+          <button class="modal-toolbar-btn" id="addBtn">
+            <span class="modal-toolbar-btn-top">
+              <span class="modal-toolbar-btn-icon">+</span>
+              <span class="modal-toolbar-btn-caret">▾</span>
+            </span>
+            <span class="modal-toolbar-btn-label">Add</span>
+          </button>
+          <button class="modal-toolbar-btn" id="removeBtn" disabled>
+            <span class="modal-toolbar-btn-top">
+              <span class="modal-toolbar-btn-icon">−</span>
+            </span>
+            <span class="modal-toolbar-btn-label">Remove</span>
+          </button>
+        </div>
+        <div class="modal-toolbar-right">
+          <div class="zoom-control-inline">
+            <div class="zoom-slider-row">
+              <span class="zoom-minus">−</span>
+              <input type="range" id="modalZoomSlider" min="0.3" max="1" step="0.1" value="0.5">
+              <span class="zoom-plus">+</span>
+            </div>
+            <span class="zoom-label">Zoom</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-content">
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <circle cx="10" cy="6" r="1.5"/>
+              <rect x="8.5" y="9" width="3" height="7" rx="1"/>
+            </svg>
+          </div>
+          <h3>No references</h3>
+          <p>Add a reference using the 'Add' button on the toolbar</p>
+          <span class="link" id="emptyStateAddLink">Add reference</span>
+        </div>
+
+        <div class="reference-table-container" id="tableContainer">
+          <table class="reference-table" id="referenceTable">
+            <colgroup id="tableColgroup"></colgroup>
+            <thead>
+              <tr id="tableHeader"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <div class="modal-item-count" id="itemCount">0 items</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="applyBtn">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Reference Popover -->
+  <div class="popover" id="addPopover">
+    <div class="popover-header">
+      <h3>Add reference</h3>
+    </div>
+    <div class="popover-body">
+      <div class="info-banner">
+        <svg class="info-banner-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" fill="none"/>
+          <circle cx="8" cy="5" r="1" fill="currentColor"/>
+          <rect x="7" y="7" width="2" height="5" fill="currentColor"/>
+        </svg>
+        <div>
+          <div class="info-banner-title">Existing references are not shown</div>
+          <div class="info-banner-text">Some references may already be added to some contexts without being visible here</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Reference type</label>
+        <div class="form-value">Ungrouped ref. type 1</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Items</label>
+        <div class="items-field-container" id="itemsFieldContainer">
+          <div class="items-tags-list" id="itemsTagsList"></div>
+          <input type="text" class="items-search-input" placeholder="Search" id="itemsSearchInput">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Contexts</label>
+        <div class="items-field-container" id="contextsFieldContainer">
+          <input type="text" class="items-search-input" placeholder="Search" id="contextsSearchInput">
+          <div class="items-tags-list" id="contextsTagsList"></div>
+        </div>
+      </div>
+    </div>
+    <div class="popover-footer">
+      <button class="btn btn-secondary" id="addPopoverCancel">Cancel</button>
+      <button class="btn btn-primary" id="addPopoverApply">Apply</button>
+    </div>
+  </div>
+
+  <!-- Remove Confirmation Modal -->
+  <div class="modal-overlay hidden" id="removeModalOverlay">
+    <div class="remove-modal">
+      <div class="remove-modal-header">
+        <h2>Remove references</h2>
+      </div>
+      <div class="remove-modal-body">
+        <!-- Non-global: show context selection -->
+        <div id="removeContextSelection">
+          <p style="margin-bottom: 16px; font-size: 13px; color: #666;">
+            Select the contexts from which to remove the selected reference(s):
+          </p>
+          <div class="remove-items-summary" id="removeItemsSummary"></div>
+          <label class="form-label" style="margin-top: 16px;">Contexts</label>
+          <div class="context-select-list" id="contextSelectList"></div>
+          <div class="remove-select-actions">
+            <a href="#" class="select-link" id="selectAllContexts">Select all</a>
+            <span class="select-divider">|</span>
+            <a href="#" class="select-link" id="deselectAllContexts">Deselect all</a>
+          </div>
+        </div>
+        <!-- Global: show confirmation message -->
+        <div id="removeGlobalConfirmation" style="display: none;">
+          <p style="margin-bottom: 16px; font-size: 13px; color: #666;">
+            This will remove the selected reference(s) from <strong>all contexts</strong>.
+          </p>
+          <div class="remove-items-summary" id="removeItemsSummaryGlobal"></div>
+          <p style="margin-top: 16px; font-size: 13px; color: #c00;">
+            This action cannot be undone.
+          </p>
+        </div>
+      </div>
+      <div class="remove-modal-footer">
+        <button class="btn btn-secondary" id="removeModalCancel">Cancel</button>
+        <button class="btn btn-danger" id="removeModalConfirm">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Picker Modal -->
+  <div class="modal-overlay hidden" id="advancedPickerOverlay">
+    <div class="advanced-picker">
+      <div class="picker-header">
+        <h2>Select items</h2>
+        <button class="modal-close" id="pickerClose">&times;</button>
+      </div>
+      <div class="picker-body">
+        <div class="picker-sidebar">
+          <div class="picker-sidebar-item active">All items</div>
+          <div class="picker-sidebar-item">Products</div>
+          <div class="picker-sidebar-item">Categories</div>
+          <div class="picker-sidebar-item">Assets</div>
+        </div>
+        <div class="picker-main">
+          <div class="picker-search">
+            <input type="text" placeholder="Search items...">
+          </div>
+          <div class="picker-grid" id="pickerGrid"></div>
+        </div>
+      </div>
+      <div class="picker-footer">
+        <span class="picker-selected-count" id="pickerSelectedCount">0 items selected</span>
+        <div>
+          <button class="btn btn-secondary" id="pickerCancel">Cancel</button>
+          <button class="btn btn-primary" id="pickerSelect">Select</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">Reference added successfully</div>
+
+  <script>
+    // Data
+    const contexts = [
+      { id: 'en-us', name: 'English (US)' },
+      { id: 'es-mx', name: 'Spanish (Mexico)' },
+      { id: 'da-dk', name: 'Danish (Denmark)' }
+    ];
+
+    const availableItems = [
+      { id: 'nimbus', name: 'Nimbus Runner' },
+      { id: 'terra', name: 'Terra Trekker' },
+      { id: 'cloudwalker', name: 'CloudWalker Pro' },
+      { id: 'speedster', name: 'Speedster 3000' },
+      { id: 'trailblazer', name: 'TrailBlazer X' },
+      { id: 'urbanlite', name: 'UrbanLite Sneaker' },
+      { id: 'airglide', name: 'AirGlide Max' },
+      { id: 'flexrun', name: 'FlexRun Elite' },
+      { id: 'momentum', name: 'Momentum Pro' },
+      { id: 'velocity', name: 'Velocity Sprint' },
+      { id: 'endurance', name: 'Endurance Plus' },
+      { id: 'streetwise', name: 'StreetWise Urban' },
+      { id: 'peakclimb', name: 'PeakClimb Hiker' },
+      { id: 'aquashield', name: 'AquaShield Waterproof' },
+      { id: 'lightfoot', name: 'Lightfoot Racer' },
+      { id: 'comfortzone', name: 'ComfortZone Daily' },
+      { id: 'powergrip', name: 'PowerGrip Trail' },
+      { id: 'aeroboost', name: 'AeroBoost Runner' },
+      { id: 'classicstep', name: 'ClassicStep Leather' },
+      { id: 'activepro', name: 'ActivePro Sport' }
+    ];
+
+    // References stored by type
+    let referencesByType = {
+      'ungrouped-1': [
+        {
+          id: 'ref1',
+          name: 'Nimbus Runner shoe',
+          isGlobal: false,
+          contexts: ['en-us', 'es-mx'],
+          properties: [
+            { name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Nimbus Runner shoe', 'es-mx': 'Zapato Nimbus Runner' } },
+            { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'High performance running shoe', 'es-mx': 'Zapato de running de alto rendimiento' } },
+            { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'NRS-001', 'es-mx': 'NRS-001' } }
+          ]
+        }
+      ],
+      'ungrouped-2': [
+        {
+          id: 'ref-global-1',
+          name: 'Global item 1',
+          isGlobal: true,
+          contexts: ['en-us', 'es-mx', 'da-dk'],
+          properties: [
+            { name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Global item 1', 'es-mx': 'Global item 1', 'da-dk': 'Global item 1' } },
+            { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Accessories', 'es-mx': 'Accessories', 'da-dk': 'Accessories' } },
+            { name: 'Status', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Active', 'es-mx': 'Active', 'da-dk': 'Active' } }
+          ]
+        }
+      ],
+      'ungrouped-3': [],
+      'ungrouped-4': [],
+      'linked-1': [
+        {
+          id: 'ref-linked-1',
+          name: 'Nimbus Runner shoe',
+          isGlobal: false,
+          contexts: ['en-us', 'es-mx', 'da-dk'],
+          properties: [
+            { name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Nimbus Runner shoe', 'es-mx': 'Zapato Nimbus Runner', 'da-dk': 'Nimbus Runner sko' } },
+            { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Lightweight runner', 'es-mx': 'Corredor ligero', 'da-dk': 'Let løbesko' } },
+            { name: 'Color', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Blue/White', 'es-mx': 'Azul/Blanco', 'da-dk': 'Blå/Hvid' } }
+          ]
+        },
+        {
+          id: 'ref-linked-1b',
+          name: 'Terra Trekker shoe',
+          isGlobal: false,
+          contexts: ['da-dk'],
+          properties: [
+            { name: 'Name', hasIcon: false, isEditable: false, values: { 'da-dk': 'Terra Trekker sko' } },
+            { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'da-dk': 'Outdoor vandresko' } },
+            { name: 'Color', hasIcon: true, isEditable: true, isMetaData: true, values: { 'da-dk': 'Brun' } }
+          ]
+        }
+      ],
+      'linked-2': [
+        {
+          id: 'ref-linked-2',
+          name: 'Image 234',
+          isGlobal: false,
+          contexts: ['en-us', 'es-mx'],
+          properties: [
+            { name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Image 234', 'es-mx': 'Imagen 234' } },
+            { name: 'Alt text', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Product photo', 'es-mx': 'Foto del producto' } },
+            { name: 'Resolution', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '1920x1080', 'es-mx': '1920x1080' } }
+          ]
+        }
+      ],
+      'related-products': [
+        { id: 'rp1', name: 'AirGlide Max', isGlobal: false, contexts: ['en-us', 'es-mx'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'AirGlide Max', 'es-mx': 'AirGlide Max' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Premium running shoe with air cushioning', 'es-mx': 'Zapato de correr premium con amortiguación de aire' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'AG-MAX-001' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Running' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$149.99', 'es-mx': '$2,899 MXN' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '250' } }] },
+        { id: 'rp2', name: 'FlexRun Elite', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'FlexRun Elite' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Flexible running shoe for daily training' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'FR-ELT-002' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Running' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$129.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '180' } }] },
+        { id: 'rp3', name: 'Momentum Pro', isGlobal: false, contexts: ['en-us', 'da-dk'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Momentum Pro', 'da-dk': 'Momentum Pro' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Professional performance shoe', 'da-dk': 'Professionel performance sko' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'MM-PRO-003' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Performance' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$179.99', 'da-dk': '1.299 DKK' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '120' } }] },
+        { id: 'rp4', name: 'Velocity Sprint', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Velocity Sprint' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Lightweight sprinting shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'VL-SPR-004' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Track & Field' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$159.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '90' } }] },
+        { id: 'rp5', name: 'Endurance Plus', isGlobal: false, contexts: ['en-us', 'es-mx', 'da-dk'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Endurance Plus', 'es-mx': 'Endurance Plus', 'da-dk': 'Endurance Plus' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Marathon running shoe', 'es-mx': 'Zapato para maratón', 'da-dk': 'Maraton løbesko' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'EN-PLS-005' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Long Distance' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$169.99', 'es-mx': '$3,299 MXN', 'da-dk': '1.199 DKK' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '200' } }] },
+        { id: 'rp6', name: 'StreetWise Urban', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'StreetWise Urban' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Casual urban sneaker' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'SW-URB-006' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Lifestyle' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$89.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '350' } }] },
+        { id: 'rp7', name: 'PeakClimb Hiker', isGlobal: false, contexts: ['en-us', 'da-dk'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'PeakClimb Hiker', 'da-dk': 'PeakClimb Vandresko' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Rugged hiking boot', 'da-dk': 'Robust vandrestøvle' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'PC-HIK-007' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Outdoor' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$199.99', 'da-dk': '1.499 DKK' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '75' } }] },
+        { id: 'rp8', name: 'AquaShield Waterproof', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'AquaShield Waterproof' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Waterproof trail shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'AQ-WPF-008' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Trail' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$189.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '110' } }] },
+        { id: 'rp9', name: 'Lightfoot Racer', isGlobal: false, contexts: ['en-us', 'es-mx'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'Lightfoot Racer', 'es-mx': 'Lightfoot Corredor' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Ultra-light racing flat', 'es-mx': 'Zapato de carrera ultraligero' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'LF-RCR-009' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Racing' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$139.99', 'es-mx': '$2,699 MXN' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '85' } }] },
+        { id: 'rp10', name: 'ComfortZone Daily', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'ComfortZone Daily' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'All-day comfort walking shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'CZ-DLY-010' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Walking' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$99.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '400' } }] },
+        { id: 'rp11', name: 'PowerGrip Trail', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'PowerGrip Trail' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Aggressive trail running shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'PG-TRL-011' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Trail' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$159.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '95' } }] },
+        { id: 'rp12', name: 'AeroBoost Runner', isGlobal: false, contexts: ['en-us', 'es-mx', 'da-dk'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'AeroBoost Runner', 'es-mx': 'AeroBoost Corredor', 'da-dk': 'AeroBoost Løber' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Energy-return running shoe', 'es-mx': 'Zapato con retorno de energía', 'da-dk': 'Løbesko med energiretur' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'AB-RUN-012' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Running' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$179.99', 'es-mx': '$3,499 MXN', 'da-dk': '1.349 DKK' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '165' } }] },
+        { id: 'rp13', name: 'ClassicStep Leather', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'ClassicStep Leather' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Premium leather casual shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'CS-LTH-013' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Casual' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$119.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '220' } }] },
+        { id: 'rp14', name: 'ActivePro Sport', isGlobal: false, contexts: ['en-us', 'es-mx'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'ActivePro Sport', 'es-mx': 'ActivePro Deporte' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Multi-sport training shoe', 'es-mx': 'Zapato de entrenamiento multideporte' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'AP-SPT-014' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Training' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$109.99', 'es-mx': '$2,199 MXN' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '280' } }] },
+        { id: 'rp15', name: 'StormRunner GTX', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'StormRunner GTX' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Gore-Tex all-weather running' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'SR-GTX-015' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'All-Weather' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$219.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '60' } }] },
+        { id: 'rp16', name: 'ZenWalk Comfort', isGlobal: false, contexts: ['en-us', 'da-dk'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'ZenWalk Comfort', 'da-dk': 'ZenWalk Komfort' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Ergonomic walking shoe', 'da-dk': 'Ergonomisk gangsko' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'ZW-CMF-016' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Walking' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$129.99', 'da-dk': '949 DKK' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '175' } }] },
+        { id: 'rp17', name: 'TurboSpeed Carbon', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'TurboSpeed Carbon' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Carbon plate racing shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'TS-CRB-017' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Racing' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$249.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '45' } }] },
+        { id: 'rp18', name: 'TrailMaster Pro', isGlobal: false, contexts: ['en-us', 'es-mx'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'TrailMaster Pro', 'es-mx': 'TrailMaster Pro' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Technical trail running', 'es-mx': 'Carrera técnica de sendero' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'TM-PRO-018' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Trail' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$169.99', 'es-mx': '$3,299 MXN' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '88' } }] },
+        { id: 'rp19', name: 'GymFlex Training', isGlobal: false, contexts: ['en-us'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'GymFlex Training' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Cross-training gym shoe' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'GF-TRN-019' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Training' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$99.99' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '320' } }] },
+        { id: 'rp20', name: 'SkyHigh Basketball', isGlobal: false, contexts: ['en-us', 'es-mx', 'da-dk'], properties: [{ name: 'Name', hasIcon: false, isEditable: false, values: { 'en-us': 'SkyHigh Basketball', 'es-mx': 'SkyHigh Baloncesto', 'da-dk': 'SkyHigh Basketball' } }, { name: 'Description', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'High-top basketball shoe', 'es-mx': 'Zapato de baloncesto de caña alta', 'da-dk': 'Høj basketball sko' } }, { name: 'SKU', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'SH-BSK-020' } }, { name: 'Category', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': 'Basketball' } }, { name: 'Price', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '$159.99', 'es-mx': '$3,099 MXN', 'da-dk': '1.199 DKK' } }, { name: 'Stock', hasIcon: true, isEditable: true, isMetaData: true, values: { 'en-us': '140' } }] }
+      ]
+    };
+
+    let currentRefType = 'ungrouped-1';
+    let currentRefTypeName = 'Ungrouped ref. type 1';
+    let currentRefTypeIsGlobal = false;
+
+    // Getter for current references
+    function getReferences() {
+      return referencesByType[currentRefType] || [];
+    }
+
+    let selectedRefs = new Set();
+    let selectedItems = [];
+    let selectedContexts = [];
+    let visibleContexts = contexts;
+    let isPickerOpen = false;
+    let modalHasChanges = false;
+
+    // DOM Elements
+    const refModalOverlay = document.getElementById('refModalOverlay');
+    const addBtn = document.getElementById('addBtn');
+    const addPopover = document.getElementById('addPopover');
+    const removeBtn = document.getElementById('removeBtn');
+    const tableBody = document.getElementById('tableBody');
+    const tableHeader = document.getElementById('tableHeader');
+    const emptyState = document.getElementById('emptyState');
+    const tableContainer = document.getElementById('tableContainer');
+    const itemCount = document.getElementById('itemCount');
+    const removeModalOverlay = document.getElementById('removeModalOverlay');
+    const advancedPickerOverlay = document.getElementById('advancedPickerOverlay');
+    const toast = document.getElementById('toast');
+
+    // Initialize
+    function init() {
+      setupMainPageListeners();
+      setupModalListeners();
+      refreshMainTableFromReferences();
+      setupThumbTooltips();
+      updateRowCounts();
+      setupGlobalAttributeSync();
+      setupColumnResize();
+      setupZoomControls();
+    }
+
+    // Zoom controls for row height
+    function setupZoomControls() {
+      const mainTable = document.querySelector('.mc-table');
+      const mainZoomSlider = document.getElementById('mainTableZoomSlider');
+      const headerHeight = 33; // Fixed header height
+      const spacerHeight = 12; // Spacer before header
+      
+      // Function to update row height based on zoom level
+      function updateMainTableZoom(zoomLevel) {
+        // Map zoom 0.3, 0.65, 1.0 to row height 30px, 60px, 90px
+        let rowHeight;
+        if (zoomLevel <= 0.3) {
+          rowHeight = 30;
+        } else if (zoomLevel <= 0.65) {
+          rowHeight = 30 + Math.round((zoomLevel - 0.3) / 0.35 * 30);
+        } else {
+          rowHeight = 60 + Math.round((zoomLevel - 0.65) / 0.35 * 30);
+        }
+        mainTable.style.setProperty('--row-height', `${rowHeight}px`);
+        
+        // Update sticky row positions based on new row height
+        const stickyRow1 = document.querySelector('.sticky-row-1');
+        const stickyRow2 = document.querySelector('.sticky-row-2');
+        
+        if (stickyRow1) {
+          const top1 = spacerHeight + headerHeight;
+          stickyRow1.querySelectorAll('td').forEach((td, index) => {
+            td.style.top = `${top1}px`;
+            if (index === 0) {
+              td.style.left = '0';
+            }
+          });
+        }
+        
+        if (stickyRow2) {
+          const top2 = spacerHeight + headerHeight + rowHeight;
+          stickyRow2.querySelectorAll('td').forEach((td, index) => {
+            td.style.top = `${top2}px`;
+            if (index === 0) {
+              td.style.left = '0';
+            }
+          });
+        }
+      }
+      
+      // Initialize with current slider value
+      updateMainTableZoom(parseFloat(mainZoomSlider.value));
+      
+      // Listen for slider changes
+      mainZoomSlider.addEventListener('input', (e) => {
+        updateMainTableZoom(parseFloat(e.target.value));
+      });
+      
+      // Plus/minus buttons for main table
+      const mainZoomContainer = mainZoomSlider.closest('.zoom-control-inline');
+      const mainMinus = mainZoomContainer.querySelector('.zoom-minus');
+      const mainPlus = mainZoomContainer.querySelector('.zoom-plus');
+      
+      mainMinus.addEventListener('click', () => {
+        const newVal = Math.max(0.3, parseFloat(mainZoomSlider.value) - 0.1);
+        mainZoomSlider.value = newVal;
+        updateMainTableZoom(newVal);
+      });
+      
+      mainPlus.addEventListener('click', () => {
+        const newVal = Math.min(1, parseFloat(mainZoomSlider.value) + 0.1);
+        mainZoomSlider.value = newVal;
+        updateMainTableZoom(newVal);
+      });
+      
+      // Modal table zoom
+      const modalTable = document.querySelector('.reference-table');
+      const modalZoomSlider = document.getElementById('modalZoomSlider');
+      
+      function updateModalTableZoom(zoomLevel) {
+        // Map zoom 0.3, 0.65, 1.0 to row height 30px, 60px, 90px
+        let rowHeight;
+        if (zoomLevel <= 0.3) {
+          rowHeight = 30;
+        } else if (zoomLevel <= 0.65) {
+          rowHeight = 30 + Math.round((zoomLevel - 0.3) / 0.35 * 30);
+        } else {
+          rowHeight = 60 + Math.round((zoomLevel - 0.65) / 0.35 * 30);
+        }
+        modalTable.style.setProperty('--row-height', `${rowHeight}px`);
+      }
+      
+      updateModalTableZoom(parseFloat(modalZoomSlider.value));
+      
+      modalZoomSlider.addEventListener('input', (e) => {
+        updateModalTableZoom(parseFloat(e.target.value));
+      });
+      
+      const modalZoomContainer = modalZoomSlider.closest('.zoom-control-inline');
+      const modalMinus = modalZoomContainer.querySelector('.zoom-minus');
+      const modalPlus = modalZoomContainer.querySelector('.zoom-plus');
+      
+      modalMinus.addEventListener('click', () => {
+        const newVal = Math.max(0.3, parseFloat(modalZoomSlider.value) - 0.1);
+        modalZoomSlider.value = newVal;
+        updateModalTableZoom(newVal);
+      });
+      
+      modalPlus.addEventListener('click', () => {
+        const newVal = Math.min(1, parseFloat(modalZoomSlider.value) + 0.1);
+        modalZoomSlider.value = newVal;
+        updateModalTableZoom(newVal);
+      });
+    }
+
+    // Column resize functionality
+    function setupColumnResize() {
+      const table = document.querySelector('.mc-table');
+      const headers = table.querySelectorAll('th');
+      const colgroup = table.querySelector('colgroup');
+      const cols = colgroup.querySelectorAll('col');
+      
+      headers.forEach((th, index) => {
+        // Add resize handle to each header
+        const handle = document.createElement('div');
+        handle.className = 'col-resize-handle';
+        th.appendChild(handle);
+        
+        let startX, startWidth, colElement;
+        
+        handle.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          startX = e.pageX;
+          colElement = cols[index];
+          startWidth = colElement.offsetWidth || parseInt(colElement.style.width) || th.offsetWidth;
+          
+          handle.classList.add('resizing');
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+          
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+        
+        function onMouseMove(e) {
+          const diff = e.pageX - startX;
+          const newWidth = Math.max(80, startWidth + diff);
+          colElement.style.width = newWidth + 'px';
+        }
+        
+        function onMouseUp() {
+          handle.classList.remove('resizing');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          // Update table width to match sum of column widths
+          let totalWidth = 0;
+          cols.forEach(col => {
+            totalWidth += parseInt(col.style.width) || 200;
+          });
+          table.style.width = totalWidth + 'px';
+          // Update footer width to match table
+          const mainFooter = document.getElementById('mainTableItemCount');
+          if (mainFooter) {
+            mainFooter.style.width = totalWidth + 'px';
+            mainFooter.style.minWidth = totalWidth + 'px';
+          }
+          // Refresh chips to adjust visible count based on new column width
+          refreshMainTableFromReferences();
+        }
+      });
+    }
+
+    function setupGlobalAttributeSync() {
+      // Listen for input on global attribute source cells (English US)
+      document.querySelectorAll('td[data-global-source="true"]').forEach(sourceCell => {
+        sourceCell.addEventListener('input', () => {
+          const row = sourceCell.closest('tr');
+          if (!row || !row.dataset.globalAttr) return;
+          
+          // Get all other cells in this row (excluding first column which is the label)
+          const allCells = Array.from(row.querySelectorAll('td'));
+          const valueCells = allCells.slice(1); // Skip first td (label)
+          
+          // Get the new value from the source cell
+          const newValue = sourceCell.textContent;
+          
+          // Update all other context cells
+          valueCells.forEach(cell => {
+            if (cell !== sourceCell) {
+              cell.textContent = newValue;
+            }
+          });
+        });
+      });
+    }
+
+    function updateRowCounts() {
+      const hideEqual = document.getElementById('hideEqualCheckbox')?.checked || false;
+      const hasFilter = hideEqual;
+      
+      let totalRows = 0;
+      let filteredVisibleRows = 0;
+      
+      // Get all section rows
+      const sectionRows = document.querySelectorAll('.mc-table .section-row');
+      
+      sectionRows.forEach(sectionRow => {
+        const toggle = sectionRow.querySelector('.section-toggle');
+        const countSpan = toggle?.querySelector('.section-count');
+        if (!countSpan) return;
+        
+        // Count rows until next section row
+        let sectionTotal = 0;
+        let sectionFilteredVisible = 0;
+        let nextRow = sectionRow.nextElementSibling;
+        
+        while (nextRow && !nextRow.classList.contains('section-row')) {
+          if (nextRow.classList.contains('attr-row')) {
+            sectionTotal++;
+            totalRows++;
+            
+            // Count rows not hidden by filter (row-hidden class)
+            // Ignore section-child-hidden as that's from collapse, not filter
+            if (!nextRow.classList.contains('row-hidden')) {
+              sectionFilteredVisible++;
+              filteredVisibleRows++;
+            }
+          }
+          nextRow = nextRow.nextElementSibling;
+        }
+        
+        // Update section count
+        if (hasFilter && sectionFilteredVisible !== sectionTotal) {
+          countSpan.textContent = `(${sectionFilteredVisible} of ${sectionTotal})`;
+        } else {
+          countSpan.textContent = `(${sectionTotal})`;
+        }
+      });
+      
+      // Also count rows before first section (like Name, Approval status)
+      const firstSection = document.querySelector('.mc-table .section-row');
+      if (firstSection) {
+        let prevRow = firstSection.previousElementSibling;
+        while (prevRow) {
+          if (prevRow.classList.contains('attr-row')) {
+            totalRows++;
+            if (!prevRow.classList.contains('row-hidden')) {
+              filteredVisibleRows++;
+            }
+          }
+          prevRow = prevRow.previousElementSibling;
+        }
+      }
+      
+      // Update footer count
+      const footerCount = document.getElementById('mainTableItemCount');
+      if (footerCount) {
+        if (hasFilter && filteredVisibleRows !== totalRows) {
+          footerCount.textContent = `${filteredVisibleRows} of ${totalRows} items`;
+        } else {
+          footerCount.textContent = `${totalRows} item${totalRows !== 1 ? 's' : ''}`;
+        }
+      }
+    }
+
+    function setupThumbTooltips() {
+      // Use event delegation for dynamically created elements
+      document.addEventListener('mouseenter', (e) => {
+        const wrapper = e.target.closest('.ref-chip-thumb-wrapper');
+        if (wrapper) {
+          const tooltip = wrapper.querySelector('.thumb-tooltip');
+          if (tooltip) {
+            const rect = wrapper.getBoundingClientRect();
+            const tooltipWidth = 158; // 150 + padding
+            const tooltipHeight = 158;
+            
+            // Position above the thumbnail
+            let top = rect.top - tooltipHeight - 8;
+            let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+            
+            // If too close to top, show below
+            if (top < 10) {
+              top = rect.bottom + 8;
+            }
+            
+            // Keep within viewport horizontally
+            if (left < 10) left = 10;
+            if (left + tooltipWidth > window.innerWidth - 10) {
+              left = window.innerWidth - tooltipWidth - 10;
+            }
+            
+            tooltip.style.top = `${top}px`;
+            tooltip.style.left = `${left}px`;
+            tooltip.style.display = 'block';
+          }
+        }
+      }, true);
+
+      document.addEventListener('mouseleave', (e) => {
+        const wrapper = e.target.closest('.ref-chip-thumb-wrapper');
+        if (wrapper) {
+          const tooltip = wrapper.querySelector('.thumb-tooltip');
+          if (tooltip) {
+            tooltip.style.display = 'none';
+          }
+        }
+      }, true);
+    }
+
+    let activeInlineCell = null;
+    let activeInlineContext = null;
+    let activeInlineRefType = null;
+
+    function setupMainPageListeners() {
+      // Section toggle (collapse/expand)
+      document.querySelectorAll('.section-toggle').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const sectionRow = toggle.closest('.section-row');
+          const isCollapsed = sectionRow.classList.toggle('collapsed');
+          
+          // Find all rows until next section-row
+          let nextRow = sectionRow.nextElementSibling;
+          while (nextRow && !nextRow.classList.contains('section-row')) {
+            if (isCollapsed) {
+              nextRow.classList.add('section-child-hidden');
+            } else {
+              nextRow.classList.remove('section-child-hidden');
+            }
+            nextRow = nextRow.nextElementSibling;
+          }
+          
+          // Update row counts after toggle
+          updateRowCounts();
+        });
+      });
+
+      // Open modal when clicking any reference type link
+      document.querySelectorAll('.ref-type-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const refType = link.dataset.refType;
+          const refName = link.dataset.refName;
+          const isGlobal = link.dataset.isGlobal === 'true';
+          openRefModal(refType, refName, isGlobal);
+        });
+      });
+
+      // Inline add when clicking a cell (using event delegation for robustness)
+      document.addEventListener('click', (e) => {
+        const cell = e.target.closest('.mc-cell-clickable');
+        if (!cell) return;
+        
+        // Don't show popover for read-only cells
+        if (cell.classList.contains('mc-readonly')) {
+          return;
+        }
+        
+        e.stopPropagation();
+        
+        const contextId = cell.dataset.context;
+        const row = cell.closest('tr');
+        if (!row) return;
+        
+        const refType = row.dataset.refType;
+        const isGlobal = row.dataset.isGlobal === 'true';
+        
+        showInlineAddPopover(cell, contextId, refType, isGlobal);
+      });
+
+      // Close inline popover when clicking outside
+      document.addEventListener('click', (e) => {
+        const popover = document.getElementById('inlineAddPopover');
+        if (!popover.contains(e.target) && !e.target.closest('.mc-cell-clickable')) {
+          popover.classList.remove('visible');
+        }
+      });
+
+      // Setup inline add input
+      const inlineInput = document.getElementById('inlineAddInput');
+      inlineInput.addEventListener('input', handleInlineSearch);
+      inlineInput.addEventListener('focus', handleInlineSearch);
+      
+      // Setup inline chip remove
+      document.getElementById('inlineExistingChips').addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('.inline-chip-remove');
+        if (removeBtn) {
+          const chip = removeBtn.closest('.inline-existing-chip');
+          const refName = chip.dataset.refName;
+          removeInlineReference(refName);
+        }
+      });
+
+      // View dropdown toggle
+      const viewBtn = document.getElementById('viewBtn');
+      const viewDropdown = document.getElementById('viewDropdown');
+      
+      viewBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        viewDropdown.classList.toggle('show');
+      });
+
+      // Close view dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!viewDropdown.contains(e.target) && e.target !== viewBtn) {
+          viewDropdown.classList.remove('show');
+        }
+      });
+
+      // View filter checkboxes
+      const hideEqualCheckbox = document.getElementById('hideEqualCheckbox');
+      const markDifferentCheckbox = document.getElementById('markDifferentCheckbox');
+
+      hideEqualCheckbox.addEventListener('change', applyViewFilters);
+      markDifferentCheckbox.addEventListener('change', applyViewFilters);
+    }
+
+    let activeInlineIsGlobal = false;
+
+    function showInlineAddPopover(cell, contextId, refType, isGlobal = false) {
+      const popover = document.getElementById('inlineAddPopover');
+      const input = document.getElementById('inlineAddInput');
+      const existingChipsContainer = document.getElementById('inlineExistingChips');
+      
+      activeInlineCell = cell;
+      activeInlineContext = contextId;
+      activeInlineRefType = refType;
+      activeInlineIsGlobal = isGlobal;
+      
+      // Populate existing chips
+      const refs = referencesByType[refType] || [];
+      const existingRefs = refs.filter(ref => ref.isGlobal || ref.contexts.includes(contextId));
+      
+      existingChipsContainer.innerHTML = existingRefs.map(ref => {
+        const seed = ref.name.toLowerCase().replace(/\s+/g, '');
+        const displayName = ref.properties[0]?.values[contextId] || ref.name;
+        return `
+          <span class="inline-existing-chip" data-ref-name="${ref.name}">
+            <span>${displayName}</span>
+            <button class="inline-chip-remove" title="Remove">&times;</button>
+          </span>
+        `;
+      }).join('');
+      
+      // Position popover at the same position as the cell
+      const cellRect = cell.getBoundingClientRect();
+      const popoverWidth = 280;
+      const popoverHeight = 300;
+      const viewportHeight = window.innerHeight;
+      
+      // Check if there's enough space below the cell
+      const spaceBelow = viewportHeight - cellRect.top;
+      
+      if (spaceBelow < popoverHeight) {
+        // Not enough space below, position above the cell
+        popover.style.top = 'auto';
+        popover.style.bottom = (viewportHeight - cellRect.bottom + 4) + 'px';
+      } else {
+        // Position at cell top with small offset
+        popover.style.bottom = 'auto';
+        popover.style.top = (cellRect.top + 4) + 'px';
+      }
+      
+      // Horizontal positioning - align with cell's left edge
+      let left = cellRect.left;
+      
+      // If popover would go off right edge, adjust left
+      if (left + popoverWidth > window.innerWidth - 10) {
+        left = window.innerWidth - popoverWidth - 10;
+      }
+      
+      // Ensure it doesn't go off left edge
+      if (left < 10) {
+        left = 10;
+      }
+      
+      popover.style.left = left + 'px';
+      
+      // Show and focus
+      popover.classList.add('visible');
+      input.value = '';
+      input.focus();
+      handleInlineSearch();
+    }
+
+    function handleInlineSearch() {
+      const input = document.getElementById('inlineAddInput');
+      const results = document.getElementById('inlineAddResults');
+      const query = input.value.toLowerCase().trim();
+      
+      // Only show results when user has typed something
+      if (!query) {
+        results.innerHTML = '';
+        return;
+      }
+      
+      // Get existing refs in this context from the reference type's array
+      const refs = referencesByType[activeInlineRefType] || [];
+      const existingNames = refs
+        .filter(ref => ref.isGlobal || ref.contexts.includes(activeInlineContext))
+        .map(r => r.name.toLowerCase());
+      
+      // Filter available items by search query only (don't exclude existing)
+      const filtered = availableItems.filter(item => 
+        item.name.toLowerCase().includes(query)
+      );
+      
+      results.innerHTML = '';
+      
+      if (filtered.length === 0) {
+        results.innerHTML = '<div class="inline-add-empty">No items found</div>';
+      } else {
+        filtered.slice(0, 8).forEach(item => {
+          const isAlreadyAdded = existingNames.includes(item.name.toLowerCase());
+          const itemEl = document.createElement('div');
+          itemEl.className = 'inline-add-item' + (isAlreadyAdded ? ' already-added' : '');
+          itemEl.innerHTML = `
+            <span class="inline-add-item-icon">${isAlreadyAdded ? '✓' : '⊡'}</span>
+            <span>${item.name}</span>
+          `;
+          if (!isAlreadyAdded) {
+            itemEl.addEventListener('click', (e) => {
+              e.stopPropagation();
+              addInlineReference(item);
+            });
+          }
+          results.appendChild(itemEl);
+        });
+      }
+    }
+
+    function addInlineReference(item) {
+      // For global references, add to all contexts
+      const contextsToAdd = activeInlineIsGlobal ? contexts.map(c => c.id) : [activeInlineContext];
+      
+      // Get references for this type
+      if (!referencesByType[activeInlineRefType]) {
+        referencesByType[activeInlineRefType] = [];
+      }
+      const refs = referencesByType[activeInlineRefType];
+      
+      // Check if reference already exists
+      let existingRef = refs.find(r => r.name.toLowerCase() === item.name.toLowerCase());
+      
+      if (existingRef) {
+        // Add contexts to existing reference
+        contextsToAdd.forEach(ctxId => {
+          if (!existingRef.contexts.includes(ctxId)) {
+            existingRef.contexts.push(ctxId);
+            // Add values for this context
+            existingRef.properties.forEach(prop => {
+              if (prop.name === 'Name') {
+                prop.values[ctxId] = item.name;
+              } else {
+                prop.values[ctxId] = '';
+              }
+            });
+          }
+        });
+        existingRef.isGlobal = activeInlineIsGlobal;
+      } else {
+        // Create new reference
+        const newRef = {
+          id: `ref-${Date.now()}`,
+          name: item.name,
+          isGlobal: activeInlineIsGlobal,
+          contexts: [...contextsToAdd],
+          properties: [
+            { name: 'Name', hasIcon: false, isEditable: false, values: {} },
+            { name: 'Meta data', hasIcon: true, isEditable: true, values: {} }
+          ]
+        };
+        contextsToAdd.forEach(ctxId => {
+          newRef.properties[0].values[ctxId] = item.name;
+          newRef.properties[1].values[ctxId] = '';
+        });
+        refs.push(newRef);
+      }
+      
+      // Update main table - for global, update all cells in the row
+      if (activeInlineIsGlobal) {
+        const row = activeInlineCell.closest('tr');
+        row.querySelectorAll('td[data-context]').forEach(cell => {
+          updateMainTableCell(cell, cell.dataset.context, activeInlineRefType);
+        });
+      } else {
+        updateMainTableCell(activeInlineCell, activeInlineContext, activeInlineRefType);
+      }
+      
+      // Refresh the existing chips in popover (don't close, user might want to add more)
+      const existingChipsContainer = document.getElementById('inlineExistingChips');
+      const updatedRefs = referencesByType[activeInlineRefType] || [];
+      const existingRefs = updatedRefs.filter(r => r.isGlobal || r.contexts.includes(activeInlineContext));
+      
+      existingChipsContainer.innerHTML = existingRefs.map(r => {
+        const seed = r.name.toLowerCase().replace(/\s+/g, '');
+        const displayName = r.properties[0]?.values[activeInlineContext] || r.name;
+        return `
+          <span class="inline-existing-chip" data-ref-name="${r.name}">
+            <span>${displayName}</span>
+            <button class="inline-chip-remove" title="Remove">&times;</button>
+          </span>
+        `;
+      }).join('');
+      
+      // Clear input and refresh search results
+      const input = document.getElementById('inlineAddInput');
+      input.value = '';
+      input.focus();
+      handleInlineSearch();
+      
+      // Show feedback
+      const message = activeInlineIsGlobal 
+        ? `Added "${item.name}" to all contexts`
+        : `Added "${item.name}" to ${contexts.find(c => c.id === activeInlineContext)?.name || activeInlineContext}`;
+      showToast(message);
+    }
+
+    function removeInlineReference(refName) {
+      const refs = referencesByType[activeInlineRefType] || [];
+      const refIndex = refs.findIndex(r => r.name === refName);
+      
+      if (refIndex === -1) return;
+      
+      const ref = refs[refIndex];
+      
+      if (activeInlineIsGlobal || ref.isGlobal) {
+        // Remove entirely for global references
+        refs.splice(refIndex, 1);
+        showToast(`Removed "${refName}" from all contexts`);
+      } else {
+        // Remove from specific context
+        const ctxIndex = ref.contexts.indexOf(activeInlineContext);
+        if (ctxIndex > -1) {
+          ref.contexts.splice(ctxIndex, 1);
+          // Remove values for this context
+          ref.properties.forEach(prop => {
+            delete prop.values[activeInlineContext];
+          });
+        }
+        
+        // If no contexts left, remove the reference entirely
+        if (ref.contexts.length === 0) {
+          refs.splice(refIndex, 1);
+        }
+        
+        showToast(`Removed "${refName}" from ${contexts.find(c => c.id === activeInlineContext)?.name || activeInlineContext}`);
+      }
+      
+      // Update main table
+      if (activeInlineIsGlobal || ref?.isGlobal) {
+        const row = activeInlineCell.closest('tr');
+        row.querySelectorAll('td[data-context]').forEach(cell => {
+          updateMainTableCell(cell, cell.dataset.context, activeInlineRefType);
+        });
+      } else {
+        updateMainTableCell(activeInlineCell, activeInlineContext, activeInlineRefType);
+      }
+      
+      // Refresh the existing chips in popover
+      const existingChipsContainer = document.getElementById('inlineExistingChips');
+      const updatedRefs = referencesByType[activeInlineRefType] || [];
+      const existingRefs = updatedRefs.filter(r => r.isGlobal || r.contexts.includes(activeInlineContext));
+      
+      existingChipsContainer.innerHTML = existingRefs.map(r => {
+        const seed = r.name.toLowerCase().replace(/\s+/g, '');
+        const displayName = r.properties[0]?.values[activeInlineContext] || r.name;
+        return `
+          <span class="inline-existing-chip" data-ref-name="${r.name}">
+            <span>${displayName}</span>
+            <button class="inline-chip-remove" title="Remove">&times;</button>
+          </span>
+        `;
+      }).join('');
+      
+      // Update search results to show the removed item as available again
+      handleInlineSearch();
+    }
+
+    function updateMainTableCell(cell, contextId, refType) {
+      // Get refs that exist in this context for this ref type
+      const allRefs = referencesByType[refType] || [];
+      const refs = allRefs.filter(ref => ref.isGlobal || ref.contexts.includes(contextId));
+      
+      if (refs.length === 0) {
+        cell.innerHTML = '';
+      } else {
+        // Calculate how many chips can fit based on cell width
+        const cellWidth = cell.offsetWidth - 24; // Subtract padding
+        const moreChipWidth = 45; // Width of "+X" chip
+        
+        // Estimate chip width based on average name length (thumbnail + text + padding)
+        const avgChipWidth = 140; // ~20px thumb + ~100px text + ~20px padding/gap
+        let maxVisible = Math.max(1, Math.floor((cellWidth - moreChipWidth) / avgChipWidth));
+        
+        const visibleRefs = refs.slice(0, maxVisible);
+        const remaining = refs.length - maxVisible;
+        
+        let chipsHtml = visibleRefs.map(ref => {
+          const displayName = ref.isGlobal 
+            ? (ref.properties[0]?.values['en-us'] || ref.name)
+            : (ref.properties[0]?.values[contextId] || ref.name);
+          const thumbSeed = ref.name.toLowerCase().replace(/\s+/g, '');
+          return `
+            <span class="ref-chip">
+              <span class="ref-chip-thumb-wrapper">
+                <img class="ref-chip-thumb" src="https://picsum.photos/seed/${thumbSeed}/40/40" alt="">
+                <span class="thumb-tooltip"><img src="https://picsum.photos/seed/${thumbSeed}/300/300" alt="${displayName}"></span>
+              </span>
+              <span class="ref-chip-text">${displayName}</span>
+            </span>
+          `;
+        }).join('');
+        
+        if (remaining > 0) {
+          chipsHtml += `<span class="ref-chip ref-chip-more">+${remaining}</span>`;
+        }
+        
+        cell.innerHTML = `<div class="ref-chips">${chipsHtml}</div>`;
+      }
+    }
+
+    function refreshMainTableFromReferences() {
+      // Update all cells in the main table based on references data
+      document.querySelectorAll('tr[data-ref-type]').forEach(row => {
+        const refType = row.dataset.refType;
+        row.querySelectorAll('td[data-context]').forEach(cell => {
+          const contextId = cell.dataset.context;
+          updateMainTableCell(cell, contextId, refType);
+        });
+      });
+    }
+
+    function applyViewFilters() {
+      const hideEqual = document.getElementById('hideEqualCheckbox').checked;
+      const markDifferent = document.getElementById('markDifferentCheckbox').checked;
+      
+      // Get all attribute rows (not section rows)
+      const rows = document.querySelectorAll('.mc-table .attr-row');
+      
+      rows.forEach(row => {
+        // Get all value cells (not the first column which is the label)
+        const cells = Array.from(row.querySelectorAll('td:not(:first-child)'));
+        
+        // Get text content from each cell
+        const values = cells.map(cell => {
+          // Handle cells with ref-chips (reference types)
+          const chips = cell.querySelector('.ref-chips');
+          if (chips) {
+            return chips.textContent.trim();
+          }
+          return cell.textContent.trim();
+        });
+        
+        // Check if all values are equal (including empty)
+        const allEqual = values.every(v => v === values[0]);
+        const allEmpty = values.every(v => v === '');
+        
+        // Has differences if:
+        // - Not all values are the same, OR
+        // - Some are empty and some are not
+        const hasDifferences = !allEqual;
+        
+        // Apply hide equal filter
+        // Hide if all values are equal (including all empty)
+        if (hideEqual && allEqual) {
+          row.classList.add('row-hidden');
+        } else {
+          row.classList.remove('row-hidden');
+        }
+        
+        // Apply mark different filter
+        // Mark if there are any differences (including empty vs non-empty)
+        if (markDifferent && hasDifferences) {
+          row.classList.add('row-different');
+        } else {
+          row.classList.remove('row-different');
+        }
+      });
+      
+      // Update row counts after filtering
+      updateRowCounts();
+    }
+
+    function openRefModal(refType, refName, isGlobal = false) {
+      currentRefType = refType;
+      currentRefTypeName = refName;
+      currentRefTypeIsGlobal = isGlobal;
+      
+      // Update modal title
+      document.querySelector('#refModal .modal-header h1').lastChild.textContent = refName;
+      
+      // Clear selection
+      selectedRefs.clear();
+      
+      refModalOverlay.classList.remove('hidden');
+      renderContextHeaders();
+      renderReferences();
+      updateItemCount();
+      updateSelectionUI();
+      
+      // Reset scroll position
+      const tableContainer = document.getElementById('tableContainer');
+      if (tableContainer) {
+        tableContainer.scrollLeft = 0;
+        tableContainer.scrollTop = 0;
+      }
+      
+      // Reset changes tracking and disable Apply
+      modalHasChanges = false;
+      updateModalApplyButton();
+    }
+
+    function closeRefModal() {
+      refModalOverlay.classList.add('hidden');
+      addPopover.classList.remove('visible');
+    }
+    
+    function updateModalApplyButton() {
+      const applyBtn = document.getElementById('applyBtn');
+      if (applyBtn) {
+        applyBtn.disabled = !modalHasChanges;
+      }
+    }
+
+    function renderContextHeaders() {
+      const colgroup = document.getElementById('tableColgroup');
+      const referenceTable = document.getElementById('referenceTable');
+      colgroup.innerHTML = '';
+      
+      const firstColWidth = 240;
+      const contextColWidth = 180;
+      
+      const firstCol = document.createElement('col');
+      firstCol.style.width = firstColWidth + 'px';
+      colgroup.appendChild(firstCol);
+      
+      visibleContexts.forEach(() => {
+        const col = document.createElement('col');
+        col.style.width = contextColWidth + 'px';
+        colgroup.appendChild(col);
+      });
+      
+      // Set explicit table width
+      const totalWidth = firstColWidth + (visibleContexts.length * contextColWidth);
+      referenceTable.style.width = totalWidth + 'px';
+      
+      // Set footer width to match table
+      const modalFooter = document.getElementById('itemCount');
+      if (modalFooter) {
+        modalFooter.style.width = totalWidth + 'px';
+      }
+      
+      tableHeader.innerHTML = '';
+      const firstTh = document.createElement('th');
+      tableHeader.appendChild(firstTh);
+      
+      visibleContexts.forEach(ctx => {
+        const th = document.createElement('th');
+        th.textContent = ctx.name;
+        tableHeader.appendChild(th);
+      });
+      
+      // Setup column resize for modal table
+      setupModalColumnResize();
+    }
+    
+    function setupModalColumnResize() {
+      const table = document.getElementById('referenceTable');
+      const headers = table.querySelectorAll('th');
+      const colgroup = document.getElementById('tableColgroup');
+      const cols = colgroup.querySelectorAll('col');
+      
+      headers.forEach((th, index) => {
+        // Add resize handle to each header
+        const handle = document.createElement('div');
+        handle.className = 'col-resize-handle';
+        th.style.position = 'relative';
+        th.appendChild(handle);
+        
+        let startX, startWidth, colElement;
+        
+        handle.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          startX = e.pageX;
+          colElement = cols[index];
+          startWidth = colElement.offsetWidth || parseInt(colElement.style.width) || th.offsetWidth;
+          
+          handle.classList.add('resizing');
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+          
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+        
+        function onMouseMove(e) {
+          const diff = e.pageX - startX;
+          const newWidth = Math.max(80, startWidth + diff);
+          colElement.style.width = newWidth + 'px';
+        }
+        
+        function onMouseUp() {
+          handle.classList.remove('resizing');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          // Update table width to match sum of column widths
+          let totalWidth = 0;
+          cols.forEach(col => {
+            totalWidth += parseInt(col.style.width) || 180;
+          });
+          table.style.width = totalWidth + 'px';
+          // Update footer width to match table
+          const modalFooter = document.getElementById('itemCount');
+          if (modalFooter) {
+            modalFooter.style.width = totalWidth + 'px';
+          }
+        }
+      });
+    }
+
+    function renderReferences() {
+      const refs = getReferences();
+      
+      if (refs.length === 0) {
+        emptyState.style.display = 'flex';
+        tableContainer.style.display = 'none';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      tableContainer.style.display = 'block';
+      tableBody.innerHTML = '';
+
+      refs.forEach(ref => {
+        const isSelected = selectedRefs.has(ref.id);
+        
+        // Main accordion row
+        const accordionRow = document.createElement('tr');
+        accordionRow.className = `accordion-row expanded${isSelected ? ' selected' : ''}`;
+        accordionRow.dataset.refId = ref.id;
+        
+        const headerCell = document.createElement('td');
+        headerCell.innerHTML = `
+          <div class="accordion-header">
+            <span class="accordion-toggle">›</span>
+            <input type="checkbox" class="accordion-checkbox" ${isSelected ? 'checked' : ''}>
+            <span class="accordion-title">${ref.name}</span>
+          </div>
+        `;
+        accordionRow.appendChild(headerCell);
+        
+        // Add empty cells for remaining columns
+        visibleContexts.forEach(() => {
+          const emptyCell = document.createElement('td');
+          accordionRow.appendChild(emptyCell);
+        });
+        
+        tableBody.appendChild(accordionRow);
+
+        // Helper function to create a property row
+        function createPropertyRow(prop) {
+          const propRow = document.createElement('tr');
+          propRow.className = 'property-row';
+          propRow.dataset.parentRef = ref.id;
+          
+          const nameCell = document.createElement('td');
+          const iconHtml = prop.hasIcon 
+            ? `<span class="icon" title="Language dependent">
+                <svg viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                  <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+              </span>`
+            : `<span class="icon placeholder"></span>`;
+          
+          nameCell.innerHTML = `
+            <div class="property-name">
+              ${iconHtml}
+              ${prop.name}
+            </div>
+          `;
+          propRow.appendChild(nameCell);
+
+          visibleContexts.forEach(ctx => {
+            const valueCell = document.createElement('td');
+            const hasContext = ref.isGlobal || ref.contexts.includes(ctx.id);
+            
+            if (hasContext) {
+              // For global refs, always use en-us value; for non-global, use context-specific
+              const value = ref.isGlobal 
+                ? (prop.values['en-us'] || '')
+                : (prop.values[ctx.id] || '');
+              
+              if (prop.isEditable) {
+                valueCell.innerHTML = `<div class="property-value editable" contenteditable="true">${value}</div>`;
+              } else {
+                valueCell.innerHTML = `<div class="property-value readonly">${value}</div>`;
+              }
+            } else {
+              valueCell.className = 'ref-not-available';
+            }
+            propRow.appendChild(valueCell);
+          });
+          
+          return propRow;
+        }
+
+        // 1. Name row (first property)
+        if (ref.properties.length > 0) {
+          tableBody.appendChild(createPropertyRow(ref.properties[0]));
+        }
+
+        // 2. Thumbnail row
+        const thumbRow = document.createElement('tr');
+        thumbRow.className = 'property-row thumbnail-row';
+        thumbRow.dataset.parentRef = ref.id;
+        
+        const thumbLabelCell = document.createElement('td');
+        thumbLabelCell.innerHTML = `
+          <div class="property-name">
+            <span class="icon placeholder"></span>
+            Thumbnail
+          </div>
+        `;
+        thumbRow.appendChild(thumbLabelCell);
+        
+        const thumbSeed = ref.name.toLowerCase().replace(/\s+/g, '');
+        visibleContexts.forEach(ctx => {
+          const thumbCell = document.createElement('td');
+          const hasContext = ref.isGlobal || ref.contexts.includes(ctx.id);
+          
+          if (hasContext) {
+            thumbCell.innerHTML = `
+              <div class="property-value thumbnail-cell readonly">
+                <span class="ref-chip-thumb-wrapper">
+                  <img class="modal-thumbnail" src="https://picsum.photos/seed/${thumbSeed}/60/60" alt="${ref.name}">
+                  <span class="thumb-tooltip"><img src="https://picsum.photos/seed/${thumbSeed}/300/300" alt="${ref.name}"></span>
+                </span>
+              </div>
+            `;
+          } else {
+            thumbCell.className = 'ref-not-available';
+          }
+          thumbRow.appendChild(thumbCell);
+        });
+        
+        tableBody.appendChild(thumbRow);
+
+        // 3. All remaining properties (both meta data and regular)
+        const remainingProps = ref.properties.slice(1);
+        remainingProps.forEach(prop => {
+          const propRow = createPropertyRow(prop);
+          if (prop.isMetaData) {
+            propRow.dataset.isMetadata = 'true';
+          }
+          tableBody.appendChild(propRow);
+        });
+
+        // Event listeners for main accordion
+        accordionRow.addEventListener('click', (e) => {
+          if (e.target.type !== 'checkbox') {
+            accordionRow.classList.toggle('expanded');
+            const isExpanded = accordionRow.classList.contains('expanded');
+            const propertyRows = tableBody.querySelectorAll(`tr.property-row[data-parent-ref="${ref.id}"]`);
+            const hideMetaData = document.getElementById('hideMetaDataCheckbox').checked;
+            propertyRows.forEach(row => {
+              if (row.dataset.isMetadata === 'true' && hideMetaData) {
+                row.style.display = 'none';
+              } else {
+                row.style.display = isExpanded ? '' : 'none';
+              }
+            });
+          }
+        });
+
+        const checkbox = headerCell.querySelector('.accordion-checkbox');
+        checkbox.addEventListener('change', (e) => {
+          e.stopPropagation();
+          if (checkbox.checked) {
+            selectedRefs.add(ref.id);
+          } else {
+            selectedRefs.delete(ref.id);
+          }
+          updateSelectionUI();
+        });
+      });
+    }
+
+    function updateSelectionUI() {
+      removeBtn.disabled = selectedRefs.size === 0;
+    }
+
+    function updateItemCount() {
+      const refs = getReferences();
+      itemCount.textContent = `${refs.length} item${refs.length !== 1 ? 's' : ''}`;
+    }
+
+    function setupModalListeners() {
+      // Close modal
+      document.getElementById('closeRefModal').addEventListener('click', closeRefModal);
+      document.getElementById('cancelBtn').addEventListener('click', closeRefModal);
+      document.getElementById('applyBtn').addEventListener('click', closeRefModal);
+      
+      // Modal View dropdown
+      const modalViewBtn = document.getElementById('modalViewBtn');
+      const modalViewDropdown = document.getElementById('modalViewDropdown');
+      const hideMetaDataCheckbox = document.getElementById('hideMetaDataCheckbox');
+      
+      modalViewBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modalViewDropdown.classList.toggle('show');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!modalViewDropdown.contains(e.target) && !modalViewBtn.contains(e.target)) {
+          modalViewDropdown.classList.remove('show');
+        }
+      });
+      
+      hideMetaDataCheckbox.addEventListener('change', () => {
+        const hideMetaData = hideMetaDataCheckbox.checked;
+        const metaDataRows = document.querySelectorAll('tr.property-row[data-is-metadata="true"]');
+        metaDataRows.forEach(row => {
+          // Only hide if parent accordion is expanded
+          const parentId = row.dataset.parentRef;
+          const parentAccordion = document.querySelector(`tr.accordion-row[data-ref-id="${parentId}"]`);
+          if (parentAccordion && parentAccordion.classList.contains('expanded')) {
+            row.style.display = hideMetaData ? 'none' : '';
+          }
+        });
+      });
+
+      // Close modal with Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          // Close inline popover first
+          const inlinePopover = document.getElementById('inlineAddPopover');
+          if (inlinePopover.classList.contains('visible')) {
+            inlinePopover.classList.remove('visible');
+            return;
+          }
+          // Close add popover
+          if (addPopover.classList.contains('visible')) {
+            addPopover.classList.remove('visible');
+            return;
+          }
+          // Close remove modal
+          if (!removeModalOverlay.classList.contains('hidden')) {
+            removeModalOverlay.classList.add('hidden');
+            return;
+          }
+          // Close picker
+          if (!advancedPickerOverlay.classList.contains('hidden')) {
+            advancedPickerOverlay.classList.add('hidden');
+            isPickerOpen = false;
+            return;
+          }
+          // Close main modal
+          if (!refModalOverlay.classList.contains('hidden')) {
+            closeRefModal();
+          }
+        }
+      });
+
+      // Add button
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (addPopover.classList.contains('visible')) {
+          addPopover.classList.remove('visible');
+        } else {
+          showAddPopover();
+        }
+      });
+
+      // Empty state add link
+      document.getElementById('emptyStateAddLink').addEventListener('click', () => {
+        showAddPopover();
+      });
+
+      // Popover
+      document.getElementById('addPopoverCancel').addEventListener('click', () => {
+        addPopover.classList.remove('visible');
+        clearPopoverState();
+      });
+
+      document.getElementById('addPopoverApply').addEventListener('click', () => {
+        addReferences();
+      });
+
+      // Remove button
+      removeBtn.addEventListener('click', () => {
+        if (selectedRefs.size > 0) {
+          showRemoveModal();
+        }
+      });
+
+      // Remove modal
+      document.getElementById('removeModalCancel').addEventListener('click', () => {
+        removeModalOverlay.classList.add('hidden');
+      });
+
+      document.getElementById('removeModalConfirm').addEventListener('click', () => {
+        removeReferences();
+      });
+
+      document.getElementById('selectAllContexts').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('#contextSelectList input').forEach(cb => cb.checked = true);
+      });
+
+      document.getElementById('deselectAllContexts').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('#contextSelectList input').forEach(cb => cb.checked = false);
+      });
+
+      document.getElementById('pickerClose').addEventListener('click', () => {
+        advancedPickerOverlay.classList.add('hidden');
+        isPickerOpen = false;
+      });
+
+      document.getElementById('pickerCancel').addEventListener('click', () => {
+        advancedPickerOverlay.classList.add('hidden');
+        isPickerOpen = false;
+      });
+
+      document.getElementById('pickerSelect').addEventListener('click', () => {
+        const selectedPickerItems = document.querySelectorAll('.picker-item.selected');
+        selectedPickerItems.forEach(item => {
+          const itemName = item.querySelector('.picker-item-name').textContent;
+          const itemId = item.dataset.itemId;
+          if (!selectedItems.find(i => i.id === itemId)) {
+            selectedItems.push({ id: itemId, name: itemName });
+          }
+        });
+        renderItemTags();
+        advancedPickerOverlay.classList.add('hidden');
+        isPickerOpen = false;
+      });
+
+      // Close popover on outside click (but not if picker is open)
+      document.addEventListener('click', (e) => {
+        if (isPickerOpen) return;
+        if (!addBtn.contains(e.target) && !addPopover.contains(e.target)) {
+          addPopover.classList.remove('visible');
+        }
+      });
+
+      // Items search typeahead
+      setupItemsTypeahead();
+      
+      // Contexts search typeahead
+      setupContextsTypeahead();
+
+      // Zoom slider
+      document.getElementById('modalZoomSlider').addEventListener('input', (e) => {
+        document.getElementById('modalZoomLevel').textContent = `Zoom level (${e.target.value}x)`;
+      });
+
+      // Track changes to editable meta-data fields in modal
+      tableBody.addEventListener('input', (e) => {
+        if (e.target.closest('.property-value.editable')) {
+          modalHasChanges = true;
+          updateModalApplyButton();
+        }
+      });
+    }
+
+    function showAddPopover() {
+      addPopover.classList.add('visible');
+      
+      const btnRect = addBtn.getBoundingClientRect();
+      addPopover.style.top = `${btnRect.bottom + 8}px`;
+      addPopover.style.left = `${btnRect.left}px`;
+      
+      // Hide contexts field for global reference types
+      const contextsGroup = document.getElementById('contextsFieldContainer').closest('.form-group');
+      if (currentRefTypeIsGlobal) {
+        contextsGroup.style.display = 'none';
+      } else {
+        contextsGroup.style.display = 'block';
+      }
+      
+      // Update apply button state
+      updateApplyButtonState();
+    }
+
+    function showRemoveModal() {
+      const refs = getReferences();
+      const count = selectedRefs.size;
+      const refNames = [];
+      selectedRefs.forEach(refId => {
+        const ref = refs.find(r => r.id === refId);
+        if (ref) refNames.push(ref.name);
+      });
+      
+      const summaryText = count === 1 ? refNames[0] : `${count} references selected`;
+      
+      // Show appropriate section based on global vs non-global
+      const contextSelection = document.getElementById('removeContextSelection');
+      const globalConfirmation = document.getElementById('removeGlobalConfirmation');
+      
+      if (currentRefTypeIsGlobal) {
+        contextSelection.style.display = 'none';
+        globalConfirmation.style.display = 'block';
+        document.getElementById('removeItemsSummaryGlobal').textContent = summaryText;
+      } else {
+        contextSelection.style.display = 'block';
+        globalConfirmation.style.display = 'none';
+        document.getElementById('removeItemsSummary').textContent = summaryText;
+        
+        const contextList = document.getElementById('contextSelectList');
+        contextList.innerHTML = '';
+        
+        contexts.forEach(ctx => {
+          const item = document.createElement('div');
+          item.className = 'context-select-item';
+          item.innerHTML = `
+            <input type="checkbox" id="remove-ctx-${ctx.id}" value="${ctx.id}">
+            <label for="remove-ctx-${ctx.id}">${ctx.name}</label>
+          `;
+          item.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT') {
+              item.querySelector('input').checked = !item.querySelector('input').checked;
+            }
+          });
+          contextList.appendChild(item);
+        });
+      }
+
+      removeModalOverlay.classList.remove('hidden');
+    }
+
+    function showAdvancedPicker() {
+      const grid = document.getElementById('pickerGrid');
+      grid.innerHTML = '';
+      
+      availableItems.forEach(item => {
+        const isSelected = selectedItems.find(i => i.id === item.id);
+        const itemEl = document.createElement('div');
+        itemEl.className = `picker-item${isSelected ? ' selected' : ''}`;
+        itemEl.dataset.itemId = item.id;
+        itemEl.innerHTML = `
+          <div class="picker-item-icon">⊡</div>
+          <div class="picker-item-name">${item.name}</div>
+        `;
+        itemEl.addEventListener('click', () => {
+          itemEl.classList.toggle('selected');
+          const count = document.querySelectorAll('.picker-item.selected').length;
+          document.getElementById('pickerSelectedCount').textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
+        });
+        grid.appendChild(itemEl);
+      });
+
+      document.getElementById('pickerSelectedCount').textContent = '0 items selected';
+      advancedPickerOverlay.classList.remove('hidden');
+    }
+
+    function setupItemsTypeahead() {
+      const input = document.getElementById('itemsSearchInput');
+      const container = document.getElementById('itemsFieldContainer');
+      
+      const dropdown = document.createElement('div');
+      dropdown.className = 'typeahead-dropdown';
+      container.appendChild(dropdown);
+
+      function showSuggestions() {
+        const query = input.value.toLowerCase().trim();
+        
+        // Only show dropdown when user has typed something
+        if (!query) {
+          dropdown.classList.remove('visible');
+          return;
+        }
+        
+        const filtered = availableItems.filter(opt => 
+          opt.name.toLowerCase().includes(query) && 
+          !selectedItems.find(s => s.id === opt.id)
+        );
+
+        dropdown.innerHTML = '';
+        
+        if (filtered.length === 0) {
+          const noResults = document.createElement('div');
+          noResults.className = 'typeahead-item';
+          noResults.style.color = '#888';
+          noResults.style.cursor = 'default';
+          noResults.textContent = 'No items found';
+          dropdown.appendChild(noResults);
+        } else {
+          filtered.forEach(opt => {
+            const item = document.createElement('div');
+            item.className = 'typeahead-item';
+            item.innerHTML = `<span class="typeahead-item-icon">★</span><span>${opt.name}</span>`;
+            item.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              selectedItems.push({...opt});
+              renderItemTags();
+              input.value = '';
+              dropdown.classList.remove('visible');
+              input.focus();
+            });
+            dropdown.appendChild(item);
+          });
+        }
+        
+        // Add "Open node picker" link at the end
+        const pickerLink = document.createElement('a');
+        pickerLink.href = '#';
+        pickerLink.className = 'open-picker-link';
+        pickerLink.id = 'openPickerLink';
+        pickerLink.textContent = 'Open node picker';
+        pickerLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          isPickerOpen = true;
+          showAdvancedPicker();
+        });
+        dropdown.appendChild(pickerLink);
+
+        dropdown.classList.add('visible');
+      }
+
+      input.addEventListener('input', showSuggestions);
+
+      // Prevent dropdown from closing when clicking inside it
+      dropdown.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+      });
+
+      input.addEventListener('blur', () => {
+        setTimeout(() => dropdown.classList.remove('visible'), 150);
+      });
+    }
+
+    function setupContextsTypeahead() {
+      const input = document.getElementById('contextsSearchInput');
+      const container = document.getElementById('contextsFieldContainer');
+      
+      const dropdown = document.createElement('div');
+      dropdown.className = 'typeahead-dropdown';
+      container.appendChild(dropdown);
+
+      function showSuggestions() {
+        const query = input.value.toLowerCase().trim();
+        
+        // Only show dropdown when user has typed something
+        if (!query) {
+          dropdown.classList.remove('visible');
+          return;
+        }
+        
+        const filtered = contexts.filter(ctx => 
+          ctx.name.toLowerCase().includes(query) && 
+          !selectedContexts.find(s => s.id === ctx.id)
+        );
+
+        dropdown.innerHTML = '';
+        
+        if (filtered.length === 0) {
+          const noResults = document.createElement('div');
+          noResults.className = 'typeahead-item';
+          noResults.style.color = '#888';
+          noResults.style.cursor = 'default';
+          noResults.textContent = 'No contexts found';
+          dropdown.appendChild(noResults);
+        } else {
+          filtered.forEach(ctx => {
+            const item = document.createElement('div');
+            item.className = 'typeahead-item';
+            item.innerHTML = `
+              <span class="typeahead-item-icon" style="color: #888;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                  <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+              </span>
+              <span>${ctx.name}</span>
+            `;
+            item.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              selectedContexts.push({...ctx});
+              renderContextTags();
+              input.value = '';
+              dropdown.classList.remove('visible');
+              input.focus();
+            });
+            dropdown.appendChild(item);
+          });
+        }
+
+        dropdown.classList.add('visible');
+      }
+
+      input.addEventListener('input', showSuggestions);
+
+      // Prevent dropdown from closing when clicking inside it
+      dropdown.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+      });
+
+      input.addEventListener('blur', () => {
+        setTimeout(() => dropdown.classList.remove('visible'), 150);
+      });
+    }
+
+    function renderItemTags() {
+      const container = document.getElementById('itemsTagsList');
+      container.innerHTML = '';
+      
+      selectedItems.forEach(item => {
+        const tag = document.createElement('div');
+        tag.className = 'item-tag';
+        tag.innerHTML = `
+          <span class="item-tag-name">${item.name}</span>
+          <button class="item-tag-remove">&times;</button>
+        `;
+        tag.querySelector('.item-tag-remove').addEventListener('click', () => {
+          selectedItems = selectedItems.filter(i => i.id !== item.id);
+          renderItemTags();
+        });
+        container.appendChild(tag);
+      });
+      
+      updateApplyButtonState();
+    }
+
+    function renderContextTags() {
+      const container = document.getElementById('contextsTagsList');
+      container.innerHTML = '';
+      
+      selectedContexts.forEach(ctx => {
+        const tag = document.createElement('div');
+        tag.className = 'item-tag';
+        tag.innerHTML = `
+          <span class="item-tag-icon" style="color: #666;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <ellipse cx="8" cy="8" rx="2.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+          </span>
+          <span class="item-tag-name">${ctx.name}</span>
+          <button class="item-tag-remove">&times;</button>
+        `;
+        tag.querySelector('.item-tag-remove').addEventListener('click', () => {
+          selectedContexts = selectedContexts.filter(c => c.id !== ctx.id);
+          renderContextTags();
+        });
+        container.appendChild(tag);
+      });
+      
+      updateApplyButtonState();
+    }
+    
+    function updateApplyButtonState() {
+      const applyBtn = document.getElementById('addPopoverApply');
+      if (!applyBtn) return;
+      
+      // For global: only need items selected
+      // For non-global: need both items and contexts selected
+      let isValid;
+      if (currentRefTypeIsGlobal) {
+        isValid = selectedItems.length > 0;
+      } else {
+        isValid = selectedItems.length > 0 && selectedContexts.length > 0;
+      }
+      
+      applyBtn.disabled = !isValid;
+    }
+
+    function clearPopoverState() {
+      selectedItems = [];
+      selectedContexts = [];
+      renderItemTags();
+      renderContextTags();
+      document.getElementById('itemsSearchInput').value = '';
+      document.getElementById('contextsSearchInput').value = '';
+    }
+
+    function addReferences() {
+      if (selectedItems.length === 0) {
+        showToast('Please select at least one item');
+        return;
+      }
+
+      // For global types, use all contexts automatically
+      // For non-global types, require context selection
+      let selectedContextIds;
+      if (currentRefTypeIsGlobal) {
+        selectedContextIds = contexts.map(c => c.id);
+      } else {
+        if (selectedContexts.length === 0) {
+          showToast('Please select at least one context');
+          return;
+        }
+        selectedContextIds = selectedContexts.map(c => c.id);
+      }
+
+      const refs = getReferences();
+
+      selectedItems.forEach(item => {
+        const existingRef = refs.find(r => r.name === item.name);
+        if (existingRef) {
+          selectedContextIds.forEach(ctxId => {
+            if (!existingRef.contexts.includes(ctxId)) {
+              existingRef.contexts.push(ctxId);
+              existingRef.properties[0].values[ctxId] = item.name;
+              existingRef.properties[1].values[ctxId] = '';
+            }
+          });
+        } else {
+          const newRef = {
+            id: `ref-${Date.now()}`,
+            name: item.name,
+            isGlobal: currentRefTypeIsGlobal,
+            contexts: [...selectedContextIds],
+            properties: [
+              { name: 'Name', hasIcon: false, isEditable: false, values: {} },
+              { name: 'Meta data', hasIcon: true, isEditable: true, values: {} }
+            ]
+          };
+          
+          selectedContextIds.forEach(ctxId => {
+            newRef.properties[0].values[ctxId] = item.name;
+            newRef.properties[1].values[ctxId] = '';
+          });
+
+          refs.push(newRef);
+        }
+      });
+
+      addPopover.classList.remove('visible');
+      clearPopoverState();
+      renderReferences();
+      updateItemCount();
+      refreshMainTableFromReferences();
+      
+      modalHasChanges = true;
+      updateModalApplyButton();
+      showToast('References added successfully');
+    }
+
+    function removeReferences() {
+      let contextsToRemove;
+      
+      if (currentRefTypeIsGlobal) {
+        // For global, remove from all contexts
+        contextsToRemove = contexts.map(c => c.id);
+      } else {
+        // For non-global, get selected contexts
+        contextsToRemove = [];
+        document.querySelectorAll('#contextSelectList input:checked').forEach(cb => {
+          contextsToRemove.push(cb.value);
+        });
+
+        if (contextsToRemove.length === 0) {
+          showToast('Please select at least one context');
+          return;
+        }
+      }
+
+      const refs = getReferences();
+      
+      selectedRefs.forEach(refId => {
+        const ref = refs.find(r => r.id === refId);
+        if (ref) {
+          ref.contexts = ref.contexts.filter(c => !contextsToRemove.includes(c));
+          ref.properties.forEach(prop => {
+            contextsToRemove.forEach(ctxId => delete prop.values[ctxId]);
+          });
+        }
+      });
+
+      // Remove references with no contexts left
+      referencesByType[currentRefType] = refs.filter(r => r.contexts.length > 0);
+
+      removeModalOverlay.classList.add('hidden');
+      selectedRefs.clear();
+      renderReferences();
+      updateSelectionUI();
+      updateItemCount();
+      refreshMainTableFromReferences();
+      
+      modalHasChanges = true;
+      updateModalApplyButton();
+      showToast('References updated successfully');
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 3000);
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

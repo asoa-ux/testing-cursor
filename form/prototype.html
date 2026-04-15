@@ -1,0 +1,3713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDM Form Field Design — Prototype V1</title>
+    <style>
+        /* ======================== */
+        /* DESIGN TOKENS            */
+        /* ======================== */
+        :root {
+            --color-primary: #1976d2;
+            --color-primary-light: #e3f2fd;
+            --color-primary-border: rgba(25, 118, 210, 0.2);
+            
+            --color-text: #333;
+            --color-text-muted: #666;
+            --color-text-disabled: #999;
+            
+            --color-error: #d32f2f;
+            --color-error-light: #fdecea;
+            
+            --color-ai: #7c3aed;
+            --color-ai-light: #ede9fe;
+            
+            --color-source: #666;
+            --color-source-light: #f5f5f5;
+            
+            --color-border: #ddd;
+            --color-bg: #f5f5f5;
+            --color-bg-white: white;
+            
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.12);
+            
+            --transition: 0.15s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 40px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: 14px;
+            color: var(--color-text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: var(--color-text-muted);
+            margin-bottom: 32px;
+        }
+
+        /* ======================== */
+        /* LAYOUT CONTAINERS        */
+        /* ======================== */
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .example-card {
+            background: var(--color-bg-white);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            overflow: visible;
+        }
+
+        .example-card h3 {
+            margin-bottom: 16px;
+        }
+
+        /* ======================== */
+        /* SHARED FIELD STYLES      */
+        /* ======================== */
+        
+        /* Label Area */
+        .field-label {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        .field-label .label-text {
+            display: inline;
+        }
+
+        .field-label .required {
+            color: var(--color-error);
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .field-label .help-icon {
+            color: var(--color-text-muted);
+            font-size: 12px;
+            cursor: help;
+            margin-left: 4px;
+        }
+
+        /* Source Badges */
+        .badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .badge-inherited {
+            background: var(--color-source-light);
+            color: var(--color-source);
+        }
+
+        .badge-calculated {
+            background: var(--color-source-light);
+            color: var(--color-source);
+        }
+
+        .badge-external {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-ai {
+            background: var(--color-ai-light);
+            color: var(--color-ai);
+        }
+
+        .badge-overridden {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-inherited-overwritten {
+            background: var(--color-source-light);
+            color: var(--color-source);
+        }
+
+        .badge-calculated-overwritten {
+            background: var(--color-source-light);
+            color: var(--color-source);
+        }
+
+        .badge-error {
+            background: var(--color-error-light);
+            color: var(--color-error);
+        }
+
+        /* Input Styles */
+        .field-input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-white);
+            color: var(--color-text);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-border);
+        }
+
+        .field-input.readonly {
+            background: var(--color-source-light);
+            color: var(--color-text-muted);
+        }
+
+        .field-input.error {
+            border-color: var(--color-error);
+            background: var(--color-error-light);
+        }
+
+        .field-input.textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Input wrapper for value-level errors */
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper .field-input {
+            flex: 1;
+        }
+
+        .input-wrapper.has-error .field-input {
+            padding-left: 32px;
+        }
+
+        .input-error-icon {
+            position: absolute;
+            left: 10px;
+            width: 16px;
+            height: 16px;
+            background: var(--color-error);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 1;
+            cursor: help;
+        }
+
+        .multi-value-row.has-error {
+            position: relative;
+        }
+
+        .multi-value-row.has-error .row-main .field-input {
+            padding-left: 32px;
+        }
+
+        .multi-value-row .row-main .input-error-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .multi-value-row .row-main {
+            position: relative;
+        }
+
+        .rich-text-wrapper.has-error {
+            position: relative;
+        }
+
+        .rich-text-wrapper.has-error .input-error-icon {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            z-index: 2;
+        }
+
+        .rich-text-wrapper.has-error.show-toolbar .input-error-icon {
+            top: 46px;
+        }
+
+        .rich-text-wrapper.has-error .textarea {
+            padding-left: 32px;
+        }
+
+        /* Action Buttons */
+        .field-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--color-text-muted);
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .action-btn:hover {
+            background: var(--color-bg);
+        }
+
+        .action-btn.ai {
+            color: var(--color-ai);
+        }
+
+        .action-btn.ai:hover {
+            background: var(--color-ai-light);
+        }
+
+        /* ======================== */
+        /* FORM — LABEL LEFT        */
+        /* ======================== */
+        .form-horizontal {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .field-row-horizontal {
+            display: grid;
+            grid-template-columns: 240px 1fr auto;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .field-row-horizontal .label-area {
+            padding-top: 10px;
+        }
+
+        .field-row-horizontal .label-area .badges {
+            margin-top: 4px;
+        }
+
+        .field-row-horizontal .input-area {
+            position: relative;
+        }
+
+        .field-row-horizontal .actions-area {
+            padding-top: 6px;
+        }
+
+        .field-row-horizontal:hover .field-actions,
+        .field-row-horizontal:focus-within .field-actions {
+            opacity: 1;
+        }
+
+        /* ======================== */
+        /* FORM — LABEL TOP         */
+        /* ======================== */
+        .form-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .field-row-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field-row-vertical .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .field-row-vertical .label-area .badges {
+            margin-top: 4px;
+        }
+
+        .field-row-vertical .input-area {
+            position: relative;
+        }
+
+        .field-row-vertical:hover .field-actions,
+        .field-row-vertical:focus-within .field-actions {
+            opacity: 1;
+        }
+
+        /* ======================== */
+        /* TABLE VIEW               */
+        /* ======================== */
+        .table-container {
+            background: var(--color-bg-white);
+            border-radius: var(--radius-lg);
+            overflow: visible;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #B0BEC5;
+            border-bottom: 1px solid var(--color-border);
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
+            font-size: 12px;
+        }
+
+        .data-table th .help-icon {
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        .data-table td {
+            padding: 0;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Table Cell */
+        .table-cell {
+            position: relative;
+            padding: 8px 12px;
+            min-height: 40px;
+            background: var(--color-bg-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            margin: 0;
+            cursor: pointer;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .table-cell:hover {
+            border-color: #bbb;
+        }
+
+        .table-cell:focus-within,
+        .table-cell:focus,
+        .table-cell.editing {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-border);
+            outline: none;
+            cursor: text;
+        }
+
+        .table-cell.readonly {
+            background: var(--color-source-light);
+            cursor: default;
+        }
+
+        .table-cell.readonly:hover {
+            border-color: var(--color-border);
+        }
+
+        .table-cell .cell-content {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .table-cell .cell-value {
+            flex: 1;
+        }
+
+        .table-cell .cell-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--color-text);
+            padding: 0;
+            outline: none;
+        }
+
+        .table-cell .cell-input::placeholder {
+            color: var(--color-text-disabled);
+        }
+
+        /* Pop-over for multi-value/reference editing */
+        .cell-popover {
+            position: absolute;
+            top: 100%;
+            left: -1px;
+            right: -1px;
+            margin-top: 4px;
+            background: var(--color-bg-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 12px;
+            z-index: 105;
+            display: none;
+            min-width: 280px;
+        }
+
+        .table-cell.editing .cell-popover {
+            display: block;
+        }
+
+        .table-cell.editing {
+            z-index: 100;
+        }
+
+        .cell-popover .popover-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            padding: 0;
+            line-height: 1;
+            z-index: 1;
+        }
+
+        .cell-popover .popover-close:hover {
+            color: var(--color-text);
+        }
+
+        /* Rich Text Toolbar */
+        .rich-text-wrapper {
+            position: relative;
+        }
+
+        .rich-text-toolbar {
+            display: none;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 8px;
+            background: var(--color-bg-white);
+            border: 1px solid var(--color-border);
+            border-bottom: none;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+
+        .rich-text-wrapper.show-toolbar .rich-text-toolbar {
+            display: flex;
+        }
+
+        .rich-text-wrapper.show-toolbar .field-input.textarea {
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+        }
+
+        .toolbar-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--color-text-muted);
+            font-weight: 600;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .toolbar-btn.active {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 20px;
+            background: var(--color-border);
+            margin: 0 4px;
+        }
+
+        /* Cell Markers */
+        .cell-markers {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .cell-marker {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .cell-marker.required { color: var(--color-error); }
+        .cell-marker.error { 
+            width: 14px;
+            height: 14px;
+            background: var(--color-error);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: help;
+        }
+        .cell-marker.inherited { color: var(--color-source); display: none; }
+        .cell-marker.calculated { color: var(--color-source); display: none; }
+        .cell-marker.ai { color: var(--color-ai); display: none; }
+        .cell-marker.inherited-overwritten { color: var(--color-source); display: none; }
+        .cell-marker.calculated-overwritten { color: var(--color-source); display: none; }
+
+        /* Blue triangle indicator for cells with additional info */
+        .table-cell.has-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 10px 10px 0 0;
+            border-color: var(--color-primary) transparent transparent transparent;
+            z-index: 1;
+        }
+
+        /* Cell Actions (on focus) */
+        .table-cell .cell-actions {
+            position: absolute;
+            bottom: 100%;
+            left: -1px;
+            margin-bottom: 4px;
+            display: none;
+            background: var(--color-bg-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 4px 8px;
+            box-shadow: var(--shadow-md);
+            gap: 8px;
+            align-items: center;
+            z-index: 110;
+        }
+
+        .table-cell:focus-within .cell-actions,
+        .table-cell:focus .cell-actions,
+        .table-cell:hover .cell-actions {
+            display: flex;
+        }
+
+        /* When editing, toolbar stays above the popover */
+        .table-cell.editing .cell-actions {
+            z-index: 120;
+        }
+
+        /* Richtext in table: format actions in cell-actions bar, textarea in cell-content */
+        .cell-richtext-container {
+            flex: 1;
+            min-width: 0;
+            align-self: stretch;
+        }
+        .cell-richtext-container .cell-richtext-edit {
+            display: none;
+        }
+        .table-cell.editing .cell-richtext-container .cell-richtext-preview {
+            display: none;
+        }
+        .table-cell.editing .cell-richtext-container .cell-richtext-edit {
+            display: flex !important;
+            flex: 1 1 100%;
+            min-width: 0;
+            width: 100%;
+            align-self: stretch;
+            margin: 0;
+        }
+        .table-cell.editing .cell-richtext-container .cell-richtext-edit textarea {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        .table-cell.editing .cell-content {
+            align-items: stretch;
+            gap: 0;
+            margin: 0;
+        }
+        /* Richtext: keep mandatory marker at top when cell is tall */
+        .table-cell[data-type="richtext"].editing .cell-content {
+            align-items: flex-start;
+        }
+        .table-cell[data-type="richtext"].editing .cell-markers {
+            padding-top: 4px;
+        }
+        /* Richtext textarea: no inner border, cell provides the bounding box */
+        .table-cell[data-type="richtext"].editing .cell-richtext-edit textarea {
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .table-cell[data-type="richtext"].editing .cell-richtext-edit textarea:focus {
+            border: none;
+            box-shadow: none;
+            outline: none;
+        }
+        /* Remove margin from inputs in table cells */
+        .table-cell .cell-input,
+        .table-cell .single-cell-source {
+            margin: 0;
+        }
+        .cell-richtext-format-actions {
+            display: none;
+            align-items: center;
+            gap: 2px;
+        }
+        .table-cell.editing .cell-richtext-format-actions {
+            display: flex !important;
+        }
+
+        .table-cell:hover {
+            background: #fafafa;
+        }
+
+        .table-cell.expanded {
+            background: var(--color-primary-light);
+            min-height: auto;
+        }
+
+        .table-cell.expanded .cell-value {
+            flex: 1;
+        }
+
+        .table-cell .cell-actions .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+        }
+
+        .table-cell .cell-actions .action-btn {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+        }
+
+        /* Info message in table toolbar - hidden by default, shown on focus */
+        .cell-info-msg {
+            display: none;
+            padding: 4px 8px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #1565c0;
+        }
+
+        .table-cell:focus-within .cell-info-msg {
+            display: inline-block;
+        }
+
+        /* Chips Input Container */
+        .chips-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 10px;
+            min-height: 42px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-white);
+            align-items: center;
+            cursor: text;
+        }
+
+        .chips-input:focus-within {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-border);
+        }
+
+        .chips-input .chip-input-field {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            font-size: 13px;
+            font-family: inherit;
+            padding: 2px 0;
+        }
+
+        .chips-input .chip-input-field::placeholder {
+            color: var(--color-text-disabled);
+        }
+
+        /* Chips (standalone for table cells) */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--color-primary-light);
+            color: #1565c0;
+            border-radius: 16px;
+            font-size: 13px;
+        }
+
+        .chip.inherited,
+        .chip.calculated {
+            background: var(--color-source-light);
+            color: var(--color-source);
+            border: 1px dashed var(--color-border);
+        }
+
+        .chip .remove {
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .chip .remove:hover {
+            opacity: 1;
+        }
+
+        .chip .lock {
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        /* Small chips for table cells */
+        .chip-sm {
+            font-size: 11px;
+            padding: 2px 8px;
+        }
+
+        .chip-sm .remove,
+        .chip-sm .lock {
+            font-size: 9px;
+        }
+
+        /* Chip variants */
+        .chip.chip-more {
+            background: #eee;
+            color: #666;
+        }
+
+        .chip.chip-error {
+            background: var(--color-error-light);
+            border: 1px solid var(--color-error);
+        }
+
+        .chip.chip-error .chip-error-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            background: var(--color-error);
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 2px;
+        }
+
+        /* Multi-value Row */
+        .multi-value-row {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .multi-value-row .row-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .multi-value-row .row-main .field-input {
+            flex: 1;
+        }
+
+        .multi-value-row .row-actions {
+            display: flex;
+            gap: 2px;
+        }
+
+        .row-action {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+        }
+
+        .row-action:hover {
+            background: var(--color-bg);
+        }
+
+        .add-value {
+            color: var(--color-primary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        .add-value:hover,
+        .add-chip:hover {
+            text-decoration: underline;
+        }
+
+        /* Character counter accessory (below input, right-aligned) - only visible when editing */
+        .input-with-counter {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .char-counter {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            text-align: right;
+            margin-top: 4px;
+            padding-right: 2px;
+            display: none;
+        }
+
+        .input-with-counter:focus-within .char-counter,
+        .multi-value-row:focus-within .char-counter,
+        .table-cell.editing .char-counter {
+            display: block;
+        }
+
+        .table-cell .input-with-counter .cell-input {
+            width: 100%;
+        }
+
+        /* Table cell: char counter below the cell, right-aligned */
+        .table-cell .char-counter {
+            position: absolute;
+            bottom: -20px;
+            right: 0;
+            margin-top: 0;
+        }
+        .table-cell.editing .input-with-counter {
+            margin-bottom: 24px;
+        }
+
+        .chips-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Error Message - Field Level (appears above inputs) */
+        .error-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--color-error-light);
+            color: var(--color-error);
+            font-size: 13px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+        }
+
+        .error-message .error-icon {
+            width: 16px;
+            height: 16px;
+            background: var(--color-error);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Error - Value Level (icon on left of input) */
+        .input-with-error {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-with-error .field-input {
+            flex: 1;
+        }
+
+        .input-with-error .value-error-icon {
+            width: 18px;
+            height: 18px;
+            background: var(--color-error);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: help;
+            flex-shrink: 0;
+            order: -1;
+        }
+
+        /* ======================== */
+        /* TEST PANEL               */
+        /* ======================== */
+        .test-panel {
+            background: var(--color-bg-white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 40px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .test-section h4 {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .toggle-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .toggle-item label {
+            cursor: pointer;
+        }
+
+        .test-preview {
+            grid-column: span 4;
+            margin-top: 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .preview-card {
+            background: #fafafa;
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .preview-card h4 {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        /* ======================== */
+        /* DESIGN NOTES             */
+        /* ======================== */
+        .design-note {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #5d4037;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+
+        .design-note strong {
+            color: #4e342e;
+        }
+    </style>
+</head>
+<body>
+    <h1>MDM Form Field Design — Prototype V1</h1>
+    <p class="subtitle">Based on requirements analysis. Info with label, actions on focus.</p>
+
+    <!-- ==================== -->
+    <!-- CONCERNS             -->
+    <!-- ==================== -->
+    <div class="design-note" style="margin: 16px 0 32px;">
+        <strong>Concerns</strong>
+        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+            <li><strong>Multi-value vs Multi-reference</strong> — Do we need two different patterns?</li>
+            <li><strong>Errors</strong> — Displayed on hover (not very accessible).</li>
+            <li><strong>Cell actions</strong> — Hidden by default, shown on hover/focus; users may not discover AI, History, or Format actions.</li>
+            <li><strong>Character counter</strong> — Only visible when editing; screen readers may not announce limits.</li>
+            <li><strong>Validation feedback</strong> — Value errors in tooltips vs attribute errors in popover; inconsistent patterns.</li>
+        </ul>
+    </div>
+
+    <!-- ==================== -->
+    <!-- INTERACTIVE TEST     -->
+    <!-- ==================== -->
+    <h2>Interactive Test</h2>
+    
+    <div class="test-panel">
+        <div class="test-grid">
+            <div class="test-section">
+                <h4>Field Name & Type</h4>
+                <input type="text" id="fieldName" value="Field" oninput="updatePreview()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; margin-bottom: 12px;">
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <input type="radio" name="fieldType" id="typeSingle" value="single" checked onchange="updatePreview()">
+                        <label for="typeSingle">Single Value</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="fieldType" id="typeMulti" value="multi" onchange="updatePreview()">
+                        <label for="typeMulti">Multi Value</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="fieldType" id="typeReference" value="reference" onchange="updatePreview()">
+                        <label for="typeReference">Reference (Chips)</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="fieldType" id="typeRichText" value="richtext" onchange="updatePreview()">
+                        <label for="typeRichText">Rich Text (Textarea)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h4>Value Source</h4>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <input type="radio" name="source" id="sourceLocal" value="local" checked onchange="updatePreview()">
+                        <label for="sourceLocal">Local</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="source" id="sourceInherited" value="inherited" onchange="updatePreview()">
+                        <label for="sourceInherited">Inherited</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="source" id="sourceCalculated" value="calculated" onchange="updatePreview()">
+                        <label for="sourceCalculated">Calculated</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="source" id="sourceExternal" value="external" onchange="updatePreview()">
+                        <label for="sourceExternal">External (Readonly)</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="source" id="sourceInheritedOverwritten" value="inherited-overwritten" onchange="updatePreview()">
+                        <label for="sourceInheritedOverwritten">Inheritance overwritten</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="source" id="sourceCalculatedOverwritten" value="calculated-overwritten" onchange="updatePreview()">
+                        <label for="sourceCalculatedOverwritten">Calculated overwritten</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h4>Attributes</h4>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <input type="checkbox" id="attrMandatory" onchange="updatePreview()">
+                        <label for="attrMandatory">Mandatory</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="checkbox" id="attrHelp" onchange="updatePreview()">
+                        <label for="attrHelp">Has Help Text</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="checkbox" id="attrAIGenerated" onchange="updatePreview()">
+                        <label for="attrAIGenerated">AI activated (badge)</label>
+                    </div>
+                    <div class="toggle-item" id="attrErrorItem" title="">
+                        <input type="checkbox" id="attrError" onchange="updatePreview()">
+                        <label for="attrError">Has Attribute Error</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="checkbox" id="valueError" onchange="updatePreview()">
+                        <label for="valueError">Has Value Error</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section" id="refModeSection" style="display: none;">
+                <h4>Reference Mode</h4>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <input type="radio" name="refMode" id="refAdditive" value="additive" checked onchange="updatePreview()">
+                        <label for="refAdditive">Additive</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input type="radio" name="refMode" id="refReplaceAll" value="replaceall" onchange="updatePreview()">
+                        <label for="refReplaceAll">Replace All</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-preview">
+                <div style="text-align: right; margin: 0 0 12px;">
+                    <button type="button" onclick="addCurrentScenarioToComparison()" title="Add current configuration to comparison" style="white-space: nowrap; padding: 6px 12px; font-size: 13px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer;">＋ Add to comparison</button>
+                </div>
+                <div class="preview-grid">
+                    <div class="preview-card">
+                        <h4>Label Left</h4>
+                        <div id="previewHorizontal"></div>
+                    </div>
+                    <div class="preview-card">
+                        <h4>Label Top</h4>
+                        <div id="previewVertical"></div>
+                    </div>
+                    <div class="preview-card">
+                        <h4>Table Cell</h4>
+                        <div id="previewTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== -->
+    <!-- SCENARIO COMPARISON  -->
+    <!-- ==================== -->
+    <h2>Scenario Comparison</h2>
+    <p style="margin: -8px 0 16px; font-size: 13px; color: #666;">
+        Configure a scenario in the Interactive Test above, then click <strong>＋ Add to comparison</strong>. Each saved scenario snapshots the current settings so you can compare multiple states side-by-side.
+    </p>
+
+    <div id="scenarioComparisonList"></div>
+
+    <!-- ==================== -->
+    <!-- REFERENCE LIBRARY    -->
+    <!-- ==================== -->
+    <details style="margin-top: 24px;">
+        <summary style="cursor: pointer; font-weight: 600; color: #333;">Reference library (previous common scenarios)</summary>
+        <div style="margin-top: 16px;">
+
+    <!-- Scenario: Single Value — Local -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Single Value — Local</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal">
+                    <div class="label-area">
+                        <div class="field-label">
+                            <span class="required">*</span>
+                            Product Name
+                            <span class="help-icon" title="The name shown to customers">ⓘ</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input" value="Widget Pro X1">
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                <span class="required">*</span>
+                                Product Name
+                                <span class="help-icon" title="The name shown to customers">ⓘ</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input" value="Widget Pro X1">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Product Name <span class="help-icon">ⓘ</span></div>
+                <div class="table-cell" tabindex="0">
+                    <div class="cell-actions">
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker required">*</span>
+                        </div>
+                        <input type="text" class="cell-input" value="Widget Pro X1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Single Value — AI activated -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Single Value — AI activated</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal">
+                    <div class="label-area">
+                        <div class="field-label">
+                            <span class="required">*</span>
+                            Product Name
+                        </div>
+                        <div class="badges">
+                            <span class="badge badge-ai">✦ AI activated</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input" value="Widget Pro X1">
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                <span class="required">*</span>
+                                Product Name
+                            </div>
+                            <div class="badges">
+                                <span class="badge badge-ai">✦ AI activated</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input" value="Widget Pro X1">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Product Name</div>
+                <div class="table-cell has-info" tabindex="0">
+                    <div class="cell-actions">
+                        <span class="badge badge-ai">✦ AI activated</span>
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker required">*</span>
+                        </div>
+                        <input type="text" class="cell-input" value="Widget Pro X1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Single Value — Inherited -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Single Value — Inherited</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal">
+                    <div class="label-area">
+                        <div class="field-label">
+                            Category
+                            <span class="help-icon" title="Product category">ⓘ</span>
+                        </div>
+                        <div class="badges">
+                            <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input" value="Electronics > Audio">
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                Category
+                                <span class="help-icon" title="Product category">ⓘ</span>
+                            </div>
+                            <div class="badges">
+                                <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input" value="Electronics > Audio">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Category <span class="help-icon">ⓘ</span></div>
+                <div class="table-cell has-info" tabindex="0">
+                    <div class="cell-actions">
+                        <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <input type="text" class="cell-input" value="Electronics > Audio">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Single Value — External (Readonly) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Single Value — External (Readonly)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal">
+                    <div class="label-area">
+                        <div class="field-label">
+                            SKU
+                        </div>
+                        <div class="badges">
+                            <span class="badge badge-external">⚡ External</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input readonly" value="SKU-12345-X" disabled>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                SKU
+                            </div>
+                            <div class="badges">
+                                <span class="badge badge-external">⚡ External</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="field-input readonly" value="SKU-12345-X" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">SKU</div>
+                <div class="table-cell" tabindex="0">
+                    <div class="cell-actions">
+                        <span class="badge badge-external">⚡ External</span>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <span class="cell-value" style="color: #999;">SKU-12345-X</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Single Value — Value-Level Error (icon inside) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Single Value — Value-Level Error (icon inside input)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal">
+                    <div class="label-area">
+                        <div class="field-label">
+                            <span class="required">*</span>
+                            Product Name
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div class="input-with-error">
+                            <input type="text" class="field-input error" value="AB">
+                            <span class="value-error-icon" title="Name must be at least 3 characters">!</span>
+                        </div>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                <span class="required">*</span>
+                                Product Name
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div class="input-with-error">
+                            <input type="text" class="field-input error" value="AB">
+                            <span class="value-error-icon" title="Name must be at least 3 characters">!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Product Name</div>
+                <div class="table-cell" tabindex="0" style="background: var(--color-error-light);">
+                    <div class="cell-actions">
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker required">*</span>
+                            <span class="cell-marker error" title="Name must be at least 3 characters">!</span>
+                        </div>
+                        <input type="text" class="cell-input" value="AB">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Multi Value — Field-Level Error (message above) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Multi Value — Field-Level Error (message above inputs)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal" style="align-items: start;">
+                    <div class="label-area">
+                        <div class="field-label">
+                            <span class="required">*</span>
+                            Feature Bullets
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div class="error-message">
+                            <span class="error-icon">!</span>
+                            At least 3 features are required
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Active noise cancellation">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                <span class="required">*</span>
+                                Feature Bullets
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div class="error-message">
+                            <span class="error-icon">!</span>
+                            At least 3 features are required
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Active noise cancellation">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px; padding: 8px; position: relative;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Feature Bullets</div>
+                <div class="table-cell" tabindex="0" onclick="if(!event.target.closest('.cell-popover'))this.classList.toggle('editing')" style="background: var(--color-error-light);">
+                    <div class="cell-actions">
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker required">*</span>
+                            <span class="cell-marker error" title="At least 3 features are required">!</span>
+                        </div>
+                        <div class="chips" style="flex-wrap: nowrap;">
+                            <span class="chip chip-sm">40-hour battery</span>
+                            <span class="chip chip-sm">ANC</span>
+                        </div>
+                    </div>
+                    <div class="cell-popover">
+                        <div class="error-message">
+                            <span class="error-icon">!</span>
+                            At least 3 features are required
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Active noise cancellation">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Multi Value — Value-Level Error (icon on specific value) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Multi Value — Value-Level Error (icon on specific value)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal" style="align-items: start;">
+                    <div class="label-area">
+                        <div class="field-label">
+                            <span class="required">*</span>
+                            Feature Bullets
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <div class="input-with-error" style="flex: 1;">
+                                    <input type="text" class="field-input error" value="OK">
+                                    <span class="value-error-icon" title="Value must be at least 10 characters">!</span>
+                                </div>
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                <span class="required">*</span>
+                                Feature Bullets
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <div class="input-with-error" style="flex: 1;">
+                                    <input type="text" class="field-input error" value="OK">
+                                    <span class="value-error-icon" title="Value must be at least 10 characters">!</span>
+                                </div>
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px; padding: 8px; position: relative;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Feature Bullets</div>
+                <div class="table-cell" tabindex="0" onclick="if(!event.target.closest('.cell-popover'))this.classList.toggle('editing')">
+                    <div class="cell-actions">
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker required">*</span>
+                            <span class="cell-marker error" title="1 value has an error">!</span>
+                        </div>
+                        <div class="chips" style="flex-wrap: nowrap;">
+                            <span class="chip chip-sm">40-hour battery</span>
+                            <span class="chip" class="chip-sm chip-error">OK !</span>
+                        </div>
+                    </div>
+                    <div class="cell-popover">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <div class="input-with-error" style="flex: 1;">
+                                    <input type="text" class="field-input error" value="OK">
+                                    <span class="value-error-icon" title="Value must be at least 10 characters">!</span>
+                                </div>
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Multi Value — Inherited (Before Override) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Multi Value — Inherited (Before Override)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal" style="align-items: start;">
+                    <div class="label-area">
+                        <div class="field-label">
+                            Feature Bullets
+                        </div>
+                        <div class="badges">
+                            <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">
+                            ⓘ Any change will replace all inherited values
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;" class="multi-inherited" data-inherited="true">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Premium sound quality" style="background: #f5f5f5;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Wireless connectivity" style="background: #f5f5f5;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                Feature Bullets
+                            </div>
+                            <div class="badges">
+                                <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">
+                            ⓘ Any change will replace all inherited values
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;" class="multi-inherited" data-inherited="true">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Premium sound quality" style="background: #f5f5f5;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Wireless connectivity" style="background: #f5f5f5;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Feature Bullets</div>
+                <div class="table-cell has-info" tabindex="0">
+                    <div class="cell-actions">
+                        <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <span class="cell-value">Premium sound, Wireless, +0 more</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Multi Value — Inherited (Before Override) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Multi Value — Inherited (Before Override)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal" style="align-items: start;">
+                    <div class="label-area">
+                        <div class="field-label">
+                            Feature Bullets
+                        </div>
+                        <div class="badges">
+                            <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">
+                            ⓘ Any change will replace all inherited values
+                        </div>
+                        <div class="multi-inherited" data-inherited="true" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row inherited-row">
+                                <input type="text" class="field-input" value="40-hour battery life" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove (will override all)">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row inherited-row">
+                                <input type="text" class="field-input" value="Active noise cancellation" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove (will override all)">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                Feature Bullets
+                            </div>
+                            <div class="badges">
+                                <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">
+                            ⓘ Any change will replace all inherited values
+                        </div>
+                        <div class="multi-inherited" data-inherited="true" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row inherited-row">
+                                <input type="text" class="field-input" value="40-hour battery life" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove (will override all)">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row inherited-row">
+                                <input type="text" class="field-input" value="Active noise cancellation" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove (will override all)">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Feature Bullets</div>
+                <div class="table-cell" tabindex="0">
+                    <div class="cell-actions">
+                        <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker inherited">↓</span>
+                        </div>
+                        <div class="chips" style="flex-wrap: nowrap;">
+                            <span class="chip inherited chip-sm">40-hour battery</span>
+                            <span class="chip inherited chip-sm">ANC</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario: Multi Value — Inherited (Alternative: Message Below) -->
+    <h3 style="margin: 24px 0 12px; font-size: 13px; color: #333;">Multi Value — Inherited (Alternative: Message Below)</h3>
+    <div class="examples-grid">
+        <div class="example-card">
+            <h3>Label Left</h3>
+            <div class="form-horizontal">
+                <div class="field-row-horizontal" style="align-items: start;">
+                    <div class="label-area">
+                        <div class="field-label">
+                            Feature Bullets
+                        </div>
+                        <div class="badges">
+                            <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Active noise cancellation" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row">
+                                <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; flex: 1;">
+                                    ⓘ Any change will replace all inherited values
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                    <div class="actions-area">
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Label Top</h3>
+            <div class="form-vertical">
+                <div class="field-row-vertical">
+                    <div class="label-row">
+                        <div class="label-area">
+                            <div class="field-label">
+                                Feature Bullets
+                            </div>
+                            <div class="badges">
+                                <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="action-btn ai" title="Generate with AI">✦</button>
+                            <button class="action-btn" title="View history">⏱</button>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Active noise cancellation" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions">
+                                    <button class="row-action" title="Remove">×</button>
+                                    <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                </div>
+                            </div>
+                            <div class="multi-value-row">
+                                <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; flex: 1;">
+                                    ⓘ Any change will replace all inherited values
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="example-card">
+            <h3>Table Cell</h3>
+            <div style="background: #fafafa; border-radius: 4px; padding: 8px; position: relative;">
+                <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">Feature Bullets</div>
+                <div class="table-cell has-info" tabindex="0" onclick="if(!event.target.closest('.cell-popover'))this.classList.toggle('editing')">
+                    <div class="cell-actions">
+                        <span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>
+                        <button class="action-btn ai" title="Generate with AI">✦</button>
+                        <button class="action-btn" title="View history">⏱</button>
+                    </div>
+                    <div class="cell-content">
+                        <div class="cell-markers">
+                            <span class="cell-marker inherited">↓</span>
+                        </div>
+                        <div class="chips" style="flex-wrap: nowrap;">
+                            <span class="chip inherited chip-sm">40-hour battery</span>
+                            <span class="chip inherited chip-sm">ANC</span>
+                        </div>
+                    </div>
+                    <div class="cell-popover">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="40-hour battery life" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <input type="text" class="field-input" value="Active noise cancellation" style="background: #f5f5f5; color: #666;">
+                                <div class="row-actions"><button class="row-action">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="multi-value-row">
+                                <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; flex: 1;">
+                                    ⓘ Any change will replace all inherited values
+                                </div>
+                            </div>
+                            <span class="add-value">+ Add feature</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="design-note" style="margin: 16px 0 32px;">
+        <strong>Comparison:</strong> Message above (previous section) vs. message below (this section). Message below keeps the inputs at the top for faster access, but the warning is less prominent.
+    </div>
+
+        </div>
+    </details>
+
+    <script>
+        // ========================
+        // SHARED DATA MODEL
+        // ========================
+        const fieldData = {
+            single: 'Widget Pro X1',
+            multi: ['Feature one', 'Feature two'],
+            reference: ['Reference A', 'Reference B'],
+            richtext: 'Rich text content here...'
+        };
+        
+        const MAX_CHARS = 40;
+
+        // Get default inherited values (shown as locked/grey)
+        const inheritedData = {
+            multi: ['Feature one', 'Feature two'],
+            reference: ['Reference A', 'Reference B']
+        };
+
+        function updatePreview() {
+            // Get selected options
+            const fieldType = document.querySelector('input[name="fieldType"]:checked').value;
+            const source = document.querySelector('input[name="source"]:checked').value;
+            const refMode = document.querySelector('input[name="refMode"]:checked').value;
+            const isMandatory = document.getElementById('attrMandatory').checked;
+            const hasHelp = document.getElementById('attrHelp').checked;
+            const aiGenerated = document.getElementById('attrAIGenerated').checked;
+            const hasAttrError = document.getElementById('attrError').checked;
+            const hasValueError = document.getElementById('valueError').checked;
+            const fieldName = document.getElementById('fieldName')?.value || 'Field';
+
+            // Determine if readonly
+            const isReadonly = source === 'external';
+
+            // Show/hide reference mode section (only for inherited references)
+            const refModeSection = document.getElementById('refModeSection');
+            if (refModeSection) {
+                refModeSection.style.display = (fieldType === 'reference' && source === 'inherited') ? 'block' : 'none';
+            }
+            
+            // Disable attribute error for single values (only applicable to multi-value fields)
+            const attrErrorCheckbox = document.getElementById('attrError');
+            const attrErrorItem = document.getElementById('attrErrorItem');
+            if (attrErrorCheckbox && attrErrorItem) {
+                const isSingleOrRichtext = fieldType === 'single' || fieldType === 'richtext';
+                attrErrorCheckbox.disabled = isSingleOrRichtext;
+                attrErrorItem.title = isSingleOrRichtext ? 'Only applicable to multi-value and reference fields' : '';
+                attrErrorItem.style.opacity = isSingleOrRichtext ? '0.5' : '1';
+                if (isSingleOrRichtext && attrErrorCheckbox.checked) {
+                    attrErrorCheckbox.checked = false;
+                }
+            }
+
+            // Build badges HTML
+            let badgesHtml = '';
+            if (source === 'inherited') badgesHtml += '<span class="badge badge-inherited"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> Inherited</span>';
+            if (source === 'calculated') badgesHtml += '<span class="badge badge-calculated"><span style="font-style: italic; font-weight: 600;">fx</span> Calculated</span>';
+            if (source === 'external') badgesHtml += '<span class="badge badge-external">⚡ External</span>';
+            if (source === 'inherited-overwritten') badgesHtml += '<span class="badge badge-inherited-overwritten"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="2" y1="14" x2="14" y2="2" stroke="currentColor" stroke-width="1.5"/></svg> Inheritance overwritten</span>';
+            if (source === 'calculated-overwritten') badgesHtml += '<span class="badge badge-calculated-overwritten"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><text x="2" y="12" font-size="11" font-style="italic" font-weight="600" fill="currentColor">fx</text><line x1="1" y1="14" x2="15" y2="2" stroke="currentColor" stroke-width="1.5"/></svg> Calculated overwritten</span>';
+            if (aiGenerated) badgesHtml += '<span class="badge badge-ai">✦ AI activated</span>';
+            
+            // No toolbar info message - will be shown in popover instead
+            let cellInfoHtml = '';
+
+            // Build actions HTML - AI action always available for editable fields
+            let actionsHtml = '';
+            const richtextFormatToolbar = (fieldType === 'richtext' && !isReadonly) ? `<span class="cell-richtext-format-actions" style="display: none;"><span class="toolbar-separator" style="height: 16px; width: 1px; background: #ddd; margin: 0 4px;"></span><button class="action-btn toolbar-btn" title="Bold"><b>B</b></button><button class="action-btn toolbar-btn" title="Italic"><i>I</i></button><button class="action-btn toolbar-btn" title="Underline"><u>U</u></button><span class="toolbar-separator" style="height: 16px; width: 1px; background: #ddd; margin: 0 4px;"></span><button class="action-btn toolbar-btn" title="Bulleted list">•</button><button class="action-btn toolbar-btn" title="Numbered list">#</button><span class="toolbar-separator" style="height: 16px; width: 1px; background: #ddd; margin: 0 4px;"></span><button class="action-btn toolbar-btn" title="Link">🔗</button></span>` : '';
+            if (fieldType === 'richtext' && !isReadonly) actionsHtml += '<button class="action-btn" title="Format text" onclick="event.stopPropagation(); var cell=this.closest(\'.table-cell\'); if(cell){cell.classList.toggle(\'editing\'); if(cell.classList.contains(\'editing\')) cell.querySelector(\'textarea\')?.focus();} else {var w=this.closest(\'.field-row-horizontal, .field-row-vertical\').querySelector(\'.rich-text-wrapper\'); w?.classList.add(\'show-toolbar\'); w?.querySelector(\'textarea\')?.focus();}">Aa</button>' + richtextFormatToolbar;
+            if (!isReadonly) actionsHtml += '<button class="action-btn ai" title="Generate with AI">✦</button>';
+            actionsHtml += '<button class="action-btn" title="View history">⏱</button>';
+
+            // Build input HTML based on field type
+            let inputHtml = '';
+            const baseInputClass = `field-input${isReadonly ? ' readonly' : ''}`;
+            const disabledAttr = isReadonly ? ' disabled' : '';
+
+            if (fieldType === 'single') {
+                const isInheritedSingle = source === 'inherited';
+                const isCalculatedSingle = source === 'calculated';
+                const singleInputClass = `${baseInputClass}${hasValueError ? ' error' : ''}`;
+                const singleWrapperClass = isInheritedSingle ? 'single-inherited' : isCalculatedSingle ? 'single-calculated' : '';
+                const singleDataAttr = isInheritedSingle ? ' data-inherited="true"' : isCalculatedSingle ? ' data-calculated="true"' : '';
+                const singleLen = (fieldData.single || '').length;
+                inputHtml = `
+                    <div class="input-with-counter">
+                        <div class="input-wrapper${hasValueError ? ' has-error' : ''} ${singleWrapperClass}"${singleDataAttr}>
+                            ${hasValueError ? '<span class="input-error-icon" title="Name must be at least 10 characters">!</span>' : ''}
+                            <input type="text" class="${singleInputClass}" value="${fieldData.single}" data-field="single" maxlength="${MAX_CHARS}"${disabledAttr}>
+                        </div>
+                        <div class="char-counter"><span class="char-count-current">${singleLen}</span>/${MAX_CHARS} characters</div>
+                    </div>
+                `;
+            } else if (fieldType === 'multi') {
+                const isInheritedMulti = source === 'inherited';
+                const isCalculatedMulti = source === 'calculated';
+                const isSourceMulti = isInheritedMulti || isCalculatedMulti;
+                const sourceStyle = isSourceMulti ? ' style="background: #f5f5f5; color: #666;"' : '';
+                const infoMessage = isInheritedMulti ? `<div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">ⓘ Any change will replace all inherited values</div>` : '';
+                const calculatedInfoMsg = isCalculatedMulti ? `<div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">ⓘ Any change will replace all calculated values</div>` : '';
+                
+                const multiRows = fieldData.multi.map((val, idx) => {
+                    // Only show value error on first input for demo
+                    const hasThisValueError = hasValueError && idx === 0;
+                    const rowInputClass = `${baseInputClass}${hasThisValueError ? ' error' : ''}`;
+                    const valLen = (val || '').length;
+                    return `
+                    <div class="multi-value-row${isSourceMulti ? ' inherited-row' : ''}${hasThisValueError ? ' has-error' : ''}" data-index="${idx}">
+                        <div class="row-main">
+                            ${hasThisValueError ? '<span class="input-error-icon" title="Value must be at least 10 characters">!</span>' : ''}
+                            <input type="text" class="${rowInputClass}" value="${val}" data-field="multi" data-index="${idx}" maxlength="${MAX_CHARS}"${disabledAttr}${sourceStyle}>
+                            ${!isReadonly ? `<div class="row-actions"><button class="row-action remove-btn" title="${isSourceMulti ? 'Remove (will override all)' : 'Remove'}">×</button><button class="row-action" title="Drag to reorder">⋮⋮</button></div>` : ''}
+                        </div>
+                        <div class="char-counter"><span class="char-count-current">${valLen}</span>/${MAX_CHARS} characters</div>
+                    </div>
+                `}).join('');
+                
+                const multiWrapperClass = isInheritedMulti ? 'multi-inherited' : isCalculatedMulti ? 'multi-calculated' : 'multi-container';
+                const multiDataAttr = isInheritedMulti ? ' data-inherited="true"' : isCalculatedMulti ? ' data-calculated="true"' : '';
+                
+                inputHtml = `
+                    ${infoMessage}
+                    ${calculatedInfoMsg}
+                    <div class="${multiWrapperClass}"${multiDataAttr} data-field-type="multi" style="display: flex; flex-direction: column; gap: 8px;">
+                        ${multiRows}
+                        ${!isReadonly ? '<span class="add-value" data-field="multi">+ Add value</span>' : ''}
+                    </div>
+                `;
+            } else if (fieldType === 'reference') {
+                const isInherited = source === 'inherited';
+                const inheritedChipIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+                const refChips = fieldData.reference.map((val, idx) => {
+                    // Show value error on first chip for demo (can be inherited or local)
+                    const hasChipError = hasValueError && idx === 0;
+                    const errorIcon = hasChipError ? '<span class="chip-error-icon" title="Invalid reference">!</span>' : '';
+                    if (isInherited) {
+                        return `<span class="chip inherited${hasChipError ? ' chip-error' : ''}" data-index="${idx}">${errorIcon}${inheritedChipIcon} ${val} <span class="lock">🔒</span></span>`;
+                    } else {
+                        return `<span class="chip${hasChipError ? ' chip-error' : ''}" data-index="${idx}">${errorIcon}${val} <span class="remove" data-field="reference" data-index="${idx}">×</span></span>`;
+                    }
+                }).join('');
+                
+                if (isInherited && refMode === 'replaceall') {
+                    inputHtml = `
+                        <div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">
+                            ⓘ Adding a reference will replace all inherited values
+                        </div>
+                        <div class="chips-input replace-all-ref" data-inherited="true" data-field-type="reference">
+                            ${refChips}
+                            <input type="text" class="chip-input-field" data-field="reference" placeholder="Add...">
+                        </div>
+                    `;
+                } else {
+                    inputHtml = `
+                        <div class="chips-input${isInherited ? '' : ''}" data-field-type="reference">
+                            ${refChips}
+                            <input type="text" class="chip-input-field" data-field="reference" placeholder="Add reference...">
+                        </div>
+                    `;
+                }
+            } else if (fieldType === 'richtext') {
+                const isInheritedRichtext = source === 'inherited';
+                const isCalculatedRichtext = source === 'calculated';
+                const richtextInputClass = `${baseInputClass}${hasValueError ? ' error' : ''}`;
+                const toolbarHtml = !isReadonly ? `
+                    <div class="rich-text-toolbar">
+                        <button class="toolbar-btn" title="Bold"><b>B</b></button>
+                        <button class="toolbar-btn" title="Italic"><i>I</i></button>
+                        <button class="toolbar-btn" title="Underline"><u>U</u></button>
+                        <span class="toolbar-separator"></span>
+                        <button class="toolbar-btn" title="Bulleted list">•</button>
+                        <button class="toolbar-btn" title="Numbered list">#</button>
+                        <span class="toolbar-separator"></span>
+                        <button class="toolbar-btn" title="Link">🔗</button>
+                    </div>
+                ` : '';
+                const richtextWrapperClass = isInheritedRichtext ? 'richtext-inherited' : isCalculatedRichtext ? 'richtext-calculated' : '';
+                const richtextDataAttr = isInheritedRichtext ? ' data-inherited="true"' : isCalculatedRichtext ? ' data-calculated="true"' : '';
+                inputHtml = `
+                    <div class="rich-text-wrapper ${richtextWrapperClass}${hasValueError ? ' has-error' : ''}"${richtextDataAttr}>
+                        ${hasValueError ? '<span class="input-error-icon" title="Content must be at least 100 characters">!</span>' : ''}
+                        ${toolbarHtml}
+                        <textarea class="${richtextInputClass} textarea" data-field="richtext"${disabledAttr}>${fieldData.richtext}</textarea>
+                    </div>
+                `;
+            }
+
+            // Attribute-level error message (shown above inputs)
+            let attrErrorHtml = '';
+            if (hasAttrError) {
+                let attrErrorMsg = 'This field is required';
+                if (fieldType === 'multi') attrErrorMsg = 'At least 3 values are required';
+                if (fieldType === 'reference') attrErrorMsg = 'At least 5 references are required';
+                attrErrorHtml = `<div class="error-message" style="margin-bottom: 8px;"><span class="error-icon">!</span> ${attrErrorMsg}</div>`;
+            }
+
+            // Build label HTML
+            const mandatoryPrefix = isMandatory ? '<span class="required">*</span>' : '';
+            const helpHtml = hasHelp ? '<span class="help-icon" title="Help text">ⓘ</span>' : '';
+
+            // Horizontal preview
+            document.getElementById('previewHorizontal').innerHTML = `
+                <div class="form-horizontal">
+                    <div class="field-row-horizontal">
+                        <div class="label-area">
+                            <div class="field-label"><span class="label-text">${mandatoryPrefix}${fieldName}${helpHtml}</span></div>
+                            ${badgesHtml ? `<div class="badges" style="margin-top: 4px;">${badgesHtml}</div>` : ''}
+                        </div>
+                        <div class="input-area">${attrErrorHtml}${inputHtml}</div>
+                        <div class="actions-area">
+                            <div class="field-actions">${actionsHtml}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Vertical preview
+            document.getElementById('previewVertical').innerHTML = `
+                <div class="form-vertical">
+                    <div class="field-row-vertical">
+                        <div class="label-row">
+                            <div class="label-area">
+                                <div class="field-label"><span class="label-text">${mandatoryPrefix}${fieldName}${helpHtml}</span></div>
+                                ${badgesHtml ? `<div class="badges" style="margin-top: 4px;">${badgesHtml}</div>` : ''}
+                            </div>
+                            <div class="field-actions">${actionsHtml}</div>
+                        </div>
+                        <div class="input-area">${attrErrorHtml}${inputHtml}</div>
+                    </div>
+                </div>
+            `;
+
+            // Table cell preview
+            // Only show mandatory and error markers in the cell (other badges shown via triangle + hover)
+            const hasAnyError = hasAttrError || hasValueError;
+            let cellMarkers = '';
+            if (isMandatory) cellMarkers += '<span class="cell-marker required">*</span>';
+            if (hasAnyError) {
+                let errorTooltip = [];
+                if (hasAttrError) {
+                    if (fieldType === 'multi') errorTooltip.push('At least 3 values are required');
+                    else if (fieldType === 'reference') errorTooltip.push('At least 5 references are required');
+                }
+                if (hasValueError) {
+                    errorTooltip.push('One or more values have errors');
+                }
+                cellMarkers += `<span class="cell-marker error" title="${errorTooltip.join('; ')}">!</span>`;
+            }
+            
+            // Determine if cell has additional info (for blue triangle indicator)
+            const hasInfo = source === 'inherited' || source === 'calculated' || source === 'external' || source === 'inherited-overwritten' || source === 'calculated-overwritten' || aiGenerated;
+
+            let cellValue = '';
+            if (fieldType === 'reference') {
+                const isInheritedRef = source === 'inherited';
+                const cellInheritedIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+                const refChipsHtml = fieldData.reference.map((val, idx) => {
+                    const hasChipError = hasValueError && idx === 0;
+                    const errorIcon = hasChipError ? '<span class="chip-error-icon" title="Invalid reference">!</span>' : '';
+                    if (isInheritedRef) {
+                        return `<span class="chip inherited${hasChipError ? ' chip-error' : ''}" data-index="${idx}">${errorIcon}${cellInheritedIcon} ${val} <span class="lock">🔒</span></span>`;
+                    } else {
+                        return `<span class="chip${hasChipError ? ' chip-error' : ''}" data-index="${idx}">${errorIcon}${val}</span>`;
+                    }
+                }).join('');
+                cellValue = `<div class="chips" style="flex-wrap: nowrap;">${refChipsHtml}</div>`;
+            } else if (fieldType === 'multi') {
+                const isInheritedMulti = source === 'inherited';
+                const isCalculatedMulti = source === 'calculated';
+                const chipSourceClass = isInheritedMulti ? ' inherited' : isCalculatedMulti ? ' calculated' : '';
+                const multiChipsHtml = fieldData.multi.map((val, idx) => {
+                    const hasChipError = hasValueError && idx === 0;
+                    const errorIcon = hasChipError ? '<span class="chip-error-icon" title="Value must be at least 10 characters">!</span>' : '';
+                    return `<span class="chip${chipSourceClass}${hasChipError ? ' chip-error' : ''}" data-index="${idx}">${errorIcon}${val}</span>`;
+                }).join('');
+                cellValue = `<div class="chips" style="flex-wrap: nowrap;">${multiChipsHtml}</div>`;
+            } else if (fieldType === 'richtext') {
+                cellValue = fieldData.richtext;
+            } else {
+                cellValue = fieldData.single;
+            }
+
+            // Determine cell type and editability
+            const isMultiOrRef = fieldType === 'multi' || fieldType === 'reference';
+            const infoClass = hasInfo ? ' has-info' : '';
+            const cellClass = `table-cell${isReadonly ? ' readonly' : ''}${hasAnyError ? ' error-cell' : ''}${infoClass}`;
+            const cellStyle = hasAnyError && !isReadonly ? 'background: var(--color-error-light);' : '';
+            
+            // Reference fields: always inline editing in cell; popover only for messages (info or errors)
+            const isReplaceAllRef = fieldType === 'reference' && source === 'inherited' && refMode === 'replaceall';
+            const refHasError = fieldType === 'reference' && (hasAttrError || hasValueError);
+            
+            // For single value, show inline input; for reference, always show inline chips (editing in cell)
+            let cellContent = '';
+            
+            if (fieldType === 'single') {
+                const isInheritedSingle = source === 'inherited';
+                const isCalculatedSingle = source === 'calculated';
+                const singleCellDataAttr = isInheritedSingle ? ' data-inherited="true"' : isCalculatedSingle ? ' data-calculated="true"' : '';
+                const singleLen = (fieldData.single || '').length;
+                cellContent = `<div class="single-cell-source"${singleCellDataAttr}><div class="input-with-counter"><input type="text" class="cell-input" data-field="single" value="${fieldData.single}" maxlength="${MAX_CHARS}"${isReadonly ? ' disabled' : ''}${hasValueError ? ' style="border-color: var(--color-error);"' : ''}><div class="char-counter"><span class="char-count-current">${singleLen}</span>/${MAX_CHARS} characters</div></div></div>`;
+            } else if (fieldType === 'reference') {
+                const isInheritedRef = source === 'inherited';
+                const inputStyle = 'border: none; outline: none; background: transparent; flex: 1; min-width: 60px; font-size: 13px;';
+                
+                // Always inline chips for reference - editing always in cell
+                const inlineInheritedIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+                const cellChipsHtml = fieldData.reference.map((val, idx) => {
+                    const hasChipError = hasValueError && idx === 0;
+                    const errorIcon = hasChipError ? '<span class="chip-error-icon">!</span>' : '';
+                    const chipTitle = hasChipError ? ` title="Invalid reference"` : '';
+                    if (isInheritedRef) {
+                        return `<span class="chip inherited${hasChipError ? ' chip-error' : ''}" data-index="${idx}"${chipTitle}>${errorIcon}${inlineInheritedIcon} ${val} <span class="lock">🔒</span></span>`;
+                    } else {
+                        return `<span class="chip${hasChipError ? ' chip-error' : ''}" data-index="${idx}"${chipTitle}>${errorIcon}${val} <span class="remove" data-field="reference" data-index="${idx}">×</span></span>`;
+                    }
+                }).join('');
+                
+                const chipsInputClass = isReplaceAllRef ? 'chips-input replace-all-ref' : `chips-input${isInheritedRef ? ' additive-ref' : ''}`;
+                const chipsDataAttr = isInheritedRef ? ' data-inherited="true"' : '';
+                
+                cellContent = `
+                    <div class="${chipsInputClass}" data-field-type="reference"${chipsDataAttr} style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex: 1; padding: 0; border: none; background: transparent; min-height: auto;">
+                        ${cellChipsHtml}
+                        <input type="text" class="chip-input-field" data-field="reference" placeholder="Add..." style="${inputStyle}">
+                    </div>
+                `;
+            } else if (fieldType === 'richtext') {
+                const isInheritedRichtext = source === 'inherited';
+                const isCalculatedRichtext = source === 'calculated';
+                const richtextCellClass = isInheritedRichtext ? 'richtext-inherited' : isCalculatedRichtext ? 'richtext-calculated' : '';
+                const richtextCellAttr = isInheritedRichtext ? ' data-inherited="true"' : isCalculatedRichtext ? ' data-calculated="true"' : '';
+                cellContent = `
+                    <div class="cell-richtext-container">
+                        <span class="cell-value cell-richtext-preview" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${cellValue}</span>
+                        <div class="cell-richtext-edit rich-text-wrapper ${richtextCellClass}"${richtextCellAttr} style="display: none;">
+                            <textarea class="field-input textarea" data-field="richtext" style="border-radius: var(--radius-md); min-height: 80px;">${fieldData.richtext}</textarea>
+                        </div>
+                    </div>
+                `;
+            } else {
+                cellContent = `<span class="cell-value">${cellValue}</span>`;
+            }
+
+            // Build popover for multi-value, references with errors, or replace-all inherited (message only)
+            // Richtext: toolbar + textarea inline in cell, no popover
+            let popoverHtml = '';
+            const refNeedsMsgPopover = fieldType === 'reference' && (isReplaceAllRef || hasAttrError);
+            const needsPopover = (fieldType === 'multi' && !isReadonly) || refNeedsMsgPopover;
+            
+            if (needsPopover) {
+                let popoverContent = '';
+                const isInheritedState = source === 'inherited';
+                const isCalculatedState = source === 'calculated';
+                const infoMsg = (isInheritedState && refMode === 'replaceall') ? `<div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0;">ⓘ Adding a reference will replace all inherited values</div>` : '';
+                const sourceStyle = (isInheritedState || isCalculatedState) ? ' style="background: #f5f5f5; color: #666;"' : '';
+                
+                if (fieldType === 'multi') {
+                    const multiInfoMsg = isInheritedState ? `<div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">ⓘ Any change will replace all inherited values</div>` : '';
+                    const multiCalculatedMsg = isCalculatedState ? `<div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0; margin-bottom: 8px;">ⓘ Any change will replace all calculated values</div>` : '';
+                    const attrErrorMsg = hasAttrError ? `<div class="error-message" style="margin-bottom: 8px;"><span class="error-icon">!</span> At least 3 values are required</div>` : '';
+                    const multiWrapperClass = isInheritedState ? 'multi-inherited' : isCalculatedState ? 'multi-calculated' : 'multi-container';
+                    const multiDataAttr = isInheritedState ? ' data-inherited="true"' : isCalculatedState ? ' data-calculated="true"' : '';
+                    const popoverRows = fieldData.multi.map((val, idx) => {
+                        const hasRowError = hasValueError && idx === 0;
+                        const rowInputClass = `field-input${hasRowError ? ' error' : ''}`;
+                        const valLen = (val || '').length;
+                        return `
+                        <div class="multi-value-row${hasRowError ? ' has-error' : ''}" data-index="${idx}">
+                            <div class="row-main">
+                                ${hasRowError ? '<span class="input-error-icon" title="Value must be at least 10 characters">!</span>' : ''}
+                                <input type="text" class="${rowInputClass}" value="${val}" data-field="multi" data-index="${idx}" maxlength="${MAX_CHARS}"${sourceStyle}>
+                                <div class="row-actions"><button class="row-action remove-btn">×</button><button class="row-action">⋮⋮</button></div>
+                            </div>
+                            <div class="char-counter"><span class="char-count-current">${valLen}</span>/${MAX_CHARS} characters</div>
+                        </div>
+                    `}).join('');
+                    
+                    popoverContent = `
+                        ${attrErrorMsg}
+                        ${multiInfoMsg}
+                        ${multiCalculatedMsg}
+                        <div class="${multiWrapperClass}" data-field-type="multi" style="display: flex; flex-direction: column; gap: 8px;"${multiDataAttr}>
+                            ${popoverRows}
+                            <span class="add-value" data-field="multi">+ Add value</span>
+                        </div>
+                    `;
+                } else if (fieldType === 'reference' && refNeedsMsgPopover) {
+                    if (isReplaceAllRef && !hasAttrError) {
+                        // Replace-all inherited: show only info message (value errors in chip tooltip)
+                        popoverContent = `
+                            <div class="inherit-info-msg" style="padding: 8px 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1565c0;">
+                                ⓘ Adding a reference will replace all inherited values
+                            </div>
+                        `;
+                    } else if (hasAttrError) {
+                        // Attribute error only: show in popover (value errors in chip tooltip)
+                        popoverContent = `
+                            <div class="error-message" style="margin-bottom: 8px;"><span class="error-icon">!</span> At least 5 references are required</div>
+                        `;
+                    }
+                }
+                    
+                popoverHtml = `
+                    <div class="cell-popover">
+                        ${popoverContent}
+                    </div>
+                `;
+            }
+
+            // For richtext, popover opens via Aa button, not cell click; for replace-all ref, open on focus
+            const cellClickOpensPopover = needsPopover && fieldType !== 'richtext';
+
+            document.getElementById('previewTable').innerHTML = `
+                <div style="background: #fafafa; border-radius: 4px; padding: 8px; position: relative;">
+                    <div style="padding: 8px 12px; background: #B0BEC5; font-size: 11px; color: rgba(0, 0, 0, 0.87);">${fieldName} ${helpHtml}</div>
+                    <div class="${cellClass}" tabindex="0" data-type="${fieldType}" style="${cellStyle}" onclick="${cellClickOpensPopover ? "if(!event.target.closest('.cell-popover'))this.classList.toggle('editing')" : ''}">
+                        <div class="cell-actions">
+                            ${badgesHtml}
+                            ${cellInfoHtml}
+                            ${(badgesHtml || cellInfoHtml) ? '<span class="toolbar-separator" style="height: 16px; width: 1px; background: #ddd; margin: 0 4px;"></span>' : ''}
+                            ${actionsHtml}
+                        </div>
+                        <div class="cell-content">
+                            ${cellMarkers ? `<div class="cell-markers">${cellMarkers}</div>` : ''}
+                            ${cellContent}
+                        </div>
+                        ${popoverHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize preview
+        updatePreview();
+
+        // ========================
+        // SYNC ALL VIEWS
+        // ========================
+        
+        // Sync values across all three preview areas
+        function syncAllViews(sourceElement) {
+            const fieldType = document.querySelector('input[name="fieldType"]:checked')?.value;
+            
+            if (fieldType === 'single') {
+                // Sync single value across all views
+                const value = sourceElement.value;
+                fieldData.single = value;
+                
+                document.querySelectorAll('#previewHorizontal input[data-field="single"], #previewVertical input[data-field="single"], #previewTable .cell-input').forEach(input => {
+                    if (input !== sourceElement) {
+                        input.value = value;
+                        const counter = input.closest('.input-with-counter')?.querySelector('.char-counter .char-count-current');
+                        if (counter) counter.textContent = value.length;
+                    }
+                });
+            } else if (fieldType === 'multi') {
+                // Collect all values from the source view (preserve empty to keep row structure)
+                const sourceContainer = sourceElement.closest('#previewHorizontal, #previewVertical, #previewTable');
+                if (!sourceContainer) return;
+                
+                const inputs = sourceContainer.querySelectorAll('input[data-field="multi"]');
+                const values = Array.from(inputs).map(i => i.value);
+                fieldData.multi = values.length > 0 ? values : [''];
+                
+                // Update other views (including table popover)
+                updateMultiValueView('previewHorizontal', sourceContainer);
+                updateMultiValueView('previewVertical', sourceContainer);
+                updateMultiValueView('previewTable', sourceContainer);
+                updateTableCellChips();
+            } else if (fieldType === 'reference') {
+                // Collect all chip values from the source view
+                const sourceContainer = sourceElement.closest('#previewHorizontal, #previewVertical, #previewTable');
+                if (!sourceContainer) return;
+                
+                const chips = sourceContainer.querySelectorAll('.chip:not(.inherited)');
+                const values = Array.from(chips).map(c => c.textContent.replace('×', '').trim()).filter(v => v);
+                
+                // Get inherited chips separately
+                const inheritedChips = sourceContainer.querySelectorAll('.chip.inherited');
+                const inheritedValues = Array.from(inheritedChips).map(c => c.textContent.replace('🔒', '').trim()).filter(v => v);
+                
+                fieldData.reference = [...inheritedValues, ...values];
+                
+                // Update chips in other views
+                updateReferenceChips('previewHorizontal', sourceContainer, inheritedValues, values);
+                updateReferenceChips('previewVertical', sourceContainer, inheritedValues, values);
+                updateReferenceChips('previewTable', sourceContainer, inheritedValues, values);
+            } else if (fieldType === 'richtext') {
+                const value = sourceElement.value;
+                fieldData.richtext = value;
+                
+                document.querySelectorAll('#previewHorizontal textarea, #previewVertical textarea, #previewTable textarea').forEach(textarea => {
+                    if (textarea !== sourceElement) {
+                        textarea.value = value;
+                    }
+                });
+                
+                // Update table cell display
+                const cellValue = document.querySelector('#previewTable .cell-value');
+                if (cellValue) {
+                    cellValue.textContent = value.substring(0, 50) + (value.length > 50 ? '...' : '');
+                }
+            }
+        }
+        
+        function updateMultiValueView(containerId, skipContainer) {
+            const container = document.getElementById(containerId);
+            if (!container || container === skipContainer) return;
+            
+            const multiContainer = container.querySelector('.multi-inherited, .multi-calculated, .multi-container, [data-field-type="multi"]');
+            if (!multiContainer) return;
+            
+            // Get current source state (inherited or calculated)
+            const isInherited = multiContainer.classList.contains('multi-inherited');
+            const isCalculated = multiContainer.classList.contains('multi-calculated');
+            const sourceStyle = (isInherited || isCalculated) ? ' style="background: #f5f5f5; color: #666;"' : '';
+            
+            // Remove existing rows (but keep add button)
+            multiContainer.querySelectorAll('.multi-value-row').forEach(row => row.remove());
+            
+            // Add new rows based on fieldData
+            const addBtn = multiContainer.querySelector('.add-value');
+            const isSourceMulti = isInherited || isCalculated;
+            fieldData.multi.forEach((val, idx) => {
+                const row = document.createElement('div');
+                row.className = 'multi-value-row' + (isSourceMulti ? ' inherited-row' : '');
+                row.dataset.index = idx;
+                const valLen = (val || '').length;
+                row.innerHTML = `
+                    <div class="row-main">
+                        <input type="text" class="field-input" value="${val}" data-field="multi" data-index="${idx}" maxlength="${MAX_CHARS}"${sourceStyle}>
+                        <div class="row-actions"><button class="row-action remove-btn" title="Remove">×</button><button class="row-action" title="Drag to reorder">⋮⋮</button></div>
+                    </div>
+                    <div class="char-counter"><span class="char-count-current">${valLen}</span>/${MAX_CHARS} characters</div>
+                `;
+                if (addBtn) {
+                    multiContainer.insertBefore(row, addBtn);
+                } else {
+                    multiContainer.appendChild(row);
+                }
+            });
+        }
+        
+        function updateTableCellChips() {
+            const cellValue = document.querySelector('#previewTable .cell-value');
+            if (!cellValue) return;
+            
+            // Preserve inherited/calculated styling unless already converted (data attr removed)
+            const multiContainer = document.querySelector('#previewTable .multi-inherited, #previewTable .multi-calculated');
+            const isStillInherited = multiContainer?.dataset.inherited === 'true';
+            const isStillCalculated = multiContainer?.dataset.calculated === 'true';
+            const chipClass = isStillInherited ? ' inherited' : isStillCalculated ? ' calculated' : '';
+            const chips = fieldData.multi.filter(v => v.trim()).map(v => `<span class="chip${chipClass}">${v}</span>`).join('');
+            if (chips) {
+                cellValue.innerHTML = `<div class="chips" style="flex-wrap: nowrap;">${chips}</div>`;
+            } else {
+                cellValue.innerHTML = '<span style="color: #999;">(empty)</span>';
+            }
+        }
+        
+        function updateReferenceChips(containerId, skipContainer, inheritedValues, localValues) {
+            const container = document.getElementById(containerId);
+            if (!container || container === skipContainer) return;
+            
+            const chipsInput = container.querySelector('.chips-input');
+            if (!chipsInput) return;
+            
+            // Clear existing chips (keep input)
+            chipsInput.querySelectorAll('.chip').forEach(c => c.remove());
+            
+            const input = chipsInput.querySelector('input');
+            
+            // Add inherited chips
+            inheritedValues.forEach(val => {
+                const chip = document.createElement('span');
+                chip.className = 'chip inherited';
+                chip.innerHTML = `${inheritedIcon} ${val} <span class="lock">🔒</span>`;
+                chipsInput.insertBefore(chip, input);
+            });
+            
+            // Add local chips
+            localValues.forEach(val => {
+                const chip = document.createElement('span');
+                chip.className = 'chip';
+                chip.innerHTML = `${val} <span class="remove">×</span>`;
+                chipsInput.insertBefore(chip, input);
+            });
+            
+            // Update table cell value display
+            if (containerId === 'previewTable') {
+                const cellValue = container.querySelector('.cell-value');
+                if (cellValue) {
+                    const cellInheritedIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+                    const inheritedChips = inheritedValues.map(v => `<span class="chip inherited">${cellInheritedIcon} ${v} <span class="lock">🔒</span></span>`).join('');
+                    const localChips = localValues.map(v => `<span class="chip">${v}</span>`).join('');
+                    const allChips = inheritedChips + localChips;
+                    cellValue.innerHTML = allChips ? `<div class="chips" style="flex-wrap: nowrap;">${allChips}</div>` : '<span style="color: #999;">(empty)</span>';
+                }
+            }
+        }
+        
+        // SVG icons for overwritten badges
+        const inheritanceOverwrittenIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><rect x="6" y="1" width="4" height="3" rx="0.5"/><rect x="1" y="12" width="4" height="3" rx="0.5"/><rect x="6" y="12" width="4" height="3" rx="0.5"/><rect x="11" y="12" width="4" height="3" rx="0.5"/><path d="M8 4v3M8 7H3v5M8 7h5v5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="2" y1="14" x2="14" y2="2" stroke="currentColor" stroke-width="1.5"/></svg>';
+        const calculatedOverwrittenIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><text x="2" y="12" font-size="11" font-style="italic" font-weight="600" fill="currentColor">fx</text><line x1="1" y1="14" x2="15" y2="2" stroke="currentColor" stroke-width="1.5"/></svg>';
+        
+        // Apply override behavior to all views for replace-all reference fields
+        function applyReferenceOverrideToAllViews() {
+            ['previewHorizontal', 'previewVertical', 'previewTable'].forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                // Update badge from Inherited to Inheritance overwritten
+                const badge = container.querySelector('.badge-inherited');
+                if (badge) {
+                    badge.className = 'badge badge-inherited-overwritten';
+                    badge.innerHTML = inheritanceOverwrittenIcon + ' Inheritance overwritten';
+                }
+                
+                // Add has-info class for table cell to show triangle
+                if (containerId === 'previewTable') {
+                    const tableCell = container.querySelector('.table-cell');
+                    if (tableCell) {
+                        tableCell.classList.add('has-info');
+                        tableCell.classList.remove('editing');
+                        
+                        // Remove the popover since it's no longer needed
+                        const popover = tableCell.querySelector('.cell-popover');
+                        if (popover) {
+                            popover.remove();
+                        }
+                        
+                        // Remove onclick handler that opens popover
+                        tableCell.removeAttribute('onclick');
+                    }
+                }
+                
+                // Remove info messages
+                const infoMsgs = container.querySelectorAll('[style*="e3f2fd"], .inherit-info-msg, .cell-info-msg');
+                infoMsgs.forEach(msg => msg.remove());
+                
+                // Remove inherited chips
+                container.querySelectorAll('.chip.inherited').forEach(chip => chip.remove());
+                
+                // Update chips-input containers
+                const chipsInput = container.querySelector('.chips-input.replace-all-ref');
+                if (chipsInput) {
+                    chipsInput.removeAttribute('data-inherited');
+                    chipsInput.classList.remove('replace-all-ref');
+                    const input = chipsInput.querySelector('input');
+                    if (input) input.placeholder = 'Add reference...';
+                }
+            });
+        }
+        
+        // Sync reference chips across views when a chip is added/removed
+        function syncReferenceViews(sourceElement) {
+            const sourceContainer = sourceElement.closest('#previewHorizontal, #previewVertical, #previewTable');
+            if (!sourceContainer) return;
+            
+            // Collect all chips from source
+            const sourceChipsInput = sourceElement.closest('.chips-input');
+            if (!sourceChipsInput) return;
+            
+            const inheritedChips = Array.from(sourceChipsInput.querySelectorAll('.chip.inherited')).map(c => 
+                c.textContent.replace('🔒', '').trim()
+            );
+            const localChips = Array.from(sourceChipsInput.querySelectorAll('.chip:not(.inherited)')).map(c => 
+                c.textContent.replace('×', '').trim()
+            );
+            
+            // Update fieldData
+            fieldData.reference = [...localChips];
+            
+            // Update other views
+            ['previewHorizontal', 'previewVertical', 'previewTable'].forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container || container === sourceContainer) return;
+                
+                const chipsInput = container.querySelector('.chips-input');
+                if (!chipsInput) return;
+                
+                // Preserve inherited chips, update local chips
+                const existingInherited = Array.from(chipsInput.querySelectorAll('.chip.inherited'));
+                chipsInput.querySelectorAll('.chip:not(.inherited)').forEach(c => c.remove());
+                
+                const input = chipsInput.querySelector('input');
+                localChips.forEach(val => {
+                    const chip = document.createElement('span');
+                    chip.className = 'chip';
+                    chip.innerHTML = `${val} <span class="remove">×</span>`;
+                    chipsInput.insertBefore(chip, input);
+                });
+                
+                // Update table cell display if applicable
+                if (containerId === 'previewTable') {
+                    const cellValue = container.querySelector('.cell-value');
+                    if (cellValue) {
+                        const allChips = [...inheritedChips, ...localChips].map(v => `<span class="chip">${v}</span>`).join('');
+                        cellValue.innerHTML = allChips ? `<div class="chips" style="flex-wrap: nowrap;">${allChips}</div>` : '<span style="color: #999;">(empty)</span>';
+                    }
+                }
+            });
+        }
+        
+        // Listen for input changes in any preview area and sync
+        document.addEventListener('input', function(e) {
+            const target = e.target;
+            const previewArea = target.closest('#previewHorizontal, #previewVertical, #previewTable');
+            
+            if (previewArea && (target.classList.contains('field-input') || target.classList.contains('cell-input') || target.tagName === 'TEXTAREA')) {
+                syncAllViews(target);
+                // Update character counter for single/multi inputs
+                if ((target.dataset.field === 'single' || target.dataset.field === 'multi') && target.tagName !== 'TEXTAREA') {
+                    const counter = target.closest('.input-with-counter, .multi-value-row')?.querySelector('.char-counter .char-count-current');
+                    if (counter) counter.textContent = target.value.length;
+                }
+            }
+        });
+
+        // ========================
+        // SCENARIO COMPARISON (snapshots from Interactive Test)
+        // ========================
+        const scenarioComparison = [];
+
+        function getScenarioLabelFromInteractiveTest() {
+            const fieldType = document.querySelector('input[name="fieldType"]:checked')?.value || 'single';
+            const source = document.querySelector('input[name="source"]:checked')?.value || 'local';
+            const refMode = document.querySelector('input[name="refMode"]:checked')?.value || 'additive';
+            const isMandatory = document.getElementById('attrMandatory')?.checked;
+            const hasHelp = document.getElementById('attrHelp')?.checked;
+            const aiGenerated = document.getElementById('attrAIGenerated')?.checked;
+            const hasAttrError = document.getElementById('attrError')?.checked;
+            const hasValueError = document.getElementById('valueError')?.checked;
+
+            const parts = [];
+            parts.push(fieldType === 'single' ? 'Single' : fieldType === 'multi' ? 'Multi' : fieldType === 'reference' ? 'Reference' : 'Rich text');
+            parts.push('•');
+            parts.push(source.charAt(0).toUpperCase() + source.slice(1));
+            if (fieldType === 'reference' && source === 'inherited') {
+                parts.push('•');
+                parts.push(refMode === 'replaceall' ? 'Replace all' : 'Additive');
+            }
+            if (isMandatory) parts.push('• Mandatory');
+            if (hasHelp) parts.push('• Help');
+            if (aiGenerated) parts.push('• AI badge');
+            if (hasAttrError) parts.push('• Attr error');
+            if (hasValueError) parts.push('• Value error');
+            return parts.join(' ');
+        }
+
+        function renderScenarioComparison() {
+            const container = document.getElementById('scenarioComparisonList');
+            if (!container) return;
+
+            if (scenarioComparison.length === 0) {
+                container.innerHTML = `
+                    <div class="design-note" style="background: #f6f7f8; border-left-color: #B0BEC5; color: rgba(0, 0, 0, 0.72);">
+                        <strong>Nothing saved yet.</strong><br>
+                        Use the Interactive Test above, then click <strong>＋ Add to comparison</strong>.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = scenarioComparison.map((item) => `
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 8px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #333;">${item.name}</div>
+                    <button class="action-btn" type="button" title="Remove scenario" onclick="removeScenarioFromComparison('${item.id}')">Remove</button>
+                </div>
+                <div class="examples-grid">
+                    <div class="example-card">
+                        <h3>Label Left</h3>
+                        <div>${item.horizontalHtml}</div>
+                    </div>
+                    <div class="example-card">
+                        <h3>Label Top</h3>
+                        <div>${item.verticalHtml}</div>
+                    </div>
+                    <div class="example-card">
+                        <h3>Table Cell</h3>
+                        <div>${item.tableHtml}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addCurrentScenarioToComparison() {
+            const name = getScenarioLabelFromInteractiveTest();
+            const horizontalHtml = document.getElementById('previewHorizontal')?.innerHTML || '';
+            const verticalHtml = document.getElementById('previewVertical')?.innerHTML || '';
+            const tableHtml = document.getElementById('previewTable')?.innerHTML || '';
+
+            const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + String(Math.random()).slice(2);
+            scenarioComparison.unshift({ id, name, horizontalHtml, verticalHtml, tableHtml });
+            renderScenarioComparison();
+        }
+
+        function removeScenarioFromComparison(id) {
+            const idx = scenarioComparison.findIndex(s => s.id === id);
+            if (idx >= 0) scenarioComparison.splice(idx, 1);
+            renderScenarioComparison();
+        }
+
+        // Initialize comparison empty state
+        renderScenarioComparison();
+
+        // ========================
+        // INTERACTIVITY
+        // ========================
+
+        // Remove value (multi-value row)
+        document.addEventListener('click', function(e) {
+            // Remove multi-value row
+            if (e.target.closest('.row-action') && e.target.textContent.trim() === '×') {
+                const row = e.target.closest('.multi-value-row');
+                if (row) {
+                    const container = row.parentElement;
+                    const previewArea = row.closest('#previewHorizontal, #previewVertical, #previewTable');
+                    row.remove();
+                    
+                    // Trigger override if inherited or calculated (removing counts as changing) - apply to all views
+                    if (container.classList.contains('multi-inherited') && container.dataset.inherited === 'true') {
+                        convertToOverriddenAllViews();
+                    } else if (container.classList.contains('multi-calculated') && container.dataset.calculated === 'true') {
+                        convertToCalculatedOverriddenAllViews();
+                    }
+                    
+                    // Update fieldData and sync views (including table popover)
+                    if (previewArea && document.querySelector('input[name="fieldType"]:checked')?.value === 'multi') {
+                        const inputs = container.querySelectorAll('input[data-field="multi"]');
+                        const values = Array.from(inputs).map(i => i.value);
+                        fieldData.multi = values.length > 0 ? values : [''];
+                        
+                        // Sync all views including table
+                        updateMultiValueView('previewHorizontal', previewArea);
+                        updateMultiValueView('previewVertical', previewArea);
+                        updateMultiValueView('previewTable', previewArea);
+                        updateTableCellChips();
+                    }
+                    
+                    // Show empty state if no values left
+                    if (container.querySelectorAll('.multi-value-row').length === 0) {
+                        const addLink = container.querySelector('.add-value');
+                        if (addLink) {
+                            const emptyRow = document.createElement('div');
+                            emptyRow.className = 'multi-value-row';
+                            emptyRow.innerHTML = `
+                                <div class="row-main">
+                                    <input type="text" class="field-input" data-field="multi" placeholder="Enter value..." maxlength="${MAX_CHARS}">
+                                    <div class="row-actions">
+                                        <button class="row-action remove-btn" title="Remove">×</button>
+                                        <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                                    </div>
+                                </div>
+                                <div class="char-counter"><span class="char-count-current">0</span>/${MAX_CHARS} characters</div>
+                            `;
+                            container.insertBefore(emptyRow, addLink);
+                        }
+                    }
+                }
+                return;
+            }
+
+            // Remove chip
+            if (e.target.closest('.remove')) {
+                const chip = e.target.closest('.chip');
+                if (chip && !chip.classList.contains('inherited')) {
+                    const chipsInput = chip.closest('.chips-input');
+                    chip.remove();
+                    // Sync reference views
+                    if (chipsInput) {
+                        const input = chipsInput.querySelector('input');
+                        if (input) syncReferenceViews(input);
+                    }
+                }
+                return;
+            }
+
+            // Add value (multi-value)
+            if (e.target.classList.contains('add-value')) {
+                const container = e.target.parentElement;
+                const previewArea = container.closest('#previewHorizontal, #previewVertical, #previewTable');
+                const newRow = document.createElement('div');
+                newRow.className = 'multi-value-row';
+                newRow.innerHTML = `
+                    <div class="row-main">
+                        <input type="text" class="field-input" data-field="multi" placeholder="Enter value..." maxlength="${MAX_CHARS}">
+                        <div class="row-actions">
+                            <button class="row-action remove-btn" title="Remove">×</button>
+                            <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                        </div>
+                    </div>
+                    <div class="char-counter"><span class="char-count-current">0</span>/${MAX_CHARS} characters</div>
+                `;
+                container.insertBefore(newRow, e.target);
+                const newInput = newRow.querySelector('input');
+                newInput.focus();
+                // Trigger override if inherited or calculated (adding counts as changing) - apply to all views
+                if (container.classList.contains('multi-inherited') && container.dataset.inherited === 'true') {
+                    convertToOverriddenAllViews();
+                } else if (container.classList.contains('multi-calculated') && container.dataset.calculated === 'true') {
+                    convertToCalculatedOverriddenAllViews();
+                }
+                // Sync to other views
+                if (previewArea && document.querySelector('input[name="fieldType"]:checked')?.value === 'multi') {
+                    syncAllViews(newInput);
+                }
+                return;
+            }
+
+            // Add chip via inline Add button
+            if (e.target.classList.contains('ref-add-btn')) {
+                const container = e.target.closest('.chips-container');
+                const input = container.querySelector('.ref-input');
+                const chipsEl = container.querySelector('.chips');
+                const name = input.value.trim();
+                if (name) {
+                    // Handle replace-all behavior
+                    if (container.classList.contains('replace-all-ref') && container.dataset.inherited === 'true') {
+                        // Remove all inherited chips
+                        chipsEl.querySelectorAll('.chip.inherited').forEach(c => c.remove());
+                        
+                        // Remove info message and update badge
+                        const fieldRow = container.closest('.field-row-horizontal, .field-row-vertical');
+                        if (fieldRow) {
+                            const infoMsg = fieldRow.querySelector('.input-area > div[style*="background: #e3f2fd"]');
+                            if (infoMsg) infoMsg.remove();
+                            
+                            const badges = fieldRow.querySelector('.badges');
+                            if (badges) {
+                                const inheritedBadge = badges.querySelector('.badge-inherited');
+                                if (inheritedBadge) {
+                                    inheritedBadge.outerHTML = '<span class="badge badge-inherited-overwritten">' + inheritanceOverwrittenIcon + ' Inheritance overwritten</span>';
+                                }
+                            }
+                        }
+                        container.removeAttribute('data-inherited');
+                    }
+                    
+                    const newChip = document.createElement('span');
+                    newChip.className = 'chip';
+                    newChip.innerHTML = `${name} <span class="remove">×</span>`;
+                    chipsEl.appendChild(newChip);
+                    input.value = '';
+                    input.focus();
+                }
+                return;
+            }
+
+            // Add chip (reference field) - show input field
+            if (e.target.classList.contains('add-chip')) {
+                const container = e.target.closest('.chips-container') || e.target.parentElement;
+                const chipsEl = container.querySelector('.chips');
+                
+                // Check if input already exists
+                if (container.querySelector('.chip-input')) return;
+                
+                // Create input for new chip
+                const inputWrapper = document.createElement('div');
+                inputWrapper.className = 'chip-input-wrapper';
+                inputWrapper.style.cssText = 'display: flex; gap: 4px; margin-top: 8px;';
+                inputWrapper.innerHTML = `
+                    <input type="text" class="chip-input field-input" placeholder="Enter reference..." style="flex: 1; padding: 6px 10px; font-size: 13px;">
+                    <button class="chip-add-btn" style="padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Add</button>
+                    <button class="chip-cancel-btn" style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 12px;">Cancel</button>
+                `;
+                container.insertBefore(inputWrapper, e.target);
+                
+                const input = inputWrapper.querySelector('.chip-input');
+                input.focus();
+                
+                // Add button handler
+                inputWrapper.querySelector('.chip-add-btn').addEventListener('click', function() {
+                    const name = input.value.trim();
+                    if (name) {
+                        const newChip = document.createElement('span');
+                        newChip.className = 'chip';
+                        newChip.innerHTML = `${name} <span class="remove">×</span>`;
+                        chipsEl.appendChild(newChip);
+                    }
+                    inputWrapper.remove();
+                });
+                
+                // Cancel button handler
+                inputWrapper.querySelector('.chip-cancel-btn').addEventListener('click', function() {
+                    inputWrapper.remove();
+                });
+                
+                // Enter key handler
+                input.addEventListener('keydown', function(ev) {
+                    if (ev.key === 'Enter') {
+                        inputWrapper.querySelector('.chip-add-btn').click();
+                    } else if (ev.key === 'Escape') {
+                        inputWrapper.remove();
+                    }
+                });
+                
+                return;
+            }
+        });
+
+        // Make static examples editable - add "Add" links where missing (only if no input row exists)
+        document.querySelectorAll('.chips').forEach(chips => {
+            const parent = chips.parentElement;
+            if (!chips.closest('.table-cell') && !parent.querySelector('.add-chip') && !parent.querySelector('.chip-input-row') && !parent.classList.contains('chips-container')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'chips-container';
+                chips.parentNode.insertBefore(wrapper, chips);
+                wrapper.appendChild(chips);
+                
+                const inputRow = document.createElement('div');
+                inputRow.className = 'chip-input-row';
+                inputRow.style.cssText = 'display: flex; gap: 8px; margin-top: 8px;';
+                inputRow.innerHTML = `
+                    <input type="text" class="field-input ref-input" placeholder="Add reference..." style="flex: 1;">
+                    <button class="ref-add-btn" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer;">Add</button>
+                `;
+                wrapper.appendChild(inputRow);
+            }
+        });
+
+        // Enter key support for chip input fields
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.classList.contains('chip-input-field')) {
+                e.preventDefault();
+                const name = e.target.value.trim();
+                if (name) {
+                    const container = e.target.closest('.chips-input');
+                    const isReplaceAllInherited = container.classList.contains('replace-all-ref') && container.dataset.inherited === 'true';
+                    
+                    // Check if this is a replace-all inherited field
+                    if (isReplaceAllInherited) {
+                        // Remove all inherited chips from current container
+                        container.querySelectorAll('.chip.inherited').forEach(chip => chip.remove());
+                        container.removeAttribute('data-inherited');
+                        e.target.placeholder = 'Add reference...';
+                        
+                        // Clear inherited values from fieldData (keep only the new one)
+                        fieldData.reference = [];
+                        
+                        // Apply override to ALL views
+                        applyReferenceOverrideToAllViews();
+                    }
+                    
+                    // Add new chip
+                    const newChip = document.createElement('span');
+                    newChip.className = 'chip';
+                    newChip.innerHTML = `${name} <span class="remove">×</span>`;
+                    container.insertBefore(newChip, e.target);
+                    e.target.value = '';
+                    
+                    // Sync reference values across views
+                    fieldData.reference.push(name);
+                    syncReferenceViews(e.target);
+                }
+            }
+            
+            // Backspace to remove last chip when input is empty
+            if (e.key === 'Backspace' && e.target.classList.contains('chip-input-field') && e.target.value === '') {
+                const container = e.target.closest('.chips-input');
+                const chips = container.querySelectorAll('.chip:not(.inherited)');
+                if (chips.length > 0) {
+                    chips[chips.length - 1].remove();
+                    // Sync reference views
+                    syncReferenceViews(e.target);
+                }
+            }
+        });
+
+        // Handle multi-value inherited -> override behavior
+        function convertToOverridden(container) {
+            // Check if we're in a form view or table cell
+            const fieldRow = container.closest('.field-row-horizontal, .field-row-vertical');
+            const tableCell = container.closest('.table-cell');
+            
+            const overwrittenBadgeHtml = '<span class="badge badge-inherited-overwritten">' + inheritanceOverwrittenIcon + ' Inheritance overwritten</span>';
+            
+            if (fieldRow) {
+                // Form view handling
+                // Remove inherited badge and add overwritten badge
+                const badges = fieldRow.querySelector('.badges');
+                if (badges) {
+                    const inheritedBadge = badges.querySelector('.badge-inherited');
+                    if (inheritedBadge) {
+                        inheritedBadge.outerHTML = overwrittenBadgeHtml;
+                    }
+                }
+
+                // Remove the info message
+                const infoMsg = fieldRow.querySelector('.input-area > div[style*="e3f2fd"], .input-area .inherit-info-msg');
+                if (infoMsg) {
+                    infoMsg.remove();
+                }
+            } else if (tableCell) {
+                // Table cell handling
+                // Remove inherited badge and add overwritten badge in toolbar
+                const cellActions = tableCell.querySelector('.cell-actions');
+                if (cellActions) {
+                    const inheritedBadge = cellActions.querySelector('.badge-inherited');
+                    if (inheritedBadge) {
+                        inheritedBadge.outerHTML = overwrittenBadgeHtml;
+                    }
+                }
+                
+                // Add has-info class to show triangle indicator
+                tableCell.classList.add('has-info');
+                
+                // Remove the info message from popover
+                const infoMsg = tableCell.querySelector('.cell-popover > div[style*="e3f2fd"], .cell-popover .inherit-info-msg');
+                if (infoMsg) {
+                    infoMsg.remove();
+                }
+                
+                // Update cell value display to remove inherited markers
+                const cellValue = tableCell.querySelector('.cell-value');
+                if (cellValue) {
+                    cellValue.querySelectorAll('.chip.inherited').forEach(chip => {
+                        chip.classList.remove('inherited');
+                    });
+                }
+            }
+
+            // Make all inputs look local (remove grey background and color)
+            container.querySelectorAll('.field-input, .cell-input').forEach(input => {
+                input.style.background = '';
+                input.style.color = '';
+            });
+
+            // Update row actions to normal (remove lock icon, add normal buttons)
+            container.querySelectorAll('.row-actions').forEach(actions => {
+                const lockIcon = actions.querySelector('.row-action[style*="cursor: default"]');
+                if (lockIcon) {
+                    actions.innerHTML = `
+                        <button class="row-action" title="Remove">×</button>
+                        <button class="row-action" title="Drag to reorder">⋮⋮</button>
+                    `;
+                }
+            });
+
+            // Update button titles
+            container.querySelectorAll('.row-action[title*="override"]').forEach(btn => {
+                btn.title = btn.title.replace(' (will override all)', '');
+            });
+
+            // Mark as no longer inherited
+            container.removeAttribute('data-inherited');
+        }
+
+        // Apply inherited overwritten to all views (form + table)
+        function convertToOverriddenAllViews() {
+            ['#previewHorizontal', '#previewVertical', '#previewTable'].forEach(sel => {
+                const area = document.querySelector(sel);
+                if (!area) return;
+                area.querySelectorAll('.multi-inherited[data-inherited="true"], .single-inherited[data-inherited="true"], .single-cell-source[data-inherited="true"], .richtext-inherited[data-inherited="true"]').forEach(container => {
+                    convertToOverridden(container);
+                });
+            });
+        }
+
+        // Handle multi-value calculated -> overwritten (same principle as inherited)
+        const calculatedOverwrittenBadgeHtml = '<span class="badge badge-calculated-overwritten"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; flex-shrink: 0; min-width: 12px; min-height: 12px;"><text x="2" y="12" font-size="11" font-style="italic" font-weight="600" fill="currentColor">fx</text><line x1="1" y1="14" x2="15" y2="2" stroke="currentColor" stroke-width="1.5"/></svg> Calculated overwritten</span>';
+        
+        function convertToCalculatedOverridden(container) {
+            const fieldRow = container.closest('.field-row-horizontal, .field-row-vertical');
+            const tableCell = container.closest('.table-cell');
+            
+            if (fieldRow) {
+                const badges = fieldRow.querySelector('.badges');
+                if (badges) {
+                    const calculatedBadge = badges.querySelector('.badge-calculated');
+                    if (calculatedBadge) {
+                        calculatedBadge.outerHTML = calculatedOverwrittenBadgeHtml;
+                    }
+                }
+                const infoMsg = fieldRow.querySelector('.input-area > div[style*="e3f2fd"], .input-area .inherit-info-msg');
+                if (infoMsg) infoMsg.remove();
+            } else if (tableCell) {
+                const cellActions = tableCell.querySelector('.cell-actions');
+                if (cellActions) {
+                    const calculatedBadge = cellActions.querySelector('.badge-calculated');
+                    if (calculatedBadge) {
+                        calculatedBadge.outerHTML = calculatedOverwrittenBadgeHtml;
+                    }
+                }
+                tableCell.classList.add('has-info');
+                const infoMsg = tableCell.querySelector('.cell-popover > div[style*="e3f2fd"], .cell-popover .inherit-info-msg');
+                if (infoMsg) infoMsg.remove();
+                const cellValue = tableCell.querySelector('.cell-value');
+                if (cellValue) {
+                    cellValue.querySelectorAll('.chip.calculated').forEach(chip => chip.classList.remove('calculated'));
+                }
+            }
+            container.querySelectorAll('.field-input, .cell-input').forEach(input => {
+                input.style.background = '';
+                input.style.color = '';
+            });
+            container.querySelectorAll('.row-actions').forEach(actions => {
+                const lockIcon = actions.querySelector('.row-action[style*="cursor: default"]');
+                if (lockIcon) {
+                    actions.innerHTML = `<button class="row-action" title="Remove">×</button><button class="row-action" title="Drag to reorder">⋮⋮</button>`;
+                }
+            });
+            container.querySelectorAll('.row-action[title*="override"]').forEach(btn => {
+                btn.title = btn.title.replace(' (will override all)', '');
+            });
+            container.removeAttribute('data-calculated');
+        }
+
+        // Apply calculated overwritten to all views (form + table)
+        function convertToCalculatedOverriddenAllViews() {
+            ['#previewHorizontal', '#previewVertical', '#previewTable'].forEach(sel => {
+                const area = document.querySelector(sel);
+                if (!area) return;
+                area.querySelectorAll('.multi-calculated[data-calculated="true"], .single-calculated[data-calculated="true"], .single-cell-source[data-calculated="true"], .richtext-calculated[data-calculated="true"]').forEach(container => {
+                    convertToCalculatedOverridden(container);
+                });
+            });
+        }
+
+        // Listen for changes on inherited or calculated fields (single, multi, richtext)
+        document.addEventListener('input', function(e) {
+            const input = e.target;
+            if (input.classList.contains('field-input') || input.classList.contains('cell-input') || input.tagName === 'TEXTAREA') {
+                // Multi-value, single, or richtext - apply overwritten to all views consistently
+                const inheritedContainer = input.closest('.multi-inherited, .single-inherited, .single-cell-source[data-inherited], .richtext-inherited[data-inherited]');
+                if (inheritedContainer && inheritedContainer.dataset.inherited === 'true') {
+                    convertToOverriddenAllViews();
+                    return;
+                }
+                const calculatedContainer = input.closest('.multi-calculated, .single-calculated, .single-cell-source[data-calculated], .richtext-calculated[data-calculated]');
+                if (calculatedContainer && calculatedContainer.dataset.calculated === 'true') {
+                    convertToCalculatedOverriddenAllViews();
+                }
+            }
+        });
+
+        // Handle add/remove for multi-value fields (static examples only - Interactive Test uses bubble handler)
+        document.addEventListener('click', function(e) {
+            // Skip Interactive Test preview areas - they use the bubble handler with sync
+            if (e.target.closest('#previewHorizontal, #previewVertical, #previewTable')) {
+                return;
+            }
+            
+            // Handle "+ Add value" click
+            if (e.target.classList.contains('add-value')) {
+                const container = e.target.closest('.multi-inherited, .multi-calculated') || e.target.parentElement;
+                const tableCell = e.target.closest('.table-cell');
+                
+                // Add new input row
+                const newRow = document.createElement('div');
+                newRow.className = 'multi-value-row';
+                newRow.innerHTML = `
+                    <div class="row-main">
+                        <input type="text" class="field-input" data-field="multi" value="" placeholder="New value..." maxlength="${MAX_CHARS}">
+                        <div class="row-actions"><button class="row-action" title="Remove">×</button><button class="row-action" title="Drag to reorder">⋮⋮</button></div>
+                    </div>
+                    <div class="char-counter"><span class="char-count-current">0</span>/${MAX_CHARS} characters</div>
+                `;
+                e.target.parentElement.insertBefore(newRow, e.target);
+                newRow.querySelector('input').focus();
+                
+                // Trigger override if inherited or calculated
+                if (container && container.dataset.inherited === 'true') {
+                    convertToOverridden(container);
+                } else if (container && container.dataset.calculated === 'true') {
+                    convertToCalculatedOverridden(container);
+                }
+                
+                // Update cell display
+                if (tableCell) {
+                    updateTableCellDisplay(tableCell);
+                }
+            }
+            
+            // Handle remove button click
+            if (e.target.closest('.row-action') && e.target.textContent.trim() === '×') {
+                const row = e.target.closest('.multi-value-row');
+                const container = e.target.closest('.multi-inherited, .multi-calculated');
+                const tableCell = e.target.closest('.table-cell');
+                
+                if (row) {
+                    row.remove();
+                    
+                    // Trigger override if inherited or calculated
+                    if (container && container.dataset.inherited === 'true') {
+                        convertToOverridden(container);
+                    } else if (container && container.dataset.calculated === 'true') {
+                        convertToCalculatedOverridden(container);
+                    }
+                    
+                    // Update cell display
+                    if (tableCell) {
+                        updateTableCellDisplay(tableCell);
+                    }
+                }
+            }
+        }, true);
+        
+        // Update table cell display based on popover content
+        function updateTableCellDisplay(tableCell) {
+            const cellValue = tableCell.querySelector('.cell-value');
+            const popover = tableCell.querySelector('.cell-popover');
+            if (!cellValue || !popover) return;
+            
+            const inputs = popover.querySelectorAll('.field-input');
+            const values = Array.from(inputs).map(input => input.value).filter(v => v.trim());
+            
+            // Preserve inherited/calculated chip styling from multi container
+            const multiContainer = popover.querySelector('.multi-inherited, .multi-calculated');
+            const chipClass = multiContainer?.dataset.inherited === 'true' ? ' inherited' : multiContainer?.dataset.calculated === 'true' ? ' calculated' : '';
+            
+            if (values.length === 0) {
+                cellValue.innerHTML = '<span style="color: #999;">(empty)</span>';
+            } else {
+                const chips = values.map(v => `<span class="chip${chipClass}">${v}</span>`).join('');
+                cellValue.innerHTML = `<div class="chips" style="flex-wrap: nowrap;">${chips}</div>`;
+            }
+        }
+        
+        // Also update cell display on input change
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('field-input')) {
+                const tableCell = e.target.closest('.table-cell');
+                if (tableCell) {
+                    updateTableCellDisplay(tableCell);
+                }
+            }
+        });
+
+        // ========================
+        // TABLE CELL EDITING
+        // ========================
+        
+        // Make multi-value and reference table cells expandable
+        document.querySelectorAll('.table-cell').forEach(cell => {
+            const cellValue = cell.querySelector('.cell-value');
+            if (!cellValue) return;
+            
+            // Check if it's a multi-value (text with +N more) or chips
+            const text = cellValue.textContent;
+            const hasChips = cellValue.querySelector('.chip');
+            const isMultiValue = text.includes('+') && text.includes('more');
+            
+            if (isMultiValue || hasChips) {
+                cell.style.cursor = 'pointer';
+                cellValue.dataset.originalContent = cellValue.innerHTML;
+                
+                cell.addEventListener('click', function(e) {
+                    // Don't expand if clicking on actions or already expanded
+                    if (e.target.closest('.cell-actions') || cell.classList.contains('expanded')) return;
+                    
+                    // Toggle expansion
+                    if (!cell.classList.contains('expanded')) {
+                        expandTableCell(cell, isMultiValue, hasChips);
+                    }
+                });
+            }
+        });
+
+        function expandTableCell(cell, isMultiValue, hasChips) {
+            cell.classList.add('expanded');
+            const cellValue = cell.querySelector('.cell-value');
+            const originalContent = cellValue.dataset.originalContent;
+            
+            if (isMultiValue) {
+                // Show editable multi-value inputs
+                cellValue.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 0;">
+                        <div class="multi-value-row" style="gap: 4px;">
+                            <input type="text" class="field-input" value="40-hour battery life" style="padding: 6px 8px; font-size: 12px;">
+                            <div class="row-actions">
+                                <button class="row-action" title="Remove" style="width: 20px; height: 20px;">×</button>
+                            </div>
+                        </div>
+                        <div class="multi-value-row" style="gap: 4px;">
+                            <input type="text" class="field-input" value="Active noise cancellation" style="padding: 6px 8px; font-size: 12px;">
+                            <div class="row-actions">
+                                <button class="row-action" title="Remove" style="width: 20px; height: 20px;">×</button>
+                            </div>
+                        </div>
+                        <span class="add-value" style="font-size: 11px;">+ Add value</span>
+                        <button class="collapse-btn" style="margin-top: 4px; padding: 4px 8px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Done</button>
+                    </div>
+                `;
+            } else if (hasChips) {
+                // Show editable chips with input field
+                cellValue.innerHTML = `
+                    <div style="padding: 8px 0;" class="chips-container">
+                        <div class="chips" style="margin-bottom: 8px;">
+                            <span class="chip">Widget Mini <span class="remove">×</span></span>
+                            <span class="chip">Accessory Pack <span class="remove">×</span></span>
+                        </div>
+                        <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+                            <input type="text" class="field-input chip-input-inline" placeholder="Add reference..." style="flex: 1; padding: 6px 8px; font-size: 11px;">
+                            <button class="chip-add-inline" style="padding: 4px 8px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Add</button>
+                        </div>
+                        <button class="collapse-btn" style="padding: 4px 8px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Done</button>
+                    </div>
+                `;
+                
+                // Add inline chip handler
+                const addBtn = cellValue.querySelector('.chip-add-inline');
+                const chipInput = cellValue.querySelector('.chip-input-inline');
+                const chipsEl = cellValue.querySelector('.chips');
+                
+                addBtn.addEventListener('click', function() {
+                    const name = chipInput.value.trim();
+                    if (name) {
+                        const newChip = document.createElement('span');
+                        newChip.className = 'chip';
+                        newChip.style.cssText = 'font-size: 11px; padding: 2px 8px;';
+                        newChip.innerHTML = `${name} <span class="remove">×</span>`;
+                        chipsEl.appendChild(newChip);
+                        chipInput.value = '';
+                        chipInput.focus();
+                    }
+                });
+                
+                chipInput.addEventListener('keydown', function(ev) {
+                    if (ev.key === 'Enter') {
+                        addBtn.click();
+                    }
+                });
+            }
+            
+            // Add collapse handler
+            const collapseBtn = cellValue.querySelector('.collapse-btn');
+            if (collapseBtn) {
+                collapseBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    collapseTableCell(cell, originalContent);
+                });
+            }
+        }
+
+        function collapseTableCell(cell, originalContent) {
+            cell.classList.remove('expanded');
+            const cellValue = cell.querySelector('.cell-value');
+            
+            // Count current values to update summary
+            const inputs = cellValue.querySelectorAll('.field-input');
+            const chips = cellValue.querySelectorAll('.chip');
+            
+            if (inputs.length > 0) {
+                const values = Array.from(inputs).map(i => i.value).filter(v => v);
+                const display = values.slice(0, 2).join(', ');
+                const more = values.length > 2 ? `, +${values.length - 2} more` : '';
+                cellValue.innerHTML = display + more;
+                cellValue.dataset.originalContent = cellValue.innerHTML;
+            } else if (chips.length > 0) {
+                const chipHtml = Array.from(chips).slice(0, 2).map(c => 
+                    `<span class="chip">${c.textContent.replace('×', '').trim()}</span>`
+                ).join('');
+                const more = chips.length > 2 ? `<span class="chip chip-more">+${chips.length - 2}</span>` : '';
+                cellValue.innerHTML = `<div class="chips" style="flex-wrap: nowrap;">${chipHtml}${more}</div>`;
+                cellValue.dataset.originalContent = cellValue.innerHTML;
+            } else {
+                cellValue.innerHTML = '<span style="color: #999;">(empty)</span>';
+                cellValue.dataset.originalContent = cellValue.innerHTML;
+            }
+        }
+
+        // Close pop-overs when clicking outside (but not when clicking inside popover)
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.table-cell') && !e.target.closest('.cell-popover')) {
+                document.querySelectorAll('.table-cell.editing').forEach(cell => {
+                    cell.classList.remove('editing');
+                });
+            }
+        });
+
+        // Hide rich text toolbar on click outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.rich-text-wrapper') && !e.target.closest('.action-btn')) {
+                document.querySelectorAll('.rich-text-wrapper.show-toolbar').forEach(w => {
+                    w.classList.remove('show-toolbar');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Patterns - Comparison</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --primary-light: #e8f4fd;
+            --text: #333;
+            --text-muted: #666;
+            --text-light: #888;
+            --border: #e0e0e0;
+            --bg-subtle: #f8f9fa;
+            --bg-hover: #f0f0f0;
+            --radius: 6px;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: var(--text); background: #f0f0f0; }
+        
+        h1 { padding: 24px; background: #2c3e50; color: #fff; font-size: 18px; font-weight: 600; }
+        
+        .pattern-selector {
+            display: flex;
+            gap: 8px;
+            padding: 16px 24px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .pattern-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .pattern-btn:hover { background: var(--bg-hover); }
+        .pattern-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        
+        .patterns-container {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .pattern-card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 320px;
+            display: none;
+        }
+        .pattern-card.active { display: block; }
+        .pattern-card h2 {
+            padding: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border);
+        }
+        .pattern-card .description {
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            background: #fffde7;
+            border-bottom: 1px solid #fff3c4;
+        }
+        
+        /* Shared list styles */
+        .demo-list { padding: 8px 0; }
+        .section-title { 
+            padding: 8px 16px; 
+            font-size: 11px; 
+            color: var(--text-light);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-subtle);
+        }
+        .list-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .list-item:hover { background: var(--bg-hover); }
+        .list-item.active { background: var(--primary-light); border-left-color: var(--primary); }
+        
+        /* Pattern A: + Button → Modal */
+        .add-btn {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-btn:hover { background: var(--bg-hover); color: var(--text); }
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: var(--radius);
+            width: 360px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { font-size: 15px; font-weight: 600; }
+        .close-btn { background: none; border: none; font-size: 20px; color: var(--text-light); cursor: pointer; }
+        .modal-body { padding: 16px; }
+        .modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+        
+        /* Pattern B: Inline Input */
+        .inline-add {
+            padding: 8px 16px;
+            display: none;
+        }
+        .inline-add.open { display: block; }
+        .inline-add input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--primary);
+            border-radius: var(--radius);
+            font-size: 13px;
+            outline: none;
+        }
+        .inline-add-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .add-item-btn {
+            padding: 8px 16px;
+            font-size: 12px;
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .add-item-btn:hover { background: var(--bg-hover); }
+        
+        /* Pattern C: Expandable Section */
+        .expandable-add {
+            border-top: 1px solid var(--border);
+            background: var(--bg-subtle);
+        }
+        .expandable-trigger {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .expandable-trigger:hover { background: var(--bg-hover); }
+        .expandable-content {
+            padding: 0 16px 16px;
+            display: none;
+        }
+        .expandable-content.open { display: block; }
+        .expandable-content input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .expandable-content input:focus { border-color: var(--primary); outline: none; }
+        
+        /* Pattern D: Slide-out Panel */
+        .panel-container { position: relative; overflow: hidden; }
+        .slide-panel {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            transition: left 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .slide-panel.open { left: 0; }
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-subtle);
+        }
+        .panel-back {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .panel-back:hover { color: var(--text); }
+        .panel-body { padding: 16px; flex: 1; }
+        .panel-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+        
+        /* Pattern E: Quick Add (Command-style) */
+        .quick-add-trigger {
+            padding: 10px 16px;
+            color: var(--text-light);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-add-trigger:hover { background: var(--bg-hover); color: var(--text); }
+        .quick-add-input {
+            padding: 8px 16px;
+            display: none;
+        }
+        .quick-add-input.open { display: block; }
+        .quick-add-input input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            font-size: 13px;
+            outline: none;
+            background: var(--primary-light);
+        }
+        .quick-add-hint {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+        
+        /* Shared form styles */
+        .form-field { margin-bottom: 12px; }
+        .form-field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .form-field input, .form-field select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 13px;
+        }
+        .form-field input:focus, .form-field select:focus { border-color: var(--primary); outline: none; }
+        
+        button {
+            padding: 8px 14px;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 13px;
+        }
+        button:hover { background: var(--primary-dark); }
+        button.secondary { background: #fff; color: var(--text); border: 1px solid var(--border); }
+        button.secondary:hover { background: var(--bg-hover); }
+        button.small { padding: 6px 10px; font-size: 12px; }
+        
+        .pros-cons {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+        }
+        .pros-cons h4 { font-size: 11px; color: var(--text-light); margin-bottom: 4px; text-transform: uppercase; }
+        .pros { color: #27ae60; margin-bottom: 8px; }
+        .cons { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <h1>Add Patterns — Compare Alternatives</h1>
+    
+    <div class="pattern-selector">
+        <button class="pattern-btn active" onclick="showPattern('a')">A: Modal</button>
+        <button class="pattern-btn" onclick="showPattern('b')">B: Inline Input</button>
+        <button class="pattern-btn" onclick="showPattern('c')">C: Expandable</button>
+        <button class="pattern-btn" onclick="showPattern('d')">D: Slide Panel</button>
+        <button class="pattern-btn" onclick="showPattern('e')">E: Quick Add</button>
+        <button class="pattern-btn" onclick="showPattern('all')">Show All</button>
+    </div>
+    
+    <div class="patterns-container">
+        
+        <!-- Pattern A: Modal -->
+        <div class="pattern-card active" id="pattern-a">
+            <h2>A: + Button → Modal</h2>
+            <div class="description">Click + to open a centered modal dialog</div>
+            <div class="demo-list">
+                <div class="section-title">Perspectives <button class="add-btn" onclick="openModal('modalA')">+</button></div>
+                <div class="list-item active">All Products</div>
+                <div class="list-item">Enrichment Queue</div>
+                <div class="list-item">Ready for Review</div>
+                <div id="listA"></div>
+            </div>
+            <div class="pros-cons">
+                <div class="pros"><h4>Pros</h4>✓ Room for complex forms<br>✓ Clear focus/context<br>✓ Familiar pattern</div>
+                <div class="cons"><h4>Cons</h4>✗ Interrupts flow<br>✗ Extra click to dismiss</div>
+            </div>
+        </div>
+        
+        <!-- Pattern B: Inline Input -->
+        <div class="pattern-card" id="pattern-b">
+            <h2>B: Inline Input</h2>
+            <div class="description">Click + to show input directly in the list</div>
+            <div class="demo-list">
+                <div class="section-title">Perspectives <button class="add-btn" onclick="toggleInline('inlineB')">+</button></div>
+                <div class="list-item active">All Products</div>
+                <div class="list-item">Enrichment Queue</div>
+                <div class="list-item">Ready for Review</div>
+                <div id="listB"></div>
+                <div class="inline-add" id="inlineB">
+                    <input type="text" placeholder="New perspective name..." id="inputB" onkeydown="if(event.key==='Enter')addInline('B')">
+                    <div class="inline-add-actions">
+                        <button class="small" onclick="addInline('B')">Add</button>
+                        <button class="small secondary" onclick="toggleInline('inlineB')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pros-cons">
+                <div class="pros"><h4>Pros</h4>✓ Fast, low friction<br>✓ Stays in context<br>✓ Good for simple adds</div>
+                <div class="cons"><h4>Cons</h4>✗ Limited space for options<br>✗ Can clutter the list</div>
+            </div>
+        </div>
+        
+        <!-- Pattern C: Expandable Section -->
+        <div class="pattern-card" id="pattern-c">
+            <h2>C: Expandable Section</h2>
+            <div class="description">Click to expand a form section at the bottom</div>
+            <div class="demo-list">
+                <div class="section-title">Perspectives</div>
+                <div class="list-item active">All Products</div>
+                <div class="list-item">Enrichment Queue</div>
+                <div class="list-item">Ready for Review</div>
+                <div id="listC"></div>
+                <div class="expandable-add">
+                    <div class="expandable-trigger" onclick="toggleExpand('expandC')">
+                        <span>+</span> Add perspective
+                    </div>
+                    <div class="expandable-content" id="expandC">
+                        <input type="text" placeholder="Name" id="inputC">
+                        <select>
+                            <option>Based on: All Products</option>
+                            <option>Based on: Current filter</option>
+                        </select>
+                        <div style="display:flex;gap:8px;margin-top:8px">
+                            <button class="small" onclick="addExpand('C')">Create</button>
+                            <button class="small secondary" onclick="toggleExpand('expandC')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pros-cons">
+                <div class="pros"><h4>Pros</h4>✓ Shows options inline<br>✓ Doesn't cover content<br>✓ Progressive disclosure</div>
+                <div class="cons"><h4>Cons</h4>✗ Takes list space<br>✗ Scrolling may be needed</div>
+            </div>
+        </div>
+        
+        <!-- Pattern D: Slide Panel -->
+        <div class="pattern-card" id="pattern-d">
+            <h2>D: Slide Panel</h2>
+            <div class="description">Slides in a panel from the side, replacing the list</div>
+            <div class="panel-container" style="height:320px">
+                <div class="demo-list">
+                    <div class="section-title">Perspectives <button class="add-btn" onclick="togglePanel('panelD')">+</button></div>
+                    <div class="list-item active">All Products</div>
+                    <div class="list-item">Enrichment Queue</div>
+                    <div class="list-item">Ready for Review</div>
+                    <div id="listD"></div>
+                </div>
+                <div class="slide-panel" id="panelD">
+                    <div class="panel-header">
+                        <button class="panel-back" onclick="togglePanel('panelD')">←</button>
+                        <strong>New Perspective</strong>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-field">
+                            <label>Name</label>
+                            <input type="text" placeholder="My perspective" id="inputD">
+                        </div>
+                        <div class="form-field">
+                            <label>Based on</label>
+                            <select>
+                                <option>All Products</option>
+                                <option>Current filter</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Visibility</label>
+                            <select>
+                                <option>Only me</option>
+                                <option>My team</option>
+                                <option>Everyone</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <button onclick="addPanel('D')">Create</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pros-cons">
+                <div class="pros"><h4>Pros</h4>✓ Full form space<br>✓ Smooth transition<br>✓ Mobile-friendly</div>
+                <div class="cons"><h4>Cons</h4>✗ Hides the list<br>✗ Needs back navigation</div>
+            </div>
+        </div>
+        
+        <!-- Pattern E: Quick Add -->
+        <div class="pattern-card" id="pattern-e">
+            <h2>E: Quick Add (Command-style)</h2>
+            <div class="description">Always-visible input that creates on Enter</div>
+            <div class="demo-list">
+                <div class="section-title">Perspectives</div>
+                <div class="list-item active">All Products</div>
+                <div class="list-item">Enrichment Queue</div>
+                <div class="list-item">Ready for Review</div>
+                <div id="listE"></div>
+                <div class="quick-add-trigger" onclick="focusQuickAdd('E')" id="triggerE">
+                    <span style="opacity:0.5">+</span> Add perspective...
+                </div>
+                <div class="quick-add-input" id="quickE">
+                    <input type="text" placeholder="Type name and press Enter" id="inputE" onkeydown="handleQuickAdd(event,'E')" onblur="blurQuickAdd('E')">
+                    <div class="quick-add-hint">Press Enter to create, Esc to cancel</div>
+                </div>
+            </div>
+            <div class="pros-cons">
+                <div class="pros"><h4>Pros</h4>✓ Fastest for power users<br>✓ Keyboard-friendly<br>✓ Minimal UI</div>
+                <div class="cons"><h4>Cons</h4>✗ No room for options<br>✗ Less discoverable</div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Modal for Pattern A -->
+    <div class="modal-overlay" id="modalA" onclick="if(event.target===this)closeModal('modalA')">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create Perspective</h3>
+                <button class="close-btn" onclick="closeModal('modalA')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>Name</label>
+                    <input type="text" id="inputA" placeholder="My perspective">
+                </div>
+                <div class="form-field">
+                    <label>Based on</label>
+                    <select>
+                        <option>All Products</option>
+                        <option>Current filter</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" onclick="closeModal('modalA')">Cancel</button>
+                <button onclick="addModal('A')">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPattern(id) {
+            document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if (id === 'all') {
+                document.querySelectorAll('.pattern-card').forEach(c => c.classList.add('active'));
+            } else {
+                document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('active'));
+                document.getElementById('pattern-' + id).classList.add('active');
+            }
+        }
+        
+        // Pattern A: Modal
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            document.getElementById('input' + id.slice(-1)).focus();
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+        function addModal(id) {
+            const input = document.getElementById('input' + id);
+            if (input.value.trim()) {
+                addItem('list' + id, input.value.trim());
+                input.value = '';
+                closeModal('modal' + id);
+            }
+        }
+        
+        // Pattern B: Inline
+        function toggleInline(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('open');
+            if (el.classList.contains('open')) {
+                document.getElementById('input' + id.slice(-1)).focus();
+            }
+        }
+        function addInline(id) {
+            const input = document.getElementById('input' + id);
+            if (input.value.trim()) {
+                addItem('list' + id, input.value.trim());
+                input.value = '';
+                toggleInline('inline' + id);
+            }
+        }
+        
+        // Pattern C: Expandable
+        function toggleExpand(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+        function addExpand(id) {
+            const input = document.getElementById('input' + id);
+            if (input.value.trim()) {
+                addItem('list' + id, input.value.trim());
+                input.value = '';
+                toggleExpand('expand' + id);
+            }
+        }
+        
+        // Pattern D: Slide Panel
+        function togglePanel(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+        function addPanel(id) {
+            const input = document.getElementById('input' + id);
+            if (input.value.trim()) {
+                addItem('list' + id, input.value.trim());
+                input.value = '';
+                togglePanel('panel' + id);
+            }
+        }
+        
+        // Pattern E: Quick Add
+        function focusQuickAdd(id) {
+            document.getElementById('trigger' + id).style.display = 'none';
+            document.getElementById('quick' + id).classList.add('open');
+            document.getElementById('input' + id).focus();
+        }
+        function blurQuickAdd(id) {
+            setTimeout(() => {
+                document.getElementById('quick' + id).classList.remove('open');
+                document.getElementById('trigger' + id).style.display = 'flex';
+            }, 150);
+        }
+        function handleQuickAdd(e, id) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('input' + id);
+                if (input.value.trim()) {
+                    addItem('list' + id, input.value.trim());
+                    input.value = '';
+                }
+                input.blur();
+            } else if (e.key === 'Escape') {
+                document.getElementById('input' + id).blur();
+            }
+        }
+        
+        // Shared: Add item to list
+        function addItem(listId, name) {
+            const list = document.getElementById(listId);
+            const item = document.createElement('div');
+            item.className = 'list-item';
+            item.textContent = name;
+            item.onclick = function() {
+                this.parentElement.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            };
+            list.appendChild(item);
+        }
+    </script>
+</body>
+</html>

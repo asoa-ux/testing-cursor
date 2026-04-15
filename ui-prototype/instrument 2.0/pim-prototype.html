@@ -1,0 +1,3285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIM Pro - Product Information Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --sidebar-width: 280px;
+            --header-height: 56px;
+            --drawer-width: 440px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .app-container { display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header { padding: 16px; border-bottom: 1px solid var(--gray-200); }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo svg { width: 24px; height: 24px; }
+
+        .search-box { margin-top: 12px; position: relative; }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 13px;
+            background: var(--gray-50);
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--gray-400);
+        }
+
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+
+        .nav-section { margin-bottom: 8px; }
+
+        .nav-section-title {
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 13px;
+            color: var(--gray-700);
+            gap: 10px;
+        }
+
+        .nav-item:hover { background: var(--gray-50); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .nav-item svg { width: 18px; height: 18px; }
+
+        /* Tree Navigation */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+        }
+
+        .tree-item:hover { background: var(--gray-50); }
+        .tree-item.active { background: var(--primary-light); color: var(--primary); }
+
+        .tree-toggle {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            color: var(--gray-400);
+            flex-shrink: 0;
+        }
+
+        .tree-toggle svg { width: 14px; height: 14px; transition: transform 0.2s; }
+        .tree-toggle.expanded svg { transform: rotate(90deg); }
+        .tree-toggle.no-children { visibility: hidden; }
+
+        .tree-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            color: var(--gray-500);
+            flex-shrink: 0;
+        }
+
+        .tree-label {
+            flex: 1;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tree-badges { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+        .tree-children { display: none; }
+        .tree-children.expanded { display: block; }
+        .tree-children .tree-item { 
+            padding-left: 40px;
+            font-size: 12px;
+        }
+        .tree-children .tree-item .tree-icon { width: 16px; height: 16px; }
+        .tree-children .tree-item .tree-label { font-size: 12px; }
+        .tree-node { position: relative; }
+        .tree-more:hover { background: var(--primary-light) !important; }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-completeness { background: var(--gray-100); color: var(--gray-600); }
+        .badge-completeness.high { background: var(--success-light); color: #065f46; }
+        .badge-completeness.medium { background: var(--warning-light); color: #92400e; }
+        .badge-completeness.low { background: var(--danger-light); color: #991b1b; }
+        .badge-issues { background: var(--danger-light); color: var(--danger); }
+        .badge-count { background: var(--gray-200); color: var(--gray-700); }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .content-header {
+            height: var(--header-height);
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            background: none;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--gray-600);
+            transition: all 0.15s;
+        }
+
+        .back-btn:hover { background: var(--gray-50); }
+        .back-btn svg { width: 16px; height: 16px; }
+
+        .breadcrumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .breadcrumb-item { color: var(--gray-500); cursor: pointer; }
+        .breadcrumb-item:hover { color: var(--primary); }
+        .breadcrumb-item.current { color: var(--gray-800); font-weight: 500; cursor: default; }
+        .breadcrumb-separator { color: var(--gray-300); }
+
+        .header-actions { display: flex; gap: 8px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+        }
+
+        .btn svg { width: 16px; height: 16px; }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+        .btn-secondary { background: white; color: var(--gray-700); border: 1px solid var(--gray-200); }
+        .btn-secondary:hover { background: var(--gray-50); }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-success:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        .btn-ghost { background: transparent; color: var(--gray-600); }
+        .btn-ghost:hover { background: var(--gray-100); }
+
+        .btn-sm { padding: 6px 10px; font-size: 12px; }
+        .btn-sm svg { width: 14px; height: 14px; }
+
+        .btn-icon { padding: 8px; }
+        .btn-icon.btn-sm { padding: 6px; }
+
+        /* Content Body */
+        .content-body { flex: 1; overflow: auto; padding: 24px; }
+
+        .content-split { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: 100%; }
+
+        /* Overview Panel */
+        .overview-panel {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 0;
+        }
+
+        .overview-header { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-100); }
+        .overview-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .overview-subtitle { font-size: 13px; color: var(--gray-500); margin-bottom: 8px; }
+        .overview-status { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .overview-section { margin-bottom: 20px; }
+        .overview-section:last-child { margin-bottom: 0; }
+        .overview-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            margin-bottom: 12px;
+        }
+
+        .overview-field { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .field-label { font-size: 13px; color: var(--gray-500); }
+        .field-value { font-size: 13px; font-weight: 500; }
+
+        /* Completeness Meter */
+        .completeness-meter { margin-bottom: 8px; }
+        .meter-bar { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+        .meter-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .meter-fill.high { background: var(--success); }
+        .meter-fill.medium { background: var(--warning); }
+        .meter-fill.low { background: var(--danger); }
+        .meter-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-published { background: var(--success-light); color: #065f46; }
+        .status-review { background: var(--warning-light); color: #92400e; }
+        .status-draft { background: var(--gray-100); color: var(--gray-600); }
+        .status-error { background: var(--danger-light); color: #991b1b; }
+
+        /* Enrichment Panel */
+        .enrichment-panel { display: flex; flex-direction: column; min-height: 0; }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+            background: white;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tab:hover { background: var(--gray-50); }
+        .tab.active { background: var(--primary); color: white; }
+
+        .tab-content { flex: 1; overflow: auto; }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .card-title { font-size: 14px; font-weight: 600; }
+        .card-body { padding: 16px; }
+
+        /* Table Actions Bar */
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            flex-wrap: wrap;
+        }
+
+        .table-actions-left { display: flex; align-items: center; gap: 8px; }
+        .table-actions-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+        .search-input {
+            padding: 6px 12px 6px 32px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 13px;
+            width: 240px;
+            background: white;
+            position: relative;
+        }
+
+        .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        .search-wrapper { position: relative; }
+        .search-wrapper svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            color: var(--gray-400);
+        }
+
+        /* View Mode Switcher */
+        .view-switcher {
+            display: flex;
+            background: var(--gray-100);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .view-btn {
+            padding: 6px 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            transition: all 0.15s;
+        }
+
+        .view-btn:hover { color: var(--gray-700); }
+        .view-btn.active { background: white; color: var(--gray-800); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .view-btn svg { width: 16px; height: 16px; }
+
+        /* Data Table */
+        .table-container { overflow-x: auto; }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: var(--gray-600);
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th:hover { background: var(--gray-100); }
+
+        .data-table th .sort-icon {
+            display: inline-flex;
+            margin-left: 4px;
+            opacity: 0.3;
+        }
+
+        .data-table th.sorted .sort-icon { opacity: 1; }
+        .data-table th.sorted-desc .sort-icon svg { transform: rotate(180deg); }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover { background: var(--gray-50); }
+        .data-table tr.selected { background: var(--primary-light); }
+
+        .table-checkbox { width: 16px; height: 16px; cursor: pointer; }
+        .table-link { color: var(--primary); cursor: pointer; font-weight: 500; }
+        .table-link:hover { text-decoration: underline; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-top: 1px solid var(--gray-200);
+            background: white;
+        }
+
+        .pagination-info { font-size: 13px; color: var(--gray-500); }
+
+        .pagination-controls { display: flex; align-items: center; gap: 8px; }
+
+        .pagination-btn {
+            padding: 6px 10px;
+            border: 1px solid var(--gray-200);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--gray-600);
+            transition: all 0.15s;
+        }
+
+        .pagination-btn:hover:not(:disabled) { background: var(--gray-50); }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .page-size-select {
+            padding: 6px 8px;
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+        }
+
+        /* Bulk Actions Bar */
+        .bulk-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--primary);
+            color: white;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .bulk-actions-count { font-weight: 500; }
+
+        .bulk-actions .btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .bulk-actions .btn:hover { background: rgba(255,255,255,0.3); }
+
+        .bulk-actions-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Gallery View */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .gallery-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .gallery-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
+        .gallery-card.selected { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+
+        .gallery-card-checkbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 1;
+        }
+
+        .gallery-card-preview {
+            aspect-ratio: 4/3;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+        }
+
+        .gallery-card-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-card-preview svg { width: 48px; height: 48px; }
+
+        .gallery-card-info { padding: 12px; }
+        .gallery-card-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .gallery-card-meta { font-size: 11px; color: var(--gray-500); display: flex; gap: 8px; }
+
+        /* List View */
+        .list-view { padding: 8px 0; }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .list-item:hover { background: var(--gray-50); }
+        .list-item.selected { background: var(--primary-light); }
+
+        .list-item-icon { width: 40px; height: 40px; background: var(--gray-100); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--gray-400); flex-shrink: 0; }
+        .list-item-icon svg { width: 20px; height: 20px; }
+
+        .list-item-content { flex: 1; min-width: 0; }
+        .list-item-title { font-weight: 500; margin-bottom: 2px; }
+        .list-item-subtitle { font-size: 12px; color: var(--gray-500); }
+
+        .list-item-badges { display: flex; gap: 8px; }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .filter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            cursor: pointer;
+        }
+
+        .filter-header-title { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .filter-body { padding: 16px; display: none; }
+        .filter-body.open { display: block; }
+
+        .filter-group { margin-bottom: 16px; }
+        .filter-group:last-child { margin-bottom: 0; }
+        .filter-label { font-size: 12px; font-weight: 500; color: var(--gray-600); margin-bottom: 8px; display: block; }
+
+        .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .filter-chip {
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .filter-chip:hover { background: var(--gray-200); }
+        .filter-chip.active { background: var(--primary); color: white; }
+
+        .active-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 16px; border-top: 1px solid var(--gray-200); }
+
+        .active-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px 4px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 16px;
+            font-size: 12px;
+        }
+
+        .active-filter button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px;
+            color: var(--primary);
+            display: flex;
+        }
+
+        /* Reference Type Tabs */
+        .ref-type-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 8px 16px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .ref-type-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ref-type-tab:hover { background: var(--gray-200); }
+        .ref-type-tab.active { background: var(--primary); color: white; }
+        .ref-type-tab .count { font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 10px; }
+        .ref-type-tab.active .count { background: rgba(255,255,255,0.2); }
+
+        /* Drawer */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .drawer-overlay.open { opacity: 1; visibility: visible; }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--drawer-width);
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+        }
+
+        .drawer.open { transform: translateX(0); }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .drawer-title { font-size: 16px; font-weight: 600; }
+        .drawer-close { background: none; border: none; cursor: pointer; padding: 4px; color: var(--gray-500); }
+        .drawer-close:hover { color: var(--gray-700); }
+
+        .drawer-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+        .drawer-footer {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-top: 1px solid var(--gray-200);
+            background: var(--gray-50);
+        }
+
+        .drawer-footer .btn { flex: 1; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 16px; }
+        .form-group:last-child { margin-bottom: 0; }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--gray-700);
+        }
+
+        .form-label.required::after { content: ' *'; color: var(--danger); }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+
+        .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 8px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 32px;
+        }
+
+        textarea.form-input { min-height: 80px; resize: vertical; }
+
+        /* Chips */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .chip:hover { background: var(--gray-200); }
+        .chip svg { width: 14px; height: 14px; }
+
+        .chips-container { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            background: var(--gray-800);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; color: var(--gray-300); }
+        .empty-state-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--gray-700); }
+        .empty-state-text { font-size: 14px; margin-bottom: 16px; }
+
+        /* Loading State */
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            transform: scale(0.95);
+            transition: transform 0.2s;
+        }
+
+        .modal-overlay.open .modal { transform: scale(1); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .modal-title { font-size: 16px; font-weight: 600; }
+        .modal-close { background: none; border: none; cursor: pointer; padding: 4px; color: var(--gray-500); }
+
+        .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 16px 20px;
+            border-top: 1px solid var(--gray-200);
+            background: var(--gray-50);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+        /* Dropdown */
+        .dropdown { position: relative; }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
+            z-index: 50;
+            display: none;
+        }
+
+        .dropdown-menu.open { display: block; }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover { background: var(--gray-50); }
+        .dropdown-item svg { width: 16px; height: 16px; color: var(--gray-500); }
+        .dropdown-divider { height: 1px; background: var(--gray-100); margin: 4px 0; }
+
+        /* Validation Icon */
+        .validation-icon { width: 16px; height: 16px; }
+        .validation-icon.valid { color: var(--success); }
+        .validation-icon.warning { color: var(--warning); }
+        .validation-icon.error { color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                    PIM Pro
+                </div>
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" placeholder="Search everything..." id="globalSearch" onkeypress="handleGlobalSearch(event)">
+                </div>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav"></nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <button class="back-btn" id="backBtn" style="display: none;" onclick="goBack()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                        Back
+                    </button>
+                    <nav class="breadcrumbs" id="breadcrumbs"></nav>
+                </div>
+                <div class="header-actions" id="headerActions"></div>
+            </header>
+            <div class="content-body" id="contentBody">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Drawer -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="drawerTitle">Details</h3>
+            <button class="drawer-close" onclick="closeDrawer()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="drawer-body" id="drawerBody"></div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" onclick="closeDrawer()">Close</button>
+            <button class="btn btn-primary" id="drawerOpenFull">Open Full Page</button>
+        </div>
+    </div>
+
+    <!-- Bulk Edit Modal -->
+    <div class="modal-overlay" id="bulkEditModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Bulk Edit</h3>
+                <button class="modal-close" onclick="closeBulkEditModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="bulkEditBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBulkEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyBulkEdit()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================
+        // ICONS
+        // ============================================
+        const icons = {
+            family: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+            product: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
+            asset: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+            supplier: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            category: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+            chevron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>`,
+            check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+            warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+            error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+            save: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+            validate: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+            publish: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`,
+            more: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`,
+            edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+            trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+            copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+            download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+            filter: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
+            search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`,
+            grid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+            list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+            table: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`,
+            columns: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>`,
+            sort: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>`,
+            arrowUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>`,
+            arrowDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`,
+            close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
+            link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+            external: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+            clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+            star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+        };
+
+        // ============================================
+        // GENERATE MOCK DATA WITH SCALE
+        // ============================================
+        const brands = ['TechPro', 'NexGen', 'ProLine', 'EliteTech', 'SmartCore', 'VisionMax', 'CoreTech', 'PrimeTech'];
+        const owners = ['Sarah Chen', 'Michael Torres', 'Emma Wilson', 'David Kim', 'Lisa Park', 'James Roberts', 'Anna Martinez', 'Robert Lee'];
+        const statuses = ['published', 'review', 'draft'];
+        const colors = ['Black', 'White', 'Silver', 'Gold', 'Blue', 'Red', 'Green', 'Space Gray'];
+
+        function generateProducts(familyId, prefix, count, categoryBase) {
+            const products = [];
+            for (let i = 1; i <= count; i++) {
+                const status = statuses[Math.floor(Math.random() * 3)];
+                const completeness = status === 'published' ? 85 + Math.floor(Math.random() * 16) : 
+                                     status === 'review' ? 60 + Math.floor(Math.random() * 25) :
+                                     30 + Math.floor(Math.random() * 30);
+                const issues = status === 'published' ? 0 : Math.floor(Math.random() * (status === 'draft' ? 8 : 4));
+                
+                products.push({
+                    id: `prod-${familyId}-${String(i).padStart(3, '0')}`,
+                    familyId: familyId,
+                    name: `${prefix} ${String(i).padStart(3, '0')}`,
+                    sku: `${familyId.toUpperCase()}-${String(i).padStart(4, '0')}`,
+                    status: status,
+                    completeness: completeness,
+                    issues: issues,
+                    lastEdited: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    owner: owners[Math.floor(Math.random() * owners.length)],
+                    description: `High-quality ${prefix.toLowerCase()} with premium features and exceptional performance.`,
+                    price: (Math.random() * 500 + 50).toFixed(2),
+                    brand: brands[Math.floor(Math.random() * brands.length)],
+                    weight: `${(Math.random() * 5 + 0.1).toFixed(1)}kg`,
+                    dimensions: `${Math.floor(Math.random() * 50 + 10)} x ${Math.floor(Math.random() * 40 + 10)} x ${Math.floor(Math.random() * 20 + 5)}cm`,
+                    attributes: {
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        material: ['Aluminum', 'Plastic', 'Steel', 'Carbon Fiber'][Math.floor(Math.random() * 4)],
+                        warranty: ['1 year', '2 years', '3 years', '5 years'][Math.floor(Math.random() * 4)],
+                        origin: ['USA', 'China', 'Germany', 'Japan', 'South Korea'][Math.floor(Math.random() * 5)]
+                    },
+                    assetIds: Array.from({length: Math.floor(Math.random() * 5) + 1}, (_, j) => `asset-${familyId}-${i}-${j+1}`),
+                    supplierIds: [`supplier-${Math.floor(Math.random() * 10) + 1}`],
+                    categoryIds: [`cat-${categoryBase}`, `cat-${categoryBase}-sub-${Math.floor(Math.random() * 3) + 1}`]
+                });
+            }
+            return products;
+        }
+
+        function generateAssets(products) {
+            const assets = [];
+            const assetTypes = ['image', 'document', 'video'];
+            const formats = { image: ['JPEG', 'PNG', 'WebP'], document: ['PDF', 'DOCX'], video: ['MP4', 'MOV'] };
+            
+            products.forEach(product => {
+                product.assetIds.forEach((assetId, idx) => {
+                    const type = idx === 0 ? 'image' : assetTypes[Math.floor(Math.random() * 3)];
+                    assets.push({
+                        id: assetId,
+                        name: `${product.name.replace(/\s/g, '-').toLowerCase()}-${idx === 0 ? 'main' : ['detail', 'lifestyle', 'spec', 'manual'][idx % 4]}.${formats[type][0].toLowerCase()}`,
+                        type: type,
+                        format: formats[type][Math.floor(Math.random() * formats[type].length)],
+                        size: `${(Math.random() * 10 + 0.5).toFixed(1)} MB`,
+                        dimensions: type === 'image' ? `${2000 + Math.floor(Math.random() * 2000)}x${1500 + Math.floor(Math.random() * 1500)}` : null,
+                        uploadDate: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(),
+                        usedBy: [product.id],
+                        thumbnail: type === 'image' ? `https://picsum.photos/seed/${assetId}/400/300` : null
+                    });
+                });
+            });
+            return assets;
+        }
+
+        function generateSuppliers(count) {
+            const supplierNames = ['Global Supply Co', 'Prime Distributors', 'Elite Manufacturing', 'Pacific Trade', 'Atlantic Partners', 'Continental Goods', 'Universal Imports', 'Direct Source Ltd', 'Quality First Inc', 'Express Logistics'];
+            return Array.from({length: count}, (_, i) => ({
+                id: `supplier-${i + 1}`,
+                name: supplierNames[i % supplierNames.length],
+                code: `SUP-${String(i + 1).padStart(3, '0')}`,
+                country: ['USA', 'China', 'Germany', 'Japan', 'South Korea', 'Taiwan', 'Vietnam', 'Mexico'][Math.floor(Math.random() * 8)],
+                rating: (3 + Math.random() * 2).toFixed(1),
+                status: Math.random() > 0.2 ? 'active' : 'inactive',
+                email: `contact@supplier${i + 1}.com`,
+                leadTime: `${Math.floor(Math.random() * 14) + 7} days`
+            }));
+        }
+
+        function generateCategories() {
+            return {
+                'cat-electronics': { id: 'cat-electronics', name: 'Electronics', parent: null, children: ['cat-electronics-sub-1', 'cat-electronics-sub-2', 'cat-electronics-sub-3'] },
+                'cat-electronics-sub-1': { id: 'cat-electronics-sub-1', name: 'Smartphones', parent: 'cat-electronics' },
+                'cat-electronics-sub-2': { id: 'cat-electronics-sub-2', name: 'Laptops', parent: 'cat-electronics' },
+                'cat-electronics-sub-3': { id: 'cat-electronics-sub-3', name: 'Accessories', parent: 'cat-electronics' },
+                'cat-home': { id: 'cat-home', name: 'Home & Garden', parent: null, children: ['cat-home-sub-1', 'cat-home-sub-2', 'cat-home-sub-3'] },
+                'cat-home-sub-1': { id: 'cat-home-sub-1', name: 'Furniture', parent: 'cat-home' },
+                'cat-home-sub-2': { id: 'cat-home-sub-2', name: 'Lighting', parent: 'cat-home' },
+                'cat-home-sub-3': { id: 'cat-home-sub-3', name: 'Garden Tools', parent: 'cat-home' },
+                'cat-sports': { id: 'cat-sports', name: 'Sports & Fitness', parent: null, children: ['cat-sports-sub-1', 'cat-sports-sub-2', 'cat-sports-sub-3'] },
+                'cat-sports-sub-1': { id: 'cat-sports-sub-1', name: 'Exercise Equipment', parent: 'cat-sports' },
+                'cat-sports-sub-2': { id: 'cat-sports-sub-2', name: 'Outdoor Gear', parent: 'cat-sports' },
+                'cat-sports-sub-3': { id: 'cat-sports-sub-3', name: 'Sportswear', parent: 'cat-sports' }
+            };
+        }
+
+        // ============================================
+        // HIERARCHICAL TREE STRUCTURE (4-6 levels)
+        // ============================================
+        // Level types: division > line > family > subfamily > product > variant
+        
+        function createHierarchyNode(id, name, type, parentId, extra = {}) {
+            const status = ['published', 'review', 'draft'][Math.floor(Math.random() * 3)];
+            const completeness = status === 'published' ? 80 + Math.floor(Math.random() * 21) : 
+                                 status === 'review' ? 55 + Math.floor(Math.random() * 25) : 
+                                 25 + Math.floor(Math.random() * 35);
+            return {
+                id,
+                name,
+                type, // 'division', 'line', 'family', 'subfamily', 'product', 'variant'
+                parentId,
+                sku: `${type.toUpperCase().slice(0,3)}-${id.split('-').pop()}`,
+                status: extra.status || status,
+                completeness: extra.completeness || completeness,
+                issues: extra.issues !== undefined ? extra.issues : (status === 'published' ? 0 : Math.floor(Math.random() * 5)),
+                lastEdited: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                owner: owners[Math.floor(Math.random() * owners.length)],
+                description: extra.description || `${name} - ${type} level node`,
+                ...extra
+            };
+        }
+
+        // Build the complete hierarchy
+        const hierarchy = {};
+        
+        // Level 1: Divisions
+        hierarchy['div-electronics'] = createHierarchyNode('div-electronics', 'Consumer Electronics', 'division', null, { status: 'published', completeness: 87 });
+        hierarchy['div-home'] = createHierarchyNode('div-home', 'Home & Living', 'division', null, { status: 'review', completeness: 72 });
+        hierarchy['div-sports'] = createHierarchyNode('div-sports', 'Sports & Outdoors', 'division', null, { status: 'draft', completeness: 58 });
+
+        // Level 2: Product Lines (under Electronics)
+        hierarchy['line-mobile'] = createHierarchyNode('line-mobile', 'Mobile Devices', 'line', 'div-electronics', { status: 'published', completeness: 91 });
+        hierarchy['line-computing'] = createHierarchyNode('line-computing', 'Computing', 'line', 'div-electronics', { status: 'published', completeness: 85 });
+        hierarchy['line-audio'] = createHierarchyNode('line-audio', 'Audio & Video', 'line', 'div-electronics', { status: 'review', completeness: 68 });
+
+        // Level 2: Product Lines (under Home)
+        hierarchy['line-furniture'] = createHierarchyNode('line-furniture', 'Furniture', 'line', 'div-home', { status: 'review', completeness: 75 });
+        hierarchy['line-garden'] = createHierarchyNode('line-garden', 'Garden & Outdoor', 'line', 'div-home', { status: 'draft', completeness: 62 });
+        hierarchy['line-kitchen'] = createHierarchyNode('line-kitchen', 'Kitchen & Dining', 'line', 'div-home', { status: 'published', completeness: 82 });
+
+        // Level 2: Product Lines (under Sports)
+        hierarchy['line-fitness'] = createHierarchyNode('line-fitness', 'Fitness Equipment', 'line', 'div-sports', { status: 'review', completeness: 65 });
+        hierarchy['line-outdoor'] = createHierarchyNode('line-outdoor', 'Outdoor Recreation', 'line', 'div-sports', { status: 'draft', completeness: 48 });
+
+        // Level 3: Families (under Mobile Devices)
+        hierarchy['fam-smartphones'] = createHierarchyNode('fam-smartphones', 'Smartphones', 'family', 'line-mobile', { status: 'published', completeness: 94 });
+        hierarchy['fam-tablets'] = createHierarchyNode('fam-tablets', 'Tablets', 'family', 'line-mobile', { status: 'published', completeness: 88 });
+        hierarchy['fam-wearables'] = createHierarchyNode('fam-wearables', 'Wearables', 'family', 'line-mobile', { status: 'review', completeness: 72 });
+
+        // Level 3: Families (under Computing)
+        hierarchy['fam-laptops'] = createHierarchyNode('fam-laptops', 'Laptops', 'family', 'line-computing', { status: 'published', completeness: 89 });
+        hierarchy['fam-desktops'] = createHierarchyNode('fam-desktops', 'Desktops', 'family', 'line-computing', { status: 'review', completeness: 78 });
+        hierarchy['fam-accessories'] = createHierarchyNode('fam-accessories', 'Accessories', 'family', 'line-computing', { status: 'published', completeness: 85 });
+
+        // Level 3: Families (under Furniture)
+        hierarchy['fam-office'] = createHierarchyNode('fam-office', 'Office Furniture', 'family', 'line-furniture', { status: 'published', completeness: 82 });
+        hierarchy['fam-living'] = createHierarchyNode('fam-living', 'Living Room', 'family', 'line-furniture', { status: 'review', completeness: 68 });
+
+        // Level 3: Families (under Fitness)
+        hierarchy['fam-cardio'] = createHierarchyNode('fam-cardio', 'Cardio Equipment', 'family', 'line-fitness', { status: 'review', completeness: 70 });
+        hierarchy['fam-strength'] = createHierarchyNode('fam-strength', 'Strength Training', 'family', 'line-fitness', { status: 'draft', completeness: 55 });
+
+        // Level 4: Subfamilies (under Smartphones) - THIS IS WHERE WE GET 200+ PRODUCTS
+        hierarchy['sub-flagship'] = createHierarchyNode('sub-flagship', 'Flagship Series', 'subfamily', 'fam-smartphones', { status: 'published', completeness: 96 });
+        hierarchy['sub-midrange'] = createHierarchyNode('sub-midrange', 'Mid-Range Series', 'subfamily', 'fam-smartphones', { status: 'published', completeness: 92 });
+        hierarchy['sub-budget'] = createHierarchyNode('sub-budget', 'Budget Series', 'subfamily', 'fam-smartphones', { status: 'review', completeness: 78 });
+
+        // Level 4: Subfamilies (under Laptops)
+        hierarchy['sub-pro'] = createHierarchyNode('sub-pro', 'Pro Workstations', 'subfamily', 'fam-laptops', { status: 'published', completeness: 91 });
+        hierarchy['sub-ultra'] = createHierarchyNode('sub-ultra', 'Ultrabooks', 'subfamily', 'fam-laptops', { status: 'published', completeness: 88 });
+        hierarchy['sub-gaming'] = createHierarchyNode('sub-gaming', 'Gaming Laptops', 'subfamily', 'fam-laptops', { status: 'review', completeness: 75 });
+
+        // Level 4: Subfamilies (under Office Furniture)  
+        hierarchy['sub-chairs'] = createHierarchyNode('sub-chairs', 'Office Chairs', 'subfamily', 'fam-office', { status: 'published', completeness: 85 });
+        hierarchy['sub-desks'] = createHierarchyNode('sub-desks', 'Desks & Workstations', 'subfamily', 'fam-office', { status: 'review', completeness: 78 });
+
+        // Generate products under subfamilies
+        function generateProductsForSubfamily(subfamilyId, prefix, count) {
+            const products = [];
+            for (let i = 1; i <= count; i++) {
+                const status = statuses[Math.floor(Math.random() * 3)];
+                const completeness = status === 'published' ? 85 + Math.floor(Math.random() * 16) : 
+                                     status === 'review' ? 60 + Math.floor(Math.random() * 25) :
+                                     30 + Math.floor(Math.random() * 30);
+                const issues = status === 'published' ? 0 : Math.floor(Math.random() * (status === 'draft' ? 8 : 4));
+                const prodId = `prod-${subfamilyId}-${String(i).padStart(3, '0')}`;
+                
+                // Add to hierarchy
+                hierarchy[prodId] = createHierarchyNode(prodId, `${prefix} ${String(i).padStart(3, '0')}`, 'product', subfamilyId, {
+                    status, completeness, issues,
+                    price: (Math.random() * 500 + 50).toFixed(2),
+                    brand: brands[Math.floor(Math.random() * brands.length)],
+                    weight: `${(Math.random() * 5 + 0.1).toFixed(1)}kg`,
+                    dimensions: `${Math.floor(Math.random() * 50 + 10)} x ${Math.floor(Math.random() * 40 + 10)} x ${Math.floor(Math.random() * 20 + 5)}cm`,
+                    attributes: {
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        material: ['Aluminum', 'Plastic', 'Steel', 'Carbon Fiber'][Math.floor(Math.random() * 4)],
+                        warranty: ['1 year', '2 years', '3 years', '5 years'][Math.floor(Math.random() * 4)],
+                        origin: ['USA', 'China', 'Germany', 'Japan', 'South Korea'][Math.floor(Math.random() * 5)]
+                    },
+                    assetIds: Array.from({length: Math.floor(Math.random() * 5) + 1}, (_, j) => `asset-${prodId}-${j+1}`),
+                    supplierIds: [`supplier-${Math.floor(Math.random() * 10) + 1}`]
+                });
+                
+                products.push(hierarchy[prodId]);
+                
+                // Add variants for some products (Level 6)
+                if (i <= 5) {
+                    const variantColors = ['Black', 'White', 'Silver'];
+                    const variantStorage = ['128GB', '256GB', '512GB'];
+                    variantColors.forEach((color, ci) => {
+                        const varId = `var-${prodId}-${ci + 1}`;
+                        hierarchy[varId] = createHierarchyNode(varId, `${prefix} ${String(i).padStart(3, '0')} - ${variantStorage[ci]} ${color}`, 'variant', prodId, {
+                            status: hierarchy[prodId].status,
+                            completeness: hierarchy[prodId].completeness - Math.floor(Math.random() * 10),
+                            price: (parseFloat(hierarchy[prodId].price) + ci * 100).toFixed(2),
+                            variantOf: prodId
+                        });
+                    });
+                }
+            }
+            return products;
+        }
+
+        // Generate products for each subfamily
+        generateProductsForSubfamily('sub-flagship', 'ProMax', 85);
+        generateProductsForSubfamily('sub-midrange', 'ProLine', 75);
+        generateProductsForSubfamily('sub-budget', 'ValuePhone', 55);
+        generateProductsForSubfamily('sub-pro', 'WorkStation Pro', 25);
+        generateProductsForSubfamily('sub-ultra', 'UltraSlim', 30);
+        generateProductsForSubfamily('sub-gaming', 'GameForce', 20);
+        generateProductsForSubfamily('sub-chairs', 'ErgoChair', 18);
+        generateProductsForSubfamily('sub-desks', 'SmartDesk', 15);
+
+        // Helper to get children of any node
+        function getChildNodes(parentId) {
+            return Object.values(hierarchy).filter(node => node.parentId === parentId);
+        }
+
+        // Helper to get all descendants (products) under a node
+        function getAllDescendantProducts(nodeId) {
+            const products = [];
+            const node = hierarchy[nodeId];
+            if (!node) return products;
+            
+            if (node.type === 'product') {
+                products.push(node);
+            } else {
+                getChildNodes(nodeId).forEach(child => {
+                    products.push(...getAllDescendantProducts(child.id));
+                });
+            }
+            return products;
+        }
+
+        // Get root nodes (divisions)
+        function getRootNodes() {
+            return Object.values(hierarchy).filter(node => node.parentId === null);
+        }
+
+        // Generate assets for all products
+        const allProductNodes = Object.values(hierarchy).filter(n => n.type === 'product');
+        const allAssets = generateAssets(allProductNodes);
+        const allSuppliers = generateSuppliers(10);
+        const allCategories = generateCategories();
+
+        const mockData = {
+            hierarchy: hierarchy,
+            products: allProductNodes,
+            assets: allAssets,
+            suppliers: allSuppliers,
+            categories: allCategories,
+            getNode: (id) => hierarchy[id],
+            getChildren: getChildNodes,
+            getRoots: getRootNodes,
+            getDescendantProducts: getAllDescendantProducts
+        };
+
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+        const state = {
+            currentRoute: null,
+            currentEntity: null,
+            currentTab: 0,
+            navigationHistory: [],
+            expandedNodes: new Set(['div-electronics', 'line-mobile', 'fam-smartphones', 'div-home', 'div-sports']),
+            selectedRows: new Set(),
+            viewMode: 'table',
+            filters: {
+                status: null,
+                completeness: null,
+                search: ''
+            },
+            sort: { column: 'name', direction: 'asc' },
+            pagination: { page: 1, pageSize: 25 },
+            referenceType: 'assets'
+        };
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function getCompletenessClass(value) {
+            if (value >= 80) return 'high';
+            if (value >= 50) return 'medium';
+            return 'low';
+        }
+
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+
+        function getEntity(type, id) {
+            if (type === 'node' || type === 'family' || type === 'product' || type === 'division' || type === 'line' || type === 'subfamily' || type === 'variant') {
+                return mockData.getNode(id);
+            }
+            if (type === 'asset') return mockData.assets.find(a => a.id === id);
+            if (type === 'supplier') return mockData.suppliers.find(s => s.id === id);
+            return null;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ============================================
+        // ROUTER
+        // ============================================
+        function navigate(path, pushState = true) {
+            if (state.currentRoute && state.currentRoute !== path) {
+                state.navigationHistory.push(state.currentRoute);
+            }
+            state.currentRoute = path;
+            state.selectedRows.clear();
+            state.pagination.page = 1;
+            
+            if (pushState) {
+                window.location.hash = path;
+            }
+            
+            renderPage();
+            updateBackButton();
+            updateSidebarActive();
+        }
+
+        function goBack() {
+            if (state.navigationHistory.length > 0) {
+                const prevRoute = state.navigationHistory.pop();
+                state.currentRoute = prevRoute;
+                window.location.hash = prevRoute;
+                renderPage();
+                updateBackButton();
+                updateSidebarActive();
+            }
+        }
+
+        function updateBackButton() {
+            const backBtn = document.getElementById('backBtn');
+            if (backBtn) {
+                backBtn.style.display = state.navigationHistory.length > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function parseRoute(path) {
+            if (!path) return { type: 'home' };
+            const parts = path.split('/').filter(Boolean);
+            if (parts.length === 0) return { type: 'home' };
+            if (parts[0] === 'node' && parts[1]) return { type: 'node', id: parts[1] };
+            if (parts[0] === 'families' && parts[1]) return { type: 'node', id: parts[1] };
+            if (parts[0] === 'products' && parts[1]) return { type: 'node', id: parts[1] };
+            if (parts[0] === 'assets' && parts[1]) return { type: 'asset', id: parts[1] };
+            if (parts[0] === 'search') return { type: 'search', query: parts[1] || '' };
+            return { type: 'home' };
+        }
+
+        function handleGlobalSearch(event) {
+            if (event.key === 'Enter') {
+                const query = event.target.value.trim();
+                if (query) {
+                    navigate(`/search/${encodeURIComponent(query)}`);
+                }
+            }
+        }
+
+        // ============================================
+        // SIDEBAR RENDERING
+        // ============================================
+        function renderSidebar() {
+            const nav = document.getElementById('sidebarNav');
+            const rootNodes = mockData.getRoots();
+            
+            nav.innerHTML = `
+                <div class="nav-section">
+                    <div class="nav-section-title">Navigation</div>
+                    <div class="nav-item ${state.currentRoute?.startsWith('/search') ? 'active' : ''}" onclick="navigate('/search')">
+                        ${icons.search} Search
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Product Hierarchy</div>
+                    ${rootNodes.map(node => renderTreeNode(node, 0)).join('')}
+                </div>
+            `;
+            attachTreeListeners();
+        }
+
+        function getNodeIcon(type) {
+            const iconMap = {
+                'division': icons.category,
+                'line': icons.family,
+                'family': icons.family,
+                'subfamily': icons.product,
+                'product': icons.product,
+                'variant': icons.link
+            };
+            return iconMap[type] || icons.product;
+        }
+
+        function renderTreeNode(node, depth) {
+            const isExpanded = state.expandedNodes.has(node.id);
+            const isActive = state.currentEntity?.id === node.id;
+            const children = mockData.getChildren(node.id);
+            const hasChildren = children.length > 0;
+            
+            // For product-level nodes, count descendants
+            const descendantCount = node.type === 'product' || node.type === 'variant' ? 0 : 
+                                    mockData.getDescendantProducts(node.id).length;
+            
+            // Limit visible children for large lists
+            const maxVisible = 12;
+            const visibleChildren = children.slice(0, maxVisible);
+            const hasMore = children.length > maxVisible;
+            
+            // Determine indentation based on depth
+            const paddingLeft = 16 + (depth * 16);
+            
+            return `
+                <div class="tree-node" data-id="${node.id}">
+                    <div class="tree-item ${isActive ? 'active' : ''}" 
+                         data-id="${node.id}" 
+                         data-type="${node.type}"
+                         style="padding-left: ${paddingLeft}px;">
+                        <span class="tree-toggle ${hasChildren ? (isExpanded ? 'expanded' : '') : 'no-children'}">${icons.chevron}</span>
+                        <span class="tree-icon">${getNodeIcon(node.type)}</span>
+                        <span class="tree-label">${node.name}</span>
+                        <div class="tree-badges">
+                            ${descendantCount > 0 ? `<span class="badge badge-count">${descendantCount}</span>` : ''}
+                            <span class="badge badge-completeness ${getCompletenessClass(node.completeness)}">${node.completeness}%</span>
+                            ${node.issues > 0 ? `<span class="badge badge-issues">${node.issues}</span>` : ''}
+                        </div>
+                    </div>
+                    ${hasChildren ? `
+                        <div class="tree-children ${isExpanded ? 'expanded' : ''}">
+                            ${visibleChildren.map(child => renderTreeNode(child, depth + 1)).join('')}
+                            ${hasMore ? `
+                                <div class="tree-item tree-more" 
+                                     onclick="event.stopPropagation(); navigate('/node/${node.id}');" 
+                                     style="padding-left: ${paddingLeft + 16}px; color: var(--primary);">
+                                    <span class="tree-toggle no-children">${icons.chevron}</span>
+                                    <span class="tree-icon" style="opacity: 0;">${icons.product}</span>
+                                    <span class="tree-label" style="font-style: italic;">View all ${children.length} items...</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function attachTreeListeners() {
+            document.querySelectorAll('.tree-toggle').forEach(toggle => {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const nodeId = toggle.closest('.tree-node')?.dataset.id || toggle.closest('.tree-item')?.dataset.id;
+                    if (nodeId) {
+                        if (state.expandedNodes.has(nodeId)) {
+                            state.expandedNodes.delete(nodeId);
+                        } else {
+                            state.expandedNodes.add(nodeId);
+                        }
+                        renderSidebar();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.tree-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    const type = item.dataset.type;
+                    if (type === 'family') navigate(`/families/${id}`);
+                    else if (type === 'product') navigate(`/products/${id}`);
+                });
+            });
+        }
+
+        function updateSidebarActive() {
+            document.querySelectorAll('.tree-item, .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            if (state.currentRoute?.startsWith('/search')) {
+                document.querySelector('.nav-item')?.classList.add('active');
+            } else if (state.currentEntity) {
+                const item = document.querySelector(`.tree-item[data-id="${state.currentEntity.id}"]`);
+                if (item) item.classList.add('active');
+            }
+        }
+
+        // ============================================
+        // MAIN PAGE RENDERING
+        // ============================================
+        function renderPage() {
+            const route = parseRoute(state.currentRoute || '/node/div-electronics');
+            state.currentTab = 0;
+            
+            if (route.type === 'node') {
+                const node = mockData.getNode(route.id);
+                if (node) {
+                    state.currentEntity = node;
+                    renderNodePage(node);
+                } else {
+                    // Fallback to first root node
+                    const roots = mockData.getRoots();
+                    state.currentEntity = roots[0];
+                    renderNodePage(roots[0]);
+                }
+            } else if (route.type === 'asset') {
+                const asset = getEntity('asset', route.id);
+                if (asset) {
+                    state.currentEntity = asset;
+                    renderAssetPage(asset);
+                }
+            } else if (route.type === 'search') {
+                state.currentEntity = null;
+                renderSearchPage(decodeURIComponent(route.query || ''));
+            } else {
+                const roots = mockData.getRoots();
+                state.currentEntity = roots[0];
+                renderNodePage(roots[0]);
+            }
+        }
+
+        // Build breadcrumb path from node to root
+        function getNodePath(nodeId) {
+            const path = [];
+            let current = mockData.getNode(nodeId);
+            while (current) {
+                path.unshift(current);
+                current = current.parentId ? mockData.getNode(current.parentId) : null;
+            }
+            return path;
+        }
+
+        function renderBreadcrumbs(items) {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            breadcrumbs.innerHTML = items.map((item, index) => {
+                const isLast = index === items.length - 1;
+                return `
+                    <span class="breadcrumb-item ${isLast ? 'current' : ''}" ${!isLast ? `onclick="navigate('${item.path}')"` : ''}>${item.label}</span>
+                    ${!isLast ? '<span class="breadcrumb-separator">/</span>' : ''}
+                `;
+            }).join('');
+        }
+
+        function switchTab(index) {
+            state.currentTab = index;
+            state.selectedRows.clear();
+            state.pagination.page = 1;
+            renderTabContent();
+        }
+
+        function renderTabContent() {
+            const tabContent = document.getElementById('tabContent');
+            if (!tabContent || !state.currentEntity) return;
+            
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === state.currentTab);
+            });
+            
+            const entity = state.currentEntity;
+            if (entity.familyId) {
+                tabContent.innerHTML = renderProductTabContent(entity, state.currentTab);
+            } else if (entity.productCount !== undefined) {
+                tabContent.innerHTML = renderFamilyTabContent(entity, state.currentTab);
+            }
+        }
+
+        // ============================================
+        // FAMILY PAGE
+        // ============================================
+        // ============================================
+        // NODE PAGE RENDERING (handles all hierarchy levels)
+        // ============================================
+        function renderNodePage(node) {
+            // Build breadcrumbs from path
+            const path = getNodePath(node.id);
+            const breadcrumbItems = path.map(n => ({ 
+                label: n.name, 
+                path: `/node/${n.id}` 
+            }));
+            renderBreadcrumbs(breadcrumbItems);
+            
+            document.getElementById('headerActions').innerHTML = `
+                <button class="btn btn-secondary" onclick="showToast('Changes saved!', 'success')">${icons.save} Save</button>
+                <button class="btn btn-secondary" onclick="showToast('Validation complete', 'success')">${icons.validate} Validate</button>
+                <button class="btn btn-success" ${node.issues > 0 ? 'disabled' : ''}>${icons.publish} Publish</button>
+            `;
+
+            const children = mockData.getChildren(node.id);
+            const isLeafProduct = node.type === 'product' || node.type === 'variant';
+            const descendantProducts = mockData.getDescendantProducts(node.id);
+            
+            // Determine tabs based on node type
+            let tabs;
+            if (isLeafProduct) {
+                tabs = ['Overview', 'Details', 'References', 'History'];
+            } else {
+                tabs = ['Overview', 'Children', 'References', 'Settings'];
+            }
+            
+            const childCount = isLeafProduct ? 0 : children.length;
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div class="content-split">
+                    ${renderNodeOverviewPanel(node)}
+                    <div class="enrichment-panel">
+                        <div class="tabs-container">
+                            ${tabs.map((tab, i) => `
+                                <div class="tab ${i === state.currentTab ? 'active' : ''}" onclick="switchTab(${i})">
+                                    ${tab}${tab === 'Children' ? ` <span class="badge badge-count">${childCount}</span>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="tab-content" id="tabContent">
+                            ${isLeafProduct ? renderProductTabContent(node, state.currentTab) : renderNodeTabContent(node, state.currentTab)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNodeOverviewPanel(node) {
+            const children = mockData.getChildren(node.id);
+            const descendantProducts = mockData.getDescendantProducts(node.id);
+            const isLeafProduct = node.type === 'product' || node.type === 'variant';
+            const parent = node.parentId ? mockData.getNode(node.parentId) : null;
+            
+            const typeLabels = {
+                'division': 'Division',
+                'line': 'Product Line',
+                'family': 'Product Family',
+                'subfamily': 'Subfamily',
+                'product': 'Product',
+                'variant': 'Variant'
+            };
+            
+            return `
+                <div class="overview-panel">
+                    <div class="overview-header">
+                        <span class="badge" style="margin-bottom: 8px; background: var(--gray-100);">${typeLabels[node.type] || node.type}</span>
+                        <h2 class="overview-title">${node.name}</h2>
+                        <p class="overview-subtitle">${node.sku}</p>
+                        <div class="overview-status">
+                            <span class="status-badge ${getStatusClass(node.status)}">${node.status}</span>
+                            ${node.issues > 0 ? `<span class="status-badge status-error">${node.issues} issues</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="overview-section">
+                        <h4 class="overview-section-title">Completeness</h4>
+                        <div class="completeness-meter">
+                            <div class="meter-bar">
+                                <div class="meter-fill ${getCompletenessClass(node.completeness)}" style="width: ${node.completeness}%"></div>
+                            </div>
+                            <div class="meter-label">
+                                <span>${node.completeness}% complete</span>
+                                <span>${100 - node.completeness}% remaining</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overview-section">
+                        <h4 class="overview-section-title">Details</h4>
+                        ${parent ? `
+                            <div class="overview-field">
+                                <span class="field-label">Parent</span>
+                                <span class="field-value table-link" onclick="navigate('/node/${parent.id}')">${parent.name}</span>
+                            </div>
+                        ` : ''}
+                        <div class="overview-field">
+                            <span class="field-label">Last edited</span>
+                            <span class="field-value">${formatDate(node.lastEdited)}</span>
+                        </div>
+                        <div class="overview-field">
+                            <span class="field-label">Owner</span>
+                            <span class="field-value">${node.owner}</span>
+                        </div>
+                        ${!isLeafProduct ? `
+                            <div class="overview-field">
+                                <span class="field-label">Direct Children</span>
+                                <span class="field-value">${children.length}</span>
+                            </div>
+                            <div class="overview-field">
+                                <span class="field-label">Total Products</span>
+                                <span class="field-value">${descendantProducts.length}</span>
+                            </div>
+                        ` : `
+                            ${node.price ? `
+                                <div class="overview-field">
+                                    <span class="field-label">Price</span>
+                                    <span class="field-value">$${node.price}</span>
+                                </div>
+                            ` : ''}
+                            ${node.brand ? `
+                                <div class="overview-field">
+                                    <span class="field-label">Brand</span>
+                                    <span class="field-value">${node.brand}</span>
+                                </div>
+                            ` : ''}
+                        `}
+                    </div>
+                    ${isLeafProduct ? `
+                        <div class="overview-section">
+                            <h4 class="overview-section-title">Quick Links</h4>
+                            <div class="chips-container" style="flex-direction: column; gap: 8px;">
+                                <span class="chip" onclick="switchTab(2)">${icons.asset} ${node.assetIds?.length || 0} Assets</span>
+                                <span class="chip" onclick="switchTab(2)">${icons.supplier} ${node.supplierIds?.length || 0} Suppliers</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderNodeTabContent(node, tabIndex) {
+            switch(tabIndex) {
+                case 0: return renderNodeOverviewTab(node);
+                case 1: return renderChildrenTab(node);
+                case 2: return renderNodeReferencesTab(node);
+                case 3: return renderNodeSettingsTab(node);
+                default: return '';
+            }
+        }
+
+        function renderNodeOverviewTab(node) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">${node.type.charAt(0).toUpperCase() + node.type.slice(1)} Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label required">Name</label>
+                            <input type="text" class="form-input" value="${node.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">SKU / Code</label>
+                            <input type="text" class="form-input" value="${node.sku}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input">${node.description || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNodeSettingsTab(node) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Default Status for New Children</label>
+                            <select class="form-input form-select">
+                                <option value="draft">Draft</option>
+                                <option value="review">Review</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Auto-validation</label>
+                            <select class="form-input form-select">
+                                <option value="on">Enabled</option>
+                                <option value="off">Disabled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNodeReferencesTab(node) {
+            const descendantProducts = mockData.getDescendantProducts(node.id);
+            const assetIds = new Set();
+            const supplierIds = new Set();
+            
+            descendantProducts.forEach(p => {
+                p.assetIds?.forEach(id => assetIds.add(id));
+                p.supplierIds?.forEach(id => supplierIds.add(id));
+            });
+            
+            const assets = mockData.assets.filter(a => assetIds.has(a.id));
+            const suppliers = mockData.suppliers.filter(s => supplierIds.has(s.id));
+            
+            const refTypes = [
+                { key: 'assets', label: 'Assets', count: assets.length, icon: icons.asset },
+                { key: 'suppliers', label: 'Suppliers', count: suppliers.length, icon: icons.supplier }
+            ];
+            
+            return `
+                <div class="card">
+                    <div class="ref-type-tabs">
+                        ${refTypes.map(type => `
+                            <div class="ref-type-tab ${state.referenceType === type.key ? 'active' : ''}" onclick="setReferenceType('${type.key}')">
+                                ${type.icon} ${type.label} <span class="count">${type.count}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="table-actions">
+                        <div class="search-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" class="search-input" placeholder="Search ${state.referenceType}...">
+                        </div>
+                        <div class="table-actions-right">
+                            <div class="view-switcher">
+                                <button class="view-btn ${state.viewMode === 'table' ? 'active' : ''}" onclick="setViewMode('table')">
+                                    ${icons.table}
+                                </button>
+                                <button class="view-btn ${state.viewMode === 'gallery' ? 'active' : ''}" onclick="setViewMode('gallery')">
+                                    ${icons.grid}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    ${state.referenceType === 'assets' ? renderAssetsContent(assets) : renderSuppliersContent(suppliers)}
+                </div>
+            `;
+        }
+
+        // Legacy function alias
+        function renderFamilyTabContent(family, tabIndex) {
+            return renderNodeTabContent(family, tabIndex);
+        }
+
+        function renderFamilyOverviewTab(family) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Family Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label required">Name</label>
+                            <input type="text" class="form-input" value="${family.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">SKU</label>
+                            <input type="text" class="form-input" value="${family.sku}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input">${family.description}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Attribute Set</label>
+                            <select class="form-input form-select">
+                                <option>${family.attributeSet}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSettingsTab(family) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Family Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Default Status for New Products</label>
+                            <select class="form-input form-select">
+                                <option value="draft">Draft</option>
+                                <option value="review">Review</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Auto-validation</label>
+                            <select class="form-input form-select">
+                                <option value="on">Enabled</option>
+                                <option value="off">Disabled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // PRODUCTS TABLE WITH FILTERING/SORTING/PAGINATION
+        // ============================================
+        function getFilteredChildren(nodeId) {
+            // Get direct children of a node
+            let children = mockData.getChildren(nodeId);
+            
+            // Apply search filter
+            if (state.filters.search) {
+                const search = state.filters.search.toLowerCase();
+                children = children.filter(c => 
+                    c.name.toLowerCase().includes(search) ||
+                    c.sku.toLowerCase().includes(search) ||
+                    (c.brand && c.brand.toLowerCase().includes(search))
+                );
+            }
+            
+            // Apply status filter
+            if (state.filters.status) {
+                children = children.filter(c => c.status === state.filters.status);
+            }
+            
+            // Apply completeness filter
+            if (state.filters.completeness) {
+                if (state.filters.completeness === 'complete') {
+                    children = children.filter(c => c.completeness >= 80);
+                } else if (state.filters.completeness === 'incomplete') {
+                    children = children.filter(c => c.completeness < 80);
+                } else if (state.filters.completeness === 'issues') {
+                    children = children.filter(c => c.issues > 0);
+                }
+            }
+            
+            // Apply sorting
+            products.sort((a, b) => {
+                let aVal = a[state.sort.column];
+                let bVal = b[state.sort.column];
+                
+                if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+                
+                if (aVal < bVal) return state.sort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return state.sort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            return products;
+        }
+
+        function renderChildrenTab(node) {
+            const allChildren = getFilteredChildren(node.id);
+            const totalCount = allChildren.length;
+            const { page, pageSize } = state.pagination;
+            const totalPages = Math.ceil(totalCount / pageSize);
+            const startIdx = (page - 1) * pageSize;
+            const children = allChildren.slice(startIdx, startIdx + pageSize);
+            
+            const hasSelection = state.selectedRows.size > 0;
+            
+            return `
+                <div class="card">
+                    ${hasSelection ? renderBulkActionsBar() : ''}
+                    ${renderChildrenTableActions(node, totalCount)}
+                    ${renderActiveFilters()}
+                    <div class="table-container" style="max-height: calc(100vh - 400px); overflow: auto;">
+                        ${state.viewMode === 'table' ? renderChildrenTable(children) : ''}
+                        ${state.viewMode === 'gallery' ? renderChildrenGallery(children) : ''}
+                        ${state.viewMode === 'list' ? renderChildrenList(children) : ''}
+                    </div>
+                    ${renderPagination(totalCount, totalPages)}
+                </div>
+            `;
+        }
+
+        function renderBulkActionsBar() {
+            return `
+                <div class="bulk-actions">
+                    <span class="bulk-actions-count">${state.selectedRows.size} selected</span>
+                    <button class="btn btn-sm" onclick="openBulkEditModal()">
+                        ${icons.edit} Bulk Edit
+                    </button>
+                    <button class="btn btn-sm" onclick="bulkUpdateStatus('review')">
+                        Set to Review
+                    </button>
+                    <button class="btn btn-sm" onclick="bulkUpdateStatus('published')">
+                        ${icons.publish} Publish
+                    </button>
+                    <button class="btn btn-sm" onclick="showToast('Exported ${state.selectedRows.size} products', 'success')">
+                        ${icons.download} Export
+                    </button>
+                    <button class="bulk-actions-close" onclick="clearSelection()">
+                        ${icons.close}
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderChildrenTableActions(node, totalCount) {
+            const childType = getChildTypeName(node.type);
+            return `
+                <div class="table-actions">
+                    <div class="table-actions-left">
+                        <button class="btn btn-primary btn-sm">+ Add ${childType}</button>
+                        <div class="search-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" class="search-input" placeholder="Search..." 
+                                value="${state.filters.search}" 
+                                oninput="handleTableSearch(this.value)">
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="toggleFilterPanel()">
+                            ${icons.filter} Filter ${state.filters.status || state.filters.completeness ? `<span class="badge badge-count" style="margin-left: 4px;">!</span>` : ''}
+                        </button>
+                    </div>
+                    <div class="table-actions-right">
+                        <span style="color: var(--gray-500); font-size: 12px;">${totalCount} items</span>
+                        <div class="view-switcher">
+                            <button class="view-btn ${state.viewMode === 'table' ? 'active' : ''}" onclick="setViewMode('table')" title="Table View">
+                                ${icons.table}
+                            </button>
+                            <button class="view-btn ${state.viewMode === 'gallery' ? 'active' : ''}" onclick="setViewMode('gallery')" title="Gallery View">
+                                ${icons.grid}
+                            </button>
+                            <button class="view-btn ${state.viewMode === 'list' ? 'active' : ''}" onclick="setViewMode('list')" title="List View">
+                                ${icons.list}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderActiveFilters() {
+            const filters = [];
+            if (state.filters.status) filters.push({ key: 'status', label: `Status: ${state.filters.status}` });
+            if (state.filters.completeness) filters.push({ key: 'completeness', label: `Completeness: ${state.filters.completeness}` });
+            
+            if (filters.length === 0) return '';
+            
+            return `
+                <div class="active-filters">
+                    ${filters.map(f => `
+                        <span class="active-filter">
+                            ${f.label}
+                            <button onclick="clearFilter('${f.key}')">${icons.close}</button>
+                        </span>
+                    `).join('')}
+                    <button class="btn btn-ghost btn-sm" onclick="clearAllFilters()">Clear all</button>
+                </div>
+            `;
+        }
+
+        function getChildTypeName(parentType) {
+            const typeMap = {
+                'division': 'Product Line',
+                'line': 'Family',
+                'family': 'Subfamily',
+                'subfamily': 'Product',
+                'product': 'Variant'
+            };
+            return typeMap[parentType] || 'Item';
+        }
+
+        function renderChildrenTable(children) {
+            if (children.length === 0) {
+                return renderEmptyState('No items found', 'Try adjusting your search or filters');
+            }
+            
+            const columns = [
+                { key: 'select', label: '', sortable: false },
+                { key: 'name', label: 'Name', sortable: true },
+                { key: 'type', label: 'Type', sortable: true },
+                { key: 'sku', label: 'SKU', sortable: true },
+                { key: 'status', label: 'Status', sortable: true },
+                { key: 'completeness', label: 'Completeness', sortable: true },
+                { key: 'issues', label: 'Issues', sortable: true },
+                { key: 'lastEdited', label: 'Last Modified', sortable: true }
+            ];
+            
+            return `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            ${columns.map(col => {
+                                if (col.key === 'select') {
+                                    return `<th style="width: 40px;"><input type="checkbox" class="table-checkbox" onclick="toggleAllRows(this)" ${state.selectedRows.size === children.length && children.length > 0 ? 'checked' : ''}></th>`;
+                                }
+                                const isSorted = state.sort.column === col.key;
+                                return `
+                                    <th class="${isSorted ? 'sorted' : ''} ${isSorted && state.sort.direction === 'desc' ? 'sorted-desc' : ''}"
+                                        onclick="${col.sortable ? `sortTable('${col.key}')` : ''}">
+                                        ${col.label}
+                                        ${col.sortable ? `<span class="sort-icon">${icons.arrowUp}</span>` : ''}
+                                    </th>
+                                `;
+                            }).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${children.map(child => `
+                            <tr class="${state.selectedRows.has(child.id) ? 'selected' : ''}">
+                                <td><input type="checkbox" class="table-checkbox" data-id="${child.id}" onclick="toggleRow('${child.id}')" ${state.selectedRows.has(child.id) ? 'checked' : ''}></td>
+                                <td><span class="table-link" onclick="navigate('/node/${child.id}')">${child.name}</span></td>
+                                <td><span class="badge" style="text-transform: capitalize;">${child.type}</span></td>
+                                <td><span class="status-badge ${getStatusClass(child.status)}">${child.status}</span></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div class="meter-bar" style="width: 60px;">
+                                            <div class="meter-fill ${getCompletenessClass(child.completeness)}" style="width: ${child.completeness}%"></div>
+                                        </div>
+                                        <span>${child.completeness}%</span>
+                                    </div>
+                                </td>
+                                <td>${child.issues > 0 ? `<span class="badge badge-issues">${child.issues}</span>` : `<span class="validation-icon valid">${icons.check}</span>`}</td>
+                                <td>${formatDate(child.lastEdited)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function renderChildrenGallery(children) {
+            if (children.length === 0) {
+                return renderEmptyState('No items found', 'Try adjusting your search or filters');
+            }
+            
+            return `
+                <div class="gallery-grid">
+                    ${children.map(child => {
+                        const mainAsset = child.assetIds ? mockData.assets.find(a => a.id === child.assetIds[0]) : null;
+                        return `
+                            <div class="gallery-card ${state.selectedRows.has(child.id) ? 'selected' : ''}" onclick="navigate('/node/${child.id}')">
+                                <input type="checkbox" class="table-checkbox gallery-card-checkbox" data-id="${child.id}" 
+                                    onclick="event.stopPropagation(); toggleRow('${child.id}')" 
+                                    ${state.selectedRows.has(child.id) ? 'checked' : ''}>
+                                <div class="gallery-card-preview">
+                                    ${mainAsset?.thumbnail 
+                                        ? `<img src="${mainAsset.thumbnail}" alt="${child.name}">`
+                                        : getNodeIcon(child.type)
+                                    }
+                                </div>
+                                <div class="gallery-card-info">
+                                    <div class="gallery-card-name">${child.name}</div>
+                                    <div class="gallery-card-meta">
+                                        <span class="status-badge ${getStatusClass(child.status)}" style="font-size: 10px; padding: 2px 6px;">${child.status}</span>
+                                        <span>${child.completeness}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderChildrenList(children) {
+            if (children.length === 0) {
+                return renderEmptyState('No items found', 'Try adjusting your search or filters');
+            }
+            
+            return `
+                <div class="list-view">
+                    ${children.map(child => `
+                        <div class="list-item ${state.selectedRows.has(child.id) ? 'selected' : ''}" onclick="navigate('/node/${child.id}')">
+                            <input type="checkbox" class="table-checkbox" data-id="${child.id}" 
+                                onclick="event.stopPropagation(); toggleRow('${child.id}')" 
+                                ${state.selectedRows.has(child.id) ? 'checked' : ''}>
+                            <div class="list-item-icon">${getNodeIcon(child.type)}</div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">${child.name}</div>
+                                <div class="list-item-subtitle">${child.sku} • ${child.type}${child.price ? ` • $${child.price}` : ''}</div>
+                            </div>
+                            <div class="list-item-badges">
+                                <span class="status-badge ${getStatusClass(child.status)}">${child.status}</span>
+                                <span class="badge badge-completeness ${getCompletenessClass(child.completeness)}">${child.completeness}%</span>
+                                ${child.issues > 0 ? `<span class="badge badge-issues">${child.issues}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderPagination(totalCount, totalPages) {
+            const { page, pageSize } = state.pagination;
+            const startItem = (page - 1) * pageSize + 1;
+            const endItem = Math.min(page * pageSize, totalCount);
+            
+            return `
+                <div class="pagination">
+                    <div class="pagination-info">
+                        Showing ${startItem}-${endItem} of ${totalCount}
+                    </div>
+                    <div class="pagination-controls">
+                        <select class="page-size-select" onchange="setPageSize(this.value)">
+                            <option value="25" ${pageSize === 25 ? 'selected' : ''}>25 per page</option>
+                            <option value="50" ${pageSize === 50 ? 'selected' : ''}>50 per page</option>
+                            <option value="100" ${pageSize === 100 ? 'selected' : ''}>100 per page</option>
+                        </select>
+                        <button class="pagination-btn" onclick="goToPage(1)" ${page === 1 ? 'disabled' : ''}>First</button>
+                        <button class="pagination-btn" onclick="goToPage(${page - 1})" ${page === 1 ? 'disabled' : ''}>Prev</button>
+                        <span style="font-size: 13px; color: var(--gray-600);">Page ${page} of ${totalPages}</span>
+                        <button class="pagination-btn" onclick="goToPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>Next</button>
+                        <button class="pagination-btn" onclick="goToPage(${totalPages})" ${page >= totalPages ? 'disabled' : ''}>Last</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEmptyState(title, text) {
+            return `
+                <div class="empty-state">
+                    ${icons.search}
+                    <div class="empty-state-title">${title}</div>
+                    <div class="empty-state-text">${text}</div>
+                </div>
+            `;
+        }
+
+        // Table interaction handlers
+        function handleTableSearch(value) {
+            state.filters.search = value;
+            state.pagination.page = 1;
+            renderTabContent();
+        }
+
+        function setFilter(key, value) {
+            state.filters[key] = value;
+            state.pagination.page = 1;
+            renderTabContent();
+        }
+
+        function clearFilter(key) {
+            state.filters[key] = null;
+            state.pagination.page = 1;
+            renderTabContent();
+        }
+
+        function clearAllFilters() {
+            state.filters = { status: null, completeness: null, search: '' };
+            state.pagination.page = 1;
+            renderTabContent();
+        }
+
+        function sortTable(column) {
+            if (state.sort.column === column) {
+                state.sort.direction = state.sort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sort.column = column;
+                state.sort.direction = 'asc';
+            }
+            renderTabContent();
+        }
+
+        function setViewMode(mode) {
+            state.viewMode = mode;
+            renderTabContent();
+        }
+
+        function goToPage(page) {
+            state.pagination.page = page;
+            renderTabContent();
+        }
+
+        function setPageSize(size) {
+            state.pagination.pageSize = parseInt(size);
+            state.pagination.page = 1;
+            renderTabContent();
+        }
+
+        function toggleRow(id) {
+            if (state.selectedRows.has(id)) {
+                state.selectedRows.delete(id);
+            } else {
+                state.selectedRows.add(id);
+            }
+            renderTabContent();
+        }
+
+        function toggleAllRows(checkbox) {
+            const children = getFilteredChildren(state.currentEntity.id);
+            const { page, pageSize } = state.pagination;
+            const pageChildren = children.slice((page - 1) * pageSize, page * pageSize);
+            
+            if (checkbox.checked) {
+                pageChildren.forEach(c => state.selectedRows.add(c.id));
+            } else {
+                pageChildren.forEach(c => state.selectedRows.delete(c.id));
+            }
+            renderTabContent();
+        }
+
+        function clearSelection() {
+            state.selectedRows.clear();
+            renderTabContent();
+        }
+
+        function toggleFilterPanel() {
+            const filterHtml = `
+                <div class="filter-panel" id="filterPanel">
+                    <div class="filter-header" onclick="document.querySelector('.filter-body').classList.toggle('open')">
+                        <span class="filter-header-title">${icons.filter} Filters</span>
+                        <span>${icons.chevron}</span>
+                    </div>
+                    <div class="filter-body open">
+                        <div class="filter-group">
+                            <label class="filter-label">Status</label>
+                            <div class="filter-chips">
+                                <span class="filter-chip ${state.filters.status === null ? 'active' : ''}" onclick="setFilter('status', null)">All</span>
+                                <span class="filter-chip ${state.filters.status === 'published' ? 'active' : ''}" onclick="setFilter('status', 'published')">Published</span>
+                                <span class="filter-chip ${state.filters.status === 'review' ? 'active' : ''}" onclick="setFilter('status', 'review')">Review</span>
+                                <span class="filter-chip ${state.filters.status === 'draft' ? 'active' : ''}" onclick="setFilter('status', 'draft')">Draft</span>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Completeness</label>
+                            <div class="filter-chips">
+                                <span class="filter-chip ${state.filters.completeness === null ? 'active' : ''}" onclick="setFilter('completeness', null)">All</span>
+                                <span class="filter-chip ${state.filters.completeness === 'complete' ? 'active' : ''}" onclick="setFilter('completeness', 'complete')">Complete (≥80%)</span>
+                                <span class="filter-chip ${state.filters.completeness === 'incomplete' ? 'active' : ''}" onclick="setFilter('completeness', 'incomplete')">Incomplete (<80%)</span>
+                                <span class="filter-chip ${state.filters.completeness === 'issues' ? 'active' : ''}" onclick="setFilter('completeness', 'issues')">Has Issues</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const existing = document.getElementById('filterPanel');
+            if (existing) {
+                existing.remove();
+            } else {
+                const tabContent = document.getElementById('tabContent');
+                tabContent.insertAdjacentHTML('afterbegin', filterHtml);
+            }
+        }
+
+        // Bulk actions
+        function openBulkEditModal() {
+            const modal = document.getElementById('bulkEditModal');
+            modal.classList.add('open');
+            
+            document.getElementById('bulkEditBody').innerHTML = `
+                <p style="margin-bottom: 16px; color: var(--gray-600);">Apply changes to ${state.selectedRows.size} selected products:</p>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-input form-select" id="bulkStatus">
+                        <option value="">-- No change --</option>
+                        <option value="draft">Draft</option>
+                        <option value="review">Review</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner</label>
+                    <select class="form-input form-select" id="bulkOwner">
+                        <option value="">-- No change --</option>
+                        ${owners.map(o => `<option value="${o}">${o}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Brand</label>
+                    <select class="form-input form-select" id="bulkBrand">
+                        <option value="">-- No change --</option>
+                        ${brands.map(b => `<option value="${b}">${b}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        }
+
+        function closeBulkEditModal() {
+            document.getElementById('bulkEditModal').classList.remove('open');
+        }
+
+        function applyBulkEdit() {
+            const status = document.getElementById('bulkStatus').value;
+            const owner = document.getElementById('bulkOwner').value;
+            const brand = document.getElementById('bulkBrand').value;
+            
+            let changes = [];
+            state.selectedRows.forEach(id => {
+                const product = mockData.products.find(p => p.id === id);
+                if (product) {
+                    if (status) { product.status = status; changes.push('status'); }
+                    if (owner) { product.owner = owner; changes.push('owner'); }
+                    if (brand) { product.brand = brand; changes.push('brand'); }
+                }
+            });
+            
+            closeBulkEditModal();
+            showToast(`Updated ${state.selectedRows.size} products`, 'success');
+            state.selectedRows.clear();
+            renderTabContent();
+        }
+
+        function bulkUpdateStatus(status) {
+            state.selectedRows.forEach(id => {
+                const product = mockData.products.find(p => p.id === id);
+                if (product) {
+                    product.status = status;
+                    if (status === 'published') {
+                        product.completeness = Math.max(product.completeness, 85);
+                        product.issues = 0;
+                    }
+                }
+            });
+            
+            showToast(`Set ${state.selectedRows.size} products to ${status}`, 'success');
+            state.selectedRows.clear();
+            renderTabContent();
+        }
+
+        // ============================================
+        // REFERENCES TAB (FAMILY LEVEL)
+        // ============================================
+        function renderReferencesTab(family) {
+            const products = mockData.products.filter(p => p.familyId === family.id);
+            const assetIds = new Set();
+            const supplierIds = new Set();
+            const categoryIds = new Set();
+            
+            products.forEach(p => {
+                p.assetIds?.forEach(id => assetIds.add(id));
+                p.supplierIds?.forEach(id => supplierIds.add(id));
+                p.categoryIds?.forEach(id => categoryIds.add(id));
+            });
+            
+            const assets = mockData.assets.filter(a => assetIds.has(a.id));
+            const suppliers = mockData.suppliers.filter(s => supplierIds.has(s.id));
+            
+            const refTypes = [
+                { key: 'assets', label: 'Assets', count: assets.length, icon: icons.asset },
+                { key: 'suppliers', label: 'Suppliers', count: suppliers.length, icon: icons.supplier },
+                { key: 'categories', label: 'Categories', count: categoryIds.size, icon: icons.category }
+            ];
+            
+            return `
+                <div class="card">
+                    <div class="ref-type-tabs">
+                        ${refTypes.map(type => `
+                            <div class="ref-type-tab ${state.referenceType === type.key ? 'active' : ''}" onclick="setReferenceType('${type.key}')">
+                                ${type.icon} ${type.label} <span class="count">${type.count}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="table-actions">
+                        <div class="search-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" class="search-input" placeholder="Search ${state.referenceType}...">
+                        </div>
+                        <div class="table-actions-right">
+                            <div class="view-switcher">
+                                <button class="view-btn ${state.viewMode === 'table' ? 'active' : ''}" onclick="setViewMode('table')">
+                                    ${icons.table}
+                                </button>
+                                <button class="view-btn ${state.viewMode === 'gallery' ? 'active' : ''}" onclick="setViewMode('gallery')">
+                                    ${icons.grid}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    ${state.referenceType === 'assets' ? renderAssetsContent(assets) : ''}
+                    ${state.referenceType === 'suppliers' ? renderSuppliersContent(suppliers) : ''}
+                    ${state.referenceType === 'categories' ? renderCategoriesContent(categoryIds) : ''}
+                </div>
+            `;
+        }
+
+        function setReferenceType(type) {
+            state.referenceType = type;
+            renderTabContent();
+        }
+
+        function renderAssetsContent(assets) {
+            if (state.viewMode === 'gallery') {
+                return `
+                    <div class="gallery-grid">
+                        ${assets.map(asset => `
+                            <div class="gallery-card" onclick="openDrawer('asset', '${asset.id}')">
+                                <div class="gallery-card-preview">
+                                    ${asset.thumbnail 
+                                        ? `<img src="${asset.thumbnail}" alt="${asset.name}">`
+                                        : (asset.type === 'image' ? icons.asset : icons.link)
+                                    }
+                                </div>
+                                <div class="gallery-card-info">
+                                    <div class="gallery-card-name">${asset.name}</div>
+                                    <div class="gallery-card-meta">${asset.format} • ${asset.size}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Format</th>
+                                <th>Size</th>
+                                <th>Used By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assets.map(asset => `
+                                <tr>
+                                    <td><span class="table-link" onclick="openDrawer('asset', '${asset.id}')">${asset.name}</span></td>
+                                    <td>${asset.type}</td>
+                                    <td>${asset.format}</td>
+                                    <td>${asset.size}</td>
+                                    <td>${asset.usedBy.length} product(s)</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderSuppliersContent(suppliers) {
+            return `
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Code</th>
+                                <th>Country</th>
+                                <th>Rating</th>
+                                <th>Lead Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${suppliers.map(supplier => `
+                                <tr>
+                                    <td><span class="table-link" onclick="openDrawer('supplier', '${supplier.id}')">${supplier.name}</span></td>
+                                    <td>${supplier.code}</td>
+                                    <td>${supplier.country}</td>
+                                    <td>${supplier.rating} ${icons.star}</td>
+                                    <td>${supplier.leadTime}</td>
+                                    <td><span class="status-badge ${supplier.status === 'active' ? 'status-published' : 'status-draft'}">${supplier.status}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderCategoriesContent(categoryIds) {
+            const categories = Array.from(categoryIds).map(id => mockData.categories[id]).filter(Boolean);
+            
+            return `
+                <div style="padding: 16px;">
+                    <div class="chips-container" style="gap: 12px;">
+                        ${categories.map(cat => `
+                            <span class="chip" style="padding: 10px 16px;">
+                                ${icons.category} ${cat.name}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // PRODUCT PAGE
+        // ============================================
+        function renderProductPage(product) {
+            const family = getEntity('family', product.familyId);
+            
+            renderBreadcrumbs([
+                { label: 'Product Families', path: '/families/fam-001' },
+                { label: family.name, path: `/families/${family.id}` },
+                { label: product.name, path: `/products/${product.id}` }
+            ]);
+            
+            document.getElementById('headerActions').innerHTML = `
+                <button class="btn btn-secondary" onclick="showToast('Changes saved!', 'success')">${icons.save} Save</button>
+                <button class="btn btn-secondary" onclick="showToast('Validation complete', 'success')">${icons.validate} Validate</button>
+                <button class="btn btn-success" ${product.issues > 0 ? 'disabled' : ''}>${icons.publish} Publish</button>
+            `;
+
+            const tabs = ['Overview', 'Details', 'References', 'History'];
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div class="content-split">
+                    ${renderOverviewPanel(product)}
+                    <div class="enrichment-panel">
+                        <div class="tabs-container">
+                            ${tabs.map((tab, i) => `<div class="tab ${i === state.currentTab ? 'active' : ''}" onclick="switchTab(${i})">${tab}</div>`).join('')}
+                        </div>
+                        <div class="tab-content" id="tabContent">
+                            ${renderProductTabContent(product, state.currentTab)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductTabContent(product, tabIndex) {
+            switch(tabIndex) {
+                case 0: return renderProductOverviewTab(product);
+                case 1: return renderProductDetailsTab(product);
+                case 2: return renderProductReferencesTab(product);
+                case 3: return renderProductHistoryTab(product);
+                default: return '';
+            }
+        }
+
+        function renderProductOverviewTab(product) {
+            const family = getEntity('family', product.familyId);
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Product Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label required">Name</label>
+                            <input type="text" class="form-input" value="${product.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">SKU</label>
+                            <input type="text" class="form-input" value="${product.sku}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input">${product.description}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product Family</label>
+                            <div class="chip" onclick="navigate('/families/${family.id}')">
+                                ${icons.family} ${family.name}
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-input" value="${product.brand}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Price</label>
+                                <input type="text" class="form-input" value="$${product.price}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductDetailsTab(product) {
+            return `
+                <div class="card" style="margin-bottom: 16px;">
+                    <div class="card-header">
+                        <h3 class="card-title">Physical Specifications</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label">Weight</label>
+                                <input type="text" class="form-input" value="${product.weight}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dimensions</label>
+                                <input type="text" class="form-input" value="${product.dimensions}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Custom Attributes</h3>
+                    </div>
+                    <div class="card-body">
+                        ${Object.entries(product.attributes || {}).map(([key, value]) => `
+                            <div class="form-group">
+                                <label class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                                <input type="text" class="form-input" value="${value}">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductReferencesTab(product) {
+            const assets = product.assetIds?.map(id => mockData.assets.find(a => a.id === id)).filter(Boolean) || [];
+            const suppliers = product.supplierIds?.map(id => mockData.suppliers.find(s => s.id === id)).filter(Boolean) || [];
+            
+            const refTypes = [
+                { key: 'assets', label: 'Assets', count: assets.length, icon: icons.asset },
+                { key: 'suppliers', label: 'Suppliers', count: suppliers.length, icon: icons.supplier }
+            ];
+            
+            return `
+                <div class="card">
+                    <div class="ref-type-tabs">
+                        ${refTypes.map(type => `
+                            <div class="ref-type-tab ${state.referenceType === type.key ? 'active' : ''}" onclick="setReferenceType('${type.key}')">
+                                ${type.icon} ${type.label} <span class="count">${type.count}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn btn-primary btn-sm">+ Add ${state.referenceType === 'assets' ? 'Asset' : 'Supplier'}</button>
+                        <div class="table-actions-right">
+                            <div class="view-switcher">
+                                <button class="view-btn ${state.viewMode === 'table' ? 'active' : ''}" onclick="setViewMode('table')">
+                                    ${icons.table}
+                                </button>
+                                <button class="view-btn ${state.viewMode === 'gallery' ? 'active' : ''}" onclick="setViewMode('gallery')">
+                                    ${icons.grid}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    ${state.referenceType === 'assets' ? renderAssetsContent(assets) : renderSuppliersContent(suppliers)}
+                </div>
+            `;
+        }
+
+        function renderProductHistoryTab(product) {
+            const history = [
+                { action: 'Status changed to ' + product.status, user: product.owner, date: product.lastEdited },
+                { action: 'Description updated', user: product.owner, date: new Date(new Date(product.lastEdited).getTime() - 86400000).toISOString() },
+                { action: 'Price changed', user: 'David Kim', date: new Date(new Date(product.lastEdited).getTime() - 172800000).toISOString() },
+                { action: 'Product created', user: product.owner, date: new Date(new Date(product.lastEdited).getTime() - 604800000).toISOString() }
+            ];
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Activity History</h3>
+                    </div>
+                    <div class="card-body">
+                        ${history.map(item => `
+                            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gray-100);">
+                                <div style="width: 32px; height: 32px; background: var(--gray-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gray-500);">
+                                    ${icons.clock}
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500;">${item.action}</div>
+                                    <div style="font-size: 12px; color: var(--gray-500);">by ${item.user} • ${formatDate(item.date)}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // ASSET PAGE
+        // ============================================
+        function renderAssetPage(asset) {
+            renderBreadcrumbs([
+                { label: 'Assets', path: '/search' },
+                { label: asset.name, path: `/assets/${asset.id}` }
+            ]);
+            
+            document.getElementById('headerActions').innerHTML = `
+                <button class="btn btn-secondary">${icons.download} Download</button>
+                <button class="btn btn-secondary">${icons.edit} Edit Metadata</button>
+            `;
+
+            const usedByProducts = asset.usedBy.map(id => mockData.products.find(p => p.id === id)).filter(Boolean);
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div class="content-split">
+                    <div class="overview-panel">
+                        <div style="background: var(--gray-100); border-radius: 8px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; overflow: hidden;">
+                            ${asset.thumbnail 
+                                ? `<img src="${asset.thumbnail}" alt="${asset.name}" style="width: 100%; height: 100%; object-fit: cover;">`
+                                : `<div style="color: var(--gray-400);">${icons.asset}</div>`
+                            }
+                        </div>
+                        <h2 class="overview-title" style="font-size: 16px;">${asset.name}</h2>
+                        <p class="overview-subtitle">${asset.type} • ${asset.format}</p>
+                        <div class="overview-section" style="margin-top: 16px;">
+                            <h4 class="overview-section-title">File Details</h4>
+                            <div class="overview-field">
+                                <span class="field-label">Size</span>
+                                <span class="field-value">${asset.size}</span>
+                            </div>
+                            ${asset.dimensions ? `
+                                <div class="overview-field">
+                                    <span class="field-label">Dimensions</span>
+                                    <span class="field-value">${asset.dimensions}</span>
+                                </div>
+                            ` : ''}
+                            <div class="overview-field">
+                                <span class="field-label">Uploaded</span>
+                                <span class="field-value">${formatDate(asset.uploadDate)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="enrichment-panel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Used By (${usedByProducts.length} products)</h3>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>SKU</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${usedByProducts.map(product => `
+                                            <tr>
+                                                <td><span class="table-link" onclick="navigate('/node/${product.id}')">${product.name}</span></td>
+                                                <td>${product.sku}</td>
+                                                <td><span class="status-badge ${getStatusClass(product.status)}">${product.status}</span></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // SEARCH PAGE
+        // ============================================
+        function renderSearchPage(query) {
+            renderBreadcrumbs([{ label: 'Search', path: '/search' }]);
+            
+            document.getElementById('headerActions').innerHTML = '';
+            
+            let results = { hierarchy: [], products: [], assets: [], suppliers: [] };
+            
+            if (query) {
+                const q = query.toLowerCase();
+                // Search all hierarchy nodes except products
+                results.hierarchy = Object.values(mockData.hierarchy)
+                    .filter(n => n.type !== 'product' && n.type !== 'variant' && 
+                                 (n.name.toLowerCase().includes(q) || n.sku.toLowerCase().includes(q)))
+                    .slice(0, 20);
+                // Search products
+                results.products = mockData.products.filter(p => 
+                    p.name.toLowerCase().includes(q) || 
+                    p.sku.toLowerCase().includes(q) || 
+                    (p.brand && p.brand.toLowerCase().includes(q))
+                ).slice(0, 50);
+                results.assets = mockData.assets.filter(a => a.name.toLowerCase().includes(q)).slice(0, 20);
+                results.suppliers = mockData.suppliers.filter(s => s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q));
+            }
+            
+            const totalResults = results.hierarchy.length + results.products.length + results.assets.length + results.suppliers.length;
+            
+            document.getElementById('contentBody').innerHTML = `
+                <div style="max-width: 1000px; margin: 0 auto;">
+                    <div style="margin-bottom: 24px;">
+                        <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">Search</h1>
+                        <div class="search-wrapper" style="max-width: 600px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" class="search-input" style="width: 100%; font-size: 16px; padding: 12px 12px 12px 40px;" 
+                                placeholder="Search hierarchy, products, assets, suppliers..." 
+                                value="${query}"
+                                oninput="debounceSearch(this.value)">
+                        </div>
+                        ${query ? `<p style="margin-top: 12px; color: var(--gray-500);">${totalResults} results for "${query}"</p>` : ''}
+                    </div>
+                    
+                    ${!query ? `
+                        <div class="empty-state">
+                            ${icons.search}
+                            <div class="empty-state-title">Search across all entities</div>
+                            <div class="empty-state-text">Find divisions, product lines, families, products, assets, and suppliers</div>
+                        </div>
+                    ` : `
+                        ${results.hierarchy.length > 0 ? `
+                            <div class="card" style="margin-bottom: 16px;">
+                                <div class="card-header">
+                                    <h3 class="card-title">${icons.family} Hierarchy (${results.hierarchy.length})</h3>
+                                </div>
+                                <div class="list-view">
+                                    ${results.hierarchy.map(n => `
+                                        <div class="list-item" onclick="navigate('/node/${n.id}')">
+                                            <div class="list-item-icon">${getNodeIcon(n.type)}</div>
+                                            <div class="list-item-content">
+                                                <div class="list-item-title">${n.name}</div>
+                                                <div class="list-item-subtitle">${n.sku} • ${n.type}</div>
+                                            </div>
+                                            <span class="status-badge ${getStatusClass(n.status)}">${n.status}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${results.products.length > 0 ? `
+                            <div class="card" style="margin-bottom: 16px;">
+                                <div class="card-header">
+                                    <h3 class="card-title">${icons.product} Products (${results.products.length}${results.products.length === 50 ? '+' : ''})</h3>
+                                </div>
+                                <div class="table-container" style="max-height: 400px; overflow: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>SKU</th>
+                                                <th>Brand</th>
+                                                <th>Status</th>
+                                                <th>Completeness</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${results.products.map(p => `
+                                                <tr>
+                                                    <td><span class="table-link" onclick="navigate('/node/${p.id}')">${p.name}</span></td>
+                                                    <td>${p.sku}</td>
+                                                    <td>${p.brand}</td>
+                                                    <td><span class="status-badge ${getStatusClass(p.status)}">${p.status}</span></td>
+                                                    <td>${p.completeness}%</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${results.assets.length > 0 ? `
+                            <div class="card" style="margin-bottom: 16px;">
+                                <div class="card-header">
+                                    <h3 class="card-title">${icons.asset} Assets (${results.assets.length})</h3>
+                                </div>
+                                <div class="gallery-grid" style="padding: 16px;">
+                                    ${results.assets.map(a => `
+                                        <div class="gallery-card" onclick="navigate('/assets/${a.id}')">
+                                            <div class="gallery-card-preview">
+                                                ${a.thumbnail ? `<img src="${a.thumbnail}" alt="${a.name}">` : icons.asset}
+                                            </div>
+                                            <div class="gallery-card-info">
+                                                <div class="gallery-card-name">${a.name}</div>
+                                                <div class="gallery-card-meta">${a.format} • ${a.size}</div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${results.suppliers.length > 0 ? `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">${icons.supplier} Suppliers (${results.suppliers.length})</h3>
+                                </div>
+                                <div class="list-view">
+                                    ${results.suppliers.map(s => `
+                                        <div class="list-item" onclick="openDrawer('supplier', '${s.id}')">
+                                            <div class="list-item-icon">${icons.supplier}</div>
+                                            <div class="list-item-content">
+                                                <div class="list-item-title">${s.name}</div>
+                                                <div class="list-item-subtitle">${s.code} • ${s.country}</div>
+                                            </div>
+                                            <span class="status-badge ${s.status === 'active' ? 'status-published' : 'status-draft'}">${s.status}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${totalResults === 0 ? `
+                            <div class="empty-state">
+                                ${icons.search}
+                                <div class="empty-state-title">No results found</div>
+                                <div class="empty-state-text">Try adjusting your search terms</div>
+                            </div>
+                        ` : ''}
+                    `}
+                </div>
+            `;
+        }
+
+        let searchTimeout;
+        function debounceSearch(value) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                navigate(`/search/${encodeURIComponent(value)}`, true);
+            }, 300);
+        }
+
+        // ============================================
+        // DRAWER
+        // ============================================
+        function openDrawer(type, id) {
+            const entity = getEntity(type, id);
+            if (!entity) return;
+            
+            document.getElementById('drawerTitle').textContent = entity.name;
+            document.getElementById('drawerOverlay').classList.add('open');
+            document.getElementById('drawer').classList.add('open');
+            
+            let content = '';
+            
+            if (type === 'asset') {
+                content = `
+                    <div style="background: var(--gray-100); border-radius: 8px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; overflow: hidden;">
+                        ${entity.thumbnail 
+                            ? `<img src="${entity.thumbnail}" alt="${entity.name}" style="width: 100%; height: 100%; object-fit: cover;">`
+                            : `<div style="color: var(--gray-400);">${icons.asset}</div>`
+                        }
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Type</span>
+                        <span class="field-value">${entity.type}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Format</span>
+                        <span class="field-value">${entity.format}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Size</span>
+                        <span class="field-value">${entity.size}</span>
+                    </div>
+                    ${entity.dimensions ? `
+                        <div class="overview-field" style="margin-bottom: 12px;">
+                            <span class="field-label">Dimensions</span>
+                            <span class="field-value">${entity.dimensions}</span>
+                        </div>
+                    ` : ''}
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Used by</span>
+                        <span class="field-value">${entity.usedBy.length} product(s)</span>
+                    </div>
+                `;
+                document.getElementById('drawerOpenFull').onclick = () => { closeDrawer(); navigate(`/assets/${id}`); };
+            } else if (type === 'supplier') {
+                content = `
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Code</span>
+                        <span class="field-value">${entity.code}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Country</span>
+                        <span class="field-value">${entity.country}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Rating</span>
+                        <span class="field-value">${entity.rating} ${icons.star}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Lead Time</span>
+                        <span class="field-value">${entity.leadTime}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Status</span>
+                        <span class="status-badge ${entity.status === 'active' ? 'status-published' : 'status-draft'}">${entity.status}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Contact</span>
+                        <span class="field-value">${entity.email}</span>
+                    </div>
+                `;
+                document.getElementById('drawerOpenFull').style.display = 'none';
+            } else if (type === 'product') {
+                const family = getEntity('family', entity.familyId);
+                content = `
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">SKU</span>
+                        <span class="field-value">${entity.sku}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Status</span>
+                        <span class="status-badge ${getStatusClass(entity.status)}">${entity.status}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Family</span>
+                        <span class="field-value">${family?.name || 'N/A'}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Price</span>
+                        <span class="field-value">$${entity.price}</span>
+                    </div>
+                    <div class="overview-field" style="margin-bottom: 12px;">
+                        <span class="field-label">Completeness</span>
+                        <span class="field-value">${entity.completeness}%</span>
+                    </div>
+                    <p style="margin-top: 16px; font-size: 13px; color: var(--gray-600);">${entity.description}</p>
+                `;
+                document.getElementById('drawerOpenFull').onclick = () => { closeDrawer(); navigate(`/products/${id}`); };
+                document.getElementById('drawerOpenFull').style.display = 'flex';
+            }
+            
+            document.getElementById('drawerBody').innerHTML = content;
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.remove('open');
+            document.getElementById('drawer').classList.remove('open');
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            // Handle hash-based routing
+            const handleRoute = () => {
+                const hash = window.location.hash.slice(1) || '/families/fam-001';
+                state.currentRoute = hash;
+                renderPage();
+                updateSidebarActive();
+            };
+            
+            window.addEventListener('hashchange', handleRoute);
+            
+            // Initial render
+            renderSidebar();
+            handleRoute();
+            updateBackButton();
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('open'));
+                }
+            });
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>

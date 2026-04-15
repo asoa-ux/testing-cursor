@@ -1,0 +1,3754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Context Comparison View - Filter & View Options Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0097a7;
+      --primary-hover: #00838f;
+      --primary-light: #e0f7fa;
+      --primary-bg: #0097a710;
+      
+      /* Filter colors (blue family - selection/inclusion) */
+      --filter-primary: #2563eb;
+      --filter-light: #dbeafe;
+      --filter-bg: #eff6ff;
+      --filter-border: #93c5fd;
+      
+      /* View colors (purple family - evaluation/presentation) */
+      --view-primary: #7c3aed;
+      --view-light: #ede9fe;
+      --view-bg: #f5f3ff;
+      --view-border: #c4b5fd;
+      
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      
+      --diff-highlight: #fef3c7;
+      --diff-border: #f59e0b;
+      --error-highlight: #fee2e2;
+      --error-border: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f2f5;
+      color: var(--gray-800);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    /* ================================================
+       SECTION HEADERS & LAYOUT
+       ================================================ */
+    .prototype-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+
+    .prototype-header {
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .prototype-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 8px;
+    }
+
+    .prototype-header p {
+      font-size: 15px;
+      color: var(--gray-500);
+      max-width: 800px;
+    }
+
+    .concept-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .concept-card {
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid;
+    }
+
+    .concept-card.filter {
+      background: var(--filter-bg);
+      border-color: var(--filter-border);
+    }
+
+    .concept-card.view {
+      background: var(--view-bg);
+      border-color: var(--view-border);
+    }
+
+    .concept-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .concept-card.filter h3 { color: var(--filter-primary); }
+    .concept-card.view h3 { color: var(--view-primary); }
+
+    .concept-card ul {
+      font-size: 12px;
+      color: var(--gray-600);
+      margin-left: 20px;
+    }
+
+    .concept-card li {
+      margin-bottom: 4px;
+    }
+
+    .concept-card .principle {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid currentColor;
+      opacity: 0.7;
+    }
+
+    .concept-card.filter .principle { color: var(--filter-primary); }
+    .concept-card.view .principle { color: var(--view-primary); }
+
+    /* Section dividers */
+    .section-divider {
+      margin: 60px 0;
+      padding: 16px 0;
+      border-top: 3px dashed var(--gray-300);
+    }
+
+    .section-divider h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+
+    .section-divider p {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    /* ================================================
+       VARIATION CONTAINERS
+       ================================================ */
+    .variation {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+      margin-bottom: 48px;
+      overflow: hidden;
+    }
+
+    .variation-header {
+      padding: 20px 24px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .variation-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .variation-header p {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .variation-label {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .variation-label.recommended {
+      background: var(--success-light);
+      color: #065f46;
+    }
+
+    .variation-label.alternative {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .variation-body {
+      padding: 0;
+    }
+
+    /* ================================================
+       ANNOTATION BOXES
+       ================================================ */
+    .annotation {
+      background: #fffde7;
+      border: 1px dashed #d4c85c;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px;
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+
+    .annotation strong {
+      color: var(--gray-800);
+    }
+
+    .annotation ul {
+      margin-left: 16px;
+      margin-top: 8px;
+    }
+
+    .annotation li {
+      margin-bottom: 4px;
+    }
+
+    /* ================================================
+       TOOLBAR STYLES
+       ================================================ */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--gray-200);
+      margin: 0 8px;
+    }
+
+    .toolbar-spacer { flex: 1; }
+
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px solid var(--gray-200);
+      background: white;
+      color: var(--gray-600);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .toolbar-btn:hover {
+      border-color: var(--gray-300);
+      background: var(--gray-50);
+    }
+
+    .toolbar-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .toolbar-btn .badge {
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Filter button styling */
+    .toolbar-btn.filter-btn {
+      border-color: var(--filter-border);
+    }
+
+    .toolbar-btn.filter-btn:hover {
+      background: var(--filter-bg);
+      border-color: var(--filter-primary);
+      color: var(--filter-primary);
+    }
+
+    .toolbar-btn.filter-btn.active {
+      background: var(--filter-light);
+      border-color: var(--filter-primary);
+      color: var(--filter-primary);
+    }
+
+    .toolbar-btn.filter-btn .badge {
+      background: var(--filter-primary);
+      color: white;
+    }
+
+    /* View button styling */
+    .toolbar-btn.view-btn {
+      border-color: var(--view-border);
+    }
+
+    .toolbar-btn.view-btn:hover {
+      background: var(--view-bg);
+      border-color: var(--view-primary);
+      color: var(--view-primary);
+    }
+
+    .toolbar-btn.view-btn.active {
+      background: var(--view-light);
+      border-color: var(--view-primary);
+      color: var(--view-primary);
+    }
+
+    .toolbar-btn.view-btn .badge {
+      background: var(--view-primary);
+      color: white;
+    }
+
+    /* Icon-only toolbar buttons */
+    .toolbar-btn.toolbar-btn-icon {
+      padding: 8px;
+      min-width: unset;
+    }
+
+    .toolbar-btn.toolbar-btn-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Expand/Collapse dropdown in toolbar */
+    .toolbar-expand-dropdown {
+      position: relative;
+    }
+
+    .toolbar-expand-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      min-width: 160px;
+      z-index: 100;
+      margin-top: 4px;
+    }
+
+    .toolbar-expand-menu.open {
+      display: block;
+    }
+
+    .toolbar-expand-menu button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      background: none;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .toolbar-expand-menu button:hover {
+      background: var(--gray-50);
+    }
+
+    .toolbar-expand-menu button svg {
+      width: 16px;
+      height: 16px;
+      color: var(--gray-400);
+    }
+
+    /* ================================================
+       SIDE PANEL STYLES
+       ================================================ */
+    .panel-container {
+      display: flex;
+      min-height: 500px;
+    }
+
+    .side-panel {
+      width: 340px;
+      min-width: 340px;
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      background: white;
+    }
+
+    .side-panel.filter-panel {
+      background: var(--filter-bg);
+      border-right-color: var(--filter-border);
+    }
+
+    .side-panel.view-panel {
+      background: var(--view-bg);
+      border-right-color: var(--view-border);
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-panel .panel-header {
+      border-bottom-color: var(--filter-border);
+    }
+
+    .filter-panel .panel-header h4 {
+      color: var(--filter-primary);
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--gray-400);
+      margin-left: 8px;
+    }
+
+    .view-panel .panel-header {
+      border-bottom-color: var(--view-border);
+    }
+
+    .view-panel .panel-header h4 {
+      color: var(--view-primary);
+    }
+
+    .panel-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .filter-panel .panel-badge {
+      background: var(--filter-primary);
+      color: white;
+    }
+
+    .view-panel .panel-badge {
+      background: var(--view-primary);
+      color: white;
+    }
+
+    .panel-close {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--gray-500);
+      transition: all 0.15s;
+    }
+
+    .panel-close:hover {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .panel-close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Cursor styles */
+    .tree-checkbox,
+    .tree-group-header,
+    .tree-item,
+    .view-option,
+    .view-option-toggle,
+    .quick-toggle,
+    .dropdown-item,
+    .chip-remove {
+      cursor: pointer;
+    }
+
+    /* Transition for smooth toggle animation */
+    .view-option-toggle {
+      transition: background 0.2s;
+    }
+
+    .view-option-toggle::after {
+      transition: transform 0.2s;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .panel-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .filter-panel .panel-footer {
+      border-top-color: var(--filter-border);
+      background: var(--filter-light);
+    }
+
+    .view-panel .panel-footer {
+      border-top-color: var(--view-border);
+      background: var(--view-light);
+    }
+
+    .panel-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .panel-btn.secondary {
+      background: white;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-600);
+    }
+
+    .panel-btn.secondary:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+
+    .filter-panel .panel-btn.primary {
+      background: var(--filter-primary);
+      border: none;
+      color: white;
+    }
+
+    .filter-panel .panel-btn.primary:hover {
+      background: #1d4ed8;
+    }
+
+    .view-panel .panel-btn.primary {
+      background: var(--view-primary);
+      border: none;
+      color: white;
+    }
+
+    .view-panel .panel-btn.primary:hover {
+      background: #6d28d9;
+    }
+
+    /* ================================================
+       FILTER PANEL - QUERY BUILDER APPROACH
+       ================================================ */
+    
+    /* Filter Conditions Container */
+    .filter-conditions {
+      padding: 16px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Individual Filter Row */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-row-remove {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      color: var(--gray-400);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .filter-row-remove:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .filter-row-remove svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .filter-row-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      flex-shrink: 0;
+      min-width: 45px;
+    }
+
+    /* Filter Dropdowns */
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      cursor: pointer;
+      min-width: 140px;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .filter-dropdown-btn:hover {
+      border-color: var(--filter-primary);
+    }
+
+    .filter-dropdown-btn:focus {
+      outline: none;
+      border-color: var(--filter-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .filter-dropdown-btn span {
+      flex: 1;
+    }
+
+    .filter-dropdown-btn svg {
+      width: 14px;
+      height: 14px;
+      color: var(--gray-400);
+      flex-shrink: 0;
+    }
+
+    .filter-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 100%;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      z-index: 100;
+      margin-top: 4px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .filter-dropdown.open .filter-dropdown-menu {
+      display: block;
+    }
+
+    .filter-dropdown-section {
+      padding: 8px 12px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-400);
+    }
+
+    .filter-dropdown-item {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .filter-dropdown-item:hover {
+      background: var(--filter-bg);
+    }
+
+    .filter-dropdown-item.selected {
+      background: var(--filter-light);
+      color: var(--filter-primary);
+      font-weight: 500;
+    }
+
+    /* Value Input (for text values) */
+    .filter-value-input {
+      padding: 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      min-width: 180px;
+      transition: all 0.15s;
+    }
+
+    .filter-value-input:focus {
+      outline: none;
+      border-color: var(--filter-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .filter-value-input::placeholder {
+      color: var(--gray-400);
+    }
+
+    /* Add Filter Row */
+    .filter-add-row {
+      padding-top: 4px;
+    }
+
+    .filter-add-btn {
+      border-style: dashed;
+      color: var(--gray-500);
+      background: var(--gray-50);
+      min-width: 220px;
+    }
+
+    .filter-add-btn:hover {
+      border-color: var(--filter-primary);
+      color: var(--filter-primary);
+      background: var(--filter-bg);
+    }
+
+    .filter-add-btn svg:first-child {
+      width: 16px;
+      height: 16px;
+    }
+
+    .filter-add-btn .dropdown-chevron {
+      margin-left: auto;
+    }
+
+    .filter-add-menu {
+      min-width: 220px;
+    }
+
+    /* Filter Actions Bar */
+    .filter-actions-bar {
+      padding: 12px 16px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .filter-action-btn {
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-action-btn.secondary {
+      background: white;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-600);
+    }
+
+    .filter-action-btn.secondary:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+
+    .filter-action-btn.primary {
+      background: var(--filter-primary);
+      border: 1px solid var(--filter-primary);
+      color: white;
+    }
+
+    .filter-action-btn.primary:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    /* Results Status Bar */
+    .filter-results-bar {
+      padding: 10px 16px;
+      background: var(--filter-light);
+      border-top: 1px solid var(--filter-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .results-count {
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+
+    .results-count strong {
+      color: var(--filter-primary);
+      font-weight: 600;
+    }
+
+    .clear-all-btn {
+      padding: 4px 10px;
+      background: none;
+      border: none;
+      color: var(--filter-primary);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .clear-all-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Boolean value toggle */
+    .filter-bool-toggle {
+      display: flex;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .filter-bool-toggle button {
+      padding: 8px 16px;
+      border: none;
+      background: white;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-bool-toggle button:first-child {
+      border-right: 1px solid var(--gray-300);
+    }
+
+    .filter-bool-toggle button:hover {
+      background: var(--gray-50);
+    }
+
+    .filter-bool-toggle button.active {
+      background: var(--filter-primary);
+      color: white;
+    }
+
+    /* Filter row for subsequent rows */
+    .filter-row + .filter-row .filter-row-label {
+      color: var(--gray-400);
+    }
+
+    /* ================================================
+       FILTER PANEL CONTENT (ORIGINAL)
+       ================================================ */
+    .filter-section {
+      margin-bottom: 20px;
+    }
+
+    .filter-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--filter-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-section-label svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Tree structure */
+    .tree-group {
+      margin-bottom: 4px;
+    }
+
+    .tree-group-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      gap: 8px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .tree-group-header:hover {
+      background: rgba(37, 99, 235, 0.08);
+    }
+
+    .tree-expand {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+      transition: transform 0.2s;
+    }
+
+    .tree-expand svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .tree-group.collapsed .tree-expand {
+      transform: rotate(-90deg);
+    }
+
+    .tree-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .tree-checkbox.checked {
+      background: var(--filter-primary);
+      border-color: var(--filter-primary);
+    }
+
+    .tree-checkbox.partial {
+      border-color: var(--filter-primary);
+    }
+
+    .tree-checkbox.partial::after {
+      content: '';
+      width: 8px;
+      height: 2px;
+      background: var(--filter-primary);
+      border-radius: 1px;
+    }
+
+    .tree-checkbox svg {
+      width: 10px;
+      height: 10px;
+      color: white;
+      opacity: 0;
+    }
+
+    .tree-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    .tree-group-label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+
+    .tree-group-count {
+      font-size: 11px;
+      color: var(--gray-400);
+      background: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tree-items {
+      padding-left: 24px;
+      display: block;
+    }
+
+    .tree-group.collapsed .tree-items {
+      display: none;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 10px;
+      gap: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .tree-item:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .tree-item-label {
+      flex: 1;
+      font-size: 13px;
+      color: var(--gray-600);
+    }
+
+    .type-tag {
+      font-size: 9px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .type-tag.attr {
+      background: var(--filter-light);
+      color: var(--filter-primary);
+    }
+
+    .type-tag.ref {
+      background: #fce7f3;
+      color: #be185d;
+    }
+
+    /* ================================================
+       VIEW OPTIONS PANEL CONTENT
+       ================================================ */
+    .view-section {
+      margin-bottom: 24px;
+    }
+
+    .view-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--view-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .view-section-label svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .view-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 4px;
+    }
+
+    .view-option:hover {
+      background: rgba(124, 58, 237, 0.06);
+    }
+
+    .view-option-toggle {
+      width: 36px;
+      height: 20px;
+      background: var(--gray-200);
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .view-option-toggle::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .view-option.active .view-option-toggle {
+      background: var(--view-primary);
+    }
+
+    .view-option.active .view-option-toggle::after {
+      transform: translateX(16px);
+    }
+
+    .view-option-content {
+      flex: 1;
+    }
+
+    .view-option-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 2px;
+    }
+
+    .view-option-desc {
+      font-size: 11px;
+      color: var(--gray-400);
+      line-height: 1.4;
+    }
+
+    .view-option-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-left: 6px;
+    }
+
+    .view-option-badge.always {
+      background: var(--success-light);
+      color: #065f46;
+    }
+
+    /* Segmented Control for mutually exclusive options */
+    .view-segmented-control {
+      display: flex;
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .view-segmented-control .segment {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .view-segmented-control .segment:hover {
+      color: var(--gray-700);
+      background: var(--gray-50);
+    }
+
+    .view-segmented-control .segment.active {
+      background: white;
+      color: var(--view-primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .view-segmented-control .segment svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .view-segmented-desc {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--gray-50);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--gray-500);
+      text-align: center;
+    }
+
+    .view-segmented-desc span {
+      display: block;
+    }
+
+    /* Safety indicator */
+    .safety-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--danger-light);
+      border-radius: 6px;
+      font-size: 11px;
+      color: #991b1b;
+      margin-top: 16px;
+    }
+
+    .safety-indicator svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ================================================
+       COMPARISON TABLE
+       ================================================ */
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      background: white;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      border: 1px solid var(--gray-200);
+      padding: 10px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .compare-table thead th {
+      background: var(--gray-100);
+      font-weight: 600;
+      color: var(--gray-700);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .compare-table th.row-header {
+      width: 200px;
+      min-width: 200px;
+      background: var(--gray-50);
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      font-weight: 500;
+    }
+
+    .compare-table thead th.row-header {
+      z-index: 15;
+    }
+
+    /* Column header with inline actions (Option 2) */
+    .column-header-with-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .column-header-actions {
+      display: flex;
+      gap: 2px;
+      opacity: 0.5;
+      transition: opacity 0.15s;
+    }
+
+    .compare-table thead th:hover .column-header-actions {
+      opacity: 1;
+    }
+
+    .column-action-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      color: var(--gray-500);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .column-action-btn:hover {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .column-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .compare-table th.context-col {
+      min-width: 180px;
+    }
+
+    /* Row states */
+    .compare-table tr.diff-row td:not(.row-header) {
+      background: var(--diff-highlight);
+    }
+
+    .compare-table tr.diff-row .row-header {
+      border-left: 3px solid var(--diff-border);
+    }
+
+    .compare-table tr.error-row td:not(.row-header) {
+      background: var(--error-highlight);
+    }
+
+    .compare-table tr.error-row .row-header {
+      border-left: 3px solid var(--error-border);
+    }
+
+    .compare-table tr.hidden-row {
+      display: none;
+    }
+
+    /* Cell indicators */
+    .cell-error {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--danger);
+      font-size: 11px;
+    }
+
+    .cell-error svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .cell-mandatory {
+      position: relative;
+    }
+
+    .cell-mandatory::after {
+      content: '*';
+      color: var(--danger);
+      font-weight: bold;
+      margin-left: 2px;
+    }
+
+    .cell-pending {
+      color: var(--warning);
+      font-style: italic;
+    }
+
+    .row-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row-label .indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .row-label .indicator.error {
+      background: var(--danger);
+    }
+
+    .row-label .indicator.mandatory {
+      background: var(--warning);
+    }
+
+    .row-label .indicator.pending {
+      background: var(--view-primary);
+    }
+
+    /* Group header rows */
+    .compare-table tr.group-row td,
+    .compare-table tr.group-row th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--gray-600);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .compare-table tr.group-row:hover td {
+      background: var(--gray-100);
+    }
+
+    .compare-table tr.group-row td:first-child::before {
+      content: '';
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--gray-400);
+      margin-right: 8px;
+      vertical-align: middle;
+      transition: transform 0.15s;
+    }
+
+    .compare-table tr.group-row.collapsed td:first-child::before {
+      transform: rotate(-90deg);
+    }
+
+    /* Hidden rows */
+    .compare-table tr.filter-hidden,
+    .compare-table tr.view-hidden {
+      display: none;
+    }
+
+    /* ================================================
+       DROPDOWN MENU
+       ================================================ */
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      z-index: 100;
+      min-width: 280px;
+      display: none;
+    }
+
+    .dropdown-menu.open {
+      display: block;
+    }
+
+    .dropdown-menu.filter-menu {
+      border-color: var(--filter-border);
+    }
+
+    .dropdown-menu.view-menu {
+      border-color: var(--view-border);
+    }
+
+    .dropdown-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .dropdown-menu.filter-menu .dropdown-header {
+      color: var(--filter-primary);
+      background: var(--filter-bg);
+    }
+
+    .dropdown-menu.view-menu .dropdown-header {
+      color: var(--view-primary);
+      background: var(--view-bg);
+    }
+
+    .dropdown-section {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .dropdown-section:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-section-label {
+      padding: 6px 16px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-400);
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .dropdown-item:hover {
+      background: var(--gray-50);
+    }
+
+    .dropdown-item-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .dropdown-menu.filter-menu .dropdown-item.active .dropdown-item-checkbox {
+      background: var(--filter-primary);
+      border-color: var(--filter-primary);
+    }
+
+    .dropdown-menu.view-menu .dropdown-item.active .dropdown-item-checkbox {
+      background: var(--view-primary);
+      border-color: var(--view-primary);
+    }
+
+    .dropdown-item-checkbox svg {
+      width: 10px;
+      height: 10px;
+      color: white;
+      opacity: 0;
+    }
+
+    .dropdown-item.active .dropdown-item-checkbox svg {
+      opacity: 1;
+    }
+
+    .dropdown-item-content {
+      flex: 1;
+    }
+
+    .dropdown-item-label {
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+
+    .dropdown-item-desc {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    .dropdown-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--gray-100);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .dropdown-footer-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .dropdown-footer-btn.text {
+      background: none;
+      border: none;
+      color: var(--gray-500);
+    }
+
+    .dropdown-footer-btn.text:hover {
+      color: var(--gray-700);
+    }
+
+    .dropdown-menu.filter-menu .dropdown-footer-btn.primary {
+      background: var(--filter-primary);
+      border: none;
+      color: white;
+    }
+
+    .dropdown-menu.view-menu .dropdown-footer-btn.primary {
+      background: var(--view-primary);
+      border: none;
+      color: white;
+    }
+
+    /* ================================================
+       ACTIVE CHIPS BAR
+       ================================================ */
+    .active-chips-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      flex-wrap: wrap;
+    }
+
+    .chips-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chips-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .chips-label.filter {
+      color: var(--filter-primary);
+    }
+
+    .chips-label.view {
+      color: var(--view-primary);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .chip.filter {
+      background: var(--filter-light);
+      color: var(--filter-primary);
+      border: 1px solid var(--filter-border);
+    }
+
+    .chip.view {
+      background: var(--view-light);
+      color: var(--view-primary);
+      border: 1px solid var(--view-border);
+    }
+
+    .chip-remove {
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+
+    .chip-remove:hover {
+      opacity: 1;
+    }
+
+    .chip-remove svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .chips-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--gray-300);
+      margin: 0 8px;
+    }
+
+    /* ================================================
+       SPLIT PANEL LAYOUT
+       ================================================ */
+    .split-panels {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .split-panel {
+      flex: 1;
+      padding: 16px 20px;
+    }
+
+    .split-panel.filter {
+      background: var(--filter-bg);
+      border-right: 1px solid var(--filter-border);
+    }
+
+    .split-panel.view {
+      background: var(--view-bg);
+    }
+
+    .split-panel h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .split-panel.filter h4 {
+      color: var(--filter-primary);
+    }
+
+    .split-panel.view h4 {
+      color: var(--view-primary);
+    }
+
+    .split-panel h4 svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Quick toggles in split panel */
+    .quick-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .quick-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-toggle.filter {
+      background: white;
+      border: 1px solid var(--filter-border);
+      color: var(--gray-600);
+    }
+
+    .quick-toggle.filter:hover {
+      border-color: var(--filter-primary);
+      color: var(--filter-primary);
+    }
+
+    .quick-toggle.filter.active {
+      background: var(--filter-primary);
+      border-color: var(--filter-primary);
+      color: white;
+    }
+
+    .quick-toggle.view {
+      background: white;
+      border: 1px solid var(--view-border);
+      color: var(--gray-600);
+    }
+
+    .quick-toggle.view:hover {
+      border-color: var(--view-primary);
+      color: var(--view-primary);
+    }
+
+    .quick-toggle.view.active {
+      background: var(--view-primary);
+      border-color: var(--view-primary);
+      color: white;
+    }
+
+    /* ================================================
+       FOOTER
+       ================================================ */
+    .table-footer {
+      padding: 10px 16px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      font-size: 12px;
+      color: var(--gray-500);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-swatch {
+      width: 16px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid;
+    }
+
+    .legend-swatch.diff {
+      background: var(--diff-highlight);
+      border-color: var(--diff-border);
+    }
+
+    .legend-swatch.error {
+      background: var(--error-highlight);
+      border-color: var(--error-border);
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="prototype-container">
+
+  <!-- HEADER -->
+  <div class="prototype-header">
+    <h1>Multi-Context Comparison View</h1>
+    <p>Prototype exploring different approaches for implementing Filter (selection) and View Options (evaluation) controls. The separation ensures users explicitly select data scope while system-derived states control presentation.</p>
+    
+    <div class="concept-summary">
+      <div class="concept-card filter">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          Filter (Selection)
+        </h3>
+        <ul>
+          <li>Selecting specific attributes</li>
+          <li>Selecting attribute groups</li>
+          <li>Selecting relationships</li>
+        </ul>
+        <div class="principle">Rule: If the user explicitly chooses what to include, it belongs in Filter</div>
+      </div>
+      
+      <div class="concept-card view">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          View Options (Evaluation)
+        </h3>
+        <ul>
+          <li>Attributes with errors</li>
+          <li>Mandatory attributes</li>
+          <li>Attributes pending approval</li>
+          <li><strong>Differences: Show All | Highlight | Only Diff</strong> (mutually exclusive)</li>
+        </ul>
+        <div class="principle">Rule: If the system determines it, it belongs in View Options</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       VARIATION 1: Side-by-Side Panels
+       ======================================== -->
+  <div class="section-divider">
+    <h2>Variation 1: Dual Side Panels</h2>
+    <p>Filter and View Options as separate side panels with distinct visual treatment. Clear separation through color coding.</p>
+  </div>
+
+  <div class="variation">
+    <div class="variation-header">
+      <span class="variation-label recommended">Recommended</span>
+      <h3>Dual Panel Layout - Maximum Clarity</h3>
+      <p>Two dedicated panels with strong visual differentiation. Best for complex filtering and view scenarios with many options.</p>
+    </div>
+    <div class="variation-body">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-btn filter-btn active" id="filterPanelBtn" onclick="toggleFilterPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            Filter
+            <span class="badge" id="filterBadgeCount" style="display: none;">0</span>
+          </button>
+          <button class="toolbar-btn view-btn active" id="viewPanelBtn" onclick="toggleViewPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            View Options
+            <span class="badge" id="viewBadgeCount">2</span>
+          </button>
+        </div>
+        <!-- Option 1: Expand/Collapse in toolbar -->
+        <div class="toolbar-group" style="margin-left: 8px;">
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn toolbar-btn-icon" onclick="expandAllTableGroups()" title="Expand all groups">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+              <polyline points="6 15 12 21 18 15"/>
+            </svg>
+          </button>
+          <button class="toolbar-btn toolbar-btn-icon" onclick="collapseAllTableGroups()" title="Collapse all groups">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="18 15 12 9 6 15"/>
+              <polyline points="18 9 12 3 6 9"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="toolbar-spacer"></div>
+        <button class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Approve Selected
+        </button>
+      </div>
+
+      <div class="panel-container">
+        <!-- FILTER PANEL - QUERY BUILDER APPROACH -->
+        <div class="side-panel filter-panel" id="filterPanel">
+          <div class="panel-header">
+            <h4>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              Filter
+            </h4>
+            <div class="panel-close" onclick="toggleFilterPanel()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- ACTIVE FILTER CONDITIONS -->
+          <div class="filter-conditions" id="filterConditions">
+            <!-- Filter Row Template (shown when filters exist) -->
+            <div class="filter-row" id="filterRow1">
+              <button class="filter-row-remove" onclick="removeFilterRow(this)" title="Remove condition">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              <span class="filter-row-label">Where</span>
+              <div class="filter-dropdown" data-type="field">
+                <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+                  <span>Attribute Group</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                <div class="filter-dropdown-menu">
+                  <div class="filter-dropdown-section">Attribute</div>
+                  <div class="filter-dropdown-item selected" data-value="attribute-group">Attribute Group</div>
+                  <div class="filter-dropdown-item" data-value="attribute-name">Attribute Name</div>
+                  <div class="filter-dropdown-item" data-value="attribute-type">Attribute Type</div>
+                  <div class="filter-dropdown-section">Comparison</div>
+                  <div class="filter-dropdown-item" data-value="has-difference">Has Difference</div>
+                  <div class="filter-dropdown-item" data-value="has-error">Has Error</div>
+                  <div class="filter-dropdown-item" data-value="is-pending">Is Pending</div>
+                  <div class="filter-dropdown-item" data-value="is-mandatory">Is Mandatory</div>
+                  <div class="filter-dropdown-section">Value</div>
+                  <div class="filter-dropdown-item" data-value="value-source-a">Value in Source A</div>
+                  <div class="filter-dropdown-item" data-value="value-source-b">Value in Source B</div>
+                </div>
+              </div>
+              <div class="filter-dropdown" data-type="operator">
+                <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+                  <span>Equals</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                <div class="filter-dropdown-menu">
+                  <div class="filter-dropdown-item selected" data-value="equals">Equals</div>
+                  <div class="filter-dropdown-item" data-value="not-equals">Does not equal</div>
+                  <div class="filter-dropdown-item" data-value="contains">Contains</div>
+                  <div class="filter-dropdown-item" data-value="not-contains">Does not contain</div>
+                  <div class="filter-dropdown-item" data-value="starts-with">Starts with</div>
+                  <div class="filter-dropdown-item" data-value="ends-with">Ends with</div>
+                </div>
+              </div>
+              <div class="filter-dropdown filter-value-dropdown" data-type="value">
+                <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+                  <span>Basic Information</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                <div class="filter-dropdown-menu">
+                  <div class="filter-dropdown-item selected" data-value="basic-info">Basic Information</div>
+                  <div class="filter-dropdown-item" data-value="descriptions">Descriptions</div>
+                  <div class="filter-dropdown-item" data-value="media">Media Assets</div>
+                  <div class="filter-dropdown-item" data-value="pricing">Pricing & Availability</div>
+                  <div class="filter-dropdown-item" data-value="specifications">Specifications</div>
+                  <div class="filter-dropdown-item" data-value="product-refs">Product References</div>
+                  <div class="filter-dropdown-item" data-value="classifications">Classifications</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty state / Add filter -->
+            <div class="filter-add-row" id="filterAddRow">
+              <div class="filter-dropdown filter-add-dropdown" data-type="add-field">
+                <button class="filter-dropdown-btn filter-add-btn" onclick="toggleFilterDropdown(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  <span>Pick a field to filter by</span>
+                  <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                <div class="filter-dropdown-menu filter-add-menu">
+                  <div class="filter-dropdown-section">Attribute</div>
+                  <div class="filter-dropdown-item" data-value="attribute-group" onclick="addFilterCondition('attribute-group', 'Attribute Group')">Attribute Group</div>
+                  <div class="filter-dropdown-item" data-value="attribute-name" onclick="addFilterCondition('attribute-name', 'Attribute Name')">Attribute Name</div>
+                  <div class="filter-dropdown-item" data-value="attribute-type" onclick="addFilterCondition('attribute-type', 'Attribute Type')">Attribute Type</div>
+                  <div class="filter-dropdown-section">Comparison</div>
+                  <div class="filter-dropdown-item" data-value="has-difference" onclick="addFilterCondition('has-difference', 'Has Difference')">Has Difference</div>
+                  <div class="filter-dropdown-item" data-value="has-error" onclick="addFilterCondition('has-error', 'Has Error')">Has Error</div>
+                  <div class="filter-dropdown-item" data-value="is-pending" onclick="addFilterCondition('is-pending', 'Is Pending')">Is Pending</div>
+                  <div class="filter-dropdown-item" data-value="is-mandatory" onclick="addFilterCondition('is-mandatory', 'Is Mandatory')">Is Mandatory</div>
+                  <div class="filter-dropdown-section">Value</div>
+                  <div class="filter-dropdown-item" data-value="value-source-a" onclick="addFilterCondition('value-source-a', 'Value in Source A')">Value in Source A</div>
+                  <div class="filter-dropdown-item" data-value="value-source-b" onclick="addFilterCondition('value-source-b', 'Value in Source B')">Value in Source B</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FILTER ACTIONS -->
+          <div class="filter-actions-bar" id="filterActionsBar">
+            <button class="filter-action-btn secondary" onclick="cancelFilterChanges()">Cancel</button>
+            <button class="filter-action-btn primary" onclick="applyFilterConditions()">Apply</button>
+          </div>
+
+          <!-- RESULTS STATUS -->
+          <div class="filter-results-bar" id="filterResultsBar">
+            <span class="results-count">Showing <strong id="visibleCount">12</strong> of <strong id="totalAttrCount">156</strong> attributes</span>
+            <button class="clear-all-btn" onclick="clearAllFilterConditions()">Clear all</button>
+          </div>
+        </div>
+
+        <!-- VIEW OPTIONS PANEL -->
+        <div class="side-panel view-panel" id="viewPanel">
+          <div class="panel-header">
+            <h4>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              View Options
+            </h4>
+            <div class="panel-close" onclick="toggleViewPanel()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+          </div>
+          
+          <div class="panel-content">
+            <div class="view-section">
+              <div class="view-section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Data Quality
+              </div>
+              
+              <div class="view-option" data-option="showErrorsOnly" onclick="toggleViewOption(this, 'showErrorsOnly')">
+                <div class="view-option-toggle"></div>
+                <div class="view-option-content">
+                  <div class="view-option-title">
+                    Show errors only
+                    <span class="view-option-badge always">Safety Override</span>
+                  </div>
+                  <div class="view-option-desc">Display only attributes with validation errors</div>
+                </div>
+              </div>
+              
+              <div class="view-option active" data-option="highlightErrors" onclick="toggleViewOption(this, 'highlightErrors')">
+                <div class="view-option-toggle"></div>
+                <div class="view-option-content">
+                  <div class="view-option-title">Highlight errors</div>
+                  <div class="view-option-desc">Visually emphasize cells with errors</div>
+                </div>
+              </div>
+              
+              <div class="view-option" data-option="showMandatoryOnly" onclick="toggleViewOption(this, 'showMandatoryOnly')">
+                <div class="view-option-toggle"></div>
+                <div class="view-option-content">
+                  <div class="view-option-title">
+                    Show mandatory only
+                    <span class="view-option-badge always">Safety Override</span>
+                  </div>
+                  <div class="view-option-desc">Display only required attributes</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="view-section">
+              <div class="view-section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                </svg>
+                Differences
+              </div>
+              
+              <!-- Segmented control for mutually exclusive options -->
+              <div class="view-segmented-control" id="diffViewControl">
+                <button class="segment" data-value="show-all" onclick="setDiffViewMode('show-all')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  </svg>
+                  Show All
+                </button>
+                <button class="segment active" data-value="highlight" onclick="setDiffViewMode('highlight')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                  Highlight
+                </button>
+                <button class="segment" data-value="only-diff" onclick="setDiffViewMode('only-diff')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                  </svg>
+                  Only Diff
+                </button>
+              </div>
+              <div class="view-segmented-desc">
+                <span id="diffModeDesc">Rows with differences are highlighted in yellow</span>
+              </div>
+            </div>
+
+            <div class="view-section">
+              <div class="view-section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 11 12 14 22 4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                Workflow
+              </div>
+              
+              <div class="view-option" data-option="showPendingApproval" onclick="toggleViewOption(this, 'showPendingApproval')">
+                <div class="view-option-toggle"></div>
+                <div class="view-option-content">
+                  <div class="view-option-title">Show pending approval</div>
+                  <div class="view-option-desc">Highlight attributes awaiting review</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="safety-indicator">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>Errors and missing mandatory data are always visible regardless of view settings</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+          <table class="compare-table" id="comparisonTable">
+            <thead>
+              <tr>
+                <th class="row-header">
+                  <!-- Option 2: Expand/Collapse in column header -->
+                  <div class="column-header-with-actions">
+                    <span>Attribute</span>
+                    <div class="column-header-actions">
+                      <button class="column-action-btn" onclick="expandAllTableGroups()" title="Expand all">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                      </button>
+                      <button class="column-action-btn" onclick="collapseAllTableGroups()" title="Collapse all">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="18 15 12 9 6 15"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </th>
+                <th class="context-col">en-US (Primary)</th>
+                <th class="context-col">es-MX</th>
+                <th class="context-col">da-DK</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-row" data-group-id="basic-info" onclick="toggleTableGroup(this)">
+                <td colspan="4">Basic Information</td>
+              </tr>
+              <tr class="data-row" data-group="basic-info" data-attr="name" data-has-diff="true" data-has-error="true" data-mandatory="true">
+                <th class="row-header">
+                  <div class="row-label">
+                    <span class="indicator error"></span>
+                    Name
+                  </div>
+                </th>
+                <td>Zephyr Glide Shoe</td>
+                <td>Zapato Zephyr Glide</td>
+                <td class="cell-error">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  Missing value
+                </td>
+              </tr>
+              <tr class="data-row" data-group="basic-info" data-attr="sku" data-has-diff="false" data-has-error="false" data-mandatory="false">
+                <th class="row-header">SKU</th>
+                <td>ZG-2024-001</td>
+                <td>ZG-2024-001</td>
+                <td>ZG-2024-001</td>
+              </tr>
+              <tr class="data-row" data-group="basic-info" data-attr="category" data-has-diff="true" data-has-error="false" data-mandatory="false">
+                <th class="row-header">Category</th>
+                <td>Running Shoes</td>
+                <td>Zapatos para Correr</td>
+                <td>Løbesko</td>
+              </tr>
+              <tr class="group-row" data-group-id="descriptions" onclick="toggleTableGroup(this)">
+                <td colspan="4">Descriptions</td>
+              </tr>
+              <tr class="data-row" data-group="descriptions" data-attr="short-desc" data-has-diff="true" data-has-error="false" data-mandatory="true" data-pending="true">
+                <th class="row-header">
+                  <div class="row-label">
+                    <span class="indicator mandatory"></span>
+                    <span class="cell-mandatory">Short Description</span>
+                  </div>
+                </th>
+                <td>Experience unparalleled comfort...</td>
+                <td>Experimente una comodidad...</td>
+                <td class="cell-pending">Pending translation...</td>
+              </tr>
+              <tr class="data-row" data-group="descriptions" data-attr="long-desc" data-has-diff="true" data-has-error="false" data-mandatory="false">
+                <th class="row-header">Long Description</th>
+                <td>The Zephyr Glide is engineered...</td>
+                <td>El Zephyr Glide está diseñado...</td>
+                <td>Zephyr Glide er udviklet...</td>
+              </tr>
+              <tr class="group-row" data-group-id="media" onclick="toggleTableGroup(this)" style="display: none;">
+                <td colspan="4">Media Assets</td>
+              </tr>
+              <tr class="data-row filter-hidden" data-group="media" data-attr="primary-image" data-has-diff="false" data-has-error="false" data-mandatory="false">
+                <th class="row-header">Primary Image</th>
+                <td>product-main.jpg</td>
+                <td>product-main.jpg</td>
+                <td>product-main.jpg</td>
+              </tr>
+              <tr class="data-row filter-hidden" data-group="media" data-attr="gallery" data-has-diff="true" data-has-error="true" data-mandatory="false">
+                <th class="row-header">
+                  <div class="row-label">
+                    <span class="indicator error"></span>
+                    Gallery Images
+                  </div>
+                </th>
+                <td>5 images</td>
+                <td>3 images</td>
+                <td class="cell-error">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  No images
+                </td>
+              </tr>
+              <tr class="data-row filter-hidden" data-group="media" data-attr="video" data-has-diff="false" data-has-error="false" data-mandatory="false">
+                <th class="row-header">Product Video</th>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-footer">
+        <span id="rowCounter">Showing 6 of 9 attributes</span>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-swatch diff"></div>
+            <span>Different values</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch error"></div>
+            <span>Error / Missing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>Design Rationale:</strong>
+      <ul>
+        <li><strong>Color coding:</strong> Blue for Filter (selection intent), Purple for View Options (evaluation intent)</li>
+        <li><strong>Spatial separation:</strong> Two distinct panels reinforce conceptual separation</li>
+        <li><strong>Safety badges:</strong> "Always Visible" badges on error/mandatory options clarify safety invariants</li>
+        <li><strong>Apply vs. Instant:</strong> Filter requires explicit "Apply" (changes scope), View Options can be instant toggles (presentation only)</li>
+      </ul>
+      <strong style="display: block; margin-top: 16px;">Query Builder Approach (matching existing 1D table pattern):</strong>
+      <ul>
+        <li><strong>Same pattern:</strong> "Where [Field] [Operator] [Value]" - consistent with existing table filters</li>
+        <li><strong>Pick a field:</strong> Dropdown to select what to filter on (Attribute Group, Name, Has Difference, etc.)</li>
+        <li><strong>Context-aware operators:</strong> Text fields get contains/equals, booleans get Yes/No toggle</li>
+        <li><strong>Stackable conditions:</strong> Add multiple conditions with "And" - all must match</li>
+        <li><strong>Cancel/Apply:</strong> Review conditions before applying, with clear cancel option</li>
+        <li><strong>Results status:</strong> Shows "X of Y attributes" with clear all option</li>
+        <li><strong>Scales infinitely:</strong> No list of items - just build the query you need</li>
+      </ul>
+      
+      <strong style="display: block; margin-top: 16px;">Filter Fields for 2D Table:</strong>
+      <ul>
+        <li><strong>Attribute Group:</strong> Filter by group (Basic Info, Pricing, Specs, etc.)</li>
+        <li><strong>Attribute Name:</strong> Text search on attribute names</li>
+        <li><strong>Attribute Type:</strong> Show only Attributes or only Relationships</li>
+        <li><strong>Has Difference:</strong> Show only rows with differences between contexts</li>
+        <li><strong>Has Error:</strong> Show only rows with validation errors</li>
+        <li><strong>Is Pending:</strong> Show only rows pending review</li>
+        <li><strong>Value in Source A/B:</strong> Search within specific context values</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========================================
+       VARIATION 2: Toolbar Dropdowns
+       ======================================== -->
+  <div class="section-divider">
+    <h2>Variation 2: Toolbar Dropdown Menus</h2>
+    <p>Compact approach using dropdown menus from the toolbar. Good for simpler scenarios or when screen space is limited.</p>
+  </div>
+
+  <div class="variation">
+    <div class="variation-header">
+      <span class="variation-label alternative">Alternative</span>
+      <h3>Dropdown Menus - Compact Interface</h3>
+      <p>Filter and View Options as dropdown menus with categorized options. Suitable for fewer options and quick access.</p>
+    </div>
+    <div class="variation-body">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <div class="dropdown">
+            <button class="toolbar-btn filter-btn" onclick="toggleDropdown('filterDropdown2')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              Filter
+              <span class="badge">2</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu filter-menu" id="filterDropdown2">
+              <div class="dropdown-header">Select what to include</div>
+              <div class="dropdown-section">
+                <div class="dropdown-section-label">Attribute Groups</div>
+                <div class="dropdown-item active" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox checked">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Basic Information</div>
+                  </div>
+                </div>
+                <div class="dropdown-item active" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox checked">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Descriptions</div>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Media Assets</div>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Pricing</div>
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown-section">
+                <div class="dropdown-section-label">Relationships</div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Cross-sell Products</div>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Classifications</div>
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown-footer">
+                <button class="dropdown-footer-btn text">Reset</button>
+                <button class="dropdown-footer-btn primary" onclick="toggleDropdown('filterDropdown2')">Done</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="dropdown" style="margin-left: 12px;">
+            <button class="toolbar-btn view-btn" onclick="toggleDropdown('viewDropdown2')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              View Options
+              <span class="badge">1</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu view-menu" id="viewDropdown2">
+              <div class="dropdown-header">Control how data is displayed</div>
+              <div class="dropdown-section">
+                <div class="dropdown-section-label">Comparison</div>
+                <div class="dropdown-item active" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox checked">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Highlight differences</div>
+                    <div class="dropdown-item-desc">Mark cells that differ across contexts</div>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Hide identical rows</div>
+                    <div class="dropdown-item-desc">Only show rows with differences</div>
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown-section">
+                <div class="dropdown-section-label">Data Quality</div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Show errors only</div>
+                    <div class="dropdown-item-desc">Filter to attributes with errors</div>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleDropdownItem(this)">
+                  <div class="dropdown-item-checkbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-label">Show mandatory only</div>
+                    <div class="dropdown-item-desc">Filter to required attributes</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 400px; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-400);">
+        [Comparison Table Area]
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>Design Notes:</strong>
+      <ul>
+        <li><strong>Compact footprint:</strong> No persistent panels, dropdowns appear on demand</li>
+        <li><strong>Quick access:</strong> Good for simple filtering scenarios with fewer options</li>
+        <li><strong>Badge counts:</strong> Show active selections without opening the menu</li>
+        <li><strong>Limitation:</strong> Deep hierarchies (nested groups, many attributes) become unwieldy</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========================================
+       VARIATION 3: Active Chips Bar
+       ======================================== -->
+  <div class="section-divider">
+    <h2>Variation 3: Active Chips Display</h2>
+    <p>A persistent bar showing active filters and view options as removable chips, making current state always visible.</p>
+  </div>
+
+  <div class="variation">
+    <div class="variation-header">
+      <span class="variation-label alternative">Alternative</span>
+      <h3>Chips Bar - Current State Always Visible</h3>
+      <p>Active filters and view options displayed as colored chips, organized by type. Chips can be removed individually.</p>
+    </div>
+    <div class="variation-body">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-btn filter-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            Filter
+          </button>
+          <button class="toolbar-btn view-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            View Options
+          </button>
+        </div>
+        <div class="toolbar-spacer"></div>
+      </div>
+
+      <div class="active-chips-bar" id="chipsBar">
+        <div class="chips-group">
+          <span class="chips-label filter">Filter:</span>
+          <span id="filterChipsContainer">
+            <!-- Dynamic chips will be inserted here -->
+          </span>
+        </div>
+        
+        <span class="chips-divider"></span>
+        
+        <div class="chips-group">
+          <span class="chips-label view">View:</span>
+          <span id="viewChipsContainer">
+            <!-- Dynamic chips will be inserted here -->
+          </span>
+        </div>
+      </div>
+
+      <div style="height: 350px; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-400);">
+        [Comparison Table Area]
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>Design Notes:</strong>
+      <ul>
+        <li><strong>Transparency:</strong> Current filters and view options always visible without opening any panel</li>
+        <li><strong>Color coding:</strong> Blue chips = Filter selections, Purple chips = View Options</li>
+        <li><strong>Quick removal:</strong> Click X on any chip to remove that specific selection</li>
+        <li><strong>Scalability concern:</strong> Many active filters could make the bar very tall</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========================================
+       VARIATION 4: Split Inline Panel
+       ======================================== -->
+  <div class="section-divider">
+    <h2>Variation 4: Split Inline Controls</h2>
+    <p>Horizontal split panel showing both Filter and View Options side-by-side above the table.</p>
+  </div>
+
+  <div class="variation">
+    <div class="variation-header">
+      <span class="variation-label alternative">Alternative</span>
+      <h3>Split Inline Panel - Quick Access to Both</h3>
+      <p>Collapsible horizontal panel with Filter on left, View Options on right. Good for quick adjustments to both.</p>
+    </div>
+    <div class="variation-body">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-btn active" style="background: var(--gray-100);" onclick="toggleSplitPanels(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+            </svg>
+            Toggle Controls
+          </button>
+        </div>
+        <div class="toolbar-spacer"></div>
+      </div>
+
+      <div class="split-panels" id="splitPanels">
+        <div class="split-panel filter">
+          <h4>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            Filter — Select what to include
+          </h4>
+          <div class="quick-toggles">
+            <span class="quick-toggle filter active" onclick="toggleQuickFilter(this, 'basic-info')">Basic Information</span>
+            <span class="quick-toggle filter active" onclick="toggleQuickFilter(this, 'descriptions')">Descriptions</span>
+            <span class="quick-toggle filter" onclick="toggleQuickFilter(this, 'media')">Media Assets</span>
+            <span class="quick-toggle filter" onclick="toggleQuickFilter(this, 'pricing')">Pricing</span>
+            <span class="quick-toggle filter active" onclick="toggleQuickFilter(this, 'cross-sell')">Cross-sell</span>
+            <span class="quick-toggle filter" onclick="toggleQuickFilter(this, 'classifications')">Classifications</span>
+          </div>
+        </div>
+        <div class="split-panel view">
+          <h4>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            View Options — Control presentation
+          </h4>
+          <div class="quick-toggles">
+            <span class="quick-toggle view active" onclick="toggleQuickView(this, 'highlightDiff')">Highlight differences</span>
+            <span class="quick-toggle view" onclick="toggleQuickView(this, 'hideIdentical')">Hide identical</span>
+            <span class="quick-toggle view" onclick="toggleQuickView(this, 'showErrorsOnly')">Show errors only</span>
+            <span class="quick-toggle view" onclick="toggleQuickView(this, 'showMandatoryOnly')">Show mandatory only</span>
+            <span class="quick-toggle view" onclick="toggleQuickView(this, 'showPendingApproval')">Pending approval</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 300px; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-400);">
+        [Comparison Table Area]
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>Design Notes:</strong>
+      <ul>
+        <li><strong>Side-by-side:</strong> Both controls visible simultaneously for quick adjustments</li>
+        <li><strong>Toggle chips:</strong> Click to toggle on/off, active state clearly visible</li>
+        <li><strong>Collapsible:</strong> Can be hidden when not needed to maximize table space</li>
+        <li><strong>Limitation:</strong> Works best with limited options; deep hierarchies need different approach</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========================================
+       COMPARISON SUMMARY
+       ======================================== -->
+  <div class="section-divider">
+    <h2>Design Recommendations</h2>
+    <p>Summary of approaches and when to use each pattern.</p>
+  </div>
+
+  <div class="variation">
+    <div class="variation-header">
+      <h3>When to Use Each Pattern</h3>
+    </div>
+    <div class="variation-body" style="padding: 24px;">
+      <table class="compare-table" style="font-size: 13px;">
+        <thead>
+          <tr>
+            <th style="width: 180px;">Pattern</th>
+            <th>Best For</th>
+            <th>Pros</th>
+            <th>Cons</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="row-header">Dual Side Panels</th>
+            <td>Complex filtering with many attribute groups and deep hierarchies</td>
+            <td>Maximum clarity, supports complex trees, clear separation</td>
+            <td>Takes significant screen space, may feel heavy for simple cases</td>
+          </tr>
+          <tr>
+            <th class="row-header">Toolbar Dropdowns</th>
+            <td>Simpler scenarios with fewer options, quick access</td>
+            <td>Compact, familiar pattern, doesn't steal focus</td>
+            <td>Nested content awkward, limited space for descriptions</td>
+          </tr>
+          <tr>
+            <th class="row-header">Chips Bar</th>
+            <td>Making current state always visible, quick removal</td>
+            <td>Transparent state, easy to clear individual items</td>
+            <td>Gets tall with many active filters, still needs panels to add</td>
+          </tr>
+          <tr>
+            <th class="row-header">Split Inline Panel</th>
+            <td>Moderate complexity, frequent adjustments to both</td>
+            <td>Quick toggle access, both visible, collapsible</td>
+            <td>Limited to flat lists, not for deep hierarchies</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="annotation" style="margin: 20px 0;">
+        <strong>Key Design Principles Applied:</strong>
+        <ul>
+          <li><strong>Visual Differentiation:</strong> Blue for Filter (user selection), Purple for View Options (system evaluation)</li>
+          <li><strong>Safety Invariants:</strong> Errors and mandatory data badges show these are always visible</li>
+          <li><strong>Clear Labels:</strong> "Select what to include" vs "Control how data is displayed"</li>
+          <li><strong>Appropriate Scope:</strong> Filter changes require "Apply" (scope change), View Options can be instant (presentation only)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================
+  // STATE MANAGEMENT
+  // ============================================
+  const state = {
+    // Panel visibility
+    filterPanelOpen: true,
+    viewPanelOpen: true,
+    
+    // Filter selections (what's included)
+    filters: {
+      groups: {
+        'basic-info': true,
+        'descriptions': true,
+        'media': false
+      },
+      attributes: {
+        'name': true,
+        'sku': true,
+        'category': true,
+        'short-desc': true,
+        'long-desc': true
+      },
+      relationships: {
+        'cross-sell': true,
+        'upsell': false
+      }
+    },
+    
+    // View options (how it's displayed)
+    viewOptions: {
+      highlightDiff: true,
+      hideIdentical: false,
+      showErrorsOnly: false,
+      highlightErrors: true,
+      showMandatoryOnly: false,
+      showPendingApproval: false
+    }
+  };
+
+  // ============================================
+  // VARIATION 1: DUAL SIDE PANELS
+  // ============================================
+  
+  // Toggle filter panel
+  function toggleFilterPanel() {
+    state.filterPanelOpen = !state.filterPanelOpen;
+    const panel = document.getElementById('filterPanel');
+    const btn = document.getElementById('filterPanelBtn');
+    
+    if (state.filterPanelOpen) {
+      panel.style.display = 'flex';
+      btn.classList.add('active');
+    } else {
+      panel.style.display = 'none';
+      btn.classList.remove('active');
+    }
+    updateFilterBadge();
+  }
+
+  // Toggle view options panel
+  function toggleViewPanel() {
+    state.viewPanelOpen = !state.viewPanelOpen;
+    const panel = document.getElementById('viewPanel');
+    const btn = document.getElementById('viewPanelBtn');
+    
+    if (state.viewPanelOpen) {
+      panel.style.display = 'flex';
+      btn.classList.add('active');
+    } else {
+      panel.style.display = 'none';
+      btn.classList.remove('active');
+    }
+    updateViewBadge();
+  }
+
+  // Tree group expand/collapse
+  function toggleTreeGroup(header) {
+    const group = header.closest('.tree-group');
+    group.classList.toggle('collapsed');
+  }
+
+  // Toggle group checkbox (affects all children)
+  function toggleGroupCheckbox(checkbox, groupId) {
+    event.stopPropagation();
+    const isChecked = checkbox.classList.contains('checked') || checkbox.classList.contains('partial');
+    const newState = !isChecked;
+    
+    // Update checkbox visual
+    checkbox.classList.toggle('checked', newState);
+    checkbox.classList.remove('partial');
+    
+    // Update all child checkboxes
+    const group = checkbox.closest('.tree-group');
+    group.querySelectorAll('.tree-items .tree-checkbox').forEach(cb => {
+      cb.classList.toggle('checked', newState);
+    });
+    
+    updateAfterFilterChange();
+  }
+
+  // Toggle individual item checkbox (checked = visible, unchecked = hidden)
+  function toggleItemCheckbox(checkbox) {
+    event.stopPropagation();
+    checkbox.classList.toggle('checked');
+    updateAfterFilterChange();
+  }
+
+  // Update group checkbox to show partial/checked/unchecked
+  function updateGroupCheckboxState(group) {
+    const groupCheckbox = group.querySelector('.tree-group-header .tree-checkbox');
+    const allItems = group.querySelectorAll('.tree-items .tree-checkbox');
+    const checkedItems = group.querySelectorAll('.tree-items .tree-checkbox.checked');
+    
+    groupCheckbox.classList.remove('checked', 'partial');
+    
+    if (checkedItems.length === allItems.length && allItems.length > 0) {
+      groupCheckbox.classList.add('checked');
+    } else if (checkedItems.length > 0) {
+      groupCheckbox.classList.add('partial');
+    }
+  }
+
+  // Update group count display
+  function updateGroupCount(group) {
+    const countEl = group.querySelector('.tree-group-count');
+    if (!countEl) return;
+    
+    const allItems = group.querySelectorAll('.tree-items .tree-item');
+    const checkedItems = group.querySelectorAll('.tree-items .tree-checkbox.checked');
+    
+    countEl.textContent = `${checkedItems.length}/${allItems.length}`;
+  }
+
+  // Toggle view option
+  function toggleViewOption(optionEl, optionKey) {
+    const isActive = optionEl.classList.contains('active');
+    const newState = !isActive;
+    
+    optionEl.classList.toggle('active', newState);
+    state.viewOptions[optionKey] = newState;
+    
+    applyViewOptionsToTable();
+    updateViewBadge();
+    updateChipsBar();
+  }
+
+  // Diff view mode (segmented control - mutually exclusive)
+  let diffViewMode = 'highlight'; // 'show-all', 'highlight', 'only-diff'
+  
+  // ============================================
+  // TABLE EXPAND / COLLAPSE
+  // ============================================
+  
+  function expandAllTableGroups() {
+    const table = document.getElementById('comparisonTable');
+    if (!table) return;
+    
+    // Show all group rows and their children
+    table.querySelectorAll('tr.group-row').forEach(groupRow => {
+      groupRow.classList.remove('collapsed');
+      const groupId = groupRow.dataset.groupId;
+      
+      // Show all rows belonging to this group
+      table.querySelectorAll(`tr[data-group="${groupId}"]`).forEach(row => {
+        row.style.display = '';
+      });
+    });
+  }
+
+  function collapseAllTableGroups() {
+    const table = document.getElementById('comparisonTable');
+    if (!table) return;
+    
+    // Collapse all group rows and hide their children
+    table.querySelectorAll('tr.group-row').forEach(groupRow => {
+      groupRow.classList.add('collapsed');
+      const groupId = groupRow.dataset.groupId;
+      
+      // Hide all rows belonging to this group
+      table.querySelectorAll(`tr[data-group="${groupId}"]`).forEach(row => {
+        row.style.display = 'none';
+      });
+    });
+  }
+
+  function toggleTableGroup(groupRow) {
+    const groupId = groupRow.dataset.groupId;
+    const table = groupRow.closest('table');
+    const isCollapsed = groupRow.classList.contains('collapsed');
+    
+    groupRow.classList.toggle('collapsed');
+    
+    // Toggle visibility of rows in this group
+    table.querySelectorAll(`tr[data-group="${groupId}"]`).forEach(row => {
+      row.style.display = isCollapsed ? '' : 'none';
+    });
+  }
+
+  function setDiffViewMode(mode) {
+    diffViewMode = mode;
+    
+    // Update segmented control UI
+    const control = document.getElementById('diffViewControl');
+    if (control) {
+      control.querySelectorAll('.segment').forEach(seg => {
+        seg.classList.toggle('active', seg.dataset.value === mode);
+      });
+    }
+    
+    // Update description
+    const desc = document.getElementById('diffModeDesc');
+    if (desc) {
+      const descriptions = {
+        'show-all': 'All rows are shown without highlighting',
+        'highlight': 'Rows with differences are highlighted in yellow',
+        'only-diff': 'Only rows with differences are shown'
+      };
+      desc.textContent = descriptions[mode];
+    }
+    
+    // Update state for consistency with other view options
+    state.viewOptions.highlightDiff = (mode === 'highlight');
+    state.viewOptions.hideIdentical = (mode === 'only-diff');
+    
+    applyViewOptionsToTable();
+    updateViewBadge();
+  }
+
+  // Apply filters to the comparison table
+  function applyFiltersToTable() {
+    const table = document.getElementById('comparisonTable');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+      const group = row.dataset.group;
+      const attr = row.dataset.attr;
+      
+      // Group headers
+      if (row.classList.contains('group-row')) {
+        const groupId = row.dataset.groupId;
+        if (groupId && state.filters.groups[groupId] !== undefined) {
+          row.style.display = state.filters.groups[groupId] ? '' : 'none';
+        }
+        return;
+      }
+      
+      // Attribute rows
+      if (attr) {
+        let shouldShow = true;
+        
+        // Check if parent group is hidden
+        if (group && state.filters.groups[group] === false) {
+          shouldShow = false;
+        }
+        
+        // Check if specific attribute is hidden
+        if (state.filters.attributes[attr] === false) {
+          shouldShow = false;
+        }
+        
+        row.classList.toggle('filter-hidden', !shouldShow);
+      }
+    });
+    
+    updateRowCount();
+  }
+
+  // Apply view options to the comparison table
+  function applyViewOptionsToTable() {
+    const table = document.getElementById('comparisonTable');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr.data-row');
+    
+    rows.forEach(row => {
+      const hasDiff = row.dataset.hasDiff === 'true';
+      const hasError = row.dataset.hasError === 'true';
+      const isMandatory = row.dataset.mandatory === 'true';
+      const isPending = row.dataset.pending === 'true';
+      
+      // Reset view classes
+      row.classList.remove('diff-row', 'error-row', 'view-hidden');
+      
+      // Highlight differences
+      if (state.viewOptions.highlightDiff && hasDiff) {
+        row.classList.add('diff-row');
+      }
+      
+      // Highlight errors
+      if (state.viewOptions.highlightErrors && hasError) {
+        row.classList.add('error-row');
+      }
+      
+      // View filtering logic
+      let shouldShow = true;
+      
+      // Hide identical rows
+      if (state.viewOptions.hideIdentical && !hasDiff) {
+        shouldShow = false;
+      }
+      
+      // Show errors only
+      if (state.viewOptions.showErrorsOnly && !hasError) {
+        shouldShow = false;
+      }
+      
+      // Show mandatory only
+      if (state.viewOptions.showMandatoryOnly && !isMandatory) {
+        shouldShow = false;
+      }
+      
+      // SAFETY: Errors and mandatory missing data always visible
+      if (hasError || (isMandatory && row.querySelector('.cell-error'))) {
+        shouldShow = true;
+        row.classList.add('error-row'); // Always highlight safety issues
+      }
+      
+      row.classList.toggle('view-hidden', !shouldShow);
+    });
+    
+    updateRowCount();
+  }
+
+  // Update filter badge count
+  function updateFilterBadge() {
+    const badge = document.getElementById('filterBadgeCount');
+    if (!badge) return;
+    
+    let count = 0;
+    
+    // Count unchecked groups
+    Object.values(state.filters.groups).forEach(v => { if (!v) count++; });
+    
+    // Count unchecked attributes
+    Object.values(state.filters.attributes).forEach(v => { if (!v) count++; });
+    
+    // Count unchecked relationships
+    Object.values(state.filters.relationships).forEach(v => { if (!v) count++; });
+    
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Update view badge count
+  function updateViewBadge() {
+    const badge = document.getElementById('viewBadgeCount');
+    if (!badge) return;
+    
+    let count = 0;
+    Object.values(state.viewOptions).forEach(v => { if (v) count++; });
+    
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Update row count in footer
+  function updateRowCount() {
+    const counter = document.getElementById('rowCounter');
+    if (!counter) return;
+    
+    const table = document.getElementById('comparisonTable');
+    if (!table) return;
+    
+    const allRows = table.querySelectorAll('tbody tr.data-row');
+    const visibleRows = table.querySelectorAll('tbody tr.data-row:not(.filter-hidden):not(.view-hidden)');
+    
+    counter.textContent = `Showing ${visibleRows.length} of ${allRows.length} attributes`;
+  }
+
+  // Update chips bar
+  function updateChipsBar() {
+    const filterChips = document.getElementById('filterChipsContainer');
+    const viewChips = document.getElementById('viewChipsContainer');
+    
+    if (filterChips) {
+      filterChips.innerHTML = '';
+      
+      // Add chips for selected groups
+      Object.entries(state.filters.groups).forEach(([key, value]) => {
+        if (value) {
+          const label = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          filterChips.innerHTML += createChip(label, 'filter', () => {
+            state.filters.groups[key] = false;
+            syncUIFromState();
+          });
+        }
+      });
+    }
+    
+    if (viewChips) {
+      viewChips.innerHTML = '';
+      
+      const viewLabels = {
+        highlightDiff: 'Highlight differences',
+        hideIdentical: 'Hide identical',
+        showErrorsOnly: 'Show errors only',
+        highlightErrors: 'Highlight errors',
+        showMandatoryOnly: 'Show mandatory only',
+        showPendingApproval: 'Pending approval'
+      };
+      
+      Object.entries(state.viewOptions).forEach(([key, value]) => {
+        if (value) {
+          viewChips.innerHTML += createChip(viewLabels[key], 'view', () => {
+            state.viewOptions[key] = false;
+            syncUIFromState();
+          });
+        }
+      });
+    }
+  }
+
+  function createChip(label, type, onRemove) {
+    const chipId = 'chip-' + Math.random().toString(36).substr(2, 9);
+    setTimeout(() => {
+      const removeBtn = document.getElementById(chipId);
+      if (removeBtn) removeBtn.onclick = onRemove;
+    }, 0);
+    
+    return `
+      <span class="chip ${type}">
+        ${label}
+        <span class="chip-remove" id="${chipId}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </span>
+      </span>
+    `;
+  }
+
+  // Sync UI elements from state
+  function syncUIFromState() {
+    // Sync filter checkboxes
+    document.querySelectorAll('.tree-item').forEach(item => {
+      const itemId = item.dataset.item;
+      const itemType = item.dataset.type;
+      const checkbox = item.querySelector('.tree-checkbox');
+      
+      if (itemType === 'attribute' && state.filters.attributes[itemId] !== undefined) {
+        checkbox.classList.toggle('checked', state.filters.attributes[itemId]);
+      } else if (itemType === 'relationship' && state.filters.relationships[itemId] !== undefined) {
+        checkbox.classList.toggle('checked', state.filters.relationships[itemId]);
+      }
+    });
+    
+    // Update group checkboxes
+    document.querySelectorAll('.tree-group').forEach(group => {
+      updateGroupCheckboxState(group);
+      updateGroupCount(group);
+    });
+    
+    // Sync view option toggles
+    document.querySelectorAll('.view-option').forEach(option => {
+      const key = option.dataset.option;
+      if (key && state.viewOptions[key] !== undefined) {
+        option.classList.toggle('active', state.viewOptions[key]);
+      }
+    });
+    
+    applyFiltersToTable();
+    applyViewOptionsToTable();
+    updateFilterBadge();
+    updateViewBadge();
+    updateChipsBar();
+  }
+
+  // Reset all filters
+  function resetFilters() {
+    // Select all checkboxes
+    document.querySelectorAll('#filterPanel .tree-checkbox').forEach(cb => {
+      cb.classList.add('checked');
+    });
+    
+    // Clear search
+    clearFilterSearch();
+    
+    // Reset type filter
+    setTypeFilter('all');
+    
+    // Update counts
+    updateSelectionCounts();
+    applyFiltersToTable();
+    updateFilterBadge();
+  }
+
+  // ============================================
+  // QUERY BUILDER FILTER APPROACH
+  // ============================================
+  
+  // Filter conditions state
+  let filterConditions = [];
+  let filterRowCounter = 1;
+  const totalAttributes = 156;
+
+  // Field definitions with their operators and value types
+  const filterFields = {
+    'attribute-group': {
+      label: 'Attribute Group',
+      operators: ['equals', 'not-equals'],
+      valueType: 'select',
+      values: [
+        { value: 'basic-info', label: 'Basic Information' },
+        { value: 'descriptions', label: 'Descriptions' },
+        { value: 'media', label: 'Media Assets' },
+        { value: 'pricing', label: 'Pricing & Availability' },
+        { value: 'specifications', label: 'Specifications' },
+        { value: 'product-refs', label: 'Product References' },
+        { value: 'classifications', label: 'Classifications' }
+      ]
+    },
+    'attribute-name': {
+      label: 'Attribute Name',
+      operators: ['contains', 'not-contains', 'equals', 'not-equals', 'starts-with', 'ends-with'],
+      valueType: 'text',
+      placeholder: 'Enter attribute name...'
+    },
+    'attribute-type': {
+      label: 'Attribute Type',
+      operators: ['equals', 'not-equals'],
+      valueType: 'select',
+      values: [
+        { value: 'attribute', label: 'Attribute' },
+        { value: 'relationship', label: 'Relationship' }
+      ]
+    },
+    'has-difference': {
+      label: 'Has Difference',
+      operators: ['equals'],
+      valueType: 'boolean'
+    },
+    'has-error': {
+      label: 'Has Error',
+      operators: ['equals'],
+      valueType: 'boolean'
+    },
+    'is-pending': {
+      label: 'Is Pending',
+      operators: ['equals'],
+      valueType: 'boolean'
+    },
+    'is-mandatory': {
+      label: 'Is Mandatory',
+      operators: ['equals'],
+      valueType: 'boolean'
+    },
+    'value-source-a': {
+      label: 'Value in Source A',
+      operators: ['contains', 'not-contains', 'equals', 'not-equals', 'is-empty', 'is-not-empty'],
+      valueType: 'text',
+      placeholder: 'Enter value...'
+    },
+    'value-source-b': {
+      label: 'Value in Source B',
+      operators: ['contains', 'not-contains', 'equals', 'not-equals', 'is-empty', 'is-not-empty'],
+      valueType: 'text',
+      placeholder: 'Enter value...'
+    }
+  };
+
+  const operators = {
+    'equals': 'Equals',
+    'not-equals': 'Does not equal',
+    'contains': 'Contains',
+    'not-contains': 'Does not contain',
+    'starts-with': 'Starts with',
+    'ends-with': 'Ends with',
+    'is-empty': 'Is empty',
+    'is-not-empty': 'Is not empty'
+  };
+
+  function toggleFilterDropdown(btn) {
+    const dropdown = btn.closest('.filter-dropdown');
+    const wasOpen = dropdown.classList.contains('open');
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.filter-dropdown.open').forEach(d => {
+      d.classList.remove('open');
+    });
+    
+    // Toggle this one
+    if (!wasOpen) {
+      dropdown.classList.add('open');
+    }
+  }
+
+  function selectFilterDropdownItem(item) {
+    const dropdown = item.closest('.filter-dropdown');
+    const btn = dropdown.querySelector('.filter-dropdown-btn span');
+    const row = item.closest('.filter-row');
+    
+    // Update selection
+    dropdown.querySelectorAll('.filter-dropdown-item').forEach(i => i.classList.remove('selected'));
+    item.classList.add('selected');
+    btn.textContent = item.textContent;
+    
+    // Close dropdown
+    dropdown.classList.remove('open');
+    
+    // If field changed, update operators and value input
+    if (dropdown.dataset.type === 'field') {
+      updateFilterRowForField(row, item.dataset.value);
+    }
+  }
+
+  function updateFilterRowForField(row, fieldKey) {
+    const field = filterFields[fieldKey];
+    if (!field) return;
+    
+    // Update operator dropdown
+    const operatorDropdown = row.querySelector('[data-type="operator"]');
+    if (operatorDropdown) {
+      const menu = operatorDropdown.querySelector('.filter-dropdown-menu');
+      const btn = operatorDropdown.querySelector('.filter-dropdown-btn span');
+      
+      menu.innerHTML = field.operators.map((op, i) => 
+        `<div class="filter-dropdown-item ${i === 0 ? 'selected' : ''}" data-value="${op}" onclick="selectFilterDropdownItem(this)">${operators[op]}</div>`
+      ).join('');
+      
+      btn.textContent = operators[field.operators[0]];
+    }
+    
+    // Update value input based on type
+    const valueContainer = row.querySelector('[data-type="value"]');
+    if (valueContainer) {
+      updateValueInput(valueContainer, field);
+    }
+  }
+
+  function updateValueInput(container, field) {
+    if (field.valueType === 'select') {
+      container.innerHTML = `
+        <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+          <span>${field.values[0].label}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="filter-dropdown-menu">
+          ${field.values.map((v, i) => 
+            `<div class="filter-dropdown-item ${i === 0 ? 'selected' : ''}" data-value="${v.value}" onclick="selectFilterDropdownItem(this)">${v.label}</div>`
+          ).join('')}
+        </div>
+      `;
+    } else if (field.valueType === 'boolean') {
+      container.innerHTML = `
+        <div class="filter-bool-toggle">
+          <button class="active" onclick="toggleBoolValue(this, true)">Yes</button>
+          <button onclick="toggleBoolValue(this, false)">No</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <input type="text" class="filter-value-input" placeholder="${field.placeholder || 'Enter value...'}">
+      `;
+    }
+  }
+
+  function toggleBoolValue(btn, value) {
+    const toggle = btn.closest('.filter-bool-toggle');
+    toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function addFilterCondition(fieldKey, fieldLabel) {
+    filterRowCounter++;
+    const field = filterFields[fieldKey];
+    const conditionsContainer = document.getElementById('filterConditions');
+    const addRow = document.getElementById('filterAddRow');
+    
+    // Close dropdown
+    document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+    
+    // Create new row
+    const row = document.createElement('div');
+    row.className = 'filter-row';
+    row.id = `filterRow${filterRowCounter}`;
+    row.dataset.field = fieldKey;
+    
+    // Determine label (Where for first, And for subsequent)
+    const existingRows = conditionsContainer.querySelectorAll('.filter-row');
+    const label = existingRows.length === 0 ? 'Where' : 'And';
+    
+    // Build value HTML based on type
+    let valueHtml = '';
+    if (field.valueType === 'select') {
+      valueHtml = `
+        <div class="filter-dropdown filter-value-dropdown" data-type="value">
+          <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+            <span>${field.values[0].label}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="filter-dropdown-menu">
+            ${field.values.map((v, i) => 
+              `<div class="filter-dropdown-item ${i === 0 ? 'selected' : ''}" data-value="${v.value}" onclick="selectFilterDropdownItem(this)">${v.label}</div>`
+            ).join('')}
+          </div>
+        </div>
+      `;
+    } else if (field.valueType === 'boolean') {
+      valueHtml = `
+        <div class="filter-value-container" data-type="value">
+          <div class="filter-bool-toggle">
+            <button class="active" onclick="toggleBoolValue(this, true)">Yes</button>
+            <button onclick="toggleBoolValue(this, false)">No</button>
+          </div>
+        </div>
+      `;
+    } else {
+      valueHtml = `
+        <input type="text" class="filter-value-input" data-type="value" placeholder="${field.placeholder || 'Enter value...'}">
+      `;
+    }
+    
+    row.innerHTML = `
+      <button class="filter-row-remove" onclick="removeFilterRow(this)" title="Remove condition">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <span class="filter-row-label">${label}</span>
+      <div class="filter-dropdown" data-type="field">
+        <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+          <span>${fieldLabel}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="filter-dropdown-menu">
+          <div class="filter-dropdown-section">Attribute</div>
+          <div class="filter-dropdown-item ${fieldKey === 'attribute-group' ? 'selected' : ''}" data-value="attribute-group" onclick="selectFilterDropdownItem(this)">Attribute Group</div>
+          <div class="filter-dropdown-item ${fieldKey === 'attribute-name' ? 'selected' : ''}" data-value="attribute-name" onclick="selectFilterDropdownItem(this)">Attribute Name</div>
+          <div class="filter-dropdown-item ${fieldKey === 'attribute-type' ? 'selected' : ''}" data-value="attribute-type" onclick="selectFilterDropdownItem(this)">Attribute Type</div>
+          <div class="filter-dropdown-section">Comparison</div>
+          <div class="filter-dropdown-item ${fieldKey === 'has-difference' ? 'selected' : ''}" data-value="has-difference" onclick="selectFilterDropdownItem(this)">Has Difference</div>
+          <div class="filter-dropdown-item ${fieldKey === 'has-error' ? 'selected' : ''}" data-value="has-error" onclick="selectFilterDropdownItem(this)">Has Error</div>
+          <div class="filter-dropdown-item ${fieldKey === 'is-pending' ? 'selected' : ''}" data-value="is-pending" onclick="selectFilterDropdownItem(this)">Is Pending</div>
+          <div class="filter-dropdown-item ${fieldKey === 'is-mandatory' ? 'selected' : ''}" data-value="is-mandatory" onclick="selectFilterDropdownItem(this)">Is Mandatory</div>
+          <div class="filter-dropdown-section">Value</div>
+          <div class="filter-dropdown-item ${fieldKey === 'value-source-a' ? 'selected' : ''}" data-value="value-source-a" onclick="selectFilterDropdownItem(this)">Value in Source A</div>
+          <div class="filter-dropdown-item ${fieldKey === 'value-source-b' ? 'selected' : ''}" data-value="value-source-b" onclick="selectFilterDropdownItem(this)">Value in Source B</div>
+        </div>
+      </div>
+      <div class="filter-dropdown" data-type="operator">
+        <button class="filter-dropdown-btn" onclick="toggleFilterDropdown(this)">
+          <span>${operators[field.operators[0]]}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="filter-dropdown-menu">
+          ${field.operators.map((op, i) => 
+            `<div class="filter-dropdown-item ${i === 0 ? 'selected' : ''}" data-value="${op}" onclick="selectFilterDropdownItem(this)">${operators[op]}</div>`
+          ).join('')}
+        </div>
+      </div>
+      ${valueHtml}
+    `;
+    
+    // Insert before add row
+    conditionsContainer.insertBefore(row, addRow);
+    
+    // Show actions bar
+    document.getElementById('filterActionsBar').style.display = 'flex';
+  }
+
+  function removeFilterRow(btn) {
+    const row = btn.closest('.filter-row');
+    row.remove();
+    
+    // Update labels (first row should say "Where", others "And")
+    const rows = document.querySelectorAll('#filterConditions .filter-row');
+    rows.forEach((r, i) => {
+      const label = r.querySelector('.filter-row-label');
+      if (label) {
+        label.textContent = i === 0 ? 'Where' : 'And';
+      }
+    });
+    
+    // Hide actions bar if no rows
+    if (rows.length === 0) {
+      document.getElementById('filterActionsBar').style.display = 'none';
+    }
+  }
+
+  function cancelFilterChanges() {
+    // Remove all filter rows except re-add from saved state
+    document.querySelectorAll('#filterConditions .filter-row').forEach(row => row.remove());
+    document.getElementById('filterActionsBar').style.display = 'none';
+    
+    // Would restore from filterConditions array in real implementation
+  }
+
+  function applyFilterConditions() {
+    // Collect all conditions
+    filterConditions = [];
+    
+    document.querySelectorAll('#filterConditions .filter-row').forEach(row => {
+      const fieldDropdown = row.querySelector('[data-type="field"]');
+      const operatorDropdown = row.querySelector('[data-type="operator"]');
+      const valueEl = row.querySelector('[data-type="value"]');
+      
+      const field = fieldDropdown?.querySelector('.filter-dropdown-item.selected')?.dataset.value;
+      const operator = operatorDropdown?.querySelector('.filter-dropdown-item.selected')?.dataset.value;
+      
+      let value;
+      if (valueEl?.classList.contains('filter-value-input')) {
+        value = valueEl.value;
+      } else if (valueEl?.querySelector('.filter-bool-toggle')) {
+        value = valueEl.querySelector('.filter-bool-toggle button.active')?.textContent === 'Yes';
+      } else if (valueEl?.querySelector('.filter-dropdown-item.selected')) {
+        value = valueEl.querySelector('.filter-dropdown-item.selected')?.dataset.value;
+      }
+      
+      if (field && operator) {
+        filterConditions.push({ field, operator, value });
+      }
+    });
+    
+    // Apply to table
+    applyFiltersToTable();
+    updateFilterBadge();
+    updateVisibleCount();
+  }
+
+  function clearAllFilterConditions() {
+    filterConditions = [];
+    document.querySelectorAll('#filterConditions .filter-row').forEach(row => row.remove());
+    document.getElementById('filterActionsBar').style.display = 'none';
+    
+    applyFiltersToTable();
+    updateFilterBadge();
+    updateVisibleCount();
+  }
+
+  function updateVisibleCount() {
+    // Simulated count based on conditions
+    const visibleEl = document.getElementById('visibleCount');
+    if (visibleEl) {
+      const hidden = filterConditions.length > 0 ? Math.floor(Math.random() * 100) + 12 : 0;
+      visibleEl.textContent = totalAttributes - hidden;
+    }
+  }
+
+  // Reset all view options
+  function resetViewOptions() {
+    Object.keys(state.viewOptions).forEach(key => {
+      state.viewOptions[key] = false;
+    });
+    
+    syncUIFromState();
+  }
+
+  // ============================================
+  // VARIATION 2: DROPDOWN MENUS
+  // ============================================
+  
+  function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    const isOpen = dropdown.classList.contains('open');
+    
+    // Close all dropdowns first
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+      menu.classList.remove('open');
+    });
+    
+    // Toggle this one
+    if (!isOpen) {
+      dropdown.classList.add('open');
+    }
+  }
+
+  function toggleDropdownItem(item) {
+    item.classList.toggle('active');
+    const checkbox = item.querySelector('.dropdown-item-checkbox');
+    if (checkbox) {
+      checkbox.classList.toggle('checked', item.classList.contains('active'));
+    }
+  }
+
+  // ============================================
+  // VARIATION 4: QUICK TOGGLES
+  // ============================================
+  
+  function toggleSplitPanels(btn) {
+    const panels = document.getElementById('splitPanels');
+    const isVisible = panels.style.display !== 'none';
+    
+    panels.style.display = isVisible ? 'none' : 'flex';
+    btn.classList.toggle('active', !isVisible);
+  }
+  
+  function toggleQuickFilter(toggle, key) {
+    toggle.classList.toggle('active');
+    const isActive = toggle.classList.contains('active');
+    
+    if (state.filters.groups[key] !== undefined) {
+      state.filters.groups[key] = isActive;
+    }
+    
+    // Also sync to main panel if same keys exist
+    syncUIFromState();
+  }
+
+  function toggleQuickView(toggle, key) {
+    toggle.classList.toggle('active');
+    state.viewOptions[key] = toggle.classList.contains('active');
+    
+    // Also sync to main panel
+    syncUIFromState();
+  }
+
+  // ============================================
+  // INITIALIZATION
+  // ============================================
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    // Hide the initial filter row (show empty state)
+    const initialRow = document.getElementById('filterRow1');
+    if (initialRow) initialRow.remove();
+    
+    // Hide actions bar initially
+    const actionsBar = document.getElementById('filterActionsBar');
+    if (actionsBar) actionsBar.style.display = 'none';
+    
+    // Initialize visible count
+    updateVisibleCount();
+    
+    // Apply initial state
+    applyFiltersToTable();
+    applyViewOptionsToTable();
+    updateFilterBadge();
+    updateViewBadge();
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.filter-dropdown')) {
+        document.querySelectorAll('.filter-dropdown.open').forEach(d => {
+          d.classList.remove('open');
+        });
+      }
+      
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+          menu.classList.remove('open');
+        });
+      }
+    });
+    
+    // Keyboard shortcut for escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.filter-dropdown.open').forEach(d => {
+          d.classList.remove('open');
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

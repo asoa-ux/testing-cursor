@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribute Icon Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            background: #f5f5f5;
+            padding: 32px 24px;
+        }
+
+        .card {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e5e5e5;
+            font-weight: 600;
+            color: #1a1a1a;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Attribute row - horizontal layout */
+        .attr-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .attr-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Label area - left column */
+        .label-cell {
+            width: 220px;
+            flex-shrink: 0;
+            padding-right: 16px;
+            padding-top: 8px;
+        }
+
+        .label-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Source icons - compact */
+        .source-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            position: relative;
+        }
+
+        .source-icon svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .source-icon.inherited {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .source-icon.calculated {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .source-icon.synced {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Tooltip for source icons */
+        .source-icon::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s;
+            z-index: 100;
+        }
+
+        .source-icon:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .attr-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .required-mark {
+            color: #dc2626;
+            margin-left: 2px;
+        }
+
+        /* AI indicator - attribute level */
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .ai-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+        }
+
+        .ai-badge svg {
+            width: 10px;
+            height: 10px;
+        }
+
+        .info-btn {
+            width: 18px;
+            height: 18px;
+            border: none;
+            background: none;
+            color: #999;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+
+        .info-btn:hover {
+            color: #666;
+            background: #f0f0f0;
+        }
+
+        /* Info popover - at body level */
+        .info-popover {
+            position: fixed;
+            width: 260px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid #e5e5e5;
+            z-index: 1000;
+            display: none;
+        }
+
+        .info-popover.visible {
+            display: block;
+        }
+
+        .info-popover::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 12px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-left: 1px solid #e5e5e5;
+            border-top: 1px solid #e5e5e5;
+            transform: rotate(45deg);
+        }
+
+        .popover-content {
+            padding: 12px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .popover-footer {
+            padding: 10px 12px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .history-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #0066cc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .history-link:hover {
+            text-decoration: underline;
+        }
+
+        .history-meta {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .no-history {
+            color: #888;
+            font-size: 13px;
+        }
+
+        /* Input area - right column */
+        .input-cell {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.15s;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        /* Multi-value inputs */
+        .multi-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .multi-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .multi-row .text-input {
+            flex: 1;
+        }
+
+        .remove-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .remove-btn:hover {
+            border-color: #ccc;
+            color: #666;
+        }
+
+        .add-link {
+            font-size: 13px;
+            color: #0066cc;
+            text-decoration: none;
+            margin-top: 4px;
+        }
+
+        .add-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Textarea */
+        .text-area {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        /* Read-only / synced field */
+        .text-input.readonly {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        /* Click outside overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 500;
+            display: none;
+        }
+
+        .overlay.visible {
+            display: block;
+        }
+
+        /* Framework explanation */
+        .framework {
+            max-width: 700px;
+            margin: 24px auto 0;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .framework-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .framework-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .framework-row:last-child {
+            border-bottom: none;
+        }
+
+        .framework-position {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #888;
+            width: 80px;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+
+        .framework-content {
+            flex: 1;
+        }
+
+        .framework-items {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .framework-desc {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closePopover()"></div>
+
+<!-- Single popover element -->
+<div class="info-popover" id="popover">
+    <div class="popover-content" id="popover-content"></div>
+    <div class="popover-footer" id="popover-footer"></div>
+</div>
+
+<div class="card">
+    <div class="card-header">Product Details</div>
+    <div class="card-body">
+        
+        <!-- Regular editable field with AI + history -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="attr-label">Vegetable<span class="required-mark">*</span></span>
+                    <span class="ai-badge" title="AI suggestions available">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h3l-4 4-4-4h3V9.5C10.8 8.8 10 7.5 10 6a4 4 0 0 1 2-3.5"/>
+                            <path d="M9 18h6M10 22h4"/>
+                        </svg>
+                        2
+                    </span>
+                    <button class="info-btn" data-info="vegetable">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <input type="text" class="text-input" value="Tomato">
+            </div>
+        </div>
+
+        <!-- BOTH Inherited AND Calculated -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="source-icon inherited" data-tooltip="Inherited from parent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 5v14M5 12l7 7 7-7"/>
+                        </svg>
+                    </span>
+                    <span class="source-icon calculated" data-tooltip="Calculated value">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v8M14 17h6"/>
+                        </svg>
+                    </span>
+                    <span class="attr-label">Product Category Classification<span class="required-mark">*</span></span>
+                    <button class="info-btn" data-info="category">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <input type="text" class="text-input" value="Fruits & Vegetables">
+            </div>
+        </div>
+
+        <!-- Just Inherited -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="source-icon inherited" data-tooltip="Inherited from parent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 5v14M5 12l7 7 7-7"/>
+                        </svg>
+                    </span>
+                    <span class="attr-label">Brand Name</span>
+                    <button class="info-btn" data-info="brand">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <input type="text" class="text-input" value="Ruinart">
+            </div>
+        </div>
+
+        <!-- Just Calculated -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="source-icon calculated" data-tooltip="Calculated value">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v8M14 17h6"/>
+                        </svg>
+                    </span>
+                    <span class="attr-label">Display Name</span>
+                    <button class="info-btn" data-info="display">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <input type="text" class="text-input readonly" value="Ruinart Champagne 750ml" readonly>
+            </div>
+        </div>
+
+        <!-- Synced field -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="source-icon synced" data-tooltip="Synced from SAP">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c-1.657 0-3-4.03-3-9s1.343-9 3-9m0 18c1.657 0 3-4.03 3-9s-1.343-9-3-9"/>
+                        </svg>
+                    </span>
+                    <span class="attr-label">Product Code</span>
+                    <button class="info-btn" data-info="code">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <input type="text" class="text-input readonly" value="CHAMP-RUI-750" readonly>
+            </div>
+        </div>
+
+        <!-- Multi-value field with AI -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="attr-label">Available Apple Varieties</span>
+                    <span class="ai-badge" title="AI suggestions available">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h3l-4 4-4-4h3V9.5C10.8 8.8 10 7.5 10 6a4 4 0 0 1 2-3.5"/>
+                            <path d="M9 18h6M10 22h4"/>
+                        </svg>
+                        1
+                    </span>
+                    <button class="info-btn" data-info="apples">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <div class="multi-inputs">
+                    <div class="multi-row">
+                        <input type="text" class="text-input" value="Gala">
+                        <button class="remove-btn">×</button>
+                    </div>
+                    <div class="multi-row">
+                        <input type="text" class="text-input" value="Fuji">
+                        <button class="remove-btn">×</button>
+                    </div>
+                    <a href="#" class="add-link">+ Add new</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Long text field with AI -->
+        <div class="attr-row">
+            <div class="label-cell">
+                <div class="label-content">
+                    <span class="attr-label">Marketing Description<span class="required-mark">*</span></span>
+                    <span class="ai-badge" title="AI suggestions available">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h3l-4 4-4-4h3V9.5C10.8 8.8 10 7.5 10 6a4 4 0 0 1 2-3.5"/>
+                            <path d="M9 18h6M10 22h4"/>
+                        </svg>
+                        3
+                    </span>
+                    <button class="info-btn" data-info="description">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-cell">
+                <textarea class="text-area">A prestigious champagne from the house of Ruinart, founded in 1729.</textarea>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Framework explanation -->
+<div class="framework">
+    <div class="framework-title">Label Framework (compact icons allow multiple sources)</div>
+    
+    <div class="framework-row">
+        <div class="framework-position">Sources</div>
+        <div class="framework-content">
+            <div class="framework-items">
+                <span class="source-icon inherited" style="position:relative;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 5v14M5 12l7 7 7-7"/>
+                    </svg>
+                </span>
+                <span class="source-icon calculated" style="position:relative;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v8M14 17h6"/>
+                    </svg>
+                </span>
+                <span class="source-icon synced" style="position:relative;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c-1.657 0-3-4.03-3-9s1.343-9 3-9m0 18c1.657 0 3-4.03 3-9s-1.343-9-3-9"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="framework-desc">Compact icons — can show multiple (inherited + calculated). Hover for tooltip.</div>
+        </div>
+    </div>
+    
+    <div class="framework-row">
+        <div class="framework-position">Label</div>
+        <div class="framework-content">
+            <div class="framework-items">
+                <span class="attr-label">Attribute Name<span class="required-mark">*</span></span>
+            </div>
+            <div class="framework-desc">The attribute label — asterisk if required, may wrap to multiple lines</div>
+        </div>
+    </div>
+    
+    <div class="framework-row">
+        <div class="framework-position">Actions</div>
+        <div class="framework-content">
+            <div class="framework-items">
+                <span class="ai-badge">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h3l-4 4-4-4h3V9.5C10.8 8.8 10 7.5 10 6a4 4 0 0 1 2-3.5"/>
+                        <path d="M9 18h6M10 22h4"/>
+                    </svg>
+                    2
+                </span>
+                <button class="info-btn" style="position: relative;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4M12 8h.01"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="framework-desc">AI badge (if available) + Info icon — popover includes history link</div>
+        </div>
+    </div>
+</div>
+
+<script>
+const infoData = {
+    vegetable: {
+        description: 'Primary vegetable category for this product.',
+        history: { count: 3, time: '2 hours ago' }
+    },
+    category: {
+        description: 'Inherited from parent "Fresh Produce" and calculated based on product attributes.',
+        history: { count: 1, time: 'Mar 5' }
+    },
+    brand: {
+        description: 'Inherited from parent product family.',
+        history: { count: 2, time: 'Jan 20' }
+    },
+    display: {
+        description: 'Auto-generated from Brand + Product Name + Volume.',
+        history: null
+    },
+    code: {
+        description: 'Synced from SAP ERP. Last sync: Today at 6:00 AM.',
+        history: null
+    },
+    apples: {
+        description: 'Apple varieties currently available for this product.',
+        history: { count: 4, time: '2 hours ago' }
+    },
+    description: {
+        description: 'Marketing description for e-commerce channels.',
+        history: { count: 2, time: '2 hours ago' }
+    }
+};
+
+const popover = document.getElementById('popover');
+const popoverContent = document.getElementById('popover-content');
+const popoverFooter = document.getElementById('popover-footer');
+const overlay = document.getElementById('overlay');
+
+document.querySelectorAll('.info-btn[data-info]').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        const key = this.getAttribute('data-info');
+        const data = infoData[key];
+        
+        if (!data) return;
+        
+        popoverContent.textContent = data.description;
+        
+        if (data.history) {
+            popoverFooter.innerHTML = `
+                <a class="history-link" onclick="openHistory('${key}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    ${data.history.count} change${data.history.count !== 1 ? 's' : ''}
+                    <span class="history-meta">· ${data.history.time}</span>
+                </a>
+            `;
+        } else {
+            popoverFooter.innerHTML = '<span class="no-history">No manual changes</span>';
+        }
+        
+        const rect = this.getBoundingClientRect();
+        popover.style.top = (rect.bottom + 8) + 'px';
+        popover.style.left = rect.left + 'px';
+        
+        popover.classList.add('visible');
+        overlay.classList.add('visible');
+    });
+});
+
+function closePopover() {
+    popover.classList.remove('visible');
+    overlay.classList.remove('visible');
+}
+
+function openHistory(attr) {
+    closePopover();
+    alert('Open history modal for: ' + attr);
+}
+</script>
+
+</body>
+</html>

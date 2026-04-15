@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tooltip with Scalable Actions</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .demo-section {
+      margin-bottom: 48px;
+    }
+
+    .tooltip-row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    /* Tooltip Container */
+    .tooltip {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+      position: relative;
+      min-width: 320px;
+      max-width: 400px;
+    }
+
+    /* Pointer/Arrow */
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 8px solid white;
+      filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.06));
+    }
+
+    /* Main Content Area */
+    .tooltip-content {
+      display: flex;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    /* Image Section */
+    .tooltip-image {
+      width: 120px;
+      height: 120px;
+      min-width: 120px;
+      min-height: 120px;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 12px;
+    }
+
+    .tooltip-image svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    /* Values Section */
+    .tooltip-values {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tooltip-row-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tooltip-label {
+      font-size: 12px;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .tooltip-value {
+      font-size: 14px;
+      color: #222;
+      font-weight: 500;
+    }
+
+    /* Action Links */
+    .tooltip-actions {
+      padding: 12px 16px;
+      border-top: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .action-link {
+      font-size: 13px;
+      color: #0891b2;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .action-link:hover {
+      color: #0e7490;
+      text-decoration: underline;
+    }
+
+    .action-link svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Separator */
+    .action-separator {
+      color: #d1d5db;
+      font-size: 13px;
+      user-select: none;
+    }
+
+    /* Variant Labels */
+    .variant-label {
+      font-size: 11px;
+      color: #999;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    /* Section Divider */
+    hr {
+      border: none;
+      border-top: 1px dashed #ddd;
+      margin: 32px 0;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Dropdown Menu */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-toggle {
+      font-size: 13px;
+      color: #0891b2;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      padding: 0;
+      transition: color 0.15s ease;
+    }
+
+    .dropdown-toggle:hover {
+      color: #0e7490;
+      text-decoration: underline;
+    }
+
+    .dropdown-toggle svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0;
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      min-width: 160px;
+      padding: 6px 0;
+      z-index: 100;
+      display: none;
+    }
+
+    .dropdown:hover .dropdown-menu,
+    .dropdown.open .dropdown-menu {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .dropdown-item:hover {
+      background: #f3f4f6;
+      color: #0891b2;
+    }
+
+    .dropdown-item svg {
+      width: 14px;
+      height: 14px;
+      color: #666;
+    }
+
+    .dropdown-item:hover svg {
+      color: #0891b2;
+    }
+
+    /* Icon-only actions */
+    .action-icon {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .action-icon:hover {
+      background: #f0f0f0;
+      color: #0891b2;
+    }
+
+    .action-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Layout variations */
+    .tooltip-actions.spread {
+      justify-content: space-between;
+    }
+
+    .tooltip-actions.start {
+      justify-content: flex-start;
+    }
+
+    .tooltip-actions.with-overflow {
+      justify-content: space-between;
+    }
+
+    .actions-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1 Action -->
+  <div class="demo-section">
+    <h2>1 Action</h2>
+    <div class="tooltip-row">
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Category</span>
+                <span class="tooltip-value">Electronics</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Price</span>
+                <span class="tooltip-value">$299.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions start">
+            <a class="action-link">Open in Focus View</a>
+          </div>
+        </div>
+        <div class="variant-label">Single action</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- 2 Actions -->
+  <div class="demo-section">
+    <h2>2 Actions</h2>
+    <div class="tooltip-row">
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Category</span>
+                <span class="tooltip-value">Electronics</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Price</span>
+                <span class="tooltip-value">$299.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions start">
+            <a class="action-link">Focus View</a>
+            <span class="action-separator">|</span>
+            <a class="action-link">Fullscreen</a>
+          </div>
+        </div>
+        <div class="variant-label">Inline with separator</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- 3 Actions -->
+  <div class="demo-section">
+    <h2>3 Actions</h2>
+    <p class="note">Pattern scales naturally - just add another separator.</p>
+    <div class="tooltip-row">
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Category</span>
+                <span class="tooltip-value">Electronics</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Price</span>
+                <span class="tooltip-value">$299.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions start">
+            <a class="action-link">Focus View</a>
+            <span class="action-separator">|</span>
+            <a class="action-link">Fullscreen</a>
+            <span class="action-separator">|</span>
+            <a class="action-link">Export</a>
+          </div>
+        </div>
+        <div class="variant-label">3 inline actions</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- 4+ Actions with Overflow -->
+  <div class="demo-section">
+    <h2>4+ Actions - With Overflow Menu</h2>
+    <p class="note">Show primary actions inline, group secondary actions in "More" dropdown. Hover "More" to see menu.</p>
+    <div class="tooltip-row">
+      
+      <!-- Primary + More -->
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Category</span>
+                <span class="tooltip-value">Electronics</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Price</span>
+                <span class="tooltip-value">$299.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions with-overflow">
+            <div class="actions-group">
+              <a class="action-link">Focus View</a>
+              <span class="action-separator">|</span>
+              <a class="action-link">Fullscreen</a>
+            </div>
+            <div class="dropdown">
+              <button class="dropdown-toggle">
+                More
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+              <div class="dropdown-menu">
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Export
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                  </svg>
+                  Share
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
+                  </svg>
+                  Copy Link
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="variant-label">2 primary + overflow menu</div>
+      </div>
+
+      <!-- Single Primary + More -->
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Category</span>
+                <span class="tooltip-value">Electronics</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Price</span>
+                <span class="tooltip-value">$299.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions with-overflow">
+            <a class="action-link">Open in Focus View</a>
+            <div class="dropdown">
+              <button class="dropdown-toggle">
+                More
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+              <div class="dropdown-menu">
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                  Fullscreen
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Export
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                  </svg>
+                  Share
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="variant-label">1 primary + overflow menu</div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Alternative: Kebab Menu -->
+  <div class="demo-section">
+    <h2>Alternative: Icon Menu (Kebab/Dots)</h2>
+    <p class="note">All actions in overflow. Cleaner look, but requires extra click. Good when space is very limited.</p>
+    <div class="tooltip-row">
+      
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Category</span>
+                <span class="tooltip-value">Electronics</span>
+              </div>
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Price</span>
+                <span class="tooltip-value">$299.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions with-overflow">
+            <a class="action-link">Open in Focus View</a>
+            <div class="dropdown">
+              <div class="action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                </svg>
+              </div>
+              <div class="dropdown-menu">
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                  Fullscreen
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Export
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                  </svg>
+                  Share
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="variant-label">Primary link + kebab menu</div>
+      </div>
+
+      <div>
+        <div class="tooltip">
+          <div class="tooltip-content">
+            <div class="tooltip-image">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              No image to display
+            </div>
+            <div class="tooltip-values">
+              <div class="tooltip-row-item">
+                <span class="tooltip-label">Product</span>
+                <span class="tooltip-value">Widget Pro</span>
+              </div>
+            </div>
+          </div>
+          <div class="tooltip-actions with-overflow">
+            <span style="flex: 1;"></span>
+            <div class="dropdown">
+              <div class="action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+              </div>
+              <div class="dropdown-menu">
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5" />
+                  </svg>
+                  Focus View
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                  Fullscreen
+                </div>
+                <div class="dropdown-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Export
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="variant-label">All actions in menu (minimal)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Summary -->
+  <div class="demo-section">
+    <h2>Scaling Strategy Summary</h2>
+    <p class="note" style="max-width: 600px;">
+      <strong>1 action:</strong> Single link, left-aligned<br>
+      <strong>2 actions:</strong> Links with separator<br>
+      <strong>3 actions:</strong> Links with separators (still fits)<br>
+      <strong>4+ actions:</strong> Primary actions visible + "More" dropdown<br><br>
+      This pattern keeps the footer height consistent while gracefully handling growth.
+    </p>
+  </div>
+
+</body>
+</html>

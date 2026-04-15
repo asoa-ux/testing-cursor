@@ -1,0 +1,4818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attribute History UX Patterns - PIM Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-darkest: #f8fafc;
+      --bg-dark: #ffffff;
+      --bg-medium: #f8fafc;
+      --bg-light: #f1f5f9;
+      --bg-hover: #0097a715;
+      --bg-selected: #0097a720;
+      --border: #d1d5db;
+      --border-light: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #0097a7;
+      --accent-hover: #00838f;
+      --accent-glow: #0097a725;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --purple: #8b5cf6;
+      --transition-fast: 150ms ease;
+      --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      padding: 20px 32px;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* Main Layout */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Pattern Selector */
+    .pattern-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .pattern-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .pattern-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .pattern-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .pattern-btn.recommended {
+      position: relative;
+    }
+
+    .pattern-btn.recommended::after {
+      content: '★';
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: var(--warning);
+      color: white;
+      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Pattern Container */
+    .pattern-container {
+      display: none;
+    }
+
+    .pattern-container.active {
+      display: block;
+    }
+
+    /* Pattern Header */
+    .pattern-header {
+      background: white;
+      padding: 20px 24px;
+      border-radius: 12px 12px 0 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pattern-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pattern-header h2 .badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: var(--warning);
+      color: white;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .pattern-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .pros, .cons {
+      font-size: 13px;
+    }
+
+    .pros h4, .cons h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .pros h4 {
+      color: var(--success);
+    }
+
+    .cons h4 {
+      color: var(--error);
+    }
+
+    .pros ul, .cons ul {
+      list-style: none;
+      color: var(--text-secondary);
+    }
+
+    .pros li, .cons li {
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .pros li::before {
+      content: '+';
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .cons li::before {
+      content: '−';
+      position: absolute;
+      left: 0;
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    /* Demo Area */
+    .demo-area {
+      background: white;
+      border-radius: 0 0 12px 12px;
+      overflow: hidden;
+      min-height: 500px;
+    }
+
+    .demo-label {
+      padding: 12px 24px;
+      background: var(--bg-medium);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Product Detail Mock */
+    .product-detail-mock {
+      display: flex;
+      height: 500px;
+    }
+
+    .product-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .product-header-mock {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .product-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .product-title-group h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .product-title-group p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Form Sections */
+    .form-section {
+      margin-bottom: 24px;
+    }
+
+    .form-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Form Row - for attribute fields */
+    .form-row {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+      gap: 16px;
+      position: relative;
+    }
+
+    .form-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Ensure popover can overflow the row */
+    .form-row:has(.popover.open) {
+      z-index: 100;
+    }
+
+    .form-label-col {
+      width: 160px;
+      flex-shrink: 0;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .form-label-required::after {
+      content: '*';
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    .form-value-col {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-input {
+      flex: 1;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-input:read-only {
+      background: var(--bg-medium);
+      cursor: default;
+    }
+
+    /* History Icon Button */
+    .history-icon-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .history-icon-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border);
+      color: var(--accent);
+    }
+
+    .history-icon-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .history-icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Show on hover only */
+    .form-row .history-icon-btn.hover-only {
+      opacity: 0;
+    }
+
+    .form-row:hover .history-icon-btn.hover-only {
+      opacity: 1;
+    }
+
+    /* Change Indicator */
+    .change-indicator {
+      width: 8px;
+      height: 8px;
+      background: var(--warning);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Side Panel */
+    .side-panel {
+      width: 360px;
+      border-left: 1px solid var(--border);
+      background: var(--bg-darkest);
+      display: none;
+      flex-direction: column;
+    }
+
+    .side-panel.open {
+      display: flex;
+    }
+
+    .side-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+    }
+
+    .side-panel-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .side-panel-close {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .side-panel-close:hover {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .side-panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    /* Field Info in Panel */
+    .field-info {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .field-info-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .field-info-value {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    /* History Timeline */
+    .history-timeline {
+      position: relative;
+    }
+
+    .history-timeline::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 24px;
+      bottom: 24px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .history-item {
+      position: relative;
+      padding-left: 36px;
+      padding-bottom: 20px;
+    }
+
+    .history-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .history-dot {
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border: 3px solid var(--accent);
+      border-radius: 50%;
+    }
+
+    .history-item:first-child .history-dot {
+      background: var(--accent);
+    }
+
+    .history-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .history-date {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .history-user {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .history-change {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .history-old-value, .history-new-value {
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+
+    .history-old-value {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      text-decoration: line-through;
+      margin-bottom: 6px;
+    }
+
+    .history-new-value {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .history-restore-btn {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .history-restore-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Popover */
+    .popover-container {
+      position: relative;
+    }
+
+    .popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 320px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+      z-index: 1000;
+      display: none;
+    }
+
+    .popover.open {
+      display: block;
+      animation: popoverIn 0.2s ease;
+    }
+
+    @keyframes popoverIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .popover-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .popover-header h5 {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .popover-content {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+
+    /* Context Menu */
+    .context-menu {
+      position: fixed;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+      z-index: 2000;
+      padding: 6px;
+      min-width: 180px;
+      display: none;
+    }
+
+    .context-menu.open {
+      display: block;
+      animation: popoverIn 0.15s ease;
+    }
+
+    .context-menu-item {
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .context-menu-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .context-menu-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .context-menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* History Mode Toggle */
+    .history-mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-medium);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-mode-toggle label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .toggle-switch {
+      width: 40px;
+      height: 22px;
+      background: var(--border);
+      border-radius: 11px;
+      position: relative;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+
+    .toggle-switch.active::after {
+      left: 20px;
+    }
+
+    /* History Mode Indicators */
+    .history-mode .form-row {
+      position: relative;
+    }
+
+    .history-mode .form-row.has-changes::after {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--warning);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .history-mode .form-row.has-changes .form-input {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    /* Inline Expansion */
+    .inline-history {
+      background: var(--bg-medium);
+      border-radius: 8px;
+      margin-top: 12px;
+      padding: 16px;
+      display: none;
+    }
+
+    .inline-history.open {
+      display: block;
+      animation: slideDown 0.2s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+      }
+      to {
+        opacity: 1;
+        max-height: 400px;
+      }
+    }
+
+    .inline-history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .inline-history-header h5 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* Time Slider */
+    .time-slider-container {
+      padding: 16px 24px;
+      background: var(--bg-medium);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .time-slider-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .time-slider-label span {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .time-slider-date {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      padding: 4px 12px;
+      background: var(--accent-glow);
+      border-radius: 6px;
+    }
+
+    .time-slider {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 151, 167, 0.3);
+    }
+
+    .time-slider-marks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .time-slider-marks span {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Audit Tab Mock */
+    .tabs-mock {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: white;
+    }
+
+    .tab-mock {
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+    }
+
+    .tab-mock:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .tab-mock.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .audit-log {
+      padding: 20px 24px;
+    }
+
+    .audit-filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .audit-filter {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text-secondary);
+      background: white;
+    }
+
+    .audit-filter:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .audit-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .audit-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: var(--bg-medium);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .audit-table td {
+      padding: 14px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .audit-table tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .audit-field-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .audit-value-change {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .audit-old {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .audit-arrow {
+      color: var(--text-muted);
+    }
+
+    .audit-new {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      width: 480px;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 20px;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .modal-content {
+      padding: 20px 24px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-secondary {
+      background: white;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    /* Helper text */
+    .instruction-box {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--purple);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .instruction-box svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Comparison Matrix Styles */
+    .comparison-toggle {
+      margin-bottom: 16px;
+    }
+
+    .comparison-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .comparison-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .comparison-matrix {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .comparison-matrix.open {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .comparison-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      color: white;
+    }
+
+    .comparison-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .comparison-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 6px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .comparison-close:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .comparison-content {
+      padding: 24px;
+    }
+
+    .comparison-table-wrapper {
+      overflow-x: auto;
+      margin-bottom: 32px;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 1000px;
+    }
+
+    .comparison-table th {
+      padding: 12px 10px;
+      text-align: center;
+      font-weight: 600;
+      background: var(--bg-medium);
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .comparison-table th.criteria-col {
+      text-align: left;
+      width: 140px;
+      position: sticky;
+      left: 0;
+      background: var(--bg-medium);
+      z-index: 1;
+    }
+
+    .comparison-table th.recommended-col {
+      background: rgba(0, 151, 167, 0.1);
+      color: var(--accent);
+    }
+
+    .comparison-table td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .comparison-table td.criteria-name {
+      text-align: left;
+      font-weight: 500;
+      color: var(--text-primary);
+      position: sticky;
+      left: 0;
+      background: white;
+      z-index: 1;
+    }
+
+    .comparison-table td.recommended-col {
+      background: rgba(0, 151, 167, 0.05);
+    }
+
+    .comparison-table tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    .comparison-table tr:hover td.recommended-col {
+      background: rgba(0, 151, 167, 0.1);
+    }
+
+    .rating {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .rating.excellent {
+      color: var(--success);
+    }
+
+    .rating.good {
+      color: #22c55e;
+    }
+
+    .rating.fair {
+      color: var(--warning);
+    }
+
+    .rating.poor {
+      color: var(--error);
+    }
+
+    .comparison-summary h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .use-case-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .use-case-card {
+      padding: 16px;
+      background: var(--bg-medium);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .use-case-card.recommended {
+      background: rgba(0, 151, 167, 0.08);
+      border-color: var(--accent);
+    }
+
+    .use-case-card h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .use-case-card.recommended h4 {
+      color: var(--accent);
+    }
+
+    .use-case-card p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .use-case-tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 8px;
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .comparison-recommendation {
+      padding: 20px;
+      background: var(--bg-medium);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .comparison-recommendation h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    .comparison-recommendation p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .comparison-recommendation ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-secondary);
+    }
+
+    .comparison-recommendation li {
+      margin-bottom: 6px;
+    }
+
+    /* Head-to-Head Comparison Styles */
+    .h2h-comparison {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 2px solid var(--border);
+    }
+
+    .h2h-comparison > h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+
+    .h2h-section {
+      margin-bottom: 32px;
+    }
+
+    .h2h-section h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Workflow Comparison */
+    .h2h-workflows {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .h2h-workflow {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .h2h-workflow-header {
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .h2h-workflow-header.header-pattern {
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      color: white;
+    }
+
+    .h2h-workflow-header.attr-pattern {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+    }
+
+    .h2h-steps {
+      padding: 16px;
+    }
+
+    .h2h-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .h2h-step.empty {
+      opacity: 0.4;
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      background: var(--bg-medium);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .h2h-total {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    /* H2H Table */
+    .h2h-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .h2h-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      background: var(--bg-medium);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .h2h-table th.header-col {
+      background: rgba(0, 151, 167, 0.1);
+      color: var(--accent);
+    }
+
+    .h2h-table th.attr-col {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--purple);
+    }
+
+    .h2h-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+
+    .h2h-table td.scenario {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .h2h-table tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    .winner {
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .winner.header {
+      background: rgba(0, 151, 167, 0.15);
+      color: var(--accent);
+    }
+
+    .winner.attr {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--purple);
+    }
+
+    .winner.tie {
+      background: var(--bg-medium);
+      color: var(--text-muted);
+    }
+
+    /* Persona Grid */
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .persona-card {
+      padding: 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .persona-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .persona-icon {
+      font-size: 20px;
+    }
+
+    .persona-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .persona-card p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .persona-verdict {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .persona-verdict.header {
+      background: rgba(0, 151, 167, 0.1);
+      color: var(--accent);
+    }
+
+    .persona-verdict.attr {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--purple);
+    }
+
+    /* Scorecard */
+    .scorecard {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .scorecard-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .scorecard-criteria {
+      width: 160px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .scorecard-bars {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .score-bar {
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      min-width: 80px;
+    }
+
+    .score-bar.header {
+      background: linear-gradient(90deg, #0097a7, #00796b);
+    }
+
+    .score-bar.attr {
+      background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+    }
+
+    /* Decision Box */
+    .decision-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .decision-choose {
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .decision-choose.header {
+      background: rgba(0, 151, 167, 0.08);
+      border: 1px solid rgba(0, 151, 167, 0.2);
+    }
+
+    .decision-choose.attr {
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .decision-choose h5 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .decision-choose.header h5 {
+      color: var(--accent);
+    }
+
+    .decision-choose.attr h5 {
+      color: var(--purple);
+    }
+
+    .decision-choose ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .decision-choose li {
+      margin-bottom: 6px;
+    }
+
+    /* Final Section */
+    .h2h-final {
+      padding: 24px;
+      background: var(--bg-medium);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .h2h-final h4 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+    }
+
+    .h2h-final p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .h2h-final p:last-child {
+      margin-bottom: 0;
+    }
+
+    .h2h-tip {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: 6px;
+      color: var(--warning) !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .h2h-workflows,
+      .decision-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Header Button Pattern Styles */
+    .header-with-history {
+      flex-wrap: wrap;
+    }
+
+    .product-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .meta-separator {
+      color: var(--border);
+    }
+
+    .view-history-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+      margin-left: 8px;
+    }
+
+    .view-history-link:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .view-history-link svg {
+      color: var(--accent);
+    }
+
+    /* Header History Panel */
+    .header-history-panel {
+      width: 380px;
+    }
+
+    .history-panel-filter {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: white;
+    }
+
+    .filter-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .history-filter-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: white;
+      cursor: pointer;
+    }
+
+    .history-filter-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .history-panel-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-panel-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-light);
+      transition: background var(--transition-fast);
+    }
+
+    .history-panel-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .history-panel-item.hidden {
+      display: none;
+    }
+
+    .history-panel-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .history-panel-date {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .history-panel-user {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .history-panel-user::before {
+      content: '·';
+      margin-right: 8px;
+    }
+
+    .history-panel-attr {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .history-panel-change {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .history-panel-values {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .panel-old {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .panel-arrow {
+      color: var(--text-muted);
+    }
+
+    .panel-new {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .panel-value {
+      font-size: 12px;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+
+    .history-panel-footer-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-medium);
+      border-top: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+    }
+
+    .history-panel-footer-link:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Content Type Labels */
+    .content-type-label {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      background: var(--bg-medium);
+      color: var(--text-muted);
+      border-radius: 3px;
+      margin-left: 6px;
+    }
+
+    /* Long Text Changes */
+    .long-text-change {
+      margin-top: 6px;
+    }
+
+    .long-text-preview {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .long-text-preview .panel-old,
+    .long-text-preview .panel-new {
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .expand-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .expand-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .expand-btn.expanded svg {
+      transform: rotate(180deg);
+    }
+
+    .long-text-full {
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--bg-medium);
+      border-radius: 6px;
+      animation: slideDown 0.2s ease;
+    }
+
+    .full-text-block {
+      margin-bottom: 12px;
+    }
+
+    .full-text-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .full-text-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .full-text-block.old .full-text-label {
+      color: var(--error);
+    }
+
+    .full-text-block.new .full-text-label {
+      color: var(--success);
+    }
+
+    .full-text-block p {
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .full-text-block.old p {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--text-secondary);
+      text-decoration: line-through;
+    }
+
+    .full-text-block.new p {
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--text-primary);
+    }
+
+    /* Numeric Changes */
+    .numeric-change {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .numeric-change code {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
+    .numeric-change code.panel-old {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      text-decoration: line-through;
+    }
+
+    .numeric-change code.panel-new {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    /* Reorder Detail */
+    .reorder-detail {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* Empty to Value / Value Cleared */
+    .empty-to-value,
+    .value-cleared {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .empty-indicator {
+      padding: 2px 8px;
+      background: var(--bg-medium);
+      color: var(--text-muted);
+      border-radius: 4px;
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    /* Attribute-level history icon positioning */
+    .attr-label-with-history {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    /* Popover in attribute label uses fixed positioning to avoid overflow clipping */
+    .attr-label-with-history .light-popover {
+      position: fixed;
+      top: auto;
+      left: auto;
+      right: auto;
+    }
+
+    .attr-history-btn {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+    }
+
+    .attr-history-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Multi-value badge on label */
+    .multi-value-badge {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 5px;
+      background: var(--purple);
+      color: white;
+      border-radius: 4px;
+      margin-left: 4px;
+    }
+
+    /* Multi-valued inputs container */
+    .multi-value-row {
+      align-items: flex-start;
+    }
+
+    .multi-value-row .form-label-col {
+      padding-top: 10px;
+    }
+
+    .multi-value-inputs {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .multi-value-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .multi-value-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .multi-value-number {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-medium);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .multi-value-item .form-input {
+      flex: 1;
+    }
+
+    .multi-value-remove {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all var(--transition-fast);
+    }
+
+    .multi-value-item:hover .multi-value-remove {
+      opacity: 1;
+    }
+
+    .multi-value-remove:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    .multi-value-add {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+      margin-top: 4px;
+    }
+
+    .multi-value-add:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    /* Lightweight Popover Styles */
+    .light-popover {
+      width: 320px;
+      padding: 0;
+      z-index: 1001;
+      display: none;
+    }
+
+    .light-popover.open {
+      display: block;
+    }
+
+    .light-popover-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-medium);
+      border-bottom: 1px solid var(--border);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .light-popover-field {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .light-popover-close {
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .light-popover-close:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .light-popover-content {
+      padding: 8px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .light-history-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .light-history-item:last-child {
+      border-bottom: none;
+    }
+
+    .light-history-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .light-history-date {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .light-history-user {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .light-history-user::before {
+      content: '·';
+      margin-right: 8px;
+    }
+
+    .light-history-values {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .light-old {
+      color: var(--text-muted);
+      text-decoration: line-through;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .light-arrow {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .light-new {
+      color: var(--success);
+      font-weight: 500;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .light-history-empty {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .light-popover-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-medium);
+      border-top: 1px solid var(--border);
+      border-radius: 0 0 10px 10px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+    }
+
+    .light-popover-link:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Multi-value badge in popover header */
+    .light-popover-multi-badge {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 6px;
+      background: var(--purple);
+      color: white;
+      border-radius: 4px;
+      margin-left: auto;
+      margin-right: 8px;
+    }
+
+    /* Change types for history */
+    .light-history-change {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .change-type {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-self: flex-start;
+    }
+
+    .change-type.added {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .change-type.removed {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+    }
+
+    .change-type.changed {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+
+    .change-type.reordered {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--purple);
+    }
+
+    .change-value {
+      font-size: 12px;
+      color: var(--text-primary);
+      padding: 4px 0;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text-primary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      z-index: 4000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Attribute History - UX Patterns</h1>
+  <p>Interactive prototypes showing different approaches for viewing attribute value history in PIM</p>
+</div>
+
+<div class="main-container">
+  <!-- Comparison Matrix Toggle -->
+  <div class="comparison-toggle">
+    <button class="comparison-btn" onclick="toggleComparison()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+      View Comparison Matrix
+    </button>
+  </div>
+
+  <!-- Comparison Matrix -->
+  <div class="comparison-matrix" id="comparisonMatrix">
+    <div class="comparison-header">
+      <h2>Pattern Comparison Matrix</h2>
+      <button class="comparison-close" onclick="toggleComparison()">×</button>
+    </div>
+    <div class="comparison-content">
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th class="criteria-col">Criteria</th>
+              <th class="recommended-col">Header Button + Panel ★</th>
+              <th>Attribute-Level Popover</th>
+              <th>Inline Icon + Popover</th>
+              <th>Context Menu</th>
+              <th>Field Selection</th>
+              <th>Side Panel</th>
+              <th>History Mode</th>
+              <th>Time Slider</th>
+              <th>Audit Tab</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="criteria-name">UI Cleanliness</td>
+              <td class="recommended-col"><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating poor">●●○○○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating poor">●●○○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Clicks for Single Field</td>
+              <td class="recommended-col"><span class="rating fair">2-3</span></td>
+              <td><span class="rating excellent">1</span></td>
+              <td><span class="rating excellent">1</span></td>
+              <td><span class="rating good">2</span></td>
+              <td><span class="rating good">2</span></td>
+              <td><span class="rating excellent">1</span></td>
+              <td><span class="rating fair">2-3</span></td>
+              <td><span class="rating poor">3+</span></td>
+              <td><span class="rating poor">3+</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Multi-valued Support</td>
+              <td class="recommended-col"><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating poor">●○○○○</span></td>
+              <td><span class="rating fair">●●●○○</span></td>
+              <td><span class="rating fair">●●●○○</span></td>
+              <td><span class="rating poor">●○○○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Discoverability</td>
+              <td class="recommended-col"><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating poor">●○○○○</span></td>
+              <td><span class="rating fair">●●○○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Context Preserved</td>
+              <td class="recommended-col"><span class="rating fair">●●○○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating fair">●●○○○</span></td>
+              <td><span class="rating poor">●○○○○</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Scales to 100+ Attrs</td>
+              <td class="recommended-col"><span class="rating good">●●●●○</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating poor">●●○○○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating poor">●●○○○</span></td>
+              <td><span class="rating fair">●●●○○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Mobile/Touch</td>
+              <td class="recommended-col"><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating poor">●○○○○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●○○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+              <td><span class="rating good">●●●●○</span></td>
+              <td><span class="rating excellent">●●●●●</span></td>
+            </tr>
+            <tr>
+              <td class="criteria-name">Implementation</td>
+              <td class="recommended-col"><span class="rating good">Medium</span></td>
+              <td><span class="rating good">Medium</span></td>
+              <td><span class="rating excellent">Simple</span></td>
+              <td><span class="rating excellent">Simple</span></td>
+              <td><span class="rating good">Medium</span></td>
+              <td><span class="rating good">Medium</span></td>
+              <td><span class="rating good">Medium</span></td>
+              <td><span class="rating poor">Complex</span></td>
+              <td><span class="rating good">Medium</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="comparison-summary">
+        <h3>Best Use Cases</h3>
+        <div class="use-case-grid">
+          <div class="use-case-card recommended">
+            <h4>Header Button + Panel ★</h4>
+            <p>Best when history is an <strong>occasional need for minority of users</strong>. Keeps UI clean, provides access when needed.</p>
+            <span class="use-case-tag">Recommended for most PIM systems</span>
+          </div>
+          <div class="use-case-card">
+            <h4>Attribute-Level Popover</h4>
+            <p>Best when users <strong>frequently check specific attributes</strong> and need quick, contextual access.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>Inline Icon + Popover</h4>
+            <p>Best for <strong>simple forms with few single-valued attributes</strong>. Not ideal for complex PIM.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>Context Menu</h4>
+            <p>Best for <strong>power users on desktop</strong> who know the feature exists. Poor discoverability.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>Field Selection Mode</h4>
+            <p>Best for <strong>touch interfaces</strong> where hover isn't available. Good progressive disclosure.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>Side Panel (Per-Field)</h4>
+            <p>Best when users need <strong>detailed history with restore capability</strong> for individual fields.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>History Mode Toggle</h4>
+            <p>Best for <strong>reviewing/approving changes</strong> before publishing. Shows all changes at once.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>Time Slider</h4>
+            <p>Best for <strong>compliance/audit scenarios</strong> requiring "state at point in time" views.</p>
+          </div>
+          <div class="use-case-card">
+            <h4>Audit Log Tab</h4>
+            <p>Best as a <strong>complement to other patterns</strong>. Full history with filtering for deep investigation.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="comparison-recommendation">
+        <h3>Final Recommendation</h3>
+        <p>For a PIM system where <strong>most users focus on editing</strong> and history checking is occasional:</p>
+        <ol>
+          <li><strong>Header Button + Panel</strong> for quick history access with filtering</li>
+          <li><strong>Revisions Tab</strong> (future) for full audit trail, comparisons, and restore</li>
+        </ol>
+        <p>This combination keeps the editing experience clean while providing comprehensive history access when needed.</p>
+      </div>
+
+      <!-- Detailed Head-to-Head Comparison -->
+      <div class="h2h-comparison">
+        <h3>Head-to-Head: Header Button vs Attribute-Level Popover</h3>
+        
+        <div class="h2h-section">
+          <h4>User Workflow Comparison</h4>
+          <div class="h2h-workflows">
+            <div class="h2h-workflow">
+              <div class="h2h-workflow-header header-pattern">
+                <span class="h2h-label">Header Button + Panel</span>
+              </div>
+              <div class="h2h-steps">
+                <div class="h2h-step">
+                  <span class="step-num">1</span>
+                  <span class="step-text">User notices something odd in a field</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">2</span>
+                  <span class="step-text">Looks up to header, clicks "View history"</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">3</span>
+                  <span class="step-text">Panel opens showing all recent changes</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">4</span>
+                  <span class="step-text">Uses filter dropdown to find specific attribute</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">5</span>
+                  <span class="step-text">Views history for that attribute</span>
+                </div>
+                <div class="h2h-total">Total: 3-4 clicks + scrolling/filtering</div>
+              </div>
+            </div>
+            <div class="h2h-workflow">
+              <div class="h2h-workflow-header attr-pattern">
+                <span class="h2h-label">Attribute-Level Popover</span>
+              </div>
+              <div class="h2h-steps">
+                <div class="h2h-step">
+                  <span class="step-num">1</span>
+                  <span class="step-text">User notices something odd in a field</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">2</span>
+                  <span class="step-text">Hovers over the attribute label</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">3</span>
+                  <span class="step-text">Clicks the history icon that appears</span>
+                </div>
+                <div class="h2h-step">
+                  <span class="step-num">4</span>
+                  <span class="step-text">Popover shows history for that attribute</span>
+                </div>
+                <div class="h2h-step empty">
+                  <span class="step-num">—</span>
+                  <span class="step-text">(no additional step needed)</span>
+                </div>
+                <div class="h2h-total">Total: 1 click (+ hover)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="h2h-section">
+          <h4>Scenario Analysis</h4>
+          <table class="h2h-table">
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th class="header-col">Header Button</th>
+                <th class="attr-col">Attribute Popover</th>
+                <th>Winner</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="scenario">"Who changed this specific field?"</td>
+                <td>3-4 clicks, need to filter</td>
+                <td>1 click, instant</td>
+                <td class="winner attr">Attribute</td>
+              </tr>
+              <tr>
+                <td class="scenario">"What changed on this product recently?"</td>
+                <td>1 click, see all changes</td>
+                <td>Must check each field</td>
+                <td class="winner header">Header</td>
+              </tr>
+              <tr>
+                <td class="scenario">"Review changes before approval"</td>
+                <td>Good — see all at once</td>
+                <td>Poor — tedious per-field</td>
+                <td class="winner header">Header</td>
+              </tr>
+              <tr>
+                <td class="scenario">"Quick sanity check on one value"</td>
+                <td>Slow — open panel, filter</td>
+                <td>Fast — hover, click, done</td>
+                <td class="winner attr">Attribute</td>
+              </tr>
+              <tr>
+                <td class="scenario">User scrolled deep in long form</td>
+                <td>Must scroll up to header</td>
+                <td>Icon is right there</td>
+                <td class="winner attr">Attribute</td>
+              </tr>
+              <tr>
+                <td class="scenario">User doesn't know attribute name</td>
+                <td>Hard to find in filter</td>
+                <td>Click what you see</td>
+                <td class="winner attr">Attribute</td>
+              </tr>
+              <tr>
+                <td class="scenario">Form has 100+ attributes</td>
+                <td>Filter dropdown crowded</td>
+                <td>Icons only on labels, scales fine</td>
+                <td class="winner attr">Attribute</td>
+              </tr>
+              <tr>
+                <td class="scenario">User rarely checks history</td>
+                <td>Clean UI, no visual noise</td>
+                <td>Icons add subtle clutter</td>
+                <td class="winner header">Header</td>
+              </tr>
+              <tr>
+                <td class="scenario">Mobile/tablet user</td>
+                <td>Easy to tap button</td>
+                <td>Hover doesn't work, needs tap</td>
+                <td class="winner tie">Tie</td>
+              </tr>
+              <tr>
+                <td class="scenario">New user discovering features</td>
+                <td>Button is obvious</td>
+                <td>Icons might be missed</td>
+                <td class="winner header">Header</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="h2h-section">
+          <h4>Persona Fit</h4>
+          <div class="persona-grid">
+            <div class="persona-card">
+              <div class="persona-header">
+                <span class="persona-icon">📝</span>
+                <span class="persona-name">Data Entry Clerk</span>
+              </div>
+              <p>Focuses on entering/updating data. Rarely checks history. Values clean, fast UI.</p>
+              <div class="persona-verdict header">Better: Header Button</div>
+            </div>
+            <div class="persona-card">
+              <div class="persona-header">
+                <span class="persona-icon">🔍</span>
+                <span class="persona-name">Data Steward / QA</span>
+              </div>
+              <p>Reviews data quality, investigates discrepancies. Frequently asks "who changed this?"</p>
+              <div class="persona-verdict attr">Better: Attribute Popover</div>
+            </div>
+            <div class="persona-card">
+              <div class="persona-header">
+                <span class="persona-icon">✅</span>
+                <span class="persona-name">Approver / Manager</span>
+              </div>
+              <p>Reviews changes before publishing. Needs to see all recent changes at once.</p>
+              <div class="persona-verdict header">Better: Header Button</div>
+            </div>
+            <div class="persona-card">
+              <div class="persona-header">
+                <span class="persona-icon">📊</span>
+                <span class="persona-name">Marketing Manager</span>
+              </div>
+              <p>Occasionally updates descriptions. Might check history if content looks wrong.</p>
+              <div class="persona-verdict header">Better: Header Button</div>
+            </div>
+            <div class="persona-card">
+              <div class="persona-header">
+                <span class="persona-icon">🔧</span>
+                <span class="persona-name">Technical Admin</span>
+              </div>
+              <p>Troubleshoots data issues. Often needs to trace specific attribute changes.</p>
+              <div class="persona-verdict attr">Better: Attribute Popover</div>
+            </div>
+            <div class="persona-card">
+              <div class="persona-header">
+                <span class="persona-icon">📦</span>
+                <span class="persona-name">Supplier</span>
+              </div>
+              <p>External user entering product data. Unfamiliar with system, needs simple UI.</p>
+              <div class="persona-verdict header">Better: Header Button</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="h2h-section">
+          <h4>Summary Scorecard</h4>
+          <div class="scorecard">
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">UI Cleanliness</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 100%"><span>Header: 5/5</span></div>
+                <div class="score-bar attr" style="width: 60%"><span>Attr: 3/5</span></div>
+              </div>
+            </div>
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">Speed (single field)</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 40%"><span>Header: 2/5</span></div>
+                <div class="score-bar attr" style="width: 100%"><span>Attr: 5/5</span></div>
+              </div>
+            </div>
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">Speed (overview)</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 100%"><span>Header: 5/5</span></div>
+                <div class="score-bar attr" style="width: 20%"><span>Attr: 1/5</span></div>
+              </div>
+            </div>
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">Discoverability</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 100%"><span>Header: 5/5</span></div>
+                <div class="score-bar attr" style="width: 60%"><span>Attr: 3/5</span></div>
+              </div>
+            </div>
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">Context Preservation</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 40%"><span>Header: 2/5</span></div>
+                <div class="score-bar attr" style="width: 80%"><span>Attr: 4/5</span></div>
+              </div>
+            </div>
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">Multi-valued Attrs</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 100%"><span>Header: 5/5</span></div>
+                <div class="score-bar attr" style="width: 100%"><span>Attr: 5/5</span></div>
+              </div>
+            </div>
+            <div class="scorecard-row">
+              <span class="scorecard-criteria">Scalability (100+ attrs)</span>
+              <div class="scorecard-bars">
+                <div class="score-bar header" style="width: 60%"><span>Header: 3/5</span></div>
+                <div class="score-bar attr" style="width: 80%"><span>Attr: 4/5</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="h2h-section">
+          <h4>Decision Framework</h4>
+          <div class="decision-box">
+            <div class="decision-choose header">
+              <h5>Choose Header Button + Panel if:</h5>
+              <ul>
+                <li>Most users focus on editing, not auditing</li>
+                <li>History checking is an occasional need (< 10% of interactions)</li>
+                <li>You have a separate Revisions tab for deep auditing</li>
+                <li>UI cleanliness is a top priority</li>
+                <li>Many users are external/unfamiliar with the system</li>
+              </ul>
+            </div>
+            <div class="decision-choose attr">
+              <h5>Choose Attribute-Level Popover if:</h5>
+              <ul>
+                <li>Data quality/stewardship is a primary workflow</li>
+                <li>Users frequently investigate "who changed what"</li>
+                <li>Quick, contextual access is valued over clean UI</li>
+                <li>Forms are long and scrolling to header is annoying</li>
+                <li>Power users who will learn and appreciate the feature</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="h2h-final">
+          <h4>Bottom Line</h4>
+          <p><strong>Header Button + Panel</strong> is better for <em>most PIM systems</em> because editing is the primary task and history is secondary. It keeps the UI clean for the majority of users while still providing access when needed.</p>
+          <p><strong>Attribute-Level Popover</strong> is better when <em>data quality investigation is a core workflow</em> and users will regularly need to trace changes at the field level. The slight UI clutter is justified by the significant workflow improvement for those users.</p>
+          <p class="h2h-tip">💡 <strong>Tip:</strong> You don't have to choose just one. The Header Button could open a panel that also highlights which fields changed recently — combining the clean UI with at-a-glance awareness.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern Navigation -->
+  <div class="pattern-nav">
+    <button class="pattern-btn recommended active" data-pattern="header">Header Button + Panel (Recommended)</button>
+    <button class="pattern-btn" data-pattern="0">Attribute-Level Popover</button>
+    <button class="pattern-btn" data-pattern="1">1. Inline Icon + Popover</button>
+    <button class="pattern-btn" data-pattern="2">2. Context Menu</button>
+    <button class="pattern-btn" data-pattern="3">3. Field Selection Mode</button>
+    <button class="pattern-btn" data-pattern="4">4. Side Panel</button>
+    <button class="pattern-btn" data-pattern="5">5. History Mode Toggle</button>
+    <button class="pattern-btn" data-pattern="6">6. Time Slider</button>
+    <button class="pattern-btn" data-pattern="7">7. Audit Log Tab</button>
+  </div>
+
+  <!-- Pattern: Header Button + Panel (Recommended) -->
+  <div class="pattern-container active" data-pattern="header">
+    <div class="pattern-header">
+      <h2>Header Button + Side Panel <span class="badge">Recommended</span></h2>
+      <p>A single "View history" link in the product header opens a side panel showing all recent changes. Users can filter by attribute if needed. The form UI stays completely clean — no icons or indicators on individual fields.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Form UI stays 100% clean — zero clutter</li>
+            <li>Single, obvious entry point for history</li>
+            <li>Works for all attribute types without special handling</li>
+            <li>Majority of users (who don't need history) unaffected</li>
+            <li>Complements future Revisions tab naturally</li>
+            <li>Filter handles the "find specific attribute" case</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>2-3 clicks to check a specific attribute's history</li>
+            <li>Must know attribute name to filter (or scroll)</li>
+            <li>No at-a-glance indication of what changed</li>
+          </ul>
+        </div>
+      </div>
+      <div class="instruction-box" style="margin-top: 16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span><strong>Best for:</strong> When history checking is an occasional need for a minority of users. Keep the UI simple for everyone, provide access for those who need it.</span>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Click "View history" in the product header to open the side panel</div>
+      <div class="product-detail-mock">
+        <div class="product-main" id="headerPatternMain">
+          <div class="product-header-mock header-with-history">
+            <div class="product-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="product-title-group">
+              <h3>Champagne - Ruinart - 750ml</h3>
+              <div class="product-meta-row">
+                <span>SKU: RUI-CHAMP-750</span>
+                <span class="meta-separator">•</span>
+                <span>Last edited: 2 hours ago by John Smith</span>
+                <button class="view-history-link" onclick="openHeaderHistoryPanel()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  View history
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Marketing Descriptions</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Long</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Premium French champagne from the historic Ruinart house, established in 1729.">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Web</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche.">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Feature Bullets</label>
+              </div>
+              <div class="form-value-col multi-value-inputs">
+                <div class="multi-value-list">
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">1</span>
+                    <input type="text" class="form-input" value="Oldest established Champagne house">
+                  </div>
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">2</span>
+                    <input type="text" class="form-input" value="Founded in 1729">
+                  </div>
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">3</span>
+                    <input type="text" class="form-input" value="Perfect for celebrations">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Identifiers</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label form-label-required">SKU</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="RUI-CHAMP-750" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">GTIN</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="3185370288672">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-panel header-history-panel" id="headerHistoryPanel">
+          <div class="side-panel-header">
+            <h4>Product History</h4>
+            <button class="side-panel-close" onclick="closeHeaderHistoryPanel()">×</button>
+          </div>
+          <div class="history-panel-filter">
+            <label class="filter-label">Filter by attribute:</label>
+            <select class="history-filter-select" id="historyAttrFilter" onchange="filterHistoryByAttr(this.value)">
+              <option value="all">All attributes</option>
+              <option value="description-long">Description, Long</option>
+              <option value="description-web">Description, Web</option>
+              <option value="feature-bullets">Feature Bullets</option>
+              <option value="sku">SKU</option>
+              <option value="gtin">GTIN</option>
+            </select>
+          </div>
+          <div class="side-panel-content" id="historyPanelContent">
+            <div class="history-panel-list">
+              <!-- LONG TEXT: Truncated with expand option -->
+              <div class="history-panel-item" data-attr="description-long">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Today, 2:34 PM</span>
+                  <span class="history-panel-user">John Smith</span>
+                </div>
+                <div class="history-panel-attr">Description, Long</div>
+                <div class="history-panel-change">
+                  <span class="change-type changed">Changed</span>
+                  <span class="content-type-label">Long text</span>
+                  <div class="long-text-change">
+                    <div class="long-text-preview">
+                      <span class="panel-old">"Luxury champagne from Ruinart, a prestigious..."</span>
+                      <span class="panel-arrow">→</span>
+                      <span class="panel-new">"Premium French champagne from the historic..."</span>
+                    </div>
+                    <button class="expand-btn" onclick="toggleExpand(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="m6 9 6 6 6-6"/></svg>
+                      Show full text
+                    </button>
+                    <div class="long-text-full" style="display: none;">
+                      <div class="full-text-block old">
+                        <span class="full-text-label">Previous:</span>
+                        <p>"Luxury champagne from Ruinart, a prestigious French house known for its exceptional quality and heritage dating back centuries."</p>
+                      </div>
+                      <div class="full-text-block new">
+                        <span class="full-text-label">New:</span>
+                        <p>"Premium French champagne from the historic Ruinart house, established in 1729. Features elegant notes of citrus, brioche, and white flowers with a refined finish."</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MULTI-VALUE: Action language (Removed) -->
+              <div class="history-panel-item" data-attr="feature-bullets">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Today, 11:45 AM</span>
+                  <span class="history-panel-user">John Smith</span>
+                </div>
+                <div class="history-panel-attr">Feature Bullets</div>
+                <div class="history-panel-change">
+                  <span class="change-type removed">Removed</span>
+                  <span class="content-type-label">Multi-valued</span>
+                  <span class="panel-value">"Award-winning taste"</span>
+                </div>
+              </div>
+
+              <!-- NUMERIC: Simple delta -->
+              <div class="history-panel-item" data-attr="gtin">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Jan 18, 11:20 AM</span>
+                  <span class="history-panel-user">Maria Garcia</span>
+                </div>
+                <div class="history-panel-attr">GTIN</div>
+                <div class="history-panel-change">
+                  <span class="change-type changed">Changed</span>
+                  <span class="content-type-label">Identifier</span>
+                  <div class="history-panel-values numeric-change">
+                    <code class="panel-old">3185370288671</code>
+                    <span class="panel-arrow">→</span>
+                    <code class="panel-new">3185370288672</code>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MULTI-VALUE: Action language (Reordered) -->
+              <div class="history-panel-item" data-attr="feature-bullets">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Jan 17, 9:30 AM</span>
+                  <span class="history-panel-user">John Smith</span>
+                </div>
+                <div class="history-panel-attr">Feature Bullets</div>
+                <div class="history-panel-change">
+                  <span class="change-type reordered">Reordered</span>
+                  <span class="content-type-label">Multi-valued</span>
+                  <span class="panel-value reorder-detail">Moved "Founded in 1729" from position 3 → 2</span>
+                </div>
+              </div>
+
+              <!-- MULTI-VALUE: Action language (Added) -->
+              <div class="history-panel-item" data-attr="feature-bullets">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Jan 16, 3:20 PM</span>
+                  <span class="history-panel-user">Maria Garcia</span>
+                </div>
+                <div class="history-panel-attr">Feature Bullets</div>
+                <div class="history-panel-change">
+                  <span class="change-type added">Added</span>
+                  <span class="content-type-label">Multi-valued</span>
+                  <span class="panel-value">"Perfect for celebrations"</span>
+                </div>
+              </div>
+
+              <!-- EMPTY TO VALUE: Special formatting -->
+              <div class="history-panel-item" data-attr="description-web">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Jan 15, 2:45 PM</span>
+                  <span class="history-panel-user">Maria Garcia</span>
+                </div>
+                <div class="history-panel-attr">Description, Web</div>
+                <div class="history-panel-change">
+                  <span class="change-type added">Set</span>
+                  <span class="content-type-label">Was empty</span>
+                  <div class="empty-to-value">
+                    <span class="empty-indicator">(empty)</span>
+                    <span class="panel-arrow">→</span>
+                    <span class="panel-new">"Elegant champagne with notes of citrus and brioche."</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SHORT TEXT: Simple delta -->
+              <div class="history-panel-item" data-attr="description-long">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Jan 15, 10:22 AM</span>
+                  <span class="history-panel-user">Maria Garcia</span>
+                </div>
+                <div class="history-panel-attr">Product Name</div>
+                <div class="history-panel-change">
+                  <span class="change-type changed">Changed</span>
+                  <span class="content-type-label">Short text</span>
+                  <div class="history-panel-values">
+                    <span class="panel-old">"Ruinart Champagne 750ml"</span>
+                    <span class="panel-arrow">→</span>
+                    <span class="panel-new">"Champagne - Ruinart - 750ml"</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- VALUE CLEARED: Special formatting -->
+              <div class="history-panel-item" data-attr="description-long">
+                <div class="history-panel-meta">
+                  <span class="history-panel-date">Jan 14, 4:10 PM</span>
+                  <span class="history-panel-user">System</span>
+                </div>
+                <div class="history-panel-attr">Promotional Text</div>
+                <div class="history-panel-change">
+                  <span class="change-type removed">Cleared</span>
+                  <span class="content-type-label">Value removed</span>
+                  <div class="value-cleared">
+                    <span class="panel-old">"Limited time offer - 20% off!"</span>
+                    <span class="panel-arrow">→</span>
+                    <span class="empty-indicator">(cleared)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a href="#" class="history-panel-footer-link" onclick="event.preventDefault(); showRevisionsToast();">
+            <span>View full history in Revisions tab</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 0: Attribute-Level Popover -->
+  <div class="pattern-container" data-pattern="0">
+    <div class="pattern-header">
+      <h2>Attribute-Level Popover</h2>
+      <p>A compact popover showing only the last 2-3 changes with a link to the full Revisions tab. The history icon is positioned at the <strong>attribute level</strong> (on the label), not on each input field. For multi-valued attributes, one icon covers all values and shows changes like "Added", "Removed", or "Reordered".</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Quick answers without leaving context</li>
+            <li>Avoids duplicating the full Revisions tab</li>
+            <li>Clear escalation path: quick check → full history</li>
+            <li>Minimal UI footprint — one icon per attribute, not per value</li>
+            <li>Works for both single and multi-valued attributes</li>
+            <li>Shows change types: Added, Removed, Changed, Reordered</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Requires navigation for full history</li>
+            <li>Can't restore directly from popover</li>
+          </ul>
+        </div>
+      </div>
+      <div class="instruction-box" style="margin-top: 16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span><strong>Best for:</strong> When you already have (or plan to build) a dedicated Revisions tab. The popover handles "who changed this?" while the tab handles full audits, comparisons, and restores.</span>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — History icon is at the ATTRIBUTE level (on the label), not on each input. Hover over labels to see the icon.</div>
+      <div class="product-detail-mock">
+        <div class="product-main">
+          <div class="product-header-mock">
+            <div class="product-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="product-title-group">
+              <h3>Champagne - Ruinart - 750ml</h3>
+              <p>SKU: RUI-CHAMP-750 • Last modified: 2 hours ago</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Marketing Descriptions</div>
+            
+            <!-- Single-valued attribute: icon on label -->
+            <div class="form-row">
+              <div class="form-label-col popover-container attr-label-with-history">
+                <label class="form-label">Description, Long</label>
+                <button class="history-icon-btn attr-history-btn hover-only" onclick="toggleLightPopover(this, 'Description, Long')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover light-popover">
+                  <div class="light-popover-header">
+                    <span class="light-popover-field">Description, Long</span>
+                    <button class="light-popover-close" onclick="closeLightPopover()">×</button>
+                  </div>
+                  <div class="light-popover-content">
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Today, 2:34 PM</span>
+                        <span class="light-history-user">John Smith</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type changed">Changed</span>
+                        <div class="light-history-values">
+                          <span class="light-old">"Luxury champagne from Ruinart."</span>
+                          <span class="light-arrow">→</span>
+                          <span class="light-new">"Premium French champagne..."</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Jan 15, 10:22 AM</span>
+                        <span class="light-history-user">Maria Garcia</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type changed">Changed</span>
+                        <div class="light-history-values">
+                          <span class="light-old">"Ruinart Champagne 750ml"</span>
+                          <span class="light-arrow">→</span>
+                          <span class="light-new">"Luxury champagne from..."</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="#" class="light-popover-link" onclick="event.preventDefault(); showRevisionsToast();">
+                    <span>View full history in Revisions tab</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Premium French champagne from the historic Ruinart house, established in 1729.">
+              </div>
+            </div>
+
+            <!-- Single-valued attribute: no changes -->
+            <div class="form-row">
+              <div class="form-label-col popover-container attr-label-with-history">
+                <label class="form-label">Description, Web</label>
+                <button class="history-icon-btn attr-history-btn hover-only" onclick="toggleLightPopover(this, 'Description, Web')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover light-popover">
+                  <div class="light-popover-header">
+                    <span class="light-popover-field">Description, Web</span>
+                    <button class="light-popover-close" onclick="closeLightPopover()">×</button>
+                  </div>
+                  <div class="light-popover-content">
+                    <div class="light-history-item light-history-empty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                      <span>No changes recorded</span>
+                    </div>
+                  </div>
+                  <a href="#" class="light-popover-link" onclick="event.preventDefault(); showRevisionsToast();">
+                    <span>View full history in Revisions tab</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche.">
+              </div>
+            </div>
+
+            <!-- MULTI-VALUED attribute: ONE icon for the whole group -->
+            <div class="form-row multi-value-row">
+              <div class="form-label-col popover-container attr-label-with-history">
+                <label class="form-label">Feature Bullets</label>
+                <span class="multi-value-badge">Multi</span>
+                <button class="history-icon-btn attr-history-btn hover-only" onclick="toggleLightPopover(this, 'Feature Bullets')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover light-popover">
+                  <div class="light-popover-header">
+                    <span class="light-popover-field">Feature Bullets</span>
+                    <span class="light-popover-multi-badge">Multi-valued</span>
+                    <button class="light-popover-close" onclick="closeLightPopover()">×</button>
+                  </div>
+                  <div class="light-popover-content">
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Today, 11:45 AM</span>
+                        <span class="light-history-user">John Smith</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type removed">Removed</span>
+                        <span class="change-value">"Award-winning taste"</span>
+                      </div>
+                    </div>
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Jan 16, 3:20 PM</span>
+                        <span class="light-history-user">Maria Garcia</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type added">Added</span>
+                        <span class="change-value">"Perfect for celebrations"</span>
+                      </div>
+                    </div>
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Jan 15, 10:20 AM</span>
+                        <span class="light-history-user">Maria Garcia</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type added">Added</span>
+                        <span class="change-value">"Founded in 1729"</span>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="#" class="light-popover-link" onclick="event.preventDefault(); showRevisionsToast();">
+                    <span>View full history in Revisions tab</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="form-value-col multi-value-inputs">
+                <div class="multi-value-list">
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">1</span>
+                    <input type="text" class="form-input" value="Oldest established Champagne house">
+                    <button class="multi-value-remove" title="Remove">×</button>
+                  </div>
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">2</span>
+                    <input type="text" class="form-input" value="Founded in 1729">
+                    <button class="multi-value-remove" title="Remove">×</button>
+                  </div>
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">3</span>
+                    <input type="text" class="form-input" value="Perfect for celebrations">
+                    <button class="multi-value-remove" title="Remove">×</button>
+                  </div>
+                  <button class="multi-value-add">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Add value
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Identifiers</div>
+            
+            <!-- Single-valued: SKU -->
+            <div class="form-row">
+              <div class="form-label-col popover-container attr-label-with-history">
+                <label class="form-label form-label-required">SKU</label>
+                <button class="history-icon-btn attr-history-btn hover-only" onclick="toggleLightPopover(this, 'SKU')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover light-popover">
+                  <div class="light-popover-header">
+                    <span class="light-popover-field">SKU</span>
+                    <button class="light-popover-close" onclick="closeLightPopover()">×</button>
+                  </div>
+                  <div class="light-popover-content">
+                    <div class="light-history-item light-history-empty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                      <span>No changes recorded</span>
+                    </div>
+                  </div>
+                  <a href="#" class="light-popover-link" onclick="event.preventDefault(); showRevisionsToast();">
+                    <span>View full history in Revisions tab</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="RUI-CHAMP-750" readonly>
+              </div>
+            </div>
+
+            <!-- Single-valued: GTIN with changes -->
+            <div class="form-row">
+              <div class="form-label-col popover-container attr-label-with-history">
+                <label class="form-label">GTIN</label>
+                <button class="history-icon-btn attr-history-btn hover-only" onclick="toggleLightPopover(this, 'GTIN')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover light-popover">
+                  <div class="light-popover-header">
+                    <span class="light-popover-field">GTIN</span>
+                    <button class="light-popover-close" onclick="closeLightPopover()">×</button>
+                  </div>
+                  <div class="light-popover-content">
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Jan 18, 11:20 AM</span>
+                        <span class="light-history-user">Maria Garcia</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type changed">Changed</span>
+                        <div class="light-history-values">
+                          <span class="light-old">"3185370288671"</span>
+                          <span class="light-arrow">→</span>
+                          <span class="light-new">"3185370288672"</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="#" class="light-popover-link" onclick="event.preventDefault(); showRevisionsToast();">
+                    <span>View full history in Revisions tab</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-valued: Alternative GTINs example -->
+            <div class="form-row multi-value-row">
+              <div class="form-label-col popover-container attr-label-with-history">
+                <label class="form-label">Alt. Barcodes</label>
+                <span class="multi-value-badge">Multi</span>
+                <button class="history-icon-btn attr-history-btn hover-only" onclick="toggleLightPopover(this, 'Alt. Barcodes')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover light-popover">
+                  <div class="light-popover-header">
+                    <span class="light-popover-field">Alt. Barcodes</span>
+                    <span class="light-popover-multi-badge">Multi-valued</span>
+                    <button class="light-popover-close" onclick="closeLightPopover()">×</button>
+                  </div>
+                  <div class="light-popover-content">
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Jan 12, 9:15 AM</span>
+                        <span class="light-history-user">System Import</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type reordered">Reordered</span>
+                        <span class="change-value">Values reordered (moved UPC to position 1)</span>
+                      </div>
+                    </div>
+                    <div class="light-history-item">
+                      <div class="light-history-meta">
+                        <span class="light-history-date">Jan 10, 4:15 PM</span>
+                        <span class="light-history-user">System Import</span>
+                      </div>
+                      <div class="light-history-change">
+                        <span class="change-type added">Added</span>
+                        <span class="change-value">"012345678905" (UPC)</span>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="#" class="light-popover-link" onclick="event.preventDefault(); showRevisionsToast();">
+                    <span>View full history in Revisions tab</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="form-value-col multi-value-inputs">
+                <div class="multi-value-list">
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">1</span>
+                    <input type="text" class="form-input" value="012345678905">
+                    <button class="multi-value-remove" title="Remove">×</button>
+                  </div>
+                  <div class="multi-value-item">
+                    <span class="multi-value-number">2</span>
+                    <input type="text" class="form-input" value="3185370288672">
+                    <button class="multi-value-remove" title="Remove">×</button>
+                  </div>
+                  <button class="multi-value-add">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Add value
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 1: Inline Icon + Popover -->
+  <div class="pattern-container" data-pattern="1">
+    <div class="pattern-header">
+      <h2>Pattern 1: Inline History Icon with Popover</h2>
+      <p>A small clock icon appears next to each field. Clicking it opens a popover showing the change history for that specific attribute.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Direct and unambiguous - clear which field</li>
+            <li>Quick access without navigation</li>
+            <li>Lightweight, doesn't obscure context</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Can add visual clutter if always visible</li>
+            <li>Limited space in popover for long histories</li>
+            <li>Popover can be dismissed accidentally</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Click the clock icon on any field</div>
+      <div class="product-detail-mock">
+        <div class="product-main">
+          <div class="product-header-mock">
+            <div class="product-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="product-title-group">
+              <h3>Champagne - Ruinart - 750ml</h3>
+              <p>SKU: RUI-CHAMP-750 • Last modified: 2 hours ago</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Marketing Descriptions</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Long</label>
+              </div>
+              <div class="form-value-col popover-container">
+                <input type="text" class="form-input" value="Premium French champagne from the historic Ruinart house, established in 1729.">
+                <button class="history-icon-btn" onclick="togglePopover(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <div class="popover" id="popover1">
+                  <div class="popover-header">
+                    <h5>History: Description, Long</h5>
+                    <button class="side-panel-close" onclick="closePopover()">×</button>
+                  </div>
+                  <div class="popover-content">
+                    <div class="history-timeline">
+                      <div class="history-item">
+                        <div class="history-dot"></div>
+                        <div class="history-meta">
+                          <span class="history-date">Today, 2:34 PM</span>
+                          <span class="history-user">by John Smith</span>
+                        </div>
+                        <div class="history-change">
+                          <div class="history-old-value">Luxury champagne from Ruinart.</div>
+                          <div class="history-new-value">Premium French champagne from the historic Ruinart house, established in 1729.</div>
+                        </div>
+                      </div>
+                      <div class="history-item">
+                        <div class="history-dot"></div>
+                        <div class="history-meta">
+                          <span class="history-date">Jan 15, 10:22 AM</span>
+                          <span class="history-user">by Maria Garcia</span>
+                        </div>
+                        <div class="history-change">
+                          <div class="history-old-value">Ruinart Champagne 750ml</div>
+                          <div class="history-new-value">Luxury champagne from Ruinart.</div>
+                          <button class="history-restore-btn">Restore this version</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Web</label>
+              </div>
+              <div class="form-value-col popover-container">
+                <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche.">
+                <button class="history-icon-btn" onclick="togglePopover(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Feature Bullet 1</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Oldest established Champagne house">
+                <button class="history-icon-btn" onclick="togglePopover(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Identifiers</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label form-label-required">SKU</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="RUI-CHAMP-750" readonly>
+                <button class="history-icon-btn" onclick="togglePopover(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">GTIN</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="3185370288672">
+                <button class="history-icon-btn" onclick="togglePopover(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 2: Context Menu -->
+  <div class="pattern-container" data-pattern="2">
+    <div class="pattern-header">
+      <h2>Pattern 2: Context Menu (Right-Click)</h2>
+      <p>Right-clicking on any field opens a context menu with "View History" as an option. This keeps the interface clean while providing access to power users.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Zero visual clutter</li>
+            <li>Familiar desktop pattern</li>
+            <li>Can include other field actions</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Hidden/undiscoverable feature</li>
+            <li>Accessibility concerns</li>
+            <li>Doesn't work on touch devices</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Right-click on any input field</div>
+      <div class="product-detail-mock" id="contextMenuDemo">
+        <div class="product-main">
+          <div class="product-header-mock">
+            <div class="product-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="product-title-group">
+              <h3>Champagne - Ruinart - 750ml</h3>
+              <p>SKU: RUI-CHAMP-750 • Last modified: 2 hours ago</p>
+            </div>
+          </div>
+
+          <div class="instruction-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>Right-click on any input field to see the context menu with "View History" option</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Marketing Descriptions</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Long</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input context-menu-trigger" value="Premium French champagne from the historic Ruinart house, established in 1729." data-field="Description, Long">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Web</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input context-menu-trigger" value="Elegant champagne with notes of citrus and brioche." data-field="Description, Web">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Feature Bullet 1</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input context-menu-trigger" value="Oldest established Champagne house" data-field="Feature Bullet 1">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Identifiers</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label form-label-required">SKU</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input context-menu-trigger" value="RUI-CHAMP-750" readonly data-field="SKU">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">GTIN</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input context-menu-trigger" value="3185370288672" data-field="GTIN">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 3: Field Selection Mode -->
+  <div class="pattern-container" data-pattern="3">
+    <div class="pattern-header">
+      <h2>Pattern 3: Field Selection Mode</h2>
+      <p>Clicking on a field "selects" it and reveals a toolbar with actions including "History". This uses progressive disclosure to keep the UI clean until needed.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Clean interface until interaction</li>
+            <li>Works well with touch devices</li>
+            <li>Can show multiple field actions</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Extra click to access history</li>
+            <li>Need clear selection visual feedback</li>
+            <li>May conflict with edit interactions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Click on any field to select it and see the action toolbar</div>
+      <div class="product-detail-mock">
+        <div class="product-main">
+          <div class="product-header-mock">
+            <div class="product-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="product-title-group">
+              <h3>Champagne - Ruinart - 750ml</h3>
+              <p>SKU: RUI-CHAMP-750 • Last modified: 2 hours ago</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Marketing Descriptions</div>
+            
+            <div class="form-row selectable-row" onclick="selectRow(this)">
+              <div class="form-label-col">
+                <label class="form-label">Description, Long</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Premium French champagne from the historic Ruinart house, established in 1729." onclick="event.stopPropagation()">
+              </div>
+              <div class="field-toolbar" style="display: none;">
+                <button class="history-icon-btn" title="View History" onclick="event.stopPropagation(); openModal()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <button class="history-icon-btn" title="Copy Value" onclick="event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+                <button class="history-icon-btn" title="Field Info" onclick="event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row selectable-row" onclick="selectRow(this)">
+              <div class="form-label-col">
+                <label class="form-label">Description, Web</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche." onclick="event.stopPropagation()">
+              </div>
+              <div class="field-toolbar" style="display: none;">
+                <button class="history-icon-btn" title="View History" onclick="event.stopPropagation(); openModal()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <button class="history-icon-btn" title="Copy Value" onclick="event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+                <button class="history-icon-btn" title="Field Info" onclick="event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row selectable-row" onclick="selectRow(this)">
+              <div class="form-label-col">
+                <label class="form-label">Feature Bullet 1</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Oldest established Champagne house" onclick="event.stopPropagation()">
+              </div>
+              <div class="field-toolbar" style="display: none;">
+                <button class="history-icon-btn" title="View History" onclick="event.stopPropagation(); openModal()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <button class="history-icon-btn" title="Copy Value" onclick="event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+                <button class="history-icon-btn" title="Field Info" onclick="event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 4: Side Panel (Recommended) -->
+  <div class="pattern-container" data-pattern="4">
+    <div class="pattern-header">
+      <h2>Pattern 4: Inline Icon with Side Panel</h2>
+      <p>A history icon appears on hover. Clicking it opens a persistent side panel showing detailed history. The user can click through different fields while the panel stays open, updating to show each field's history.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Preserves context - main content stays visible</li>
+            <li>Room for detailed history with actions</li>
+            <li>Can browse multiple fields quickly</li>
+            <li>Fits existing panel-based UI patterns</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Consumes horizontal space</li>
+            <li>May need responsive handling</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Hover over fields to reveal history icon, click to open side panel</div>
+      <div class="product-detail-mock">
+        <div class="product-main">
+          <div class="product-header-mock">
+            <div class="product-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="product-title-group">
+              <h3>Champagne - Ruinart - 750ml</h3>
+              <p>SKU: RUI-CHAMP-750 • Last modified: 2 hours ago</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Marketing Descriptions</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Long</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Premium French champagne from the historic Ruinart house, established in 1729.">
+                <button class="history-icon-btn hover-only" onclick="openSidePanel('Description, Long', 'Premium French champagne from the historic Ruinart house, established in 1729.', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Description, Web</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche.">
+                <button class="history-icon-btn hover-only" onclick="openSidePanel('Description, Web', 'Elegant champagne with notes of citrus and brioche.', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">Feature Bullet 1</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="Oldest established Champagne house">
+                <button class="history-icon-btn hover-only" onclick="openSidePanel('Feature Bullet 1', 'Oldest established Champagne house', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Identifiers</div>
+            
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label form-label-required">SKU</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="RUI-CHAMP-750" readonly>
+                <button class="history-icon-btn hover-only" onclick="openSidePanel('SKU', 'RUI-CHAMP-750', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label-col">
+                <label class="form-label">GTIN</label>
+              </div>
+              <div class="form-value-col">
+                <input type="text" class="form-input" value="3185370288672">
+                <button class="history-icon-btn hover-only" onclick="openSidePanel('GTIN', '3185370288672', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-panel" id="sidePanel">
+          <div class="side-panel-header">
+            <h4>Attribute History</h4>
+            <button class="side-panel-close" onclick="closeSidePanel()">×</button>
+          </div>
+          <div class="side-panel-content">
+            <div class="field-info">
+              <div class="field-info-label">Field Name</div>
+              <div class="field-info-value" id="sidePanelField">Description, Long</div>
+            </div>
+            <div class="field-info">
+              <div class="field-info-label">Current Value</div>
+              <div class="field-info-value" id="sidePanelValue" style="font-size: 13px;">Premium French champagne from the historic Ruinart house, established in 1729.</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <div class="field-info-label" style="margin-bottom: 12px;">Change History</div>
+              <div class="history-timeline">
+                <div class="history-item">
+                  <div class="history-dot"></div>
+                  <div class="history-meta">
+                    <span class="history-date">Today, 2:34 PM</span>
+                    <span class="history-user">by John Smith</span>
+                  </div>
+                  <div class="history-change">
+                    <div class="history-old-value">Luxury champagne from Ruinart.</div>
+                    <div class="history-new-value">Premium French champagne from the historic Ruinart house, established in 1729.</div>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-dot"></div>
+                  <div class="history-meta">
+                    <span class="history-date">Jan 15, 10:22 AM</span>
+                    <span class="history-user">by Maria Garcia</span>
+                  </div>
+                  <div class="history-change">
+                    <div class="history-old-value">Ruinart Champagne 750ml</div>
+                    <div class="history-new-value">Luxury champagne from Ruinart.</div>
+                    <button class="history-restore-btn">Restore this version</button>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-dot"></div>
+                  <div class="history-meta">
+                    <span class="history-date">Jan 10, 4:15 PM</span>
+                    <span class="history-user">by System Import</span>
+                  </div>
+                  <div class="history-change">
+                    <div class="history-old-value" style="text-decoration: none; background: var(--bg-medium); color: var(--text-muted);">(empty)</div>
+                    <div class="history-new-value">Ruinart Champagne 750ml</div>
+                    <button class="history-restore-btn">Restore this version</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 5: History Mode Toggle -->
+  <div class="pattern-container" data-pattern="5">
+    <div class="pattern-header">
+      <h2>Pattern 5: Global History Mode Toggle</h2>
+      <p>A toggle switches the entire view into "History Mode" where all recently changed fields are highlighted. Clicking any highlighted field shows its history.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Great for auditing all recent changes</li>
+            <li>Visual overview of what changed</li>
+            <li>Useful before approvals</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Different mental model to learn</li>
+            <li>Not ideal for checking single field</li>
+            <li>May forget to toggle back</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Toggle "History Mode" to see changed fields highlighted</div>
+      <div class="product-detail-mock">
+        <div class="product-main" id="historyModeDemo">
+          <div class="history-mode-toggle">
+            <label>
+              <div class="toggle-switch" id="historyModeToggle" onclick="toggleHistoryMode()"></div>
+              <span>History Mode</span>
+            </label>
+            <span style="font-size: 12px; color: var(--text-muted); margin-left: auto;">Shows fields changed in the last 7 days</span>
+          </div>
+
+          <div style="padding: 20px 24px;">
+            <div class="product-header-mock" style="margin-bottom: 20px;">
+              <div class="product-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              </div>
+              <div class="product-title-group">
+                <h3>Champagne - Ruinart - 750ml</h3>
+                <p>SKU: RUI-CHAMP-750 • Last modified: 2 hours ago</p>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Marketing Descriptions</div>
+              
+              <div class="form-row has-changes" onclick="historyModeClick(this)">
+                <div class="form-label-col">
+                  <label class="form-label">Description, Long</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="Premium French champagne from the historic Ruinart house, established in 1729.">
+                  <div class="change-indicator" style="display: none;"></div>
+                </div>
+              </div>
+
+              <div class="form-row" onclick="historyModeClick(this)">
+                <div class="form-label-col">
+                  <label class="form-label">Description, Web</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche.">
+                </div>
+              </div>
+
+              <div class="form-row has-changes" onclick="historyModeClick(this)">
+                <div class="form-label-col">
+                  <label class="form-label">Feature Bullet 1</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="Oldest established Champagne house">
+                  <div class="change-indicator" style="display: none;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Identifiers</div>
+              
+              <div class="form-row" onclick="historyModeClick(this)">
+                <div class="form-label-col">
+                  <label class="form-label form-label-required">SKU</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="RUI-CHAMP-750" readonly>
+                </div>
+              </div>
+
+              <div class="form-row has-changes" onclick="historyModeClick(this)">
+                <div class="form-label-col">
+                  <label class="form-label">GTIN</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="3185370288672">
+                  <div class="change-indicator" style="display: none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 6: Time Slider -->
+  <div class="pattern-container" data-pattern="6">
+    <div class="pattern-header">
+      <h2>Pattern 6: Time Slider / "View As Of"</h2>
+      <p>A timeline slider allows users to "rewind" the product record to see its state at any point in time. All field values update to show what they were at the selected date.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Powerful for understanding product evolution</li>
+            <li>Great for compliance requirements</li>
+            <li>See holistic state at any point</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Complex to implement properly</li>
+            <li>Higher cognitive load</li>
+            <li>Not ideal for single-field checks</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — Use the slider to view the product at different points in time</div>
+      <div class="product-detail-mock">
+        <div class="product-main">
+          <div class="time-slider-container">
+            <div class="time-slider-label">
+              <span>View product as of:</span>
+              <span class="time-slider-date" id="sliderDate">Today</span>
+            </div>
+            <input type="range" class="time-slider" min="0" max="4" value="4" id="timeSlider" oninput="updateTimeSlider(this.value)">
+            <div class="time-slider-marks">
+              <span>Jan 10</span>
+              <span>Jan 12</span>
+              <span>Jan 15</span>
+              <span>Jan 18</span>
+              <span>Today</span>
+            </div>
+          </div>
+
+          <div style="padding: 20px 24px;">
+            <div class="product-header-mock" style="margin-bottom: 20px;">
+              <div class="product-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              </div>
+              <div class="product-title-group">
+                <h3>Champagne - Ruinart - 750ml</h3>
+                <p>SKU: RUI-CHAMP-750 • <span id="sliderModified">Last modified: 2 hours ago</span></p>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Marketing Descriptions</div>
+              
+              <div class="form-row">
+                <div class="form-label-col">
+                  <label class="form-label">Description, Long</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" id="sliderDesc" value="Premium French champagne from the historic Ruinart house, established in 1729." readonly>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-label-col">
+                  <label class="form-label">Description, Web</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="Elegant champagne with notes of citrus and brioche." readonly>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-label-col">
+                  <label class="form-label">Feature Bullet 1</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" id="sliderFeature" value="Oldest established Champagne house" readonly>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Identifiers</div>
+              
+              <div class="form-row">
+                <div class="form-label-col">
+                  <label class="form-label form-label-required">SKU</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" value="RUI-CHAMP-750" readonly>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-label-col">
+                  <label class="form-label">GTIN</label>
+                </div>
+                <div class="form-value-col">
+                  <input type="text" class="form-input" id="sliderGTIN" value="3185370288672" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pattern 7: Audit Log Tab -->
+  <div class="pattern-container" data-pattern="7">
+    <div class="pattern-header">
+      <h2>Pattern 7: Dedicated Audit/History Tab</h2>
+      <p>A separate tab alongside other product tabs shows a filterable log of all attribute changes. Users can filter by field name, user, date range, etc.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Complete audit trail in one place</li>
+            <li>Powerful filtering and search</li>
+            <li>Good for compliance reporting</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Requires navigation away from fields</li>
+            <li>Harder to connect to specific field context</li>
+            <li>Can be overwhelming for simple checks</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <div class="demo-label">Interactive Demo — A dedicated "History" tab shows all changes with filtering</div>
+      <div class="product-detail-mock" style="flex-direction: column;">
+        <div class="tabs-mock">
+          <div class="tab-mock" onclick="switchAuditTab('basic')">Basic Information</div>
+          <div class="tab-mock" onclick="switchAuditTab('references')">References</div>
+          <div class="tab-mock" onclick="switchAuditTab('assets')">Assets</div>
+          <div class="tab-mock active" onclick="switchAuditTab('history')">History</div>
+        </div>
+        
+        <div class="audit-log" id="auditTabContent">
+          <div class="audit-filters">
+            <select class="audit-filter">
+              <option>All Fields</option>
+              <option>Description, Long</option>
+              <option>Description, Web</option>
+              <option>Feature Bullet 1</option>
+              <option>SKU</option>
+              <option>GTIN</option>
+            </select>
+            <select class="audit-filter">
+              <option>All Users</option>
+              <option>John Smith</option>
+              <option>Maria Garcia</option>
+              <option>System Import</option>
+            </select>
+            <input type="date" class="audit-filter" value="2026-01-01">
+            <span style="color: var(--text-muted); padding: 8px;">to</span>
+            <input type="date" class="audit-filter" value="2026-01-19">
+            <button class="btn btn-secondary" style="padding: 8px 16px;">Export</button>
+          </div>
+
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Field</th>
+                <th>Change</th>
+                <th>User</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Today, 2:34 PM</td>
+                <td><span class="audit-field-name">Description, Long</span></td>
+                <td>
+                  <div class="audit-value-change">
+                    <span class="audit-old">Luxury champagne from...</span>
+                    <span class="audit-arrow">→</span>
+                    <span class="audit-new">Premium French champagne...</span>
+                  </div>
+                </td>
+                <td>John Smith</td>
+                <td><button class="history-restore-btn">Restore</button></td>
+              </tr>
+              <tr>
+                <td>Jan 18, 11:20 AM</td>
+                <td><span class="audit-field-name">GTIN</span></td>
+                <td>
+                  <div class="audit-value-change">
+                    <span class="audit-old">3185370288671</span>
+                    <span class="audit-arrow">→</span>
+                    <span class="audit-new">3185370288672</span>
+                  </div>
+                </td>
+                <td>Maria Garcia</td>
+                <td><button class="history-restore-btn">Restore</button></td>
+              </tr>
+              <tr>
+                <td>Jan 15, 10:22 AM</td>
+                <td><span class="audit-field-name">Description, Long</span></td>
+                <td>
+                  <div class="audit-value-change">
+                    <span class="audit-old">Ruinart Champagne 750ml</span>
+                    <span class="audit-arrow">→</span>
+                    <span class="audit-new">Luxury champagne from...</span>
+                  </div>
+                </td>
+                <td>Maria Garcia</td>
+                <td><button class="history-restore-btn">Restore</button></td>
+              </tr>
+              <tr>
+                <td>Jan 15, 10:20 AM</td>
+                <td><span class="audit-field-name">Feature Bullet 1</span></td>
+                <td>
+                  <div class="audit-value-change">
+                    <span class="audit-old">(empty)</span>
+                    <span class="audit-arrow">→</span>
+                    <span class="audit-new">Oldest established Champagne...</span>
+                  </div>
+                </td>
+                <td>Maria Garcia</td>
+                <td><button class="history-restore-btn">Restore</button></td>
+              </tr>
+              <tr>
+                <td>Jan 10, 4:15 PM</td>
+                <td><span class="audit-field-name">Description, Long</span></td>
+                <td>
+                  <div class="audit-value-change">
+                    <span class="audit-old">(empty)</span>
+                    <span class="audit-arrow">→</span>
+                    <span class="audit-new">Ruinart Champagne 750ml</span>
+                  </div>
+                </td>
+                <td>System Import</td>
+                <td><button class="history-restore-btn">Restore</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu (global) -->
+<div class="context-menu" id="contextMenu">
+  <div class="context-menu-item" onclick="openModal(); closeContextMenu();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    View History
+  </div>
+  <div class="context-menu-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    Copy Value
+  </div>
+  <div class="context-menu-divider"></div>
+  <div class="context-menu-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    Field Info
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Attribute History</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-content">
+      <div class="field-info">
+        <div class="field-info-label">Field Name</div>
+        <div class="field-info-value">Description, Long</div>
+      </div>
+      <div class="field-info">
+        <div class="field-info-label">Current Value</div>
+        <div class="field-info-value" style="font-size: 13px;">Premium French champagne from the historic Ruinart house, established in 1729.</div>
+      </div>
+      <div style="margin-top: 16px;">
+        <div class="field-info-label" style="margin-bottom: 12px;">Change History</div>
+        <div class="history-timeline">
+          <div class="history-item">
+            <div class="history-dot"></div>
+            <div class="history-meta">
+              <span class="history-date">Today, 2:34 PM</span>
+              <span class="history-user">by John Smith</span>
+            </div>
+            <div class="history-change">
+              <div class="history-old-value">Luxury champagne from Ruinart.</div>
+              <div class="history-new-value">Premium French champagne from the historic Ruinart house, established in 1729.</div>
+            </div>
+          </div>
+          <div class="history-item">
+            <div class="history-dot"></div>
+            <div class="history-meta">
+              <span class="history-date">Jan 15, 10:22 AM</span>
+              <span class="history-user">by Maria Garcia</span>
+            </div>
+            <div class="history-change">
+              <div class="history-old-value">Ruinart Champagne 750ml</div>
+              <div class="history-new-value">Luxury champagne from Ruinart.</div>
+              <button class="history-restore-btn">Restore this version</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Comparison Matrix Toggle
+  function toggleComparison() {
+    const matrix = document.getElementById('comparisonMatrix');
+    matrix.classList.toggle('open');
+    
+    // Scroll to matrix if opening
+    if (matrix.classList.contains('open')) {
+      matrix.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // Pattern Navigation
+  document.querySelectorAll('.pattern-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.pattern-container').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.pattern-container[data-pattern="${btn.dataset.pattern}"]`).classList.add('active');
+      // Close any open panels when switching patterns
+      closeHeaderHistoryPanel();
+    });
+  });
+
+  // Header Button Pattern
+  function openHeaderHistoryPanel() {
+    document.getElementById('headerHistoryPanel').classList.add('open');
+    // Reset filter
+    document.getElementById('historyAttrFilter').value = 'all';
+    filterHistoryByAttr('all');
+  }
+
+  function closeHeaderHistoryPanel() {
+    const panel = document.getElementById('headerHistoryPanel');
+    if (panel) {
+      panel.classList.remove('open');
+    }
+  }
+
+  function filterHistoryByAttr(value) {
+    const items = document.querySelectorAll('.history-panel-item');
+    items.forEach(item => {
+      if (value === 'all') {
+        item.classList.remove('hidden');
+      } else {
+        const attrMap = {
+          'description-long': 'description-long',
+          'description-web': 'description-web', 
+          'feature-bullets': 'feature-bullets',
+          'sku': 'sku',
+          'gtin': 'gtin'
+        };
+        if (item.dataset.attr === value) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  // Expand/collapse long text in history panel
+  function toggleExpand(btn) {
+    const fullText = btn.nextElementSibling;
+    const isExpanded = fullText.style.display !== 'none';
+    
+    if (isExpanded) {
+      fullText.style.display = 'none';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="m6 9 6 6 6-6"/></svg> Show full text';
+      btn.classList.remove('expanded');
+    } else {
+      fullText.style.display = 'block';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="m6 9 6 6 6-6"/></svg> Hide full text';
+      btn.classList.add('expanded');
+    }
+  }
+
+  // Lightweight Popover (Pattern 0)
+  let activeLightBtn = null;
+  let activeLightPopover = null;
+  
+  function toggleLightPopover(btn, fieldName) {
+    // Close any other open light popovers
+    document.querySelectorAll('.light-popover').forEach(p => {
+      p.classList.remove('open');
+      p.style.top = '';
+      p.style.left = '';
+    });
+    document.querySelectorAll('.history-icon-btn').forEach(b => b.classList.remove('active'));
+    
+    const popover = btn.nextElementSibling;
+    if (popover && popover.classList.contains('light-popover')) {
+      // Calculate position based on button location
+      const btnRect = btn.getBoundingClientRect();
+      const popoverWidth = 320;
+      
+      // Position below the button, aligned to the left of the button
+      let top = btnRect.bottom + 8;
+      let left = btnRect.left;
+      
+      // Make sure it doesn't go off the right edge
+      if (left + popoverWidth > window.innerWidth - 20) {
+        left = window.innerWidth - popoverWidth - 20;
+      }
+      
+      // Make sure it doesn't go off the bottom edge
+      if (top + 300 > window.innerHeight) {
+        top = btnRect.top - 300 - 8; // Position above instead
+      }
+      
+      popover.style.top = top + 'px';
+      popover.style.left = left + 'px';
+      popover.classList.add('open');
+      btn.classList.add('active');
+      activeLightBtn = btn;
+      activeLightPopover = popover;
+    }
+  }
+
+  function closeLightPopover() {
+    document.querySelectorAll('.light-popover').forEach(p => {
+      p.classList.remove('open');
+      p.style.top = '';
+      p.style.left = '';
+    });
+    if (activeLightBtn) {
+      activeLightBtn.classList.remove('active');
+      activeLightBtn = null;
+    }
+    activeLightPopover = null;
+  }
+
+  // Toast notification for "View full history" link
+  function showRevisionsToast() {
+    closeLightPopover();
+    
+    // Create toast if it doesn't exist
+    let toast = document.getElementById('revisionsToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'revisionsToast';
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Navigating to Revisions tab... (demo)</span>
+      `;
+      document.body.appendChild(toast);
+    }
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Hide after 2 seconds
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2000);
+  }
+
+  // Close light popover when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.light-popover') && !e.target.closest('.history-icon-btn')) {
+      closeLightPopover();
+    }
+  });
+
+  // Pattern 1: Popover
+  function togglePopover(btn) {
+    const popover = btn.nextElementSibling;
+    if (popover && popover.classList.contains('popover')) {
+      document.querySelectorAll('.popover').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.history-icon-btn').forEach(b => b.classList.remove('active'));
+      popover.classList.add('open');
+      btn.classList.add('active');
+    }
+  }
+
+  function closePopover() {
+    document.querySelectorAll('.popover').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.history-icon-btn').forEach(b => b.classList.remove('active'));
+  }
+
+  // Pattern 2: Context Menu
+  let contextMenuField = '';
+  document.querySelectorAll('.context-menu-trigger').forEach(input => {
+    input.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      contextMenuField = input.dataset.field;
+      const menu = document.getElementById('contextMenu');
+      menu.style.left = e.clientX + 'px';
+      menu.style.top = e.clientY + 'px';
+      menu.classList.add('open');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    closeContextMenu();
+    // Only close regular popovers if click is outside popover and history button
+    if (!e.target.closest('.popover') && !e.target.closest('.history-icon-btn')) {
+      closePopover();
+    }
+  });
+
+  function closeContextMenu() {
+    document.getElementById('contextMenu').classList.remove('open');
+  }
+
+  // Pattern 3: Field Selection
+  function selectRow(row) {
+    document.querySelectorAll('.selectable-row').forEach(r => {
+      r.classList.remove('selected');
+      r.querySelector('.field-toolbar').style.display = 'none';
+    });
+    row.classList.add('selected');
+    row.querySelector('.field-toolbar').style.display = 'flex';
+  }
+
+  // Pattern 4: Side Panel
+  let activeHistoryBtn = null;
+  
+  function openSidePanel(fieldName, fieldValue, btn) {
+    if (activeHistoryBtn) {
+      activeHistoryBtn.classList.remove('active');
+    }
+    btn.classList.add('active');
+    activeHistoryBtn = btn;
+    
+    document.getElementById('sidePanelField').textContent = fieldName;
+    document.getElementById('sidePanelValue').textContent = fieldValue;
+    document.getElementById('sidePanel').classList.add('open');
+  }
+
+  function closeSidePanel() {
+    document.getElementById('sidePanel').classList.remove('open');
+    if (activeHistoryBtn) {
+      activeHistoryBtn.classList.remove('active');
+      activeHistoryBtn = null;
+    }
+  }
+
+  // Pattern 5: History Mode
+  let historyModeActive = false;
+  
+  function toggleHistoryMode() {
+    historyModeActive = !historyModeActive;
+    const toggle = document.getElementById('historyModeToggle');
+    const demo = document.getElementById('historyModeDemo');
+    
+    toggle.classList.toggle('active', historyModeActive);
+    demo.classList.toggle('history-mode', historyModeActive);
+    
+    // Show/hide change indicators
+    demo.querySelectorAll('.change-indicator').forEach(indicator => {
+      indicator.style.display = historyModeActive ? 'block' : 'none';
+    });
+  }
+
+  function historyModeClick(row) {
+    if (historyModeActive && row.classList.contains('has-changes')) {
+      openModal();
+    }
+  }
+
+  // Pattern 6: Time Slider
+  const sliderData = [
+    { date: 'Jan 10, 2026', modified: 'Created by System Import', desc: 'Ruinart Champagne 750ml', feature: '', gtin: '' },
+    { date: 'Jan 12, 2026', modified: 'Modified by System Import', desc: 'Ruinart Champagne 750ml', feature: '', gtin: '3185370288671' },
+    { date: 'Jan 15, 2026', modified: 'Modified by Maria Garcia', desc: 'Luxury champagne from Ruinart.', feature: 'Oldest established Champagne house', gtin: '3185370288671' },
+    { date: 'Jan 18, 2026', modified: 'Modified by Maria Garcia', desc: 'Luxury champagne from Ruinart.', feature: 'Oldest established Champagne house', gtin: '3185370288672' },
+    { date: 'Today', modified: 'Last modified: 2 hours ago', desc: 'Premium French champagne from the historic Ruinart house, established in 1729.', feature: 'Oldest established Champagne house', gtin: '3185370288672' }
+  ];
+
+  function updateTimeSlider(value) {
+    const data = sliderData[value];
+    document.getElementById('sliderDate').textContent = data.date;
+    document.getElementById('sliderModified').textContent = data.modified;
+    document.getElementById('sliderDesc').value = data.desc;
+    document.getElementById('sliderFeature').value = data.feature || '(not set)';
+    document.getElementById('sliderGTIN').value = data.gtin || '(not set)';
+  }
+
+  // Pattern 7: Audit Tab
+  function switchAuditTab(tab) {
+    // This is just a visual demo - in real implementation would switch content
+  }
+
+  // Modal
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeContextMenu();
+      closePopover();
+      closeSidePanel();
+    }
+  });
+
+  // Add selected style for selectable rows
+  const style = document.createElement('style');
+  style.textContent = `
+    .selectable-row {
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+    .selectable-row:hover {
+      background: var(--bg-hover);
+    }
+    .selectable-row.selected {
+      background: var(--bg-selected);
+    }
+    .selectable-row.selected::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent);
+    }
+    .field-toolbar {
+      display: flex;
+      gap: 4px;
+      margin-left: 8px;
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>

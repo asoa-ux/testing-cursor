@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASOA custom work area</title>
+    <style>
+        :root {
+            --primary-color: #0097a7;
+            --primary-dark: #006978;
+            --sidebar-bg: #f5f5f5;
+            --border-color: #e0e0e0;
+            --hover-bg: #e8f4f8;
+            --selected-bg: #d4eef2;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --header-height: 48px;
+            --toolbar-height: 48px;
+            --tabs-height: 32px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-size: 13px;
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            height: var(--header-height);
+            background: #37474f;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-badge {
+            background: var(--primary-color);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .header-status {
+            opacity: 0.7;
+            font-size: 12px;
+        }
+
+        .header-spacer {
+            flex: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-locale {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .header-search {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: white;
+            width: 180px;
+            font-size: 12px;
+        }
+
+        .header-search::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .header-icon:hover {
+            background: rgba(255,255,255,0.1);
+            opacity: 1;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            height: var(--toolbar-height);
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            gap: 2px;
+        }
+
+        .toolbar-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 4px;
+            min-width: 54px;
+            height: 40px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            gap: 2px;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .toolbar-btn.active {
+            background: var(--selected-bg);
+            color: var(--primary-dark);
+        }
+
+        .toolbar-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .toolbar-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .toolbar-btn.has-badge {
+            position: relative;
+        }
+
+        .toolbar-badge {
+            position: absolute;
+            top: 2px;
+            right: 8px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 8px;
+            min-width: 14px;
+            text-align: center;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--border-color);
+            margin: 0 6px;
+        }
+
+        .toolbar-spacer {
+            flex: 1;
+        }
+
+        .zoom-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .zoom-slider {
+            width: 80px;
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            height: var(--tabs-height);
+            background: #eceff1;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 4px;
+            gap: 1px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 6px 12px;
+            background: #dee2e6;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab:hover {
+            background: #e8eaed;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--text-primary);
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+
+        .tab-icon {
+            font-size: 12px;
+        }
+
+        .tab-count {
+            background: #bdbdbd;
+            color: white;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 8px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - var(--header-height) - var(--toolbar-height) - var(--tabs-height));
+            overflow: hidden;
+        }
+
+        /* Browse Panel */
+        .browse-panel {
+            width: 220px;
+            min-width: 180px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .panel-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .panel-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .browse-content {
+            flex: 1;
+            overflow: auto;
+        }
+
+        /* Tree View */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 8px;
+            cursor: pointer;
+            gap: 4px;
+            font-size: 12px;
+        }
+
+        .tree-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .tree-item.selected {
+            background: var(--selected-bg);
+        }
+
+        .tree-toggle {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .tree-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tree-icon-folder {
+            color: #ffc107;
+        }
+
+        .tree-label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tree-children {
+            display: block;
+        }
+
+        .tree-children.collapsed {
+            display: none;
+        }
+
+        /* Content Panel */
+        .content-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            background: white;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .content-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+        }
+
+        .content-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Folder View */
+        .folder-view {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+        }
+
+        .folder-section {
+            padding: 8px 0;
+        }
+
+        .folder-section-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 4px 12px;
+        }
+
+        .folder-current {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .folder-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 12px;
+            cursor: pointer;
+            gap: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .folder-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .folder-item.selected {
+            background: var(--selected-bg);
+        }
+
+        .folder-item-icon {
+            width: 40px;
+            height: 40px;
+            background: #e3f2fd;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #1976d2;
+        }
+
+        .folder-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .folder-item-id {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .folder-item-name {
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .folder-item-expand {
+            padding: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .folder-items-count {
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Table View */
+        .table-view {
+            flex: 1;
+            overflow: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .data-table th {
+            background: var(--sidebar-bg);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--hover-bg);
+        }
+
+        .data-table tbody tr.selected {
+            background: var(--selected-bg);
+        }
+
+        .data-table .checkbox {
+            width: 32px;
+        }
+
+        .data-table .icon-col {
+            width: 32px;
+        }
+
+        .table-icon {
+            color: #1976d2;
+        }
+
+        .image-icon {
+            color: #757575;
+        }
+
+        .completeness-bar {
+            width: 100px;
+            height: 12px;
+            background: repeating-linear-gradient(
+                -45deg,
+                #e0e0e0,
+                #e0e0e0 2px,
+                #f5f5f5 2px,
+                #f5f5f5 4px
+            );
+            border-radius: 2px;
+        }
+
+        .table-footer {
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            background: white;
+        }
+
+        /* Details Panel */
+        .details-panel {
+            width: 420px;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .details-panel.hidden {
+            display: none;
+        }
+
+        .details-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-breadcrumb {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .details-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .details-icon {
+            width: 48px;
+            height: 48px;
+            background: #e3f2fd;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1976d2;
+            font-size: 20px;
+        }
+
+        .details-title-info h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .details-meta {
+            font-size: 10px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .details-workflow-section {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-workflow-title {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .details-workflow-empty {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .details-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            background: #fafafa;
+        }
+
+        .details-tab {
+            padding: 10px 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .details-tab:hover {
+            background: var(--hover-bg);
+        }
+
+        .details-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            background: white;
+        }
+
+        .details-content {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+        }
+
+        .details-sidebar {
+            width: 200px;
+            border-right: 1px solid var(--border-color);
+            padding: 8px 0;
+            background: #fafafa;
+        }
+
+        .details-sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .details-sidebar-actions {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .details-sidebar-btn {
+            padding: 2px 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .details-sidebar-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .reference-section {
+            padding: 4px 0;
+        }
+
+        .reference-section-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 4px 12px;
+        }
+
+        .reference-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            cursor: pointer;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .reference-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .reference-item.selected {
+            background: var(--selected-bg);
+        }
+
+        .reference-toggle {
+            width: 14px;
+            font-size: 8px;
+            color: var(--text-secondary);
+        }
+
+        .reference-icon {
+            font-size: 14px;
+        }
+
+        .details-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .details-main-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .details-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            background: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: #90a4ae;
+            font-size: 20px;
+        }
+
+        .empty-text {
+            font-size: 13px;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#37474f">
+                <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l6.9 3.45L12 11.09 5.1 7.64 12 4.18zM4 8.82l7 3.5v7.86l-7-3.5V8.82zm9 11.36v-7.86l7-3.5v7.86l-7 3.5z"/>
+            </svg>
+        </div>
+        <span class="header-badge">Custom</span>
+        <span class="header-title">ASOA custom work area</span>
+        <span class="header-status">Nothing to save.</span>
+        <div class="header-spacer"></div>
+        <div class="header-right">
+            <span class="header-locale">English (United States) | Main</span>
+            <input type="text" class="header-search" placeholder="Search">
+            <div class="header-icons">
+                <div class="header-icon">🔔</div>
+                <div class="header-icon">⚙️</div>
+                <div class="header-icon">👤</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="toolbar-btn has-badge">
+            <span class="toolbar-badge">1</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/></svg>
+            Sort
+        </button>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+            Filter
+        </button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Create
+        </button>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2V9h2v8zm-4 0H8v-4h2v4z"/></svg>
+            References
+        </button>
+        <button class="toolbar-btn disabled">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
+            —
+        </button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn disabled">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            Submit
+        </button>
+        <button class="toolbar-btn disabled">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+            Add to workflow
+        </button>
+        <button class="toolbar-btn disabled">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Assign
+        </button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            Collection
+        </button>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l-5.5 9h11z"/></svg>
+            Master product
+        </button>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            Categorize
+        </button>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            PDX channels
+        </button>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            Business action
+        </button>
+        <button class="toolbar-btn disabled">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Approve
+        </button>
+        <button class="toolbar-btn disabled">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/></svg>
+            Export
+        </button>
+        <div class="toolbar-spacer"></div>
+        <div class="zoom-control">
+            <span>−</span>
+            <input type="range" class="zoom-slider" value="50">
+            <span>+</span>
+            <span>Zoom level (1x)</span>
+        </div>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+            Customize
+        </button>
+        <button class="toolbar-btn active" id="detailsToggle">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg>
+            Details
+        </button>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <div class="tab active"><span class="tab-icon">📋</span> Primary P...</div>
+        <div class="tab"><span class="tab-icon">🔍</span> Browsing...</div>
+        <div class="tab"><span class="tab-icon">🔍</span> Browsing...</div>
+        <div class="tab"><span class="tab-icon">🔍</span> Browsing...</div>
+        <div class="tab"><span class="tab-icon">🖼️</span> Illustrat...</div>
+        <div class="tab"><span class="tab-icon">📁</span> Assets</div>
+        <div class="tab"><span class="tab-icon">📦</span> Products...</div>
+        <div class="tab"><span class="tab-icon">📦</span> Products...</div>
+        <div class="tab"><span class="tab-icon">✓</span> Tasks</div>
+        <div class="tab"><span class="tab-icon">📁</span> Collections</div>
+        <div class="tab"><span class="tab-icon">✓</span> Tasks <span class="tab-count">1</span></div>
+        <div class="tab"><span class="tab-icon">📁</span> Collectio...</div>
+        <div class="tab"><span class="tab-icon">📁</span> Collectio...</div>
+        <div class="tab"><span class="tab-icon">📄</span> Other na...</div>
+        <div class="tab"><span class="tab-icon">📋</span> Primary P...</div>
+        <div class="tab"><span class="tab-icon">✓</span> Tasks <span class="tab-count">2</span></div>
+        <div class="tab"><span class="tab-icon">📄</span> Copy of P...</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        <!-- Browse Panel -->
+        <div class="browse-panel" id="browsePanel">
+            <div class="panel-header">
+                <span>Browse</span>
+                <button class="panel-toggle" id="browsePanelToggle">‹</button>
+            </div>
+            <div class="browse-content" id="browseContent">
+                <!-- Tree generated by JS -->
+            </div>
+        </div>
+
+        <!-- Content Panel - Folder View -->
+        <div class="content-panel" id="contentPanel">
+            <div class="content-header">
+                <div class="content-title">
+                    Activewear
+                </div>
+            </div>
+
+            <!-- Folder View (Card style) -->
+            <div class="folder-view" id="folderView">
+                <div class="folder-current">
+                    <div class="folder-section-title">Current folder</div>
+                    <div class="folder-item selected">
+                        <div class="folder-item-icon">📁</div>
+                        <div class="folder-item-info">
+                            <div class="folder-item-id">ID</div>
+                            <div class="folder-item-id">EXT.L3-67030100</div>
+                            <div class="folder-item-id" style="margin-top: 4px;">Name</div>
+                            <div class="folder-item-name">Activewear</div>
+                        </div>
+                        <div class="folder-item-expand">⌄</div>
+                    </div>
+                </div>
+                <div class="folder-section">
+                    <div class="folder-section-title">Folder items</div>
+                    <div id="folderItems">
+                        <!-- Items generated by JS -->
+                    </div>
+                </div>
+                <div class="folder-items-count" id="folderItemsCount">12 items</div>
+            </div>
+
+            <!-- Table View -->
+            <div class="table-view hidden" id="tableView">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox"><input type="checkbox"></th>
+                            <th class="icon-col"></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Object type</th>
+                            <th>Primary image</th>
+                            <th>Completeness</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Rows generated by JS -->
+                    </tbody>
+                </table>
+                <div class="table-footer" id="tableFooter">11 items, 0 selected</div>
+            </div>
+        </div>
+
+        <!-- Details Panel -->
+        <div class="details-panel" id="detailsPanel">
+            <div class="details-header">
+                <div class="details-breadcrumb">
+                    Primary Product Hierarchy / Data Sources / External Data Sources / External Product Hierarchy / Clothing / Activewear
+                </div>
+                <div class="details-title-row">
+                    <div class="details-icon">📁</div>
+                    <div class="details-title-info">
+                        <h2>Activewear</h2>
+                        <div class="details-meta">
+                            Revision: 0.2 | Last edited by: stepsys, 1 year 6 months ago | Approved
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-workflow-section">
+                <div class="details-workflow-title">Workflows</div>
+                <div class="details-workflow-empty">No workflows to display</div>
+            </div>
+
+            <div class="details-tabs">
+                <button class="details-tab">webui</button>
+                <button class="details-tab">Basic Information</button>
+                <button class="details-tab">Category Ranking</button>
+                <button class="details-tab">Language View</button>
+                <button class="details-tab active">References</button>
+                <button class="details-tab">SEMA 404 Embedded Content</button>
+                <button class="details-tab">SEMA Empty Embedded Content</button>
+                <button class="details-tab">SEMA Working Embedded Content</button>
+                <button class="details-tab">test_pies</button>
+                <button class="details-tab">PVMA Embedded Test</button>
+            </div>
+
+            <div class="details-content">
+                <div class="details-sidebar">
+                    <div class="details-sidebar-header">
+                        <span>References</span>
+                        <div class="details-sidebar-actions">
+                            <button class="details-sidebar-btn">↕ Sort</button>
+                            <button class="details-sidebar-btn">▼ Filter</button>
+                            <button class="details-sidebar-btn">+</button>
+                            <button class="details-sidebar-btn">−</button>
+                        </div>
+                    </div>
+                    
+                    <div class="reference-section">
+                        <div class="reference-section-title">Asset references</div>
+                        <div class="reference-item">
+                            <span class="reference-toggle">▼</span>
+                            <span class="reference-icon">📁</span>
+                            <span>References</span>
+                        </div>
+                        <div class="reference-item selected" style="padding-left: 32px;">
+                            <span class="reference-icon">🖼️</span>
+                            <span>Product Images (not p4r)</span>
+                        </div>
+                    </div>
+
+                    <div class="reference-section">
+                        <div class="reference-section-title">Classification references</div>
+                        <div class="reference-item">
+                            <span class="reference-toggle">▼</span>
+                            <span class="reference-icon">📁</span>
+                            <span>References</span>
+                        </div>
+                        <div class="reference-item" style="padding-left: 32px;">
+                            <span class="reference-icon">📁</span>
+                            <span>Category Ranking For Supplier</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-main">
+                    <div class="details-main-header">Product Images (not p4r)</div>
+                    <div class="details-main-content">
+                        <div class="empty-icon">ℹ️</div>
+                        <div class="empty-text">There were no results for your selection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const categories = [
+            { name: 'Audio Visual/Photography', children: [] },
+            { name: 'Beauty/Personal Care/H...', children: [] },
+            { name: 'Building Products', children: [] },
+            { name: 'Camping', children: [] },
+            { name: 'Cleaning/Hygiene Produ...', children: [] },
+            { 
+                name: 'Clothing', 
+                expanded: true,
+                children: [
+                    { 
+                        name: 'Activewear',
+                        expanded: true,
+                        children: [
+                            { name: 'Activewear', selected: true, children: [] },
+                            { name: 'Activewear - B...', children: [] },
+                            { name: 'Sportswear - ...', children: [] },
+                            { name: 'Sportswear - F...', children: [] },
+                            { name: 'Sportswear - ...', children: [] },
+                            { name: 'Sportswear - ...', children: [] },
+                            { name: 'Sportswear - ...', children: [] },
+                            { name: 'Sportswear H...', children: [] },
+                            { name: 'Sportswear V...', children: [] },
+                        ]
+                    },
+                    { name: 'Clothing', children: [] },
+                    { name: 'Protective Wear', children: [] },
+                    { name: 'Sleepwear', children: [] },
+                    { name: 'Swimwear', children: [] },
+                    { name: 'Underwear', children: [] }
+                ]
+            },
+            { name: 'Communications', children: [] },
+            { name: 'Computing', children: [] },
+            { name: 'Crops', children: [] },
+            { name: 'Cross Segment', children: [] },
+            { name: 'Electrical Supplies', children: [] },
+            { name: 'Fluids/Fuels/Gases', children: [] },
+            { name: 'Food/Beverage/Tobacco', children: [] },
+            { name: 'Footwear', children: [] }
+        ];
+
+        const items = [
+            { id: 'EXT.L4-10001342', name: 'Sportswear - Full Body We...' },
+            { id: 'EXT.L4-10001343', name: 'Sportswear - Lower Body W...' },
+            { id: 'EXT.L4-10001344', name: 'Sportswear - Upper Body W...' },
+            { id: 'EXT.L4-10001359', name: 'Sportswear Variety Packs' },
+            { id: 'EXT.L4-10003707', name: 'Sportswear - Handwear' },
+            { id: 'EXT.L4-10003708', name: 'Sportswear - Headwear' },
+            { id: 'EXT.L4-10003709', name: 'Sportswear Hosiery' },
+            { id: 'EXT.L4-10004113', name: 'Sportswear - Neckwear' },
+            { id: 'EXT.L4-10004114', name: 'Sportswear - Belts' },
+            { id: 'EXT.L4-10004115', name: 'Activewear -...' },
+            { id: 'EXT.L4-10006840', name: 'Sportswear -...' }
+        ];
+
+        const tableItems = [
+            { id: 'EXT.L3-67030100', name: 'Activewear', type: 'External Level 3' },
+            { id: 'EXT.L4-10001342', name: 'Sportswear - Full...', type: 'External Level 4' },
+            { id: 'EXT.L4-10001343', name: 'Sportswear -...', type: 'External Level 4' },
+            { id: 'EXT.L4-10001344', name: 'Sportswear -...', type: 'External Level 4' },
+            { id: 'EXT.L4-10001359', name: 'Sportswear...', type: 'External Level 4' },
+            { id: 'EXT.L4-10003707', name: 'Sportswear -...', type: 'External Level 4' },
+            { id: 'EXT.L4-10003708', name: 'Sportswear -...', type: 'External Level 4' },
+            { id: 'EXT.L4-10003709', name: 'Sportswear...', type: 'External Level 4' },
+            { id: 'EXT.L4-10004113', name: 'Sportswear -...', type: 'External Level 4' },
+            { id: 'EXT.L4-10004114', name: 'Sportswear - Belts', type: 'External Level 4' },
+            { id: 'EXT.L4-10004115', name: 'Activewear -...', type: 'External Level 4' },
+            { id: 'EXT.L4-10006840', name: 'Sportswear -...', type: 'External Level 4' }
+        ];
+
+        // Render tree
+        function renderTree(container, items, level = 0) {
+            items.forEach(item => {
+                const div = document.createElement('div');
+                const paddingLeft = 8 + level * 16;
+                div.innerHTML = `
+                    <div class="tree-item ${item.selected ? 'selected' : ''}" style="padding-left: ${paddingLeft}px">
+                        <span class="tree-toggle">${item.children && item.children.length ? (item.expanded ? '▾' : '▸') : ''}</span>
+                        <span class="tree-icon tree-icon-folder">📁</span>
+                        <span class="tree-label">${item.name}</span>
+                    </div>
+                    ${item.children && item.children.length ? `<div class="tree-children ${!item.expanded ? 'collapsed' : ''}"></div>` : ''}
+                `;
+                container.appendChild(div);
+                
+                if (item.children && item.children.length) {
+                    const childContainer = div.querySelector('.tree-children');
+                    renderTree(childContainer, item.children, level + 1);
+
+                    div.querySelector('.tree-item').onclick = () => {
+                        item.expanded = !item.expanded;
+                        div.querySelector('.tree-toggle').textContent = item.expanded ? '▾' : '▸';
+                        div.querySelector('.tree-children').classList.toggle('collapsed');
+                    };
+                }
+            });
+        }
+
+        // Render folder items
+        function renderFolderItems() {
+            const container = document.getElementById('folderItems');
+            container.innerHTML = items.map(item => `
+                <div class="folder-item">
+                    <div class="folder-item-icon">📁</div>
+                    <div class="folder-item-info">
+                        <div class="folder-item-id">ID</div>
+                        <div class="folder-item-id">${item.id}</div>
+                        <div class="folder-item-id" style="margin-top: 4px;">Name</div>
+                        <div class="folder-item-name">${item.name}</div>
+                    </div>
+                    <div class="folder-item-expand">⌄</div>
+                </div>
+            `).join('');
+        }
+
+        // Render table
+        function renderTable() {
+            const container = document.getElementById('tableBody');
+            container.innerHTML = tableItems.map((item, index) => `
+                <tr class="${index === 0 ? 'selected' : ''}">
+                    <td class="checkbox"><input type="checkbox"></td>
+                    <td class="icon-col"><span class="table-icon">📁</span></td>
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.type}</td>
+                    <td><span class="image-icon">🖼️</span></td>
+                    <td><div class="completeness-bar"></div></td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize
+        renderTree(document.getElementById('browseContent'), categories);
+        renderFolderItems();
+        renderTable();
+
+        // Details toggle
+        document.getElementById('detailsToggle').onclick = function() {
+            this.classList.toggle('active');
+            document.getElementById('detailsPanel').classList.toggle('hidden');
+            
+            // Toggle between folder view (details open) and table view (details closed)
+            if (document.getElementById('detailsPanel').classList.contains('hidden')) {
+                document.getElementById('folderView').classList.add('hidden');
+                document.getElementById('tableView').classList.remove('hidden');
+            } else {
+                document.getElementById('tableView').classList.add('hidden');
+                document.getElementById('folderView').classList.remove('hidden');
+            }
+        };
+
+        // Tab functionality
+        document.querySelectorAll('.details-tab').forEach(tab => {
+            tab.onclick = function() {
+                document.querySelectorAll('.details-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            };
+        });
+
+        // Reference item selection
+        document.querySelectorAll('.reference-item').forEach(item => {
+            item.onclick = function() {
+                document.querySelectorAll('.reference-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Flow Diagram</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: system-ui, sans-serif; 
+            background: #f5f5f5; 
+            padding: 40px;
+            color: #333;
+        }
+        
+        h1 { margin-bottom: 32px; font-weight: 600; }
+        h2 { margin: 40px 0 20px; font-weight: 600; font-size: 18px; color: #555; }
+        
+        /* Flow container */
+        .flow { 
+            display: flex; 
+            gap: 60px; 
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        
+        /* View boxes */
+        .view-box {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            width: 420px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .view-box h3 {
+            font-size: 14px;
+            color: #1976d2;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Mini wireframes */
+        .wireframe {
+            display: flex;
+            gap: 8px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 8px;
+            min-height: 140px;
+        }
+        .wire-sidebar {
+            width: 100px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 11px;
+        }
+        .wire-sidebar .item {
+            padding: 4px 6px;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            cursor: default;
+        }
+        .wire-sidebar .item.selected {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .wire-sidebar .item.indent { padding-left: 14px; }
+        .wire-content {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 11px;
+        }
+        .wire-header {
+            background: #f5f5f5;
+            padding: 6px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .wire-table {
+            width: 100%;
+            font-size: 10px;
+        }
+        .wire-table td {
+            padding: 4px;
+            border-bottom: 1px solid #eee;
+        }
+        .wire-link { color: #0066cc; cursor: default; }
+        
+        /* Arrow between views */
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding-top: 60px;
+        }
+        .arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .arrow-line {
+            width: 80px;
+            height: 2px;
+            background: #1976d2;
+            position: relative;
+        }
+        .arrow-line.right::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -5px;
+            border: 6px solid transparent;
+            border-left: 8px solid #1976d2;
+        }
+        .arrow-line.left::after {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: -5px;
+            border: 6px solid transparent;
+            border-right: 8px solid #1976d2;
+        }
+        .arrow-label {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            max-width: 100px;
+        }
+        
+        /* Actions list */
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .action-group {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .action-group h4 {
+            font-size: 13px;
+            color: #1976d2;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .action-trigger {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .action-result {
+            color: #666;
+        }
+        .action-result strong {
+            color: #1976d2;
+        }
+        
+        /* State diagram */
+        .state-diagram {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 24px;
+        }
+        .states {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 100px;
+        }
+        .state {
+            width: 180px;
+            height: 100px;
+            border: 3px solid #1976d2;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #e3f2fd;
+        }
+        .state-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1976d2;
+        }
+        .state-desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .state-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .state-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .state-arrow-line {
+            width: 100px;
+            height: 2px;
+            background: #666;
+            position: relative;
+        }
+        .state-arrow-line.to-right::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -4px;
+            border: 5px solid transparent;
+            border-left: 6px solid #666;
+        }
+        .state-arrow-line.to-left::after {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: -4px;
+            border: 5px solid transparent;
+            border-right: 6px solid #666;
+        }
+        .state-arrow-label {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
+            text-align: center;
+        }
+        .self-loop {
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .self-loop-arrow {
+            width: 40px;
+            height: 60px;
+            border: 2px solid #666;
+            border-left: none;
+            border-radius: 0 30px 30px 0;
+            position: relative;
+        }
+        .self-loop-arrow::after {
+            content: '';
+            position: absolute;
+            left: -1px;
+            bottom: -1px;
+            border: 5px solid transparent;
+            border-top: 6px solid #666;
+        }
+        .self-loop-label {
+            position: absolute;
+            right: -70px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #666;
+            white-space: nowrap;
+        }
+        
+        /* Key */
+        .key {
+            margin-top: 32px;
+            padding: 16px;
+            background: #fffde7;
+            border: 1px solid #ffd54f;
+            border-radius: 8px;
+        }
+        .key h4 {
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .key p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>PIM Navigation Flow</h1>
+    
+    <!-- Visual flow -->
+    <div class="flow">
+        <!-- List View -->
+        <div class="view-box">
+            <h3>List View</h3>
+            <div class="wireframe">
+                <div class="wire-sidebar">
+                    <div class="item">Electronics</div>
+                    <div class="item indent selected">Smartphones</div>
+                    <div class="item indent">Laptops</div>
+                    <div class="item indent">Tablets</div>
+                </div>
+                <div class="wire-content">
+                    <div class="wire-header">Smartphones · 2 items</div>
+                    <table class="wire-table">
+                        <tr>
+                            <td><span class="wire-link">iPhone 15 Series</span></td>
+                            <td>Product</td>
+                        </tr>
+                        <tr>
+                            <td><span class="wire-link">Galaxy S24 Series</span></td>
+                            <td>Product</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: #888; margin-top: 12px;">
+                Tree selection controls table contents
+            </p>
+        </div>
+        
+        <!-- Arrows -->
+        <div class="arrow-container">
+            <div class="arrow">
+                <div class="arrow-label">Click table item</div>
+                <div class="arrow-line right"></div>
+            </div>
+            <div class="arrow">
+                <div class="arrow-line left"></div>
+                <div class="arrow-label">← Back / Esc</div>
+            </div>
+        </div>
+        
+        <!-- Detail View -->
+        <div class="view-box">
+            <h3>Detail View</h3>
+            <div class="wireframe">
+                <div class="wire-sidebar">
+                    <div style="font-size: 10px; color: #888; margin-bottom: 4px;">Smartphones</div>
+                    <div class="item selected">iPhone 15 Series</div>
+                    <div class="item">Galaxy S24 Series</div>
+                </div>
+                <div class="wire-content">
+                    <div class="wire-header">← iPhone 15 Series</div>
+                    <div style="font-size: 10px; color: #888; margin-top: 8px;">
+                        ID: iphone15<br>
+                        Status: Active<br>
+                        Children: 4 items
+                    </div>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: #888; margin-top: 12px;">
+                Sibling list replaces tree · Navigate between siblings
+            </p>
+        </div>
+    </div>
+    
+    <h2>Navigation Actions</h2>
+    <div class="actions">
+        <div class="action-group">
+            <h4>From List View</h4>
+            <div class="action-item">
+                <span class="action-trigger">Click tree node</span>
+                <span class="action-result">→ Table shows its <strong>children</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">Click table name</span>
+                <span class="action-result">→ Open that item's <strong>Detail View</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">View Details btn</span>
+                <span class="action-result">→ Open selected node's <strong>Detail View</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">Breadcrumb</span>
+                <span class="action-result">→ Go to that node's <strong>List View</strong></span>
+            </div>
+        </div>
+        
+        <div class="action-group">
+            <h4>From Detail View</h4>
+            <div class="action-item">
+                <span class="action-trigger">← button</span>
+                <span class="action-result">→ Back to <strong>List View</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">Esc key</span>
+                <span class="action-result">→ Back to <strong>List View</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">Prev / Next</span>
+                <span class="action-result">→ Navigate to <strong>sibling Detail</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">← → keys</span>
+                <span class="action-result">→ Navigate to <strong>sibling Detail</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">Click sibling</span>
+                <span class="action-result">→ Open that <strong>sibling's Detail</strong></span>
+            </div>
+            <div class="action-item">
+                <span class="action-trigger">Breadcrumb</span>
+                <span class="action-result">→ Go to that node's <strong>List View</strong></span>
+            </div>
+        </div>
+    </div>
+    
+    <h2>State Diagram</h2>
+    <div class="state-diagram">
+        <div class="states">
+            <div class="state">
+                <div class="state-name">LIST VIEW</div>
+                <div class="state-desc">Tree + Table</div>
+            </div>
+            
+            <div class="state-arrows">
+                <div class="state-arrow">
+                    <div class="state-arrow-label">Click table item</div>
+                    <div class="state-arrow-line to-right"></div>
+                </div>
+                <div class="state-arrow">
+                    <div class="state-arrow-line to-left"></div>
+                    <div class="state-arrow-label">Back / Esc / Breadcrumb</div>
+                </div>
+            </div>
+            
+            <div class="state" style="position: relative;">
+                <div class="state-name">DETAIL VIEW</div>
+                <div class="state-desc">Sibling List + Content</div>
+                <div class="self-loop">
+                    <div class="self-loop-arrow"></div>
+                    <div class="self-loop-label">Prev/Next<br>Sibling click</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="key">
+        <h4>Key Design Decisions</h4>
+        <p>
+            <strong>1.</strong> Tree is hidden in Detail View to avoid conflicting selection states<br>
+            <strong>2.</strong> Sibling list provides contextual navigation (only relevant items)<br>
+            <strong>3.</strong> Breadcrumb always goes to List View (not Detail) for consistency<br>
+            <strong>4.</strong> Multiple ways to go back (button, key, link) for discoverability<br>
+            <strong>5.</strong> "Back" always returns to where you came from, not necessarily the parent
+        </p>
+    </div>
+</body>
+</html>

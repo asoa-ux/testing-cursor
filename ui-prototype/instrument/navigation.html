@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIM Navigation - Lo-Fi Prototype</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --primary-light: #e8f4fd;
+            --text: #333;
+            --text-muted: #666;
+            --text-light: #888;
+            --border: #e0e0e0;
+            --bg-subtle: #f8f9fa;
+            --bg-hover: #f0f0f0;
+            --radius: 6px;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: var(--text); }
+        
+        /* Global header */
+        .global-header { 
+            height: 48px; 
+            background: #2c3e50; 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 16px; 
+            gap: 16px; 
+        }
+        .app-switcher { 
+            padding: 8px 12px; 
+            cursor: pointer; 
+            border-radius: var(--radius);
+            font-size: 13px;
+        }
+        .app-switcher:hover { background: rgba(255,255,255,0.1); }
+        .product-name { font-weight: 600; font-size: 16px; }
+        .spacer { flex: 1; }
+        .search-box { 
+            padding: 8px 16px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: var(--radius);
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+        }
+        .user-avatar { 
+            width: 32px; 
+            height: 32px; 
+            background: var(--primary); 
+            border-radius: 50%; 
+        }
+        
+        /* Panels */
+        .app-panel { 
+            position: fixed; 
+            top: 48px; 
+            left: 0; 
+            width: 300px; 
+            background: #fff; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+            z-index: 1000; 
+            display: none; 
+        }
+        .app-panel.open { display: block; }
+        
+        /* Section titles (consistent) */
+        .section-title { 
+            padding: 10px 16px; 
+            background: var(--bg-subtle); 
+            font-weight: 600; 
+            font-size: 11px; 
+            color: var(--text-light);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .app-item { 
+            padding: 12px 16px; 
+            cursor: pointer; 
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+            border-left: 3px solid transparent;
+        }
+        .app-item:hover { background: var(--bg-hover); }
+        .app-item.active { background: var(--primary-light); border-left-color: var(--primary); }
+        .app-icon { 
+            width: 32px; 
+            height: 32px; 
+            border-radius: var(--radius);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 600; 
+            color: #fff; 
+        }
+        .app-info { font-size: 13px; }
+        .app-info small { color: var(--text-light); font-size: 12px; }
+        
+        /* Main layout */
+        .main-container { display: flex; height: calc(100vh - 48px); }
+        
+        /* Work area sidebar */
+        .work-area-sidebar { 
+            width: 220px; 
+            background: var(--bg-subtle); 
+            border-right: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .wa-header { padding: 12px; border-bottom: 1px solid var(--border); position: relative; }
+        .wa-selector { 
+            padding: 10px 12px; 
+            cursor: pointer; 
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            display: flex; 
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        .wa-selector:hover { border-color: #ccc; }
+        .wa-dropdown { 
+            position: absolute; 
+            top: calc(100% + 4px); 
+            left: 12px; 
+            right: 12px; 
+            background: #fff; 
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 100; 
+            display: none; 
+        }
+        .wa-dropdown.open { display: block; }
+        .wa-option { 
+            padding: 10px 12px; 
+            cursor: pointer; 
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .wa-option:hover { background: var(--bg-hover); }
+        .wa-option.active { background: var(--primary-light); border-left-color: var(--primary); color: var(--primary-dark); }
+        
+        .perspectives { flex: 1; overflow-y: auto; }
+        .persp-item { 
+            padding: 10px 16px; 
+            cursor: pointer; 
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .persp-item:hover { background: var(--bg-hover); }
+        .persp-item.active { 
+            background: #fff; 
+            border-left-color: var(--primary);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        
+        /* Content area */
+        .content-area { flex: 1; display: flex; flex-direction: column; background: #fff; }
+        .breadcrumb { 
+            padding: 12px 20px; 
+            border-bottom: 1px solid var(--border); 
+            font-size: 13px;
+            background: var(--bg-subtle);
+        }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span { color: var(--text-light); margin: 0 8px; }
+        
+        .main { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Tree */
+        .tree { 
+            width: 240px; 
+            border-right: 1px solid var(--border); 
+            padding: 8px 0; 
+            overflow-y: auto;
+            background: var(--bg-subtle);
+        }
+        .tree-item { 
+            padding: 10px 16px; 
+            cursor: pointer; 
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .tree-item:hover { background: var(--bg-hover); }
+        .tree-item.selected { 
+            background: var(--primary-light); 
+            border-left-color: var(--primary); 
+            color: var(--primary-dark); 
+            font-weight: 500; 
+        }
+        .tree-item.indent-1 { padding-left: 32px; }
+        .tree-item.indent-2 { padding-left: 48px; }
+        
+        /* Sibling list */
+        .sibling-list { 
+            width: 240px; 
+            border-right: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column;
+            background: var(--bg-subtle);
+        }
+        .sibling-header { 
+            padding: 12px 16px; 
+            border-bottom: 1px solid var(--border);
+            background: #fff;
+        }
+        .sibling-header small { color: var(--text-light); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sibling-header .parent { font-weight: 600; margin-top: 4px; font-size: 14px; }
+        .sibling-items { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .sibling-item { 
+            padding: 10px 16px; 
+            cursor: pointer; 
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .sibling-item:hover { background: var(--bg-hover); }
+        .sibling-item.current { 
+            background: var(--primary-light); 
+            border-left-color: var(--primary);
+            color: var(--primary-dark);
+            font-weight: 500; 
+        }
+        
+        /* Content */
+        .content { flex: 1; display: flex; flex-direction: column; }
+        .content-header { 
+            padding: 20px 24px; 
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .content-header h2 { font-size: 18px; font-weight: 600; }
+        .content-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        
+        /* Buttons (consistent) */
+        button { 
+            padding: 8px 16px; 
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        button:hover { background: var(--primary-dark); }
+        button.secondary { 
+            background: #fff; 
+            color: var(--text); 
+            border: 1px solid var(--border); 
+        }
+        button.secondary:hover { background: var(--bg-hover); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .table-area { flex: 1; overflow: auto; padding: 20px 24px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-size: 11px; color: var(--text-light); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        td { font-size: 13px; }
+        .link { color: var(--primary); cursor: pointer; text-decoration: none; }
+        .link:hover { text-decoration: underline; }
+        .text-muted { color: var(--text-light); }
+        
+        /* Views */
+        .view { display: none; }
+        .view.active { display: flex; flex: 1; }
+        
+        /* Detail header */
+        .detail-header { 
+            padding: 20px 24px; 
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .detail-header-left { display: flex; align-items: center; gap: 16px; }
+        .back-btn { 
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: var(--bg-hover);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .back-btn:hover { background: var(--border); color: var(--text); }
+        .detail-header h2 { font-size: 18px; font-weight: 600; }
+        .type-badge { 
+            background: var(--primary-light); 
+            color: var(--primary-dark);
+            padding: 4px 10px; 
+            border-radius: var(--radius);
+            font-size: 12px; 
+            font-weight: 500;
+        }
+        .nav-buttons { display: flex; gap: 8px; }
+        
+        .detail-body { flex: 1; overflow-y: auto; padding: 24px; }
+        .detail-section { margin-bottom: 24px; }
+        .detail-section h3 { 
+            font-size: 11px; 
+            color: var(--text-light); 
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px; 
+        }
+        .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .detail-field label { font-size: 12px; color: var(--text-light); display: block; margin-bottom: 4px; }
+        .detail-field div { font-size: 14px; }
+        
+        .overlay { position: fixed; inset: 0; z-index: 99; display: none; }
+        .overlay.open { display: block; }
+        
+        /* Add button in section title */
+        .section-title { display: flex; justify-content: space-between; align-items: center; }
+        .add-btn {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-btn:hover { background: var(--bg-hover); color: var(--text); }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: var(--radius);
+            width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { font-size: 16px; font-weight: 600; }
+        .close-btn {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            font-size: 20px;
+            background: transparent;
+            color: var(--text-light);
+            border: none;
+            cursor: pointer;
+        }
+        .close-btn:hover { color: var(--text); }
+        .modal-body { padding: 20px; }
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        /* Form fields */
+        .form-field { margin-bottom: 16px; }
+        .form-field:last-child { margin-bottom: 0; }
+        .form-field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+        .form-field input[type="text"],
+        .form-field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+        }
+        .form-field input:focus,
+        .form-field select:focus { outline: none; border-color: var(--primary); }
+        .radio-group { display: flex; gap: 16px; }
+        .radio-group label { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 13px; 
+            color: var(--text);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- GLOBAL HEADER -->
+    <div class="global-header">
+        <div class="app-switcher" onclick="toggleAppPanel()">⊞ Apps</div>
+        <div class="product-name">PIM</div>
+        <div class="spacer"></div>
+        <div class="search-box">Search... ⌘K</div>
+        <div class="user-avatar"></div>
+    </div>
+    
+    <!-- APP PANEL -->
+    <div class="app-panel" id="appPanel">
+        <div class="section-title">Products</div>
+        <div class="app-item active" onclick="selectProduct('pim')">
+            <div class="app-icon" style="background:#3498db">P</div>
+            <div class="app-info"><div>PIM</div><small>Product Information</small></div>
+        </div>
+        <div class="app-item" onclick="selectProduct('dam')">
+            <div class="app-icon" style="background:#1abc9c">D</div>
+            <div class="app-info"><div>DAM</div><small>Digital Assets</small></div>
+        </div>
+        <div class="app-item" onclick="selectProduct('mdm')">
+            <div class="app-icon" style="background:#9b59b6">M</div>
+            <div class="app-info"><div>MDM</div><small>Master Data</small></div>
+        </div>
+        <div class="app-item" onclick="selectProduct('syndication')">
+            <div class="app-icon" style="background:#e67e22">S</div>
+            <div class="app-info"><div>Syndication</div><small>Channel Publishing</small></div>
+        </div>
+        <div class="section-title">Admin</div>
+        <div class="app-item" onclick="selectProduct('admin')">
+            <div class="app-icon" style="background:#7f8c8d">⚙</div>
+            <div class="app-info">Admin Console</div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
+    
+    <!-- MAIN -->
+    <div class="main-container">
+        <!-- WORK AREA SIDEBAR -->
+        <div class="work-area-sidebar">
+            <div class="wa-header">
+                <div class="wa-selector" onclick="toggleWADropdown()">
+                    <span id="currentWA">Product Catalog</span>
+                    <span>▾</span>
+                </div>
+                <div class="wa-dropdown" id="waDropdown">
+                    <div class="section-title">Admin Work Areas</div>
+                    <div class="wa-option active" onclick="selectWA('Product Catalog')">Product Catalog</div>
+                    <div class="wa-option" onclick="selectWA('Marketing Content')">Marketing Content</div>
+                    <div class="wa-option" onclick="selectWA('Compliance')">Compliance</div>
+                    <div class="section-title">My Work Areas <button class="add-btn" onclick="showAddWorkArea(event)" title="Add work area">+</button></div>
+                    <div id="myWorkAreasList">
+                        <div class="wa-option" onclick="selectWA('Electronics Review')">Electronics Review</div>
+                        <div class="wa-option" onclick="selectWA('Import Queue')">Import Queue</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="perspectives">
+                <div class="section-title">Perspectives <button class="add-btn" onclick="showAddPerspective()" title="Add perspective">+</button></div>
+                <div id="perspectivesList">
+                    <div class="persp-item active" onclick="selectPersp(this)">All Products</div>
+                    <div class="persp-item" onclick="selectPersp(this)">Enrichment Queue</div>
+                    <div class="persp-item" onclick="selectPersp(this)">Ready for Review</div>
+                    <div class="persp-item" onclick="selectPersp(this)">Published</div>
+                </div>
+                <div class="section-title">Quick Filters</div>
+                <div class="persp-item" onclick="selectPersp(this)">Incomplete Data</div>
+                <div class="persp-item" onclick="selectPersp(this)">Recently Modified</div>
+            </div>
+            
+            <!-- Add Perspective Modal -->
+            <div class="modal-overlay" id="addPerspModal" onclick="if(event.target===this)closeAddPerspective()">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Create Perspective</h3>
+                        <button class="close-btn" onclick="closeAddPerspective()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-field">
+                            <label>Name</label>
+                            <input type="text" id="perspName" placeholder="e.g., My Draft Products">
+                        </div>
+                        <div class="form-field">
+                            <label>Based on</label>
+                            <select id="perspBase">
+                                <option value="all">All Products</option>
+                                <option value="filter">Current filter</option>
+                                <option value="selection">Current selection</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Visibility</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="perspVisibility" value="private" checked> Only me</label>
+                                <label><input type="radio" name="perspVisibility" value="team"> My team</label>
+                                <label><input type="radio" name="perspVisibility" value="all"> Everyone</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="secondary" onclick="closeAddPerspective()">Cancel</button>
+                        <button onclick="createPerspective()">Create</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Work Area Modal -->
+            <div class="modal-overlay" id="addWAModal" onclick="if(event.target===this)closeAddWorkArea()">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Create Work Area</h3>
+                        <button class="close-btn" onclick="closeAddWorkArea()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-field">
+                            <label>Name</label>
+                            <input type="text" id="waName" placeholder="e.g., Q1 Product Launch">
+                        </div>
+                        <div class="form-field">
+                            <label>Description</label>
+                            <input type="text" id="waDesc" placeholder="Optional description">
+                        </div>
+                        <div class="form-field">
+                            <label>Visibility</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="waVisibility" value="private" checked> Only me</label>
+                                <label><input type="radio" name="waVisibility" value="team"> My team</label>
+                                <label><input type="radio" name="waVisibility" value="all"> Everyone</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="secondary" onclick="closeAddWorkArea()">Cancel</button>
+                        <button onclick="createWorkArea()">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CONTENT -->
+        <div class="content-area">
+            <div class="breadcrumb" id="breadcrumb"></div>
+            
+            <div class="main">
+                <!-- LIST VIEW -->
+                <div class="view active" id="listView">
+                    <div class="tree">
+                        <div class="tree-item" data-id="electronics" onclick="selectNode('electronics')">▾ Electronics</div>
+                        <div class="tree-item indent-1" data-id="smartphones" onclick="selectNode('smartphones')">▾ Smartphones</div>
+                        <div class="tree-item indent-2" data-id="iphone15" onclick="selectNode('iphone15')">▸ iPhone 15 Series</div>
+                        <div class="tree-item indent-2" data-id="galaxy24" onclick="selectNode('galaxy24')">▸ Galaxy S24 Series</div>
+                        <div class="tree-item indent-1" data-id="laptops" onclick="selectNode('laptops')">▸ Laptops</div>
+                        <div class="tree-item indent-1" data-id="tablets" onclick="selectNode('tablets')">▸ Tablets</div>
+                        <div class="tree-item" data-id="home" onclick="selectNode('home')">▸ Home & Garden</div>
+                    </div>
+                    
+                    <div class="content">
+                        <div class="content-header">
+                            <div>
+                                <h2 id="contextTitle">-</h2>
+                                <p id="contextMeta">-</p>
+                            </div>
+                            <button onclick="openDetail(currentNode)">View Details</button>
+                        </div>
+                        
+                        <div class="table-area">
+                            <table>
+                                <thead><tr><th></th><th>Name</th><th>Type</th><th>Status</th><th>Items</th><th></th></tr></thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DETAIL VIEW -->
+                <div class="view" id="detailView">
+                    <div class="sibling-list">
+                        <div class="sibling-header">
+                            <small id="siblingParentType">In Product</small>
+                            <div class="parent" id="siblingParentLink">-</div>
+                        </div>
+                        <div class="sibling-items" id="siblingListItems"></div>
+                    </div>
+                    
+                    <div class="content">
+                        <div class="detail-header">
+                            <div class="detail-header-left">
+                                <button class="back-btn" onclick="backToList()">←</button>
+                                <h2 id="detailTitle">-</h2>
+                                <span class="type-badge" id="detailType">-</span>
+                            </div>
+                            <div class="nav-buttons" id="navButtons">
+                                <button class="secondary" id="prevBtn" onclick="navigateSibling(-1)">← Prev</button>
+                                <button class="secondary" id="nextBtn" onclick="navigateSibling(1)">Next →</button>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-body">
+                            <div class="detail-section">
+                                <h3>General Information</h3>
+                                <div class="detail-grid">
+                                    <div class="detail-field"><label>ID</label><div id="detailId">-</div></div>
+                                    <div class="detail-field"><label>Status</label><div id="detailStatus">-</div></div>
+                                    <div class="detail-field"><label>Children</label><div id="detailChildren">-</div></div>
+                                </div>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Description</h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nodes = {
+            electronics: { id: 'electronics', name: 'Electronics', type: 'Category', parentId: null, status: 'Active', children: ['smartphones', 'laptops', 'tablets'] },
+            home: { id: 'home', name: 'Home & Garden', type: 'Category', parentId: null, status: 'Active', children: [] },
+            smartphones: { id: 'smartphones', name: 'Smartphones', type: 'Product Family', parentId: 'electronics', status: 'Active', children: ['iphone15', 'galaxy24'] },
+            laptops: { id: 'laptops', name: 'Laptops', type: 'Product Family', parentId: 'electronics', status: 'Active', children: [] },
+            tablets: { id: 'tablets', name: 'Tablets', type: 'Product Family', parentId: 'electronics', status: 'Draft', children: [] },
+            iphone15: { id: 'iphone15', name: 'iPhone 15 Series', type: 'Product', parentId: 'smartphones', status: 'Active', children: ['ip15-128', 'ip15-256', 'ip15-512', 'ip15-1tb'] },
+            galaxy24: { id: 'galaxy24', name: 'Galaxy S24 Series', type: 'Product', parentId: 'smartphones', status: 'Active', children: ['gs24-128', 'gs24-256'] },
+            'ip15-128': { id: 'ip15-128', name: 'iPhone 15 Pro 128GB', type: 'Variant', parentId: 'iphone15', status: 'Active', children: [] },
+            'ip15-256': { id: 'ip15-256', name: 'iPhone 15 Pro 256GB', type: 'Variant', parentId: 'iphone15', status: 'Active', children: [] },
+            'ip15-512': { id: 'ip15-512', name: 'iPhone 15 Pro 512GB', type: 'Variant', parentId: 'iphone15', status: 'Draft', children: [] },
+            'ip15-1tb': { id: 'ip15-1tb', name: 'iPhone 15 Pro 1TB', type: 'Variant', parentId: 'iphone15', status: 'Active', children: [] },
+            'gs24-128': { id: 'gs24-128', name: 'Galaxy S24 128GB', type: 'Variant', parentId: 'galaxy24', status: 'Active', children: [] },
+            'gs24-256': { id: 'gs24-256', name: 'Galaxy S24 256GB', type: 'Variant', parentId: 'galaxy24', status: 'Active', children: [] },
+        };
+        
+        let currentNode = 'electronics', currentChildren = [], currentChildIndex = -1, listParentNode = 'electronics';
+        
+        function toggleAppPanel() {
+            document.getElementById('appPanel').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
+        function toggleWADropdown() {
+            document.getElementById('waDropdown').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
+        function closeAllPanels() {
+            document.getElementById('appPanel').classList.remove('open');
+            document.getElementById('waDropdown').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+        function selectProduct(id) {
+            document.querySelectorAll('.app-item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.querySelector('.product-name').textContent = id.toUpperCase();
+            closeAllPanels();
+            alert('→ Navigate to ' + id.toUpperCase());
+        }
+        function selectWA(name) {
+            document.querySelectorAll('.wa-option').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('currentWA').textContent = name;
+            closeAllPanels();
+        }
+        function selectPersp(el) {
+            document.querySelectorAll('.persp-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+        
+        // Add Perspective
+        function showAddPerspective() {
+            document.getElementById('addPerspModal').classList.add('open');
+            document.getElementById('perspName').focus();
+        }
+        function closeAddPerspective() {
+            document.getElementById('addPerspModal').classList.remove('open');
+            document.getElementById('perspName').value = '';
+        }
+        function createPerspective() {
+            const name = document.getElementById('perspName').value.trim();
+            if (!name) { alert('Please enter a name'); return; }
+            
+            const list = document.getElementById('perspectivesList');
+            const newItem = document.createElement('div');
+            newItem.className = 'persp-item';
+            newItem.onclick = function() { selectPersp(this); };
+            newItem.textContent = name;
+            list.appendChild(newItem);
+            
+            closeAddPerspective();
+            selectPersp(newItem);
+        }
+        
+        // Add Work Area
+        function showAddWorkArea(e) {
+            e.stopPropagation(); // Don't close the dropdown
+            closeAllPanels();
+            document.getElementById('addWAModal').classList.add('open');
+            document.getElementById('waName').focus();
+        }
+        function closeAddWorkArea() {
+            document.getElementById('addWAModal').classList.remove('open');
+            document.getElementById('waName').value = '';
+            document.getElementById('waDesc').value = '';
+        }
+        function createWorkArea() {
+            const name = document.getElementById('waName').value.trim();
+            if (!name) { alert('Please enter a name'); return; }
+            
+            const list = document.getElementById('myWorkAreasList');
+            const newItem = document.createElement('div');
+            newItem.className = 'wa-option';
+            newItem.onclick = function() { selectWA(name); };
+            newItem.textContent = name;
+            list.appendChild(newItem);
+            
+            closeAddWorkArea();
+            document.getElementById('currentWA').textContent = name;
+            document.querySelectorAll('.wa-option').forEach(i => i.classList.remove('active'));
+            newItem.classList.add('active');
+        }
+        
+        function buildBreadcrumb(nodeId) {
+            let path = [], id = nodeId;
+            while (id) { path.unshift(nodes[id]); id = nodes[id].parentId; }
+            let html = '<a href="#" onclick="selectNode(null);return false">All Products</a>';
+            path.forEach((n, i) => {
+                html += '<span>›</span>';
+                html += i === path.length - 1 ? `<strong>${n.name}</strong>` : `<a href="#" onclick="selectNode('${n.id}');return false">${n.name}</a>`;
+            });
+            document.getElementById('breadcrumb').innerHTML = html;
+        }
+        
+        function selectNode(nodeId) {
+            if (!nodeId) nodeId = 'electronics';
+            currentNode = nodeId; listParentNode = nodeId; currentChildIndex = -1;
+            const node = nodes[nodeId];
+            currentChildren = node.children.map(id => nodes[id]);
+            document.querySelectorAll('.tree-item').forEach(i => i.classList.toggle('selected', i.dataset.id === nodeId));
+            document.getElementById('contextTitle').textContent = node.name;
+            document.getElementById('contextMeta').textContent = `${node.type} · ${currentChildren.length} items`;
+            document.getElementById('tableBody').innerHTML = currentChildren.length === 0 
+                ? '<tr><td colspan="6" style="text-align:center;color:var(--text-light);padding:32px">No items</td></tr>'
+                : currentChildren.map((c, i) => `<tr>
+                    <td><input type="checkbox"></td>
+                    <td><span class="link" onclick="openChildDetail(${i})">${c.name}</span></td>
+                    <td class="text-muted">${c.type}</td>
+                    <td>${c.status}</td>
+                    <td class="text-muted">${c.children.length || '—'}</td>
+                    <td><button class="secondary" onclick="openChildDetail(${i})">View</button></td>
+                </tr>`).join('');
+            buildBreadcrumb(nodeId);
+            showView('listView');
+        }
+        
+        function openDetail(nodeId) {
+            const node = nodes[nodeId];
+            if (nodeId === currentNode) {
+                if (node.parentId) {
+                    currentChildren = nodes[node.parentId].children.map(id => nodes[id]);
+                    currentChildIndex = currentChildren.findIndex(c => c.id === nodeId);
+                } else { currentChildren = []; currentChildIndex = -1; }
+            } else {
+                const idx = currentChildren.findIndex(c => c.id === nodeId);
+                if (idx >= 0) currentChildIndex = idx;
+                else {
+                    currentChildren = node.parentId ? nodes[node.parentId].children.map(id => nodes[id]) : [];
+                    currentChildIndex = currentChildren.findIndex(c => c.id === nodeId);
+                    if (node.parentId) listParentNode = node.parentId;
+                }
+            }
+            renderDetail(node); buildBreadcrumb(nodeId); showView('detailView');
+        }
+        
+        function openChildDetail(index) {
+            currentChildIndex = index;
+            renderDetail(currentChildren[index]);
+            buildBreadcrumb(currentChildren[index].id);
+            showView('detailView');
+        }
+        
+        function renderDetail(node) {
+            document.getElementById('detailTitle').textContent = node.name;
+            document.getElementById('detailType').textContent = node.type;
+            document.getElementById('detailId').textContent = node.id;
+            document.getElementById('detailStatus').textContent = node.status;
+            document.getElementById('detailChildren').textContent = node.children.length || 'None';
+            const parent = node.parentId ? nodes[node.parentId] : null;
+            document.getElementById('siblingParentType').textContent = parent ? 'In ' + parent.type : '';
+            document.getElementById('siblingParentLink').textContent = parent ? parent.name : 'Root';
+            document.getElementById('siblingListItems').innerHTML = currentChildren.map((c, i) => 
+                `<div class="sibling-item ${i === currentChildIndex ? 'current' : ''}" onclick="openChildDetail(${i})">${c.name}</div>`
+            ).join('');
+            const nav = document.getElementById('navButtons');
+            nav.style.display = currentChildren.length > 1 && currentChildIndex >= 0 ? 'flex' : 'none';
+            document.getElementById('prevBtn').disabled = currentChildIndex <= 0;
+            document.getElementById('nextBtn').disabled = currentChildIndex >= currentChildren.length - 1;
+        }
+        
+        function navigateSibling(dir) {
+            const idx = currentChildIndex + dir;
+            if (idx >= 0 && idx < currentChildren.length) openChildDetail(idx);
+        }
+        function backToList() { selectNode(listParentNode); }
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        
+        document.addEventListener('keydown', e => {
+            if (document.getElementById('detailView').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') navigateSibling(-1);
+                if (e.key === 'ArrowRight') navigateSibling(1);
+                if (e.key === 'Escape') backToList();
+            }
+            if (e.key === 'Escape') closeAllPanels();
+        });
+        
+        selectNode('electronics');
+    </script>
+</body>
+</html>

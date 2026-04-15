@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDM Form Layout - UX Analysis</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: #1e293b;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #475569;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #475569;
+        }
+
+        ul {
+            margin: 12px 0;
+            padding-left: 24px;
+            color: #475569;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .callout {
+            background: #f8fafc;
+            border-left: 4px solid #64748b;
+            padding: 14px 18px;
+            border-radius: 0 6px 6px 0;
+            margin: 16px 0;
+        }
+
+        .callout.warning {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+        }
+
+        .callout.info {
+            background: #eff6ff;
+            border-left-color: #3b82f6;
+        }
+
+        .callout-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        /* Approach cards */
+        .approach {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .approach.recommended {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .approach h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .approach p {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge.recommended {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .badge.current {
+            background: #64748b;
+            color: white;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        .pros, .cons {
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .pros {
+            background: #f0fdf4;
+        }
+
+        .cons {
+            background: #fef2f2;
+        }
+
+        .pros h5, .cons h5 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .pros h5 { color: #16a34a; }
+        .cons h5 { color: #dc2626; }
+
+        .pros ul, .cons ul {
+            margin: 0;
+            padding-left: 16px;
+            font-size: 0.8rem;
+        }
+
+        .pros li { color: #166534; }
+        .cons li { color: #991b1b; }
+
+        /* Size mapping - proportional widths */
+        .size-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .size-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .size-item.s { width: 25%; min-width: 180px; background: #f1f5f9; }
+        .size-item.m { width: 50%; min-width: 220px; background: #eef2ff; }
+        .size-item.l { width: 75%; min-width: 280px; background: #f5f3ff; }
+        .size-item.f { width: 100%; background: #ecfeff; }
+
+        .size-name {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .size-item.s .size-name { color: #475569; }
+        .size-item.m .size-name { color: #4f46e5; }
+        .size-item.l .size-name { color: #7c3aed; }
+        .size-item.f .size-name { color: #0891b2; }
+
+        .size-pct {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .size-types {
+            font-size: 0.7rem;
+            color: #64748b;
+            line-height: 1.3;
+            flex: 1;
+        }
+
+        /* Link */
+        .view-comparison {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #1e293b;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .view-comparison:hover {
+            background: #334155;
+        }
+
+        @media (max-width: 600px) {
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+            .size-item.s,
+            .size-item.m,
+            .size-item.l {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>MDM Form Layout Analysis</h1>
+        <p class="subtitle">Evaluating approaches for product detail form field widths</p>
+    </div>
+
+    <!-- 1. The Problem -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-number">1</span>
+            The Problem
+        </div>
+        
+        <p>Users have reported that the product detail form <strong>"does not use space efficiently."</strong></p>
+
+        <p>The current layout has:</p>
+        <ul>
+            <li><strong>Single-column structure</strong> with inline labels (label left, field right)</li>
+            <li><strong>Column-based width system</strong> (96px columns + 24px gutter) — field types map to 2, 3, 4, or 5 columns</li>
+            <li><strong>Short fields waste space</strong> — SKUs, dates, numbers use only a fraction of available width</li>
+        </ul>
+
+        <div class="callout">
+            <div class="callout-title">User Feedback</div>
+            <p>"We do not use the space efficiently" — Users want better use of horizontal space and less visual inconsistency.</p>
+        </div>
+    </div>
+
+    <!-- 2. Proposed Solution -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-number">2</span>
+            Proposed Change: Simplify to 3–4 Responsive Sizes
+        </div>
+
+        <p>Map the existing column-based widths (2, 3, 4, 5 columns) to <strong>named sizes</strong> that work responsively. The number of sizes depends on the layout approach:</p>
+
+        <h3>Option B (Multi-column Grid): 4 sizes</h3>
+        <p>Each size maps to a column span in a 4-column grid:</p>
+        <div class="size-grid">
+            <div class="size-item s">
+                <div class="size-name">Small</div>
+                <span class="size-pct">1 col</span>
+                <div class="size-types">SKU, GTIN, dates, numbers, booleans</div>
+            </div>
+            <div class="size-item m">
+                <div class="size-name">Medium</div>
+                <span class="size-pct">2 col</span>
+                <div class="size-types">Dropdowns, names, short text</div>
+            </div>
+            <div class="size-item l">
+                <div class="size-name">Large</div>
+                <span class="size-pct">3 col</span>
+                <div class="size-types">Product titles, longer text</div>
+            </div>
+            <div class="size-item f">
+                <div class="size-name">Full</div>
+                <span class="size-pct">4 col</span>
+                <div class="size-types">Descriptions, URLs, multi-value, tables</div>
+            </div>
+        </div>
+
+        <h3>Option C (Single Column): 3 sizes</h3>
+        <p>Since fields are alone on each row, Large and Full collapse into one — both fill the available width:</p>
+        <div class="size-grid">
+            <div class="size-item s">
+                <div class="size-name">Small</div>
+                <span class="size-pct">25%</span>
+                <div class="size-types">SKU, GTIN, dates, numbers, booleans</div>
+            </div>
+            <div class="size-item m">
+                <div class="size-name">Medium</div>
+                <span class="size-pct">50%</span>
+                <div class="size-types">Dropdowns, names, short text</div>
+            </div>
+            <div class="size-item f">
+                <div class="size-name">Full</div>
+                <span class="size-pct">100%</span>
+                <div class="size-types">Product titles, descriptions, URLs, multi-value, tables</div>
+            </div>
+        </div>
+
+        <p>This creates <strong>visual consistency</strong> — all SKUs are the same width, all dropdowns are the same width, etc.</p>
+    </div>
+
+    <!-- 3. Four Approaches -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-number">3</span>
+            Four Layout Approaches
+        </div>
+
+        <p>We can apply the size system in different ways:</p>
+
+        <!-- A. Original -->
+        <div class="approach">
+            <h4>A. Original (Current) <span class="badge current">Status Quo</span></h4>
+            <p>Single column, inline labels, column-based widths (96px columns + 24px gutter, mapped to 2-5 columns per field type).</p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h5>Pros</h5>
+                    <ul>
+                        <li>Familiar to users</li>
+                        <li>Easy vertical scanning</li>
+                        <li>Existing system, no work needed</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h5>Cons</h5>
+                    <ul>
+                        <li>Doesn't address space complaint</li>
+                        <li>Wasted horizontal space</li>
+                        <li>Fixed pixel widths, not responsive</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- B. Multi-column Grid -->
+        <div class="approach">
+            <h4>B. Multi-column Grid <span class="badge current">Alternative</span></h4>
+            <p>4-column grid with top labels. Sizes map to column spans (S=1, M=2, L=3, F=4). Responsive: collapses to 2 columns, then 1 column on mobile.</p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h5>Pros</h5>
+                    <ul>
+                        <li>Multiple small/medium fields per row</li>
+                        <li>Better horizontal space usage</li>
+                        <li>Good for reviewing many fields at once</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h5>Cons</h5>
+                    <ul>
+                        <li>Top labels add height — full-width fields take MORE space than inline labels</li>
+                        <li>Scrolling savings are marginal (depends on field mix)</li>
+                        <li>Z-pattern scanning (slower to find specific field)</li>
+                        <li>Denser, may feel overwhelming</li>
+                        <li>More complex to implement</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- C. Single Column + Mapped Sizes -->
+        <div class="approach recommended">
+            <h4>C. Single Column + Mapped Sizes <span class="badge recommended">Recommended</span></h4>
+            <p>Keep single-column layout and inline labels. Since fields are alone on each row, effectively 3 widths: Small (25%), Medium (50%), Large/Full (100%). Below 600px, labels move to top and all fields become full width.</p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h5>Pros</h5>
+                    <ul>
+                        <li>Addresses visual inconsistency (proportional sizing)</li>
+                        <li>Inline labels are more space-efficient than top labels</li>
+                        <li>Easy vertical scanning to find fields</li>
+                        <li>Familiar layout preserved</li>
+                        <li>Less disruptive, lower risk</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h5>Cons</h5>
+                    <ul>
+                        <li>Horizontal space to the right of small fields remains empty</li>
+                        <li>Same number of rows as before</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- D. Two Column Layout -->
+        <div class="approach">
+            <h4>D. Two Column Layout <span class="badge current">Split Panel</span></h4>
+            <p>Two Layout C panels side by side, each displaying different attribute groups for the same record. Useful for comparing or organizing attributes into logical categories (e.g., marketing vs. logistics). Includes shared toolbar and dual sidebar configuration.</p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h5>Pros</h5>
+                    <ul>
+                        <li>Displays more attributes simultaneously</li>
+                        <li>Logical grouping (e.g., identity/marketing in left, pricing/inventory in right)</li>
+                        <li>Good for power users who need to see related data together</li>
+                        <li>Reduces context switching between tabs/sections</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h5>Cons</h5>
+                    <ul>
+                        <li>Requires wider viewport — not suitable for narrow screens</li>
+                        <li>240px labels may be too wide for narrower columns</li>
+                        <li>Higher cognitive load with two forms visible</li>
+                        <li>With two sidebars, horizontal space becomes constrained</li>
+                        <li>No responsive breakpoint to stack columns vertically</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="callout info">
+            <div class="callout-title">Why Option C?</div>
+            <p>The "space efficiency" complaint is likely about <strong>visual inconsistency</strong> rather than actual space usage. Option C addresses this with proportional sizing while preserving the familiar scanning pattern. Option B's multi-column layout adds height via top labels, so scrolling savings are marginal — and the Z-pattern scanning makes finding specific fields slower. Option D is best suited for power users on wide displays who benefit from seeing multiple attribute categories simultaneously.</p>
+        </div>
+
+        <div class="callout">
+            <div class="callout-title">Future consideration: Use the whitespace purposefully</div>
+            <p>Instead of eliminating whitespace, consider using it for <strong>contextual information</strong>: field hints, validation feedback, data quality indicators, last-modified metadata, or quick actions. This reframes the "wasted" space as valuable real estate that improves data entry — without changing the layout.</p>
+        </div>
+    </div>
+
+    <!-- 4. Responsive Behavior -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-number">4</span>
+            Responsive Behavior (Option C)
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Screen Width</th>
+                    <th>Labels</th>
+                    <th>Field Widths</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>≥ 600px</strong> (Desktop/Tablet)</td>
+                    <td>Inline (left of field)</td>
+                    <td>S, M, L, F as specified</td>
+                </tr>
+                <tr>
+                    <td><strong>< 600px</strong> (Mobile)</td>
+                    <td>Top (above field)</td>
+                    <td>All fields 100% width</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Tables and data containers</strong> always span full width regardless of screen size.</p>
+    </div>
+
+    <!-- 5. Field Type Mapping -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-number">5</span>
+            Field Type Mapping
+        </div>
+
+        <p><em>Note: Option D uses the same sizing as Option C, with two panels displaying different attribute groups.</em></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Type</th>
+                    <th>Option B (4 sizes)</th>
+                    <th>Option C (3 sizes)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>SKU, GTIN, UPC, MPN, EAN</td><td>Small</td><td>Small</td></tr>
+                <tr><td>Dates (launch, end, created)</td><td>Small</td><td>Small</td></tr>
+                <tr><td>Numbers (qty, price, weight)</td><td>Small</td><td>Small</td></tr>
+                <tr><td>Booleans, status dropdowns</td><td>Small</td><td>Small</td></tr>
+                <tr><td>Brand, Category dropdowns</td><td>Medium</td><td>Medium</td></tr>
+                <tr><td>Short text (names)</td><td>Medium</td><td>Medium</td></tr>
+                <tr><td>Product titles, longer text</td><td>Large</td><td>Full</td></tr>
+                <tr><td>Descriptions, URLs</td><td>Full</td><td>Full</td></tr>
+                <tr><td>Multi-value attributes</td><td>Full</td><td>Full</td></tr>
+                <tr><td>Data containers (tables)</td><td>Full</td><td>Full</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 6. View Comparison -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-number">6</span>
+            Visual Comparison
+        </div>
+
+        <p>See all three approaches side by side with real form fields:</p>
+
+        <a href="form-comparison.html" class="view-comparison">
+            View Comparison →
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

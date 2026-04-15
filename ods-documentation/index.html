@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODS — One Design System · Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface-2: #EFEDE8;
+    --ink: #1A1714;
+    --ink-muted: #6B6660;
+    --ink-faint: #A09C98;
+    --accent: #1D4ED8;
+    --accent-light: #EEF2FF;
+    --accent-2: #D97706;
+    --accent-2-light: #FFFBEB;
+    --accent-3: #059669;
+    --accent-3-light: #ECFDF5;
+    --accent-4: #7C3AED;
+    --accent-4-light: #F5F3FF;
+    --danger: #DC2626;
+    --danger-light: #FEF2F2;
+    --border: #E2DDD8;
+    --radius: 6px;
+    --radius-lg: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR NAV ─── */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .sidebar-logo .wordmark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .sidebar-logo .subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 3px;
+  }
+
+  .nav-group { margin-bottom: 8px; }
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 12px 24px 6px;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 24px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-link:hover { background: var(--bg); color: var(--ink); }
+  .nav-link.active { background: var(--accent-light); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  .nav-link .status {
+    margin-left: auto;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 20px;
+  }
+  .nav-link .status.done { background: var(--accent-3-light); color: var(--accent-3); }
+  .nav-link .status.partial { background: var(--accent-2-light); color: var(--accent-2); }
+  .nav-link .status.tbd { background: var(--surface-2); color: var(--ink-faint); }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .version-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  main {
+    min-width: 0;
+    padding: 60px 80px 120px;
+    max-width: 960px;
+  }
+
+  /* ─── SECTIONS ─── */
+  .doc-section {
+    margin-bottom: 80px;
+    scroll-margin-top: 40px;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-bottom: 12px;
+    margin-top: 32px;
+  }
+  h3:first-child { margin-top: 0; }
+  h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+    margin-top: 20px;
+  }
+  p { color: var(--ink-muted); margin-bottom: 14px; line-height: 1.7; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  .lead {
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    margin-bottom: 0;
+    max-width: 640px;
+  }
+
+  .section-intro {
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin-bottom: 32px;
+    max-width: 640px;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ─── TABLE OF CONTENTS ─── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin: 32px 0;
+  }
+  .toc-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 16px;
+  }
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--ink-muted);
+  }
+  .toc-item a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .toc-item a:hover { color: var(--accent); }
+  .toc-item .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    min-width: 24px;
+  }
+  .toc-item .status {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .toc-item .status.done { background: var(--accent-3-light); color: var(--accent-3); }
+  .toc-item .status.partial { background: var(--accent-2-light); color: var(--accent-2); }
+  .toc-item .status.tbd { background: var(--surface-2); color: var(--ink-faint); }
+
+  /* ─── CALLOUTS ─── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13.5px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-note { background: var(--accent-light); color: #1e3a8a; border-left: 3px solid var(--accent); }
+  .callout-warning { background: var(--accent-2-light); color: #92400e; border-left: 3px solid var(--accent-2); }
+  .callout-success { background: var(--accent-3-light); color: #065f46; border-left: 3px solid var(--accent-3); }
+  .callout-a11y { background: var(--accent-4-light); color: #5b21b6; border-left: 3px solid var(--accent-4); }
+
+  /* ─── LISTS ─── */
+  ul.content-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  ul.content-list li {
+    font-size: 14px;
+    color: var(--ink-muted);
+    padding-left: 20px;
+    position: relative;
+  }
+  ul.content-list li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--ink-faint);
+  }
+
+  /* ─── INLINE CODE ─── */
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* ─── COMPONENT LIST ─── */
+  .component-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .component-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .component-item:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ─── DECISION GUIDE CARDS ─── */
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .guide-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .guide-card:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .guide-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .guide-card.disabled:hover {
+    border-color: var(--border);
+    background: var(--surface);
+  }
+  .guide-card-q {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .guide-card-a {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+
+  /* ─── INLINE DECISION LINK ─── */
+  .decision-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin: 4px 0;
+    transition: all 0.15s;
+  }
+  .decision-link:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    main { padding: 40px 32px 80px; }
+    .component-grid { grid-template-columns: repeat(2, 1fr); }
+    .guide-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─── SCROLL HIGHLIGHT ─── */
+  :target { animation: highlight 1.5s ease; }
+  @keyframes highlight {
+    0% { background: var(--accent-light); }
+    100% { background: transparent; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SIDEBAR NAVIGATION
+       ══════════════════════════════════════════════════════════════════════ -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="wordmark">One Design System</div>
+      <div class="subtitle">Documentation · v0.1</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">0. Introduction</div>
+      <a href="#intro" class="nav-link active">Overview</a>
+      <a href="#how-to-use" class="nav-link">How to use this doc</a>
+      <a href="#changelog" class="nav-link">Versioning & changelog</a>
+      <a href="#contributing" class="nav-link">Contributing</a>
+      <a href="#glossary" class="nav-link">Glossary</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">1. Foundations</div>
+      <a href="#foundations" class="nav-link">Overview <span class="status partial">Partial</span></a>
+      <a href="#tokens" class="nav-link">Design tokens <span class="status done">Done</span></a>
+      <a href="#typography" class="nav-link">Typography <span class="status done">Done</span></a>
+      <a href="#colour" class="nav-link">Colour system <span class="status tbd">TBD</span></a>
+      <a href="#spacing" class="nav-link">Spacing & grid <span class="status tbd">TBD</span></a>
+      <a href="#elevation" class="nav-link">Elevation & shadow <span class="status tbd">TBD</span></a>
+      <a href="#motion" class="nav-link">Motion <span class="status tbd">TBD</span></a>
+      <a href="#iconography" class="nav-link">Iconography <span class="status done">Done</span></a>
+      <a href="#imagery" class="nav-link">Imagery & illustration <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">2. Content & Writing</div>
+      <a href="#content" class="nav-link">Overview <span class="status tbd">TBD</span></a>
+      <a href="#voice-tone" class="nav-link">Voice & tone <span class="status tbd">TBD</span></a>
+      <a href="#ui-copy" class="nav-link">UI copy patterns <span class="status tbd">TBD</span></a>
+      <a href="#error-messages" class="nav-link">Error messages <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">3. Application Shell</div>
+      <a href="#shell" class="nav-link">Overview & layers <span class="status done">Done</span></a>
+      <a href="#ai-agent" class="nav-link">AI Agent <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">4. Page Types</div>
+      <a href="#page-types" class="nav-link">Overview <span class="status partial">Partial</span></a>
+      <a href="#bulk-page" class="nav-link">Bulk page <span class="status partial">Partial</span></a>
+      <a href="#details-page" class="nav-link">Details page <span class="status partial">Partial</span></a>
+      <a href="#dashboard" class="nav-link">Dashboard / home <span class="status tbd">TBD</span></a>
+      <a href="#settings-page" class="nav-link">Settings page <span class="status tbd">TBD</span></a>
+      <a href="#widgets" class="nav-link">Widgets <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">5. Wayfinding</div>
+      <a href="#wayfinding" class="nav-link">Overview <span class="status partial">Partial</span></a>
+      <a href="#hierarchy-nav" class="nav-link">Hierarchy navigation <span class="status done">Done</span></a>
+      <a href="#breadcrumb" class="nav-link">Breadcrumbs <span class="status partial">Partial</span></a>
+      <a href="#back-nav" class="nav-link">Back navigation <span class="status tbd">TBD</span></a>
+      <a href="#cross-product" class="nav-link">Cross-product links <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">6. Components</div>
+      <a href="#components" class="nav-link">Overview <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">7. Patterns</div>
+      <a href="#patterns" class="nav-link">Overview <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">8. Accessibility</div>
+      <a href="#accessibility" class="nav-link">Overview <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">9. Product Guidance</div>
+      <a href="#products" class="nav-link">Overview <span class="status tbd">TBD</span></a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Decision Guides</div>
+      <a href="#decision-guides" class="nav-link">All guides</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="version-tag">ODS v0.1 · Draft · 2026</div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ══════════════════════════════════════════════════════════════════════ -->
+  <main>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 0: INTRODUCTION
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="intro">
+      <div class="page-eyebrow">One Design System</div>
+      <h1>ODS Documentation</h1>
+      <p class="lead">A unified design language for the entire product portfolio. ODS provides the shared grammar — foundations, components, patterns, and guidance — that enables teams to build cohesive experiences across every product.</p>
+
+      <hr class="divider">
+
+      <h2>What is ODS?</h2>
+      <p class="section-intro">The <strong>One Design System</strong> unifies our fragmented design landscape — three existing design systems plus a portfolio of products that follow no system at all — into a single source of truth. ODS creates a centralized hub where all products share common patterns while maintaining their distinct purposes.</p>
+
+      <h3>Why ODS exists</h3>
+      <p style="margin-bottom:16px;">Today, our product portfolio is fragmented: three separate design systems serve some products, while many others have evolved without any systematic design guidance. This creates inconsistent user experiences and duplicated effort across teams.</p>
+      <ul class="content-list">
+        <li><strong>Consistency</strong> — Users moving between products experience a familiar interface language</li>
+        <li><strong>Efficiency</strong> — Design and engineering teams work from shared components and patterns instead of reinventing solutions</li>
+        <li><strong>Quality</strong> — Centralized documentation ensures best practices are applied everywhere</li>
+        <li><strong>Scalability</strong> — New products inherit a mature design foundation from day one</li>
+        <li><strong>Migration path</strong> — Products without a system gain clear guidance for adopting ODS</li>
+      </ul>
+
+      <h3>The five-layer framework</h3>
+      <p>At the core of ODS is the <strong>Application Shell</strong> — a shared layout structure that every product inherits. This framework divides the interface into five functional layers:</p>
+      <ul class="content-list">
+        <li><strong>Layer A</strong> — Top Bar: Suite-level navigation, global search, AI agent entry</li>
+        <li><strong>Layer B</strong> — Side Panel: Product-specific navigation (shallow hierarchy)</li>
+        <li><strong>Layer C</strong> — Explorer: Deep data hierarchy browsing (optional)</li>
+        <li><strong>Layer D</strong> — Content Area: The primary workspace</li>
+        <li><strong>Layer E</strong> — Contextual Panel: Inspector or AI agent interaction (optional)</li>
+      </ul>
+
+      <div class="callout callout-success">
+        <span class="callout-icon">✓</span>
+        <span>The Shell Framework documentation is complete and serves as the starting point for all product implementations. <a href="#shell" style="color:inherit;font-weight:600;">Jump to Shell documentation →</a></span>
+      </div>
+    </section>
+
+    <!-- HOW TO USE -->
+    <section class="doc-section" id="how-to-use">
+      <h2>How to use this documentation</h2>
+      <p class="section-intro">This documentation is organized in layers, from foundational elements to complex patterns. Each chapter builds on the previous ones.</p>
+
+      <h3>For product designers</h3>
+      <ul class="content-list">
+        <li>Start with <strong>Foundations</strong> to understand tokens, typography, colour, and the grid system</li>
+        <li>Review <strong>Content & Writing</strong> for voice, tone, and UI copy patterns</li>
+        <li>Study the <strong>Application Shell</strong> to understand the shared layout structure</li>
+        <li>Use <strong>Page Types</strong> and <strong>Wayfinding</strong> when designing new screens</li>
+        <li>Reference <strong>Components</strong> and <strong>Patterns</strong> for specific UI elements</li>
+        <li>Consult <strong>Decision Guides</strong> when choosing between similar approaches</li>
+      </ul>
+
+      <h3>For developers</h3>
+      <ul class="content-list">
+        <li><strong>Design tokens</strong> provide the primitive values for implementation</li>
+        <li><strong>Components</strong> include specifications for states, variants, and accessibility requirements</li>
+        <li><strong>Patterns</strong> describe composed behaviors that span multiple components</li>
+        <li><strong>Accessibility</strong> defines ARIA patterns and keyboard interaction for each component</li>
+      </ul>
+
+      <h3>Document status indicators</h3>
+      <p>Each section is marked with a status:</p>
+      <ul class="content-list">
+        <li><span style="background:var(--accent-3-light);color:var(--accent-3);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;">Done</span> — Complete and ready for use</li>
+        <li><span style="background:var(--accent-2-light);color:var(--accent-2);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;">Partial</span> — Initial content exists, more detail coming</li>
+        <li><span style="background:var(--surface-2);color:var(--ink-faint);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;">TBD</span> — Planned but not yet documented</li>
+      </ul>
+    </section>
+
+    <!-- CHANGELOG -->
+    <section class="doc-section" id="changelog">
+      <h2>Versioning & changelog</h2>
+      <p class="section-intro">ODS follows semantic versioning. Major changes are communicated to all product teams before release.</p>
+
+      <h3>Current version: 0.1 (Draft)</h3>
+      <p>This is the initial draft release focused on the Application Shell framework. Components and patterns are being migrated from existing design systems.</p>
+
+      <h4>Changelog</h4>
+      <ul class="content-list">
+        <li><strong>2026-03</strong> — Initial shell framework documentation complete</li>
+        <li><strong>2026-03</strong> — Design tokens and typography migrated from existing systems</li>
+        <li><strong>2026-03</strong> — Iconography library established</li>
+      </ul>
+    </section>
+
+    <!-- CONTRIBUTING -->
+    <section class="doc-section" id="contributing">
+      <h2>Contributing</h2>
+      <p class="section-intro">ODS is a living system. Product teams can propose changes, additions, or clarifications.</p>
+
+      <h3>How to propose changes</h3>
+      <ul class="content-list">
+        <li><strong>Minor clarifications</strong> — Comment directly in the Figma library or raise in the #ods-design Slack channel</li>
+        <li><strong>New components or patterns</strong> — Submit an RFC (Request for Comments) using the template in Confluence</li>
+        <li><strong>Breaking changes</strong> — Requires review by the ODS core team and a migration plan</li>
+      </ul>
+
+      <h3>Governance</h3>
+      <p>The ODS core team reviews proposals weekly. Decisions are documented in the changelog. Product teams are notified of changes that affect their implementations.</p>
+    </section>
+
+    <!-- GLOSSARY -->
+    <section class="doc-section" id="glossary">
+      <h2>Glossary</h2>
+      <p class="section-intro">Key terms used throughout this documentation.</p>
+
+      <ul class="content-list">
+        <li><strong>Application Shell</strong> — The shared layout structure (Layers A–E) that all products inherit</li>
+        <li><strong>Bulk page</strong> — A page type for browsing and acting on multiple items (lists, tables, galleries)</li>
+        <li><strong>Details page</strong> — A page type for viewing and editing a single item</li>
+        <li><strong>Explorer</strong> — Layer C; a panel for navigating deep data hierarchies</li>
+        <li><strong>Inspector</strong> — A mode of Layer E that shows contextual information about a selection</li>
+        <li><strong>Layer</strong> — One of five functional regions in the application shell</li>
+        <li><strong>Suite</strong> — The collection of all products accessible through the Top Bar app switcher</li>
+        <li><strong>Token</strong> — A named design value (colour, spacing, typography) that ensures consistency</li>
+        <li><strong>Wayfinding</strong> — How users navigate and orient themselves within and between pages</li>
+        <li><strong>Workspace</strong> — The environment/tenant context a user is working within</li>
+      </ul>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 1: FOUNDATIONS
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="foundations">
+      <h2>1. Foundations</h2>
+      <p class="section-intro">The raw materials everything else is built from. Foundations define the visual and behavioral primitives that ensure consistency across all products.</p>
+
+      <div class="toc">
+        <div class="toc-title">In this chapter</div>
+        <ul class="toc-list">
+          <li class="toc-item"><span class="num">1.1</span> <a href="#tokens">Design tokens</a> <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">1.2</span> <a href="#typography">Typography scale</a> <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">1.3</span> <a href="#colour">Colour system</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">1.4</span> <a href="#spacing">Spacing & grid</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">1.5</span> <a href="#elevation">Elevation & shadow</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">1.6</span> <a href="#motion">Motion & animation</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">1.7</span> <a href="#iconography">Iconography</a> <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">1.8</span> <a href="#imagery">Imagery & illustration</a> <span class="status tbd">TBD</span></li>
+        </ul>
+      </div>
+
+      <div class="callout callout-note">
+        <span class="callout-icon">ℹ</span>
+        <span>Design tokens, typography, and iconography have been migrated from existing systems. Colour, spacing/grid, and motion documentation is in progress.</span>
+      </div>
+    </section>
+
+    <!-- TOKENS -->
+    <section class="doc-section" id="tokens">
+      <h3>1.1 Design tokens</h3>
+      <p>Design tokens are the smallest building blocks of the design system. They capture design decisions as named values that can be used in both design tools and code.</p>
+
+      <h4>Token categories</h4>
+      <ul class="content-list">
+        <li><strong>Colour</strong> — Semantic colour tokens for text, backgrounds, borders, and status</li>
+        <li><strong>Typography</strong> — Font family, size, weight, and line height scales</li>
+        <li><strong>Spacing</strong> — Consistent spacing values based on an 8px grid</li>
+        <li><strong>Radius</strong> — Border radius values for different component sizes</li>
+        <li><strong>Shadow</strong> — Elevation levels for layering and depth</li>
+        <li><strong>Motion</strong> — Duration and easing curves for animations</li>
+      </ul>
+
+      <div class="callout callout-success">
+        <span class="callout-icon">✓</span>
+        <span>Token documentation exists in the Figma library. Reference the <strong>ODS Tokens</strong> file for current values and usage guidelines.</span>
+      </div>
+    </section>
+
+    <!-- TYPOGRAPHY -->
+    <section class="doc-section" id="typography">
+      <h3>1.2 Typography scale</h3>
+      <p>ODS uses the <strong>DM Sans</strong> family as the primary typeface, with <strong>DM Serif Display</strong> for display headings and <strong>DM Mono</strong> for code and technical content.</p>
+
+      <h4>Type scale</h4>
+      <ul class="content-list">
+        <li><code>display-lg</code> — 48px / DM Serif Display / Page headings</li>
+        <li><code>display-md</code> — 28px / DM Serif Display / Section titles</li>
+        <li><code>heading-lg</code> — 20px / DM Sans Semibold / Card titles</li>
+        <li><code>heading-md</code> — 15px / DM Sans Semibold / Subheadings</li>
+        <li><code>body</code> — 15px / DM Sans Regular / Body text</li>
+        <li><code>body-sm</code> — 13px / DM Sans Regular / Secondary text</li>
+        <li><code>caption</code> — 11px / DM Sans Medium / Labels, metadata</li>
+        <li><code>code</code> — 12px / DM Mono / Code snippets</li>
+      </ul>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> Body text must be at least 14px. Line height should be at least 1.5× font size for readability. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- COLOUR -->
+    <section class="doc-section" id="colour">
+      <h3>1.3 Colour system</h3>
+      <p>The colour system defines semantic tokens for consistent colour usage across products.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Complete colour token reference including semantic tokens, status colours, and layer-specific colours.</span>
+      </div>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Semantic colour tokens (text, surface, border, accent)</li>
+        <li>Status colours (success, warning, error, info)</li>
+        <li>Layer colours (A–E visual identification)</li>
+        <li>Dark mode considerations (if applicable)</li>
+      </ul>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> All colour combinations must meet WCAG 2.1 AA contrast ratios (4.5:1 for text, 3:1 for UI elements). <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- SPACING & GRID -->
+    <section class="doc-section" id="spacing">
+      <h3>1.4 Spacing & grid</h3>
+      <p>Spacing values are based on an 8px base unit, creating a consistent rhythm across all interfaces. The 12-column grid provides the foundational layout structure for Layer D content.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Complete spacing scale, 12-column grid specifications, and layout guidelines.</span>
+      </div>
+
+      <h4>Spacing scale</h4>
+      <ul class="content-list">
+        <li><code>space-1</code> — 4px (half unit)</li>
+        <li><code>space-2</code> — 8px (base unit)</li>
+        <li><code>space-3</code> — 12px</li>
+        <li><code>space-4</code> — 16px</li>
+        <li><code>space-6</code> — 24px</li>
+        <li><code>space-8</code> — 32px</li>
+        <li><code>space-12</code> — 48px</li>
+        <li><code>space-16</code> — 64px</li>
+      </ul>
+
+      <h4>12-column grid</h4>
+      <p>Layer D uses a 12-column grid for content layout. The grid adapts to the available width based on which layers are visible.</p>
+      <ul class="content-list">
+        <li>Column count: 12</li>
+        <li>Gutter width: 24px</li>
+        <li>Margin: 32px (desktop), 24px (tablet)</li>
+        <li>Common spans: 12 (full), 6 (half), 4 (third), 3 (quarter)</li>
+      </ul>
+
+      <h4>Breakpoints</h4>
+      <ul class="content-list">
+        <li><code>desktop</code> — ≥ 1280px</li>
+        <li><code>tablet</code> — 768px – 1279px</li>
+        <li><code>mobile</code> — < 768px (out of scope for v1)</li>
+      </ul>
+    </section>
+
+    <!-- ELEVATION -->
+    <section class="doc-section" id="elevation">
+      <h3>1.5 Elevation & shadow</h3>
+      <p>Elevation creates visual hierarchy through shadow depth.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Shadow tokens and elevation levels.</span>
+      </div>
+
+      <h4>Planned levels</h4>
+      <ul class="content-list">
+        <li><code>elevation-0</code> — Flat, no shadow (default surface)</li>
+        <li><code>elevation-1</code> — Subtle lift (cards, wells)</li>
+        <li><code>elevation-2</code> — Raised (dropdowns, popovers)</li>
+        <li><code>elevation-3</code> — Floating (modals, dialogs)</li>
+        <li><code>elevation-4</code> — High (Layer E panel)</li>
+      </ul>
+    </section>
+
+    <!-- MOTION -->
+    <section class="doc-section" id="motion">
+      <h3>1.6 Motion & animation</h3>
+      <p>Motion principles guide how elements transition and animate.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Duration tokens, easing curves, and motion principles.</span>
+      </div>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Duration scale (fast, normal, slow)</li>
+        <li>Easing curves (ease-out for entrances, ease-in for exits)</li>
+        <li>Principles (purposeful, quick, natural)</li>
+      </ul>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> All motion must respect <code>prefers-reduced-motion</code>. Animations should be subtle and not essential for understanding. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- ICONOGRAPHY -->
+    <section class="doc-section" id="iconography">
+      <h3>1.7 Iconography</h3>
+      <p>ODS uses a custom icon library designed for clarity at small sizes.</p>
+
+      <h4>Icon sizes</h4>
+      <ul class="content-list">
+        <li><code>icon-sm</code> — 16px / Navigation, inline actions</li>
+        <li><code>icon-md</code> — 20px / Default for most contexts</li>
+        <li><code>icon-lg</code> — 24px / Prominent actions, empty states</li>
+      </ul>
+
+      <h4>Usage rules</h4>
+      <ul class="content-list">
+        <li>Icons should be accompanied by labels in navigation contexts</li>
+        <li>Icon-only buttons require tooltips for accessibility</li>
+        <li>Use the same icon consistently for the same action across products</li>
+      </ul>
+
+      <div class="callout callout-success">
+        <span class="callout-icon">✓</span>
+        <span>Icon library available in the <strong>ODS Icons</strong> Figma file.</span>
+      </div>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> Decorative icons use <code>aria-hidden="true"</code>. Interactive icons need accessible labels. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- IMAGERY -->
+    <section class="doc-section" id="imagery">
+      <h3>1.8 Imagery & illustration</h3>
+      <p>Guidelines for photography, illustrations, and empty state graphics.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Illustration style, empty state graphics, and image guidelines.</span>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 2: CONTENT & WRITING
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="content">
+      <h2>2. Content & Writing</h2>
+      <p class="section-intro">How we communicate with users through words. Consistent voice, tone, and copy patterns create a cohesive experience across products.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Content guidelines are being developed.</span>
+      </div>
+
+      <div class="toc">
+        <div class="toc-title">In this chapter</div>
+        <ul class="toc-list">
+          <li class="toc-item"><span class="num">2.1</span> <a href="#voice-tone">Voice & tone</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">2.2</span> <a href="#ui-copy">UI copy patterns</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">2.3</span> <a href="#error-messages">Error messages</a> <span class="status tbd">TBD</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- VOICE & TONE -->
+    <section class="doc-section" id="voice-tone">
+      <h3>2.1 Voice & tone</h3>
+      <p>Our voice is the consistent personality across all products. Tone adapts to context.</p>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Voice principles (clear, professional, helpful)</li>
+        <li>Tone variations by context (success, error, onboarding)</li>
+        <li>Writing dos and don'ts</li>
+      </ul>
+    </section>
+
+    <!-- UI COPY -->
+    <section class="doc-section" id="ui-copy">
+      <h3>2.2 UI copy patterns</h3>
+      <p>Standard copy for common interface elements.</p>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Button labels (action verbs, title case vs sentence case)</li>
+        <li>Form labels and help text</li>
+        <li>Empty state messaging</li>
+        <li>Confirmation dialog copy</li>
+        <li>Loading and progress messages</li>
+        <li>Tooltip content guidelines</li>
+      </ul>
+    </section>
+
+    <!-- ERROR MESSAGES -->
+    <section class="doc-section" id="error-messages">
+      <h3>2.3 Error messages</h3>
+      <p>How to write helpful error messages that guide users to resolution.</p>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Error message structure (what happened, why, what to do)</li>
+        <li>Field-level validation messages</li>
+        <li>Page-level error states</li>
+        <li>API/system error communication</li>
+      </ul>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 3: APPLICATION SHELL
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="shell">
+      <h2>3. The Application Shell</h2>
+      <p class="section-intro">The shared layout structure every product inherits. The shell defines five functional layers, their responsibilities, and their interaction rules.</p>
+
+      <div class="callout callout-success">
+        <span class="callout-icon">✓</span>
+        <span><strong>Complete documentation available.</strong> The Shell Framework specification covers all five layers, navigation rules, layer states, and tablet behavior. <a href="ods-shell-framework.html" style="color:inherit;font-weight:600;">View Shell Framework →</a></span>
+      </div>
+
+      <div class="toc">
+        <div class="toc-title">Shell documentation includes</div>
+        <ul class="toc-list">
+          <li class="toc-item"><span class="num">3.1</span> Overview & design principles <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.2</span> Layer A — Top Bar (suite navigation) <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.3</span> Layer B — Side Panel (global navigation) <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.4</span> Layer C — Explorer (structural browsing) <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.5</span> Layer D — Content Area (workspace) <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.6</span> Layer E — Contextual Panel (inspector) <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.7</span> <a href="#ai-agent">AI Agent (Layer E mode)</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">3.8</span> Navigation interaction rules <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.9</span> Layer states & combinations <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">3.10</span> Responsive — Tablet behavior <span class="status done">Done</span></li>
+        </ul>
+      </div>
+
+      <h3>Quick reference: Layer responsibilities</h3>
+      <ul class="content-list">
+        <li><strong>Layer A (Top Bar)</strong> — Product switching, workspace selection, global search, notifications, AI agent entry. <em>Always present.</em></li>
+        <li><strong>Layer B (Side Panel)</strong> — Shallow product navigation (max 2 levels). Determines what appears in Layer C. <em>Always present.</em></li>
+        <li><strong>Layer C (Explorer)</strong> — Deep structural browsing of MDM hierarchies. Node selection updates Layer D. <em>Optional.</em></li>
+        <li><strong>Layer D (Content Area)</strong> — Primary working surface. <em>Always present.</em></li>
+        <li><strong>Layer E (Contextual Panel)</strong> — Inspector mode or AI agent interaction. <em>Optional, triggered by user.</em></li>
+      </ul>
+
+      <a href="#dg-layers" class="decision-link">→ Decision guide: Which layers does this screen need?</a>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> Keyboard users can navigate between layers using tab order. Focus is trapped within Layer E when open. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- AI AGENT -->
+    <section class="doc-section" id="ai-agent">
+      <h3>3.7 AI Agent (Layer E mode)</h3>
+      <p>The AI Agent surfaces in Layer E and receives context about the user's current state. This is one of two modes for the Contextual Panel (the other being Inspector).</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>Evolving:</strong> AI agent patterns are being developed in parallel with agent capabilities.</span>
+      </div>
+
+      <h4>Entry points</h4>
+      <ul class="content-list">
+        <li><strong>Layer A button</strong> — AI agent icon in the Top Bar opens Layer E in agent mode</li>
+        <li><strong>Contextual triggers</strong> — Specific actions may suggest AI assistance</li>
+      </ul>
+
+      <h4>Context payload</h4>
+      <p>When opened, the AI agent receives:</p>
+      <ul class="content-list">
+        <li>Current product identifier</li>
+        <li>Current section (Layer B selection)</li>
+        <li>Current item (Layer D selection, if applicable)</li>
+        <li>User role and permissions</li>
+      </ul>
+
+      <h4>Interaction principles</h4>
+      <ul class="content-list">
+        <li>Agent is context-aware — it knows what the user is viewing</li>
+        <li>Agent actions require explicit user confirmation</li>
+        <li>Agent can be dismissed without losing work context</li>
+        <li>Conversation persists within a session</li>
+        <li>Switching between Inspector and Agent mode preserves each mode's state</li>
+      </ul>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Suggested actions UI pattern</li>
+        <li>Confirmation dialogs for agent-initiated actions</li>
+        <li>Error and fallback states</li>
+        <li>Loading states during agent processing</li>
+      </ul>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 4: PAGE TYPES
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="page-types">
+      <h2>4. Page Types</h2>
+      <p class="section-intro">How Layer D is structured for different contexts. These page types cover the majority of use cases across all products.</p>
+
+      <div class="toc">
+        <div class="toc-title">In this chapter</div>
+        <ul class="toc-list">
+          <li class="toc-item"><span class="num">4.1</span> <a href="#bulk-page">Bulk page — list / table / gallery</a> <span class="status partial">Partial</span></li>
+          <li class="toc-item"><span class="num">4.2</span> <a href="#details-page">Details page — single item</a> <span class="status partial">Partial</span></li>
+          <li class="toc-item"><span class="num">4.3</span> <a href="#dashboard">Dashboard / home page</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">4.4</span> <a href="#settings-page">Configuration / settings page</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">4.5</span> <a href="#widgets">Widgets in pages</a> <span class="status tbd">TBD</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- BULK PAGE -->
+    <section class="doc-section" id="bulk-page">
+      <h3>4.1 Bulk page — lists, tables, galleries</h3>
+      <p>Used when the user is browsing or operating on multiple items at once.</p>
+
+      <h4>Structure (top to bottom)</h4>
+      <ul class="content-list">
+        <li><strong>Breadcrumb</strong> — Navigation context showing the path to current view</li>
+        <li><strong>Title row</strong> — Page title on the left; "..." actions button on the far right</li>
+        <li><strong>Toolbar</strong> — Search field + sort + filter on the left; actions, overflow menu, view toggle on the right</li>
+        <li><strong>Content area</strong> — Table or gallery, fills remaining height</li>
+        <li><strong>Sticky footer</strong> — Total item count; "X of Y selected" when items are selected</li>
+      </ul>
+
+      <h4>Key rules</h4>
+      <ul class="content-list">
+        <li>Actions (page-level and bulk) live in the toolbar row, not the footer</li>
+        <li>View mode toggle (table/gallery) is the rightmost element in the toolbar</li>
+        <li>Footer is informational only — no actions</li>
+      </ul>
+
+      <a href="#dg-table-type" class="decision-link">→ Decision guide: Which table type?</a>
+
+      <div class="callout callout-note">
+        <span class="callout-icon">ℹ</span>
+        <span>Detailed specifications with diagrams available in the <a href="ods-shell-framework.html#page-types" style="color:inherit;font-weight:600;">Shell Framework documentation</a>.</span>
+      </div>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> Tables must use proper <code>&lt;th&gt;</code> headers. Row selection uses checkbox pattern with <code>aria-selected</code>. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- DETAILS PAGE -->
+    <section class="doc-section" id="details-page">
+      <h3>4.2 Details page — single item</h3>
+      <p>Used when the user is reading or editing a specific record.</p>
+
+      <h4>Structure (top to bottom)</h4>
+      <ul class="content-list">
+        <li><strong>Breadcrumb</strong> — Full path to the current item</li>
+        <li><strong>Title row</strong> — Item title on the left; "..." actions button on the far right</li>
+        <li><strong>Secondary metadata</strong> — Revision info, last editor, status badges</li>
+        <li><strong>Tab bar</strong> — Details, References, Activity, etc. (sticky below header)</li>
+        <li><strong>Content area</strong> — Form fields grouped in named, collapsible sections</li>
+      </ul>
+
+      <h4>Key rules</h4>
+      <ul class="content-list">
+        <li>First tab is always "Details" (primary data view)</li>
+        <li>Tabs switch content view of the same item — not navigation</li>
+        <li>Form fields are organized into named sections, not arbitrary divisions</li>
+      </ul>
+
+      <a href="#dg-details-vs-layer-e" class="decision-link">→ Decision guide: Details page or Layer E?</a>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be defined:</strong> Widget handling within Details and Bulk pages is pending agreement.</span>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="doc-section" id="dashboard">
+      <h3>4.3 Dashboard / home page</h3>
+      <p>The landing page for a product, showing overview information and quick actions.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Dashboard structure, widget placement, and personalization rules.</span>
+      </div>
+    </section>
+
+    <!-- SETTINGS PAGE -->
+    <section class="doc-section" id="settings-page">
+      <h3>4.4 Configuration / settings page</h3>
+      <p>Pages for product configuration and user preferences.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Settings page structure, navigation within settings, and form patterns.</span>
+      </div>
+    </section>
+
+    <!-- WIDGETS -->
+    <section class="doc-section" id="widgets">
+      <h3>4.5 Widgets in pages</h3>
+      <p>Reusable content blocks that can appear within page layouts.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>Flagged for discussion:</strong> Widget pattern is pending agreement before documentation.</span>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 5: WAYFINDING
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="wayfinding">
+      <h2>5. Wayfinding</h2>
+      <p class="section-intro">How users navigate and orient themselves within and between pages. These patterns describe the routes users take through the application.</p>
+
+      <div class="toc">
+        <div class="toc-title">In this chapter</div>
+        <ul class="toc-list">
+          <li class="toc-item"><span class="num">5.1</span> <a href="#hierarchy-nav">Hierarchy navigation</a> <span class="status done">Done</span></li>
+          <li class="toc-item"><span class="num">5.2</span> <a href="#breadcrumb">Breadcrumbs</a> <span class="status partial">Partial</span></li>
+          <li class="toc-item"><span class="num">5.3</span> <a href="#back-nav">Back navigation</a> <span class="status tbd">TBD</span></li>
+          <li class="toc-item"><span class="num">5.4</span> <a href="#cross-product">Cross-product links</a> <span class="status tbd">TBD</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- HIERARCHY NAVIGATION -->
+    <section class="doc-section" id="hierarchy-nav">
+      <h3>5.1 Hierarchy navigation</h3>
+      <p>In hierarchical data structures, items may have both properties (details) and nested children. This pattern defines how users navigate between these views.</p>
+
+      <h4>Two views per item</h4>
+      <ul class="content-list">
+        <li><strong>Details page</strong> — The item's properties; the canonical view of the record</li>
+        <li><strong>Children page</strong> — A bulk page listing items nested below this item</li>
+      </ul>
+      <p>Items that cannot have children only have a details page.</p>
+
+      <h4>Entry point determines destination</h4>
+      <ul class="content-list">
+        <li><strong>From Layer C (Explorer)</strong> → Opens children page (user is drilling down the hierarchy)</li>
+        <li><strong>From search, links, or direct URL</strong> → Opens details page (user is inspecting a specific item)</li>
+      </ul>
+
+      <h4>Navigating between views</h4>
+      <ul class="content-list">
+        <li><strong>Details → Children:</strong> Click the "X items" link in the secondary metadata row</li>
+        <li><strong>Children → Details:</strong> Click the item name segment in the breadcrumb</li>
+      </ul>
+
+      <h4>Breadcrumb format</h4>
+      <ul class="content-list">
+        <li><strong>Details page:</strong> <code>Path › Item Name</code></li>
+        <li><strong>Children page:</strong> <code>Path › Item Name › Items</code></li>
+      </ul>
+      <p>The "Items" segment (or a context-specific term) distinguishes the children bulk page. Clicking the item name navigates to its details.</p>
+    </section>
+
+    <!-- BREADCRUMB -->
+    <section class="doc-section" id="breadcrumb">
+      <h3>5.2 Breadcrumbs</h3>
+      <p>Breadcrumbs show the user's location within the information hierarchy and provide quick navigation to parent levels.</p>
+
+      <h4>Structure</h4>
+      <ul class="content-list">
+        <li>Segments are separated by <code>›</code></li>
+        <li>All segments except the last are clickable links</li>
+        <li>The last segment represents the current page</li>
+      </ul>
+
+      <h4>Hierarchy navigation</h4>
+      <p>When an item has both a details page and a children page, the breadcrumb distinguishes between them:</p>
+      <ul class="content-list">
+        <li><strong>Details page:</strong> <code>Path › Item Name</code></li>
+        <li><strong>Children page:</strong> <code>Path › Item Name › Items</code></li>
+      </ul>
+
+      <h4>To be defined</h4>
+      <ul class="content-list">
+        <li>Maximum depth before truncation</li>
+        <li>Truncation pattern for long paths</li>
+        <li>Tablet adaptation</li>
+      </ul>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> Breadcrumbs use <code>&lt;nav aria-label="Breadcrumb"&gt;</code> with an ordered list. Current page is marked with <code>aria-current="page"</code>. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- BACK NAV -->
+    <section class="doc-section" id="back-nav">
+      <h3>5.3 Back navigation</h3>
+      <p>How users return to previous views.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Back button behavior, browser back integration, and unsaved changes handling.</span>
+      </div>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>Browser back button behavior</li>
+        <li>Explicit back link/button placement</li>
+        <li>Unsaved changes warning</li>
+        <li>Deep link restoration</li>
+      </ul>
+    </section>
+
+    <!-- CROSS-PRODUCT -->
+    <section class="doc-section" id="cross-product">
+      <h3>5.4 Cross-product links</h3>
+      <p>How users move between different products in the suite.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> App switcher behavior, deep linking, and context preservation.</span>
+      </div>
+
+      <h4>Planned content</h4>
+      <ul class="content-list">
+        <li>App switcher in Layer A</li>
+        <li>Deep linking to specific items in other products</li>
+        <li>Context preservation (workspace, environment)</li>
+        <li>Opening in new tab vs same tab</li>
+      </ul>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 6: COMPONENTS
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="components">
+      <h2>6. Components</h2>
+      <p class="section-intro">The building blocks. Each component has specifications for anatomy, variants, states, and accessibility requirements.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>In progress:</strong> Component documentation is being migrated from existing design systems. Check the Figma library for current specifications.</span>
+      </div>
+
+      <h3>Layout</h3>
+      <div class="component-grid">
+        <span class="component-item">Grid & columns</span>
+        <span class="component-item">Dividers & separators</span>
+        <span class="component-item">Cards</span>
+      </div>
+
+      <h3>Navigation</h3>
+      <div class="component-grid">
+        <span class="component-item">Top bar</span>
+        <span class="component-item">Side panel item</span>
+        <span class="component-item">Breadcrumb</span>
+        <span class="component-item">Tabs</span>
+        <span class="component-item">Pagination</span>
+      </div>
+
+      <h3>Forms & Input</h3>
+      <div class="component-grid">
+        <span class="component-item">Text input</span>
+        <span class="component-item">Textarea</span>
+        <span class="component-item">Dropdown / select</span>
+        <span class="component-item">Multi-select</span>
+        <span class="component-item">Checkbox</span>
+        <span class="component-item">Radio button</span>
+        <span class="component-item">Toggle / switch</span>
+        <span class="component-item">Date picker</span>
+        <span class="component-item">File upload</span>
+        <span class="component-item">Rich text editor</span>
+        <span class="component-item">Search field</span>
+        <span class="component-item">Form layout</span>
+      </div>
+
+      <h3>Data display</h3>
+      <div class="component-grid">
+        <span class="component-item">Table (list & data)</span>
+        <span class="component-item">Gallery / card grid</span>
+        <span class="component-item">Tree / hierarchy</span>
+        <span class="component-item">Badge & status pill</span>
+        <span class="component-item">Tag</span>
+        <span class="component-item">Tooltip</span>
+        <span class="component-item">Progress indicators</span>
+      </div>
+
+      <h3>Feedback & Overlays</h3>
+      <div class="component-grid">
+        <span class="component-item">Modal / dialog</span>
+        <span class="component-item">Confirmation dialog</span>
+        <span class="component-item">Toast / notification</span>
+        <span class="component-item">Banner</span>
+        <span class="component-item">Popover</span>
+        <span class="component-item">Skeleton / loading</span>
+        <span class="component-item">Spinner</span>
+        <span class="component-item">Error states</span>
+      </div>
+
+      <h3>Actions</h3>
+      <div class="component-grid">
+        <span class="component-item">Button (all variants)</span>
+        <span class="component-item">Icon button</span>
+        <span class="component-item">Overflow menu (...)</span>
+        <span class="component-item">Dropdown button</span>
+      </div>
+
+      <div class="callout callout-a11y">
+        <span class="callout-icon">♿</span>
+        <span><strong>Accessibility:</strong> Each component page will include keyboard interaction patterns and ARIA requirements. <a href="#accessibility" style="color:inherit;">See §8 Accessibility →</a></span>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 7: PATTERNS
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="patterns">
+      <h2>7. Patterns</h2>
+      <p class="section-intro">Composed interactions that span multiple components. Patterns describe how components work together to accomplish common tasks.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>In progress:</strong> Pattern documentation is being developed. Priority patterns are listed below.</span>
+      </div>
+
+      <h3>Search & filtering</h3>
+      <ul class="content-list">
+        <li><strong>Global search</strong> — Suite-wide search from Layer A</li>
+        <li><strong>Contextual search</strong> — Filtering within a table or list</li>
+        <li><strong>Filtering</strong> — Filter panel, active filters, clearing filters</li>
+        <li><strong>Sorting</strong> — Column sorting, sort persistence</li>
+      </ul>
+
+      <h3>Selection & actions</h3>
+      <ul class="content-list">
+        <li><strong>Bulk selection</strong> — Multi-select in tables, selection modes</li>
+        <li><strong>Bulk actions</strong> — Toolbar actions for selected items</li>
+        <li><strong>Inline editing</strong> — Edit-in-place vs modal editing</li>
+      </ul>
+
+      <h3>Data operations</h3>
+      <ul class="content-list">
+        <li><strong>Form validation</strong> — Field, section, and submit-level validation</li>
+        <li><strong>Saving</strong> — Auto-save vs explicit save, conflict resolution</li>
+        <li><strong>Deletion</strong> — Soft delete, confirmation dialogs, undo</li>
+        <li><strong>Import & export</strong> — File handling, progress, error states</li>
+      </ul>
+
+      <h3>Feedback & states</h3>
+      <ul class="content-list">
+        <li><strong>Empty states</strong> — No data, no results, first use, no access</li>
+        <li><strong>Loading</strong> — Skeleton screens, progressive loading</li>
+        <li><strong>Error handling</strong> — Inline errors, page errors, recovery</li>
+      </ul>
+
+      <a href="#dg-toast-vs-banner" class="decision-link">→ Decision guide: Toast or banner?</a>
+
+      <h3>Advanced interactions</h3>
+      <ul class="content-list">
+        <li><strong>Pagination</strong> — Page controls, items per page</li>
+        <li><strong>Infinite scroll</strong> — Continuous loading, scroll position</li>
+        <li><strong>Drag & drop</strong> — Reordering, moving between containers</li>
+      </ul>
+
+      <a href="#dg-pagination" class="decision-link">→ Decision guide: Pagination or infinite scroll?</a>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 8: ACCESSIBILITY
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="accessibility">
+      <h2>8. Accessibility</h2>
+      <p class="section-intro">Cross-cutting requirements that apply to everything in ODS. Accessibility is built into every component and pattern, not treated as an afterthought.</p>
+
+      <div class="callout callout-note">
+        <span class="callout-icon">ℹ</span>
+        <span>Throughout this documentation, look for the <span style="background:var(--accent-4-light);color:var(--accent-4);padding:2px 6px;border-radius:4px;font-size:12px;">♿ Accessibility</span> callouts for component-specific guidance.</span>
+      </div>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Comprehensive accessibility guidelines are in development.</span>
+      </div>
+
+      <h3>Compliance target</h3>
+      <p><strong>WCAG 2.1 Level AA</strong> is the baseline for all ODS components and patterns.</p>
+
+      <h3>Keyboard navigation</h3>
+      <ul class="content-list">
+        <li><strong>Focus order</strong> — Logical tab sequence following visual layout</li>
+        <li><strong>Focus visibility</strong> — Clear focus indicator on all interactive elements</li>
+        <li><strong>Focus trapping</strong> — Focus stays within modals and Layer E when open</li>
+        <li><strong>Keyboard shortcuts</strong> — Standard shortcuts (Escape to close, Enter to confirm)</li>
+      </ul>
+
+      <h3>Screen reader support</h3>
+      <ul class="content-list">
+        <li><strong>Semantic HTML</strong> — Proper heading hierarchy, landmarks, lists</li>
+        <li><strong>ARIA patterns</strong> — Documented for each component</li>
+        <li><strong>Live regions</strong> — Announcements for dynamic content changes</li>
+        <li><strong>Labels</strong> — All form controls have accessible labels</li>
+      </ul>
+
+      <h3>Visual accessibility</h3>
+      <ul class="content-list">
+        <li><strong>Colour contrast</strong> — 4.5:1 for text, 3:1 for UI elements</li>
+        <li><strong>Not colour alone</strong> — Information conveyed by colour also uses icons, text, or patterns</li>
+        <li><strong>Text sizing</strong> — Interfaces support up to 200% text zoom</li>
+        <li><strong>Target size</strong> — Interactive elements are at least 44×44px touch target</li>
+      </ul>
+
+      <h3>Motion</h3>
+      <ul class="content-list">
+        <li><strong>Reduced motion</strong> — Respect <code>prefers-reduced-motion</code> setting</li>
+        <li><strong>No auto-play</strong> — Animations don't start without user action</li>
+        <li><strong>Pause controls</strong> — Moving content can be paused</li>
+      </ul>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SECTION 9: PRODUCT GUIDANCE
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="products">
+      <h2>9. Product-specific guidance</h2>
+      <p class="section-intro">Where individual product teams document their ODS implementations. Each product has unique needs within the shared framework.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <span><strong>To be documented:</strong> Product-specific pages will be added as teams migrate to ODS.</span>
+      </div>
+
+      <h3>Products</h3>
+      <ul class="content-list">
+        <li><strong>Instrument</strong> — [Implementation notes to come]</li>
+        <li><strong>Product Data Exchange</strong> — [Implementation notes to come]</li>
+        <li><strong>WebUI</strong> — [Implementation notes to come]</li>
+        <li><strong>Workbench</strong> — [Implementation notes to come]</li>
+      </ul>
+
+      <h3>Template for new products</h3>
+      <p>A template will be provided for documenting new product implementations, including:</p>
+      <ul class="content-list">
+        <li>Product overview and purpose</li>
+        <li>Layer B navigation structure</li>
+        <li>Layer C usage (if applicable)</li>
+        <li>Product-specific patterns or extensions</li>
+        <li>Migration notes from previous design system (or from no system)</li>
+      </ul>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         DECISION GUIDES
+         ══════════════════════════════════════════════════════════════════════ -->
+    <section class="doc-section" id="decision-guides">
+      <h2>Decision guides</h2>
+      <p class="section-intro">When you're unsure which approach to use, these guides help you make the right choice. Each guide walks through the decision criteria.</p>
+
+      <div class="guide-grid">
+        <a href="ods-shell-framework.html#dt-nav" class="guide-card" id="dg-nav">
+          <div class="guide-card-q">Which navigation pattern?</div>
+          <div class="guide-card-a">Accordion vs popover for Layer B items → <span style="color:var(--accent-3)">Done</span></div>
+        </a>
+        <a href="ods-shell-framework.html#dt-layers" class="guide-card" id="dg-layers">
+          <div class="guide-card-q">Which layers does this screen need?</div>
+          <div class="guide-card-a">When to include Layer C and Layer E → <span style="color:var(--accent-3)">Done</span></div>
+        </a>
+        <div class="guide-card disabled" id="dg-table-type">
+          <div class="guide-card-q">Which table type?</div>
+          <div class="guide-card-a">List table vs data table → <span style="color:var(--ink-faint)">TBD</span></div>
+        </div>
+        <a href="#hierarchy-nav" class="guide-card" id="dg-hierarchy">
+          <div class="guide-card-q">Details page or children page?</div>
+          <div class="guide-card-a">Entry point determines destination for hierarchical items → <span style="color:var(--accent-3)">Done</span></div>
+        </a>
+        <div class="guide-card disabled" id="dg-details-vs-layer-e">
+          <div class="guide-card-q">Full page or Layer E?</div>
+          <div class="guide-card-a">When to navigate vs open in inspector → <span style="color:var(--ink-faint)">TBD</span></div>
+        </div>
+        <div class="guide-card disabled" id="dg-modal-vs-sheet">
+          <div class="guide-card-q">Modal or bottom sheet?</div>
+          <div class="guide-card-a">Choosing the right overlay type → <span style="color:var(--ink-faint)">TBD</span></div>
+        </div>
+        <div class="guide-card disabled" id="dg-toast-vs-banner">
+          <div class="guide-card-q">Toast or banner?</div>
+          <div class="guide-card-a">Feedback placement and persistence → <span style="color:var(--ink-faint)">TBD</span></div>
+        </div>
+        <div class="guide-card disabled" id="dg-pagination">
+          <div class="guide-card-q">Pagination or infinite scroll?</div>
+          <div class="guide-card-a">Choosing the right loading pattern → <span style="color:var(--ink-faint)">TBD</span></div>
+        </div>
+        <div class="guide-card disabled" id="dg-autosave">
+          <div class="guide-card-q">Auto-save or explicit save?</div>
+          <div class="guide-card-a">When to save automatically vs require action → <span style="color:var(--ink-faint)">TBD</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         FOOTER
+         ══════════════════════════════════════════════════════════════════════ -->
+    <hr class="divider">
+    <p style="font-size:13px; color:var(--ink-faint); text-align:center;">ODS — One Design System · Documentation v0.1 · Draft · 2026</p>
+
+  </main>
+</div>
+</body>
+</html>

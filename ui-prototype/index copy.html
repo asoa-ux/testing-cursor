@@ -1,0 +1,4794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIM Interface Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Light mode - enterprise PIM style */
+      --bg-darkest: #f5f7fa;
+      --bg-dark: #ffffff;
+      --bg-medium: #f0f2f5;
+      --bg-light: #e8ebef;
+      --bg-hover: #0097a715;
+      --bg-selected: #0097a720;
+      --border: #d1d5db;
+      --border-light: #e5e7eb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #0097a7;
+      --accent-hover: #00838f;
+      --accent-glow: #0097a725;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --panel-min: 48px;
+      --header-height: 52px;
+      --transition-fast: 150ms ease;
+      --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-panel: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-glow: 0 0 20px var(--accent-glow);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-darkest);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    .header {
+      height: var(--header-height);
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #ffffff;
+    }
+
+    .header-logo svg {
+      width: 28px;
+      height: 28px;
+      color: #ffffff;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .breadcrumb-item {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .breadcrumb-item:hover {
+      color: #ffffff;
+    }
+
+    .breadcrumb-item.active {
+      color: #ffffff;
+    }
+
+    .breadcrumb-sep {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-switcher {
+      display: flex;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .mode-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .mode-btn:hover {
+      color: #ffffff;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .mode-btn.active {
+      background: #ffffff;
+      color: var(--accent);
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      height: calc(100vh - var(--header-height));
+      position: relative;
+    }
+
+    /* Panels */
+    .panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+      position: relative;
+      transition: width var(--transition-smooth), min-width var(--transition-smooth), opacity var(--transition-smooth);
+      border-right: 1px solid var(--border);
+    }
+
+    .panel.collapsed {
+      min-width: var(--panel-min) !important;
+      width: var(--panel-min) !important;
+    }
+
+    .panel.collapsed .panel-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .panel.collapsed .panel-header-text {
+      opacity: 0;
+    }
+
+    .panel-header {
+      height: 40px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-dark);
+    }
+
+    .tree-panel .panel-header {
+      background: linear-gradient(to right, rgba(0, 151, 167, 0.08), transparent);
+      border-bottom-color: rgba(0, 151, 167, 0.2);
+    }
+
+    .list-panel .panel-header {
+      background: var(--bg-dark);
+    }
+
+    .panel-header-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .panel-header-text {
+      flex: 1;
+      font-weight: 500;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity var(--transition-fast);
+    }
+
+    .panel-toggle {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .panel-toggle:hover {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .panel-toggle svg {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-smooth);
+    }
+
+    .panel.collapsed .panel-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow: hidden;
+      transition: opacity var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Resize Handle */
+    .resize-handle {
+      width: 4px;
+      background: transparent;
+      cursor: col-resize;
+      position: relative;
+      z-index: 10;
+      transition: background var(--transition-fast);
+      margin-left: -1px;
+    }
+
+    .resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 0px;
+      background: var(--accent);
+      transition: all var(--transition-fast);
+    }
+
+    .resize-handle:hover::after,
+    .resize-handle.active::after {
+      width: 3px;
+      left: calc(50% - 1px);
+      background: var(--accent);
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* Tree Panel */
+    .tree-panel {
+      min-width: 220px;
+      width: 260px;
+    }
+
+    .tree-search {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tree-search input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .tree-search input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .tree-search input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .tree-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--text-secondary);
+      gap: 6px;
+      user-select: none;
+    }
+
+    .tree-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .tree-item.selected {
+      background: var(--bg-selected);
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .tree-item.selected::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .tree-expand {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform var(--transition-fast);
+    }
+
+    .tree-expand.expanded {
+      transform: rotate(90deg);
+    }
+
+    .tree-expand svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .tree-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .tree-icon.folder {
+      color: var(--warning);
+    }
+
+    .tree-icon.item {
+      color: var(--accent);
+    }
+
+    .tree-label {
+      flex: 1;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tree-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg-medium);
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .tree-children {
+      padding-left: 20px;
+    }
+
+    /* List Panel */
+    .list-panel {
+      min-width: 280px;
+      width: 320px;
+    }
+
+    .list-toolbar {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 6px;
+    }
+
+    .toolbar-spacer {
+      flex: 1;
+    }
+
+    .list-toolbar-btn {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-medium);
+      color: var(--text-secondary);
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .list-toolbar-btn:hover {
+      border-color: var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .list-toolbar-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .list-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      padding: 4px 10px;
+      background: var(--bg-medium);
+      border-radius: 12px;
+    }
+
+    .list-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: none;
+    }
+
+    .list-container.active {
+      display: block;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      gap: 10px;
+      margin-bottom: 2px;
+      border-left: 3px solid transparent;
+      background: var(--bg-dark);
+    }
+
+    .list-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .list-item.selected {
+      background: var(--bg-selected);
+      border-left-color: var(--accent);
+    }
+
+    .list-item-thumb {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-medium);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+
+    .list-item-thumb svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .list-item-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .list-item-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .list-item-title {
+      font-weight: 500;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    .list-item-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .list-item-meta {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .list-item-tag {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: var(--bg-medium);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .list-item-tag.approved {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .list-item-tag.pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+
+    /* Detail Panel */
+    .detail-panel {
+      flex: 1;
+      min-width: 400px;
+      display: flex;
+      flex-direction: column;
+      border-right: none;
+    }
+
+    .detail-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-darkest);
+    }
+
+    .detail-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .detail-icon svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    .detail-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .detail-title {
+      font-size: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .detail-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .detail-subtitle span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .detail-subtitle svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .detail-btn {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-medium);
+      color: var(--text-secondary);
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .detail-btn:hover {
+      border-color: var(--border-light);
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .detail-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .detail-btn.primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .detail-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Tabs */
+    .tabs-container {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-dark);
+    }
+
+    .tabs-scroll {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex: 1;
+    }
+
+    .tabs-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .tabs-overflow {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-left: 1px solid var(--border);
+    }
+
+    .tabs-overflow-btn {
+      padding: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+    }
+
+    .tabs-overflow-btn:hover {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .tabs-overflow-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    /* Split View for References */
+    .split-view {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .split-sidebar {
+      width: 240px;
+      min-width: 200px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+    }
+
+    .split-sidebar-header {
+      padding: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .split-sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .ref-group {
+      margin-bottom: 8px;
+    }
+
+    .ref-group-header {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      gap: 6px;
+    }
+
+    .ref-group-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .ref-group-header svg {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--transition-fast);
+    }
+
+    .ref-group-header.expanded svg {
+      transform: rotate(90deg);
+    }
+
+    .ref-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 8px 8px 28px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      gap: 8px;
+    }
+
+    .ref-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .ref-item.selected {
+      background: var(--bg-selected);
+      color: var(--text-primary);
+    }
+
+    .ref-item svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .ref-item-label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ref-item-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg-medium);
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .split-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .split-main-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .split-main-title {
+      font-weight: 500;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .split-main-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .split-main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* Grid for images/assets */
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .asset-card {
+      background: var(--bg-medium);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid var(--border);
+    }
+
+    .asset-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 151, 167, 0.2);
+    }
+
+    .asset-card-thumb {
+      aspect-ratio: 1;
+      background: var(--bg-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .asset-card-thumb svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .asset-card-info {
+      padding: 8px;
+    }
+
+    .asset-card-name {
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .asset-card-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .empty-state-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .empty-state-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .empty-state-btn {
+      padding: 8px 16px;
+      background: var(--accent);
+      border: none;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .empty-state-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Form Fields */
+    .form-section {
+      padding: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-medium);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Focus Mode */
+    body.focus-mode .tree-panel,
+    body.focus-mode .list-panel {
+      min-width: var(--panel-min) !important;
+      width: var(--panel-min) !important;
+    }
+
+    body.focus-mode .tree-panel .panel-content,
+    body.focus-mode .list-panel .panel-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.focus-mode .tree-panel .panel-header-text,
+    body.focus-mode .list-panel .panel-header-text {
+      opacity: 0;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 10px;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all var(--transition-fast);
+      margin-bottom: 4px;
+    }
+
+    .tooltip:hover::after {
+      opacity: 1;
+    }
+
+    /* Keyboard shortcuts hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 4px;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-fast);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+      transform: scale(0.95) translateY(10px);
+      transition: transform var(--transition-smooth);
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .modal-close:hover {
+      background: var(--bg-medium);
+      color: var(--text-primary);
+    }
+
+    .modal-close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      max-height: 60vh;
+    }
+
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Dropdown Menu */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      min-width: 180px;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .dropdown.active .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown-item {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 13px;
+    }
+
+    .dropdown-item:first-child {
+      border-radius: 7px 7px 0 0;
+    }
+
+    .dropdown-item:last-child {
+      border-radius: 0 0 7px 7px;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .dropdown-item.active {
+      background: var(--bg-selected);
+      color: var(--accent);
+    }
+
+    .dropdown-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* Filter Panel */
+    .filter-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 50;
+      padding: 16px;
+      display: none;
+    }
+
+    .filter-panel.active {
+      display: block;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-end;
+    }
+
+    .filter-field {
+      flex: 1;
+    }
+
+    .filter-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-select, .filter-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-select:focus, .filter-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-medium);
+      color: var(--text-secondary);
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .filter-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .filter-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Active filters badges */
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-darkest);
+      flex-shrink: 0;
+    }
+
+    .active-filters:empty {
+      display: none;
+    }
+
+    .filter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px 4px 10px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .filter-badge-remove {
+      width: 14px;
+      height: 14px;
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-badge-remove:hover {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .filter-badge-remove svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 280px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.success {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .toast.error {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .toast.warning {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toast.success .toast-icon { color: var(--success); }
+    .toast.error .toast-icon { color: #ef4444; }
+    .toast.warning .toast-icon { color: var(--warning); }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .toast-message {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .toast-close {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toast-close:hover {
+      background: var(--bg-medium);
+      color: var(--text-primary);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+
+    /* Context Menu */
+    .context-menu {
+      position: fixed;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      min-width: 160px;
+      z-index: 1000;
+      display: none;
+      padding: 4px;
+    }
+
+    .context-menu.active {
+      display: block;
+    }
+
+    .context-menu-item {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    .context-menu-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .context-menu-item.danger {
+      color: #ef4444;
+    }
+
+    .context-menu-item.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .context-menu-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .context-menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* Edit Mode Styles */
+    .detail-panel.editing .detail-header {
+      background: rgba(0, 151, 167, 0.05);
+      border-bottom-color: var(--accent);
+    }
+
+    .detail-panel.editing .form-input {
+      border-color: var(--accent-glow);
+    }
+
+    .form-input:disabled {
+      background: var(--bg-darkest);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .form-input.changed {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Checkbox & Radio */
+    .checkbox-group, .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkbox-item, .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .checkbox-item:hover, .radio-item:hover {
+      color: var(--text-primary);
+    }
+
+    .checkbox-item input, .radio-item input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    /* Bulk Actions Bar */
+    .bulk-actions {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(100%);
+      transition: transform var(--transition-smooth);
+      z-index: 50;
+    }
+
+    .bulk-actions.active {
+      transform: translateY(0);
+    }
+
+    .bulk-actions-count {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .bulk-actions-btns {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .bulk-btn {
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: transparent;
+      color: #ffffff;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bulk-btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    .bulk-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Multi-select checkbox in list */
+    .list-item-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Badge with count */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 9px;
+    }
+
+    /* Tabs with badge */
+    .tab .badge {
+      margin-left: 4px;
+    }
+
+    /* Sortable indicator */
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sortable-header:hover {
+      color: var(--accent);
+    }
+
+    .sort-icon {
+      width: 12px;
+      height: 12px;
+      opacity: 0.5;
+    }
+
+    .sortable-header.asc .sort-icon,
+    .sortable-header.desc .sort-icon {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .sortable-header.desc .sort-icon {
+      transform: rotate(180deg);
+    }
+
+    /* View Toggle */
+    .view-toggle {
+      display: flex;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .view-toggle-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .view-toggle-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-light);
+    }
+
+    .view-toggle-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 151, 167, 0.3);
+    }
+
+    .view-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Table View */
+    .table-view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .table-view.active {
+      display: flex;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table thead {
+      position: sticky;
+      top: 0;
+      background: var(--bg-darkest);
+      z-index: 10;
+    }
+
+    .data-table th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .data-table th.sortable {
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .data-table th.sortable:hover {
+      color: var(--accent);
+    }
+
+    .data-table th.sorted {
+      color: var(--accent);
+    }
+
+    .data-table th .th-content {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .data-table th .sort-indicator {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      transition: all var(--transition-fast);
+    }
+
+    .data-table th.sortable:hover .sort-indicator,
+    .data-table th.sorted .sort-indicator {
+      opacity: 1;
+    }
+
+    .data-table th.sorted.desc .sort-indicator {
+      transform: rotate(180deg);
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr {
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .data-table tbody tr.selected {
+      background: var(--bg-selected);
+    }
+
+    .data-table .cell-checkbox {
+      width: 40px;
+      text-align: center;
+    }
+
+    .data-table .cell-icon {
+      width: 40px;
+      text-align: center;
+    }
+
+    .data-table .cell-icon svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+
+    .data-table .cell-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .data-table .cell-name {
+      font-weight: 500;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .data-table .cell-type {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .data-table .cell-image {
+      width: 60px;
+      text-align: center;
+    }
+
+    .data-table .cell-image svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-muted);
+    }
+
+    .data-table .cell-status {
+      width: 100px;
+    }
+
+    .data-table .cell-completeness {
+      width: 120px;
+    }
+
+    .completeness-bar {
+      height: 8px;
+      background: var(--bg-light);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .completeness-bar::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--accent),
+        var(--accent) 4px,
+        transparent 4px,
+        transparent 8px
+      );
+      border-radius: 4px;
+    }
+
+    .completeness-bar[data-value="100"]::after { width: 100%; background: var(--success); }
+    .completeness-bar[data-value="80"]::after { width: 80%; }
+    .completeness-bar[data-value="60"]::after { width: 60%; }
+    .completeness-bar[data-value="40"]::after { width: 40%; }
+    .completeness-bar[data-value="20"]::after { width: 20%; }
+
+    .table-scroll {
+      flex: 1;
+      overflow: auto;
+    }
+
+    /* Details Panel Toggle Button Active State */
+    #detailsToggleBtn.active {
+      background: var(--bg-selected);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Hidden state for panels and resize handles */
+    .panel.hidden,
+    .resize-handle.hidden {
+      display: none !important;
+    }
+
+    /* List panel expands when details is hidden */
+    .list-panel.expanded {
+      flex: 1;
+      max-width: none;
+      width: auto !important;
+    }
+
+    /* Compare Mode */
+    .compare-overlay {
+      position: fixed;
+      inset: 0;
+      top: var(--header-height);
+      background: var(--bg-darkest);
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+    }
+
+    .compare-overlay.active {
+      display: flex;
+    }
+
+    .compare-header {
+      padding: 12px 20px;
+      background: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .compare-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .compare-header .compare-close {
+      padding: 8px 16px;
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .compare-header .compare-close:hover {
+      background: var(--bg-light);
+    }
+
+    .compare-instruction {
+      padding: 16px 20px;
+      background: var(--accent-glow);
+      border-bottom: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .compare-instruction svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .compare-instruction.hidden {
+      display: none;
+    }
+
+    .compare-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .compare-selector {
+      width: 300px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+    }
+
+    .compare-selector-header {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-selector-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .compare-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      gap: 10px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all var(--transition-fast);
+      margin-bottom: 4px;
+      border: 2px solid transparent;
+    }
+
+    .compare-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .compare-item.selected-a {
+      background: rgba(88, 166, 255, 0.15);
+      border-color: #58a6ff;
+    }
+
+    .compare-item.selected-b {
+      background: rgba(163, 113, 247, 0.15);
+      border-color: #a371f7;
+    }
+
+    .compare-item-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-medium);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .compare-item-icon svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+    }
+
+    .compare-item.selected-a .compare-item-icon {
+      background: #58a6ff;
+    }
+
+    .compare-item.selected-b .compare-item-icon {
+      background: #a371f7;
+    }
+
+    .compare-item.selected-a .compare-item-icon svg,
+    .compare-item.selected-b .compare-item-icon svg {
+      color: white;
+    }
+
+    .compare-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .compare-item-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .compare-item-id {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .compare-item-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .compare-item.selected-a .compare-item-badge {
+      background: #58a6ff;
+    }
+
+    .compare-item.selected-b .compare-item-badge {
+      background: #a371f7;
+    }
+
+    .compare-panels {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .compare-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+
+    .compare-panel:last-child {
+      border-right: none;
+    }
+
+    .compare-panel-header {
+      padding: 16px 20px;
+      background: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .compare-panel-header.panel-a {
+      border-top: 3px solid #58a6ff;
+    }
+
+    .compare-panel-header.panel-b {
+      border-top: 3px solid #a371f7;
+    }
+
+    .compare-panel-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .panel-a .compare-panel-badge {
+      background: #58a6ff;
+    }
+
+    .panel-b .compare-panel-badge {
+      background: #a371f7;
+    }
+
+    .compare-panel-title {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .compare-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .compare-panel-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .compare-panel-empty svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .compare-field {
+      margin-bottom: 16px;
+    }
+
+    .compare-field-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .compare-field-value {
+      padding: 10px 12px;
+      background: var(--bg-medium);
+      border-radius: 6px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .compare-field-value.different {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: var(--warning);
+    }
+
+    .compare-field-value.same {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <!-- Compare Overlay -->
+  <div class="compare-overlay" id="compareOverlay">
+    <div class="compare-header">
+      <h2>Compare Items</h2>
+      <button class="compare-close" onclick="exitCompareMode()">Exit Compare</button>
+    </div>
+    <div class="compare-instruction" id="compareInstruction">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      Select two items from the list to compare their details side by side
+    </div>
+    <div class="compare-content">
+      <div class="compare-selector">
+        <div class="compare-selector-header">Select Items to Compare</div>
+        <div class="compare-selector-list" id="compareSelectorList">
+          <!-- Items will be populated by JS -->
+        </div>
+      </div>
+      <div class="compare-panels">
+        <div class="compare-panel" id="comparePanelA">
+          <div class="compare-panel-header panel-a">
+            <span class="compare-panel-badge">A</span>
+            <span class="compare-panel-title" id="compareTitleA">Select first item</span>
+          </div>
+          <div class="compare-panel-body" id="compareBodyA">
+            <div class="compare-panel-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+              <div>Click an item to select it as Item A</div>
+            </div>
+          </div>
+        </div>
+        <div class="compare-panel" id="comparePanelB">
+          <div class="compare-panel-header panel-b">
+            <span class="compare-panel-badge">B</span>
+            <span class="compare-panel-title" id="compareTitleB">Select second item</span>
+          </div>
+          <div class="compare-panel-body" id="compareBodyB">
+            <div class="compare-panel-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+              <div>Click an item to select it as Item B</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu">
+    <div class="context-menu-item" data-action="edit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      Edit
+    </div>
+    <div class="context-menu-item" data-action="duplicate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      Duplicate
+    </div>
+    <div class="context-menu-item" data-action="export">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export
+    </div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" data-action="archive">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="21 8 21 21 3 21 3 8"/>
+        <rect x="1" y="3" width="22" height="5"/>
+        <line x1="10" y1="12" x2="14" y2="12"/>
+      </svg>
+      Archive
+    </div>
+    <div class="context-menu-item danger" data-action="delete">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+      Delete
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        <span class="modal-title">Edit Item</span>
+        <button class="modal-close" onclick="closeModal('editModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="editName" value="Sportswear - Full Body Wear">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">ID</label>
+            <input type="text" class="form-input" value="EXT.L4-10001342" disabled>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="filter-select" id="editStatus">
+              <option value="approved" selected>Approved</option>
+              <option value="pending">Pending</option>
+              <option value="draft">Draft</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input form-textarea" id="editDescription" placeholder="Enter description...">Full body athletic wear designed for maximum performance and comfort during intense physical activities.</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categories</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" checked> Clothing
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked> Activewear
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox"> Sports Equipment
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="filter-btn" onclick="closeModal('editModal')">Cancel</button>
+        <button class="filter-btn primary" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span class="modal-title">Confirm Delete</span>
+        <button class="modal-close" onclick="closeModal('deleteModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); line-height: 1.6;">
+          Are you sure you want to delete <strong id="deleteItemName">Sportswear - Full Body Wear</strong>? 
+          This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="filter-btn" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="filter-btn" style="background: #ef4444; border-color: #ef4444; color: white;" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span class="modal-title">Export Data</span>
+        <button class="modal-close" onclick="closeModal('exportModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Export Format</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="exportFormat" value="csv" checked> CSV (.csv)
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="exportFormat" value="json"> JSON (.json)
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="exportFormat" value="xml"> XML (.xml)
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="exportFormat" value="xlsx"> Excel (.xlsx)
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Include</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" checked> Basic Information
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked> References
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox"> Language Translations
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox"> SEMA Content
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="filter-btn" onclick="closeModal('exportModal')">Cancel</button>
+        <button class="filter-btn primary" onclick="doExport()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      PIM System
+    </div>
+    
+    <nav class="breadcrumb">
+      <span class="breadcrumb-item">Product Hierarchy</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">Clothing</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item active">Activewear</span>
+    </nav>
+
+    <div class="header-actions">
+      <div class="mode-switcher">
+        <button class="mode-btn active" data-mode="browse" title="Browse mode">Browse</button>
+        <button class="mode-btn" data-mode="edit" title="Edit mode (focus)">Edit</button>
+        <button class="mode-btn" data-mode="compare" title="Compare items">Compare</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Tree Panel -->
+    <div class="panel tree-panel" id="treePanel">
+      <div class="panel-header">
+        <svg class="panel-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="panel-header-text">Browse</span>
+        <button class="panel-toggle tooltip" data-tooltip="Toggle panel (⌘1)" onclick="togglePanel('treePanel')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-content">
+        <div class="tree-search">
+          <input type="text" placeholder="Search categories...">
+        </div>
+        <div class="tree-container">
+          <div class="tree-item">
+            <span class="tree-expand">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+            <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="tree-label">Audio Visual</span>
+            <span class="tree-count">24</span>
+          </div>
+          <div class="tree-item">
+            <span class="tree-expand">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+            <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="tree-label">Beauty & Personal Care</span>
+            <span class="tree-count">156</span>
+          </div>
+          <div class="tree-item">
+            <span class="tree-expand expanded">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+            <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="tree-label">Clothing</span>
+            <span class="tree-count">892</span>
+          </div>
+          <div class="tree-children">
+            <div class="tree-item selected">
+              <span class="tree-expand expanded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="tree-label">Activewear</span>
+              <span class="tree-count">12</span>
+            </div>
+            <div class="tree-children">
+              <div class="tree-item">
+                <span class="tree-expand"></span>
+                <svg class="tree-icon item" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                </svg>
+                <span class="tree-label">Sportswear - Full Body</span>
+              </div>
+              <div class="tree-item">
+                <span class="tree-expand"></span>
+                <svg class="tree-icon item" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                </svg>
+                <span class="tree-label">Sportswear - Lower Body</span>
+              </div>
+            </div>
+            <div class="tree-item">
+              <span class="tree-expand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="tree-label">Protective Wear</span>
+              <span class="tree-count">8</span>
+            </div>
+            <div class="tree-item">
+              <span class="tree-expand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="tree-label">Sleepwear</span>
+              <span class="tree-count">15</span>
+            </div>
+            <div class="tree-item">
+              <span class="tree-expand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="tree-label">Swimwear</span>
+              <span class="tree-count">22</span>
+            </div>
+          </div>
+          <div class="tree-item">
+            <span class="tree-expand">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+            <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="tree-label">Communications</span>
+            <span class="tree-count">45</span>
+          </div>
+          <div class="tree-item">
+            <span class="tree-expand">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+            <svg class="tree-icon folder" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="tree-label">Computing</span>
+            <span class="tree-count">234</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-handle" data-resize="treePanel"></div>
+
+    <!-- List Panel -->
+    <div class="panel list-panel" id="listPanel">
+      <div class="panel-header">
+        <svg class="panel-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        <span class="panel-header-text">Items</span>
+        <button class="panel-toggle tooltip" data-tooltip="Toggle panel (⌘2)" onclick="togglePanel('listPanel')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-content" style="position: relative;">
+        <div class="list-toolbar" style="position: relative;">
+          <!-- View Toggle - Most important, comes first -->
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" data-view="cards" onclick="setListView('cards')" title="Card View">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </button>
+            <button class="view-toggle-btn" data-view="table" onclick="setListView('table')" title="Table View">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+          
+          <!-- Filter & Sort Group -->
+          <div class="toolbar-group">
+            <div class="dropdown" id="filterDropdown">
+              <button class="list-toolbar-btn" onclick="toggleDropdown('filterDropdown')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                <span class="badge" id="filterCount" style="display: none;">0</span>
+              </button>
+              <div class="dropdown-menu" style="min-width: 320px; padding: 12px;">
+                <div class="filter-row">
+                  <div class="filter-field">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="filterStatus">
+                      <option value="">All Statuses</option>
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                      <option value="draft">Draft</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="filter-row">
+                  <div class="filter-field">
+                    <label class="filter-label">Name Contains</label>
+                    <input type="text" class="filter-input" id="filterName" placeholder="Search by name...">
+                  </div>
+                </div>
+                <div class="filter-row">
+                  <div class="filter-field">
+                    <label class="filter-label">Modified After</label>
+                    <input type="date" class="filter-input" id="filterDate">
+                  </div>
+                </div>
+                <div class="filter-actions">
+                  <button class="filter-btn" onclick="clearFilters()">Clear All</button>
+                  <button class="filter-btn primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="dropdown" id="sortDropdown">
+              <button class="list-toolbar-btn" onclick="toggleDropdown('sortDropdown')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 5h10M11 9h7M11 13h4"/>
+                  <path d="M3 17l3 3 3-3M6 18V4"/>
+                </svg>
+              </button>
+              <div class="dropdown-menu">
+                <div class="dropdown-item active" data-sort="name-asc" onclick="applySort('name-asc')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="19" x2="12" y2="5"/>
+                    <polyline points="5 12 12 5 19 12"/>
+                  </svg>
+                  Name (A-Z)
+                </div>
+                <div class="dropdown-item" data-sort="name-desc" onclick="applySort('name-desc')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="19 12 12 19 5 12"/>
+                  </svg>
+                  Name (Z-A)
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" data-sort="date-desc" onclick="applySort('date-desc')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  Newest First
+                </div>
+                <div class="dropdown-item" data-sort="date-asc" onclick="applySort('date-asc')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  Oldest First
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" data-sort="status" onclick="applySort('status')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  By Status
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar-spacer"></div>
+          
+          <!-- Item Count -->
+          <span class="list-count" id="listCount">12 items</span>
+          
+          <div class="toolbar-divider"></div>
+          
+          <!-- Actions Group -->
+          <div class="toolbar-group">
+            <button class="list-toolbar-btn" onclick="toggleSelectMode()" id="selectModeBtn" title="Select multiple items">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 11 12 14 22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+            </button>
+          
+            <button class="list-toolbar-btn" id="detailsToggleBtn" onclick="toggleDetailsPanel()" title="Toggle Details Panel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="15" y1="3" x2="15" y2="21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Active Filters -->
+        <div class="active-filters" id="activeFilters"></div>
+        
+        <!-- Table View -->
+        <div class="table-view" id="tableView">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="cell-checkbox">
+                    <input type="checkbox" id="selectAllTable" onchange="toggleSelectAll(this)">
+                  </th>
+                  <th class="cell-icon"></th>
+                  <th class="sortable sorted" data-sort="id" onclick="sortTable('id')">
+                    <span class="th-content">
+                      ID
+                      <svg class="sort-indicator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th class="sortable" data-sort="name" onclick="sortTable('name')">
+                    <span class="th-content">
+                      Name
+                      <svg class="sort-indicator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th class="sortable" data-sort="type" onclick="sortTable('type')">
+                    <span class="th-content">
+                      Object Type
+                      <svg class="sort-indicator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th>Primary Image</th>
+                  <th class="sortable" data-sort="completeness" onclick="sortTable('completeness')">
+                    <span class="th-content">
+                      Completeness
+                      <svg class="sort-indicator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"/>
+                      </svg>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr data-id="1" class="selected">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L3-67030100</td>
+                  <td class="cell-name">Activewear</td>
+                  <td class="cell-type">External Level 3</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="100"></div></td>
+                </tr>
+                <tr data-id="2">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10001342</td>
+                  <td class="cell-name">Sportswear - Full Body Wear</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="80"></div></td>
+                </tr>
+                <tr data-id="3">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10001343</td>
+                  <td class="cell-name">Sportswear - Lower Body Wear</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="80"></div></td>
+                </tr>
+                <tr data-id="4">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10001344</td>
+                  <td class="cell-name">Sportswear - Upper Body Wear</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="60"></div></td>
+                </tr>
+                <tr data-id="5">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10001359</td>
+                  <td class="cell-name">Sportswear Variety Packs</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="80"></div></td>
+                </tr>
+                <tr data-id="6">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10003707</td>
+                  <td class="cell-name">Sportswear - Handwear</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="60"></div></td>
+                </tr>
+                <tr data-id="7">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10003708</td>
+                  <td class="cell-name">Sportswear - Headwear</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="40"></div></td>
+                </tr>
+                <tr data-id="8">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10003709</td>
+                  <td class="cell-name">Sportswear Hosiery</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="80"></div></td>
+                </tr>
+                <tr data-id="9">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10004113</td>
+                  <td class="cell-name">Sportswear - Neckwear</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="60"></div></td>
+                </tr>
+                <tr data-id="10">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10004114</td>
+                  <td class="cell-name">Sportswear - Belts</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="80"></div></td>
+                </tr>
+                <tr data-id="11">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10004115</td>
+                  <td class="cell-name">Activewear - Accessories</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="40"></div></td>
+                </tr>
+                <tr data-id="12">
+                  <td class="cell-checkbox"><input type="checkbox" class="table-checkbox"></td>
+                  <td class="cell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                  </td>
+                  <td class="cell-id">EXT.L4-10006840</td>
+                  <td class="cell-name">Sportswear - Sets</td>
+                  <td class="cell-type">External Level 4</td>
+                  <td class="cell-image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </td>
+                  <td class="cell-completeness"><div class="completeness-bar" data-value="60"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Card View (default) -->
+        <div class="list-container active" id="listContainer">
+          <div class="list-item selected" data-id="1" data-name="Sportswear - Full Body Wear" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear - Full Body Wear</div>
+                <div class="list-item-id">EXT.L4-10001342</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="2" data-name="Sportswear - Lower Body Wear" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear - Lower Body Wear</div>
+                <div class="list-item-id">EXT.L4-10001343</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="3" data-name="Sportswear - Upper Body Wear" data-status="pending">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear - Upper Body Wear</div>
+                <div class="list-item-id">EXT.L4-10001344</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag pending">Pending</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="4" data-name="Sportswear Variety Packs" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear Variety Packs</div>
+                <div class="list-item-id">EXT.L4-10001359</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="5" data-name="Sportswear - Handwear" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear - Handwear</div>
+                <div class="list-item-id">EXT.L4-10003707</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="6" data-name="Sportswear - Headwear" data-status="pending">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear - Headwear</div>
+                <div class="list-item-id">EXT.L4-10003708</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag pending">Pending</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="7" data-name="Sportswear Hosiery" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear Hosiery</div>
+                <div class="list-item-id">EXT.L4-10003709</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="8" data-name="Sportswear - Footwear" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Sportswear - Footwear</div>
+                <div class="list-item-id">EXT.L4-10003710</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="9" data-name="Athletic Compression Gear" data-status="draft">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Athletic Compression Gear</div>
+                <div class="list-item-id">EXT.L4-10003711</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag" style="background: rgba(107, 114, 128, 0.15); color: #6b7280;">Draft</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="10" data-name="Yoga & Pilates Wear" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Yoga & Pilates Wear</div>
+                <div class="list-item-id">EXT.L4-10003712</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="11" data-name="Running Apparel" data-status="pending">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Running Apparel</div>
+                <div class="list-item-id">EXT.L4-10003713</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag pending">Pending</span>
+              </div>
+            </div>
+          </div>
+          <div class="list-item" data-id="12" data-name="Cycling Gear" data-status="approved">
+            <input type="checkbox" class="list-item-checkbox" style="display: none;">
+            <div class="list-item-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-main">
+                <div class="list-item-title">Cycling Gear</div>
+                <div class="list-item-id">EXT.L4-10003714</div>
+              </div>
+              <div class="list-item-meta">
+                <span class="list-item-tag approved">Approved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions" id="bulkActions">
+          <span class="bulk-actions-count"><span id="selectedCount">0</span> items selected</span>
+          <div class="bulk-actions-btns">
+            <button class="bulk-btn" onclick="bulkApprove()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Approve
+            </button>
+            <button class="bulk-btn" onclick="bulkExport()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export
+            </button>
+            <button class="bulk-btn" onclick="bulkDelete()" style="border-color: rgba(239,68,68,0.5);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Delete
+            </button>
+            <button class="bulk-btn" onclick="cancelSelection()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-handle" data-resize="listPanel"></div>
+
+    <!-- Detail Panel -->
+    <div class="panel detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <div class="detail-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          </svg>
+        </div>
+        <div class="detail-title-group">
+          <h1 class="detail-title">Sportswear - Full Body Wear</h1>
+          <div class="detail-subtitle">
+            <span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Rev 0.2
+            </span>
+            <span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              stepsys
+            </span>
+            <span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              1 year ago
+            </span>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button class="detail-btn" onclick="openModal('editModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Edit
+          </button>
+          <button class="detail-btn" onclick="openModal('exportModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+          </button>
+          <button class="detail-btn primary" onclick="approveItem()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Approve
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-container">
+        <div class="tabs-scroll">
+          <div class="tab active" data-tab="basic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Basic Info
+          </div>
+          <div class="tab" data-tab="references">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            References
+          </div>
+          <div class="tab" data-tab="ranking">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            Ranking
+          </div>
+          <div class="tab" data-tab="languages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            Languages
+          </div>
+          <div class="tab" data-tab="sema">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            SEMA Content
+          </div>
+        </div>
+        <div class="tabs-overflow">
+          <button class="tabs-overflow-btn tooltip" data-tooltip="More tabs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="19" cy="12" r="1"/>
+              <circle cx="5" cy="12" r="1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Basic Info Tab -->
+        <div class="tab-pane active" data-pane="basic">
+          <div class="form-section">
+            <div class="form-group">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-input" value="Sportswear - Full Body Wear">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">ID</label>
+                <input type="text" class="form-input" value="EXT.L4-10001342" readonly>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <input type="text" class="form-input" value="Approved">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-input" rows="4" placeholder="Enter description..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- References Tab -->
+        <div class="tab-pane" data-pane="references">
+          <div class="split-view">
+            <div class="split-sidebar">
+              <div class="split-sidebar-header">Reference Types</div>
+              <div class="split-sidebar-content">
+                <div class="ref-group">
+                  <div class="ref-group-header expanded">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                    Asset References
+                  </div>
+                  <div class="ref-item selected">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span class="ref-item-label">Product Images</span>
+                    <span class="ref-item-count">4</span>
+                  </div>
+                  <div class="ref-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span class="ref-item-label">Documents</span>
+                    <span class="ref-item-count">2</span>
+                  </div>
+                  <div class="ref-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span class="ref-item-label">Videos</span>
+                    <span class="ref-item-count">0</span>
+                  </div>
+                </div>
+                <div class="ref-group">
+                  <div class="ref-group-header expanded">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                    Classification References
+                  </div>
+                  <div class="ref-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="20" x2="18" y2="10"/>
+                      <line x1="12" y1="20" x2="12" y2="4"/>
+                      <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    <span class="ref-item-label">Category Ranking</span>
+                    <span class="ref-item-count">1</span>
+                  </div>
+                  <div class="ref-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 12 20 22 4 22 4 12"/>
+                      <rect x="2" y="7" width="20" height="5"/>
+                      <line x1="12" y1="22" x2="12" y2="7"/>
+                      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                      <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                    </svg>
+                    <span class="ref-item-label">Supplier Info</span>
+                    <span class="ref-item-count">3</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="split-main">
+              <div class="split-main-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="split-main-title">Product Images</span>
+                <div class="split-main-actions">
+                  <button class="list-toolbar-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19"/>
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add
+                  </button>
+                </div>
+              </div>
+              <div class="split-main-content">
+                <div class="asset-grid">
+                  <div class="asset-card animate-in" style="animation-delay: 0ms">
+                    <div class="asset-card-thumb">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <div class="asset-card-info">
+                      <div class="asset-card-name">front_view.jpg</div>
+                      <div class="asset-card-meta">1920x1080 • 245KB</div>
+                    </div>
+                  </div>
+                  <div class="asset-card animate-in" style="animation-delay: 50ms">
+                    <div class="asset-card-thumb">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <div class="asset-card-info">
+                      <div class="asset-card-name">back_view.jpg</div>
+                      <div class="asset-card-meta">1920x1080 • 198KB</div>
+                    </div>
+                  </div>
+                  <div class="asset-card animate-in" style="animation-delay: 100ms">
+                    <div class="asset-card-thumb">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <div class="asset-card-info">
+                      <div class="asset-card-name">detail_fabric.jpg</div>
+                      <div class="asset-card-meta">800x600 • 87KB</div>
+                    </div>
+                  </div>
+                  <div class="asset-card animate-in" style="animation-delay: 150ms">
+                    <div class="asset-card-thumb">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <div class="asset-card-info">
+                      <div class="asset-card-name">lifestyle.jpg</div>
+                      <div class="asset-card-meta">2400x1600 • 512KB</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ranking Tab (empty state example) -->
+        <div class="tab-pane" data-pane="ranking">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            <div class="empty-state-title">No ranking data</div>
+            <div class="empty-state-desc">Configure category rankings to improve product visibility</div>
+            <button class="empty-state-btn">Add Ranking</button>
+          </div>
+        </div>
+
+        <!-- Languages Tab -->
+        <div class="tab-pane" data-pane="languages">
+          <div class="form-section">
+            <div class="form-group">
+              <label class="form-label">English (US) - Primary</label>
+              <input type="text" class="form-input" value="Sportswear - Full Body Wear">
+            </div>
+            <div class="form-group">
+              <label class="form-label">German (DE)</label>
+              <input type="text" class="form-input" value="Sportbekleidung - Ganzkörper" placeholder="Enter translation...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">French (FR)</label>
+              <input type="text" class="form-input" value="Vêtements de sport - Corps entier" placeholder="Enter translation...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Spanish (ES)</label>
+              <input type="text" class="form-input" placeholder="Enter translation...">
+            </div>
+          </div>
+        </div>
+
+        <!-- SEMA Tab -->
+        <div class="tab-pane" data-pane="sema">
+          <div class="split-view">
+            <div class="split-sidebar">
+              <div class="split-sidebar-header">Content Types</div>
+              <div class="split-sidebar-content">
+                <div class="ref-item selected">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span class="ref-item-label">Working Content</span>
+                  <span class="ref-item-count">5</span>
+                </div>
+                <div class="ref-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span class="ref-item-label">Empty Content</span>
+                  <span class="ref-item-count">2</span>
+                </div>
+                <div class="ref-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  <span class="ref-item-label">404 Content</span>
+                  <span class="ref-item-count">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="split-main">
+              <div class="split-main-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span class="split-main-title">Working Content</span>
+              </div>
+              <div class="split-main-content">
+                <div class="form-section" style="padding: 0;">
+                  <div class="form-group">
+                    <label class="form-label">Content Status</label>
+                    <input type="text" class="form-input" value="Active" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Last Sync</label>
+                    <input type="text" class="form-input" value="2024-07-15 14:32:00" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    let state = {
+      selectMode: false,
+      selectedItems: new Set(),
+      currentSort: 'name-asc',
+      activeFilters: {},
+      currentItem: null,
+      currentView: 'cards', // 'cards' or 'table'
+      detailsPanelVisible: true
+    };
+
+    // ============================================
+    // PANEL FUNCTIONALITY
+    // ============================================
+    function togglePanel(panelId) {
+      const panel = document.getElementById(panelId);
+      panel.classList.toggle('collapsed');
+    }
+
+    // ============================================
+    // MODAL FUNCTIONALITY
+    // ============================================
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => {
+          m.classList.remove('active');
+        });
+        document.body.style.overflow = '';
+        hideContextMenu();
+      }
+    });
+
+    // ============================================
+    // DROPDOWN FUNCTIONALITY
+    // ============================================
+    function toggleDropdown(dropdownId) {
+      const dropdown = document.getElementById(dropdownId);
+      const wasActive = dropdown.classList.contains('active');
+      
+      // Close all dropdowns
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+      
+      // Toggle this one
+      if (!wasActive) {
+        dropdown.classList.add('active');
+      }
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+      }
+    });
+
+    // ============================================
+    // SORT FUNCTIONALITY
+    // ============================================
+    function applySort(sortType) {
+      state.currentSort = sortType;
+      
+      // Update UI
+      document.querySelectorAll('#sortDropdown .dropdown-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.sort === sortType);
+      });
+      
+      // Get items and sort
+      const container = document.getElementById('listContainer');
+      const items = Array.from(container.querySelectorAll('.list-item'));
+      
+      items.sort((a, b) => {
+        const nameA = a.dataset.name.toLowerCase();
+        const nameB = b.dataset.name.toLowerCase();
+        const statusA = a.dataset.status;
+        const statusB = b.dataset.status;
+        
+        switch(sortType) {
+          case 'name-asc':
+            return nameA.localeCompare(nameB);
+          case 'name-desc':
+            return nameB.localeCompare(nameA);
+          case 'status':
+            return statusA.localeCompare(statusB);
+          case 'date-desc':
+          case 'date-asc':
+            // Simulated - would use actual dates in real app
+            return sortType === 'date-desc' ? -1 : 1;
+          default:
+            return 0;
+        }
+      });
+      
+      // Re-append in sorted order
+      items.forEach(item => container.appendChild(item));
+      
+      // Close dropdown
+      document.getElementById('sortDropdown').classList.remove('active');
+      
+      showToast('success', 'Sorted', `Items sorted by ${sortType.replace('-', ' ')}`);
+    }
+
+    // ============================================
+    // FILTER FUNCTIONALITY
+    // ============================================
+    function applyFilters() {
+      const status = document.getElementById('filterStatus').value;
+      const name = document.getElementById('filterName').value.toLowerCase();
+      const date = document.getElementById('filterDate').value;
+      
+      state.activeFilters = {};
+      if (status) state.activeFilters.status = status;
+      if (name) state.activeFilters.name = name;
+      if (date) state.activeFilters.date = date;
+      
+      // Filter items
+      const items = document.querySelectorAll('.list-item');
+      let visibleCount = 0;
+      
+      items.forEach(item => {
+        let visible = true;
+        
+        if (status && item.dataset.status !== status) {
+          visible = false;
+        }
+        if (name && !item.dataset.name.toLowerCase().includes(name)) {
+          visible = false;
+        }
+        
+        item.style.display = visible ? '' : 'none';
+        if (visible) visibleCount++;
+      });
+      
+      // Update count
+      document.getElementById('listCount').textContent = `${visibleCount} items`;
+      
+      // Update filter badge count
+      const filterCount = Object.keys(state.activeFilters).length;
+      const badge = document.getElementById('filterCount');
+      if (filterCount > 0) {
+        badge.textContent = filterCount;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+      
+      // Update active filters display
+      updateActiveFiltersDisplay();
+      
+      // Close dropdown
+      document.getElementById('filterDropdown').classList.remove('active');
+      
+      showToast('success', 'Filters Applied', `Showing ${visibleCount} items`);
+    }
+
+    function clearFilters() {
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterName').value = '';
+      document.getElementById('filterDate').value = '';
+      state.activeFilters = {};
+      
+      // Show all items
+      document.querySelectorAll('.list-item').forEach(item => {
+        item.style.display = '';
+      });
+      
+      document.getElementById('listCount').textContent = '12 items';
+      document.getElementById('filterCount').style.display = 'none';
+      document.getElementById('activeFilters').innerHTML = '';
+      
+      document.getElementById('filterDropdown').classList.remove('active');
+      showToast('success', 'Filters Cleared', 'Showing all items');
+    }
+
+    function updateActiveFiltersDisplay() {
+      const container = document.getElementById('activeFilters');
+      container.innerHTML = '';
+      
+      Object.entries(state.activeFilters).forEach(([key, value]) => {
+        const badge = document.createElement('span');
+        badge.className = 'filter-badge';
+        badge.innerHTML = `
+          ${key}: ${value}
+          <button class="filter-badge-remove" onclick="removeFilter('${key}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        `;
+        container.appendChild(badge);
+      });
+    }
+
+    function removeFilter(key) {
+      delete state.activeFilters[key];
+      
+      // Reset the corresponding input
+      if (key === 'status') document.getElementById('filterStatus').value = '';
+      if (key === 'name') document.getElementById('filterName').value = '';
+      if (key === 'date') document.getElementById('filterDate').value = '';
+      
+      applyFilters();
+    }
+
+    // ============================================
+    // SELECT MODE & BULK ACTIONS
+    // ============================================
+    function toggleSelectMode() {
+      state.selectMode = !state.selectMode;
+      const btn = document.getElementById('selectModeBtn');
+      
+      document.querySelectorAll('.list-item-checkbox').forEach(cb => {
+        cb.style.display = state.selectMode ? '' : 'none';
+        cb.checked = false;
+      });
+      
+      btn.classList.toggle('active', state.selectMode);
+      state.selectedItems.clear();
+      updateBulkActions();
+      
+      if (state.selectMode) {
+        showToast('info', 'Select Mode', 'Click items to select them for bulk actions');
+      }
+    }
+
+    function updateBulkActions() {
+      const count = state.selectedItems.size;
+      document.getElementById('selectedCount').textContent = count;
+      document.getElementById('bulkActions').classList.toggle('active', count > 0);
+    }
+
+    function cancelSelection() {
+      state.selectMode = false;
+      state.selectedItems.clear();
+      
+      document.querySelectorAll('.list-item-checkbox').forEach(cb => {
+        cb.style.display = 'none';
+        cb.checked = false;
+      });
+      
+      document.getElementById('selectModeBtn').classList.remove('active');
+      updateBulkActions();
+    }
+
+    function bulkApprove() {
+      const count = state.selectedItems.size;
+      showToast('success', 'Bulk Approve', `${count} items have been approved`);
+      cancelSelection();
+    }
+
+    function bulkExport() {
+      openModal('exportModal');
+    }
+
+    function bulkDelete() {
+      openModal('deleteModal');
+      document.getElementById('deleteItemName').textContent = `${state.selectedItems.size} selected items`;
+    }
+
+    // ============================================
+    // CONTEXT MENU
+    // ============================================
+    function showContextMenu(e, item) {
+      e.preventDefault();
+      const menu = document.getElementById('contextMenu');
+      state.currentItem = item;
+      
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.classList.add('active');
+    }
+
+    function hideContextMenu() {
+      document.getElementById('contextMenu').classList.remove('active');
+    }
+
+    document.addEventListener('click', hideContextMenu);
+
+    document.querySelectorAll('.context-menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.action;
+        
+        switch(action) {
+          case 'edit':
+            openModal('editModal');
+            break;
+          case 'duplicate':
+            showToast('success', 'Duplicated', 'Item has been duplicated');
+            break;
+          case 'export':
+            openModal('exportModal');
+            break;
+          case 'archive':
+            showToast('success', 'Archived', 'Item has been archived');
+            break;
+          case 'delete':
+            openModal('deleteModal');
+            break;
+        }
+        
+        hideContextMenu();
+      });
+    });
+
+    // ============================================
+    // EDIT & SAVE FUNCTIONALITY
+    // ============================================
+    function saveEdit() {
+      const name = document.getElementById('editName').value;
+      const status = document.getElementById('editStatus').value;
+      
+      // Update the detail view
+      document.querySelector('.detail-title').textContent = name;
+      
+      closeModal('editModal');
+      showToast('success', 'Saved', 'Changes have been saved successfully');
+    }
+
+    function approveItem() {
+      showToast('success', 'Approved', 'Item has been approved');
+    }
+
+    function confirmDelete() {
+      closeModal('deleteModal');
+      showToast('success', 'Deleted', 'Item has been deleted');
+      cancelSelection();
+    }
+
+    function doExport() {
+      const format = document.querySelector('input[name="exportFormat"]:checked').value;
+      closeModal('exportModal');
+      
+      // Show loading toast
+      showToast('info', 'Exporting...', 'Preparing your download');
+      
+      setTimeout(() => {
+        showToast('success', 'Export Complete', `File downloaded as .${format}`);
+      }, 1500);
+    }
+
+    // ============================================
+    // TOAST NOTIFICATIONS
+    // ============================================
+    function showToast(type, title, message) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icons = {
+        success: '<polyline points="20 6 9 17 4 12"/>',
+        error: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+        warning: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+        info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'
+      };
+      
+      toast.innerHTML = `
+        <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          ${icons[type]}
+        </svg>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Auto remove after 4 seconds
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // ============================================
+    // TAB SWITCHING
+    // ============================================
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.dataset.tab;
+        
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.querySelector(`[data-pane="${tabId}"]`).classList.add('active');
+      });
+    });
+
+    // ============================================
+    // MODE SWITCHER
+    // ============================================
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const mode = btn.dataset.mode;
+        document.body.classList.remove('focus-mode');
+        
+        if (mode === 'edit') {
+          document.body.classList.add('focus-mode');
+          showToast('info', 'Edit Mode', 'Panels collapsed for focused editing');
+        } else if (mode === 'compare') {
+          enterCompareMode();
+        } else if (mode === 'browse') {
+          exitCompareMode();
+        }
+      });
+    });
+
+    // ============================================
+    // COMPARE MODE
+    // ============================================
+    const compareItems = [
+      { id: '1', name: 'Activewear', itemId: 'EXT.L3-67030100', type: 'External Level 3', status: 'Approved', completeness: '100%', modified: '1 year ago', modifiedBy: 'stepsys' },
+      { id: '2', name: 'Sportswear - Full Body Wear', itemId: 'EXT.L4-10001342', type: 'External Level 4', status: 'Approved', completeness: '80%', modified: '6 months ago', modifiedBy: 'admin' },
+      { id: '3', name: 'Sportswear - Lower Body Wear', itemId: 'EXT.L4-10001343', type: 'External Level 4', status: 'Approved', completeness: '80%', modified: '6 months ago', modifiedBy: 'admin' },
+      { id: '4', name: 'Sportswear - Upper Body Wear', itemId: 'EXT.L4-10001344', type: 'External Level 4', status: 'Pending', completeness: '60%', modified: '2 months ago', modifiedBy: 'editor1' },
+      { id: '5', name: 'Sportswear Variety Packs', itemId: 'EXT.L4-10001359', type: 'External Level 4', status: 'Approved', completeness: '80%', modified: '3 months ago', modifiedBy: 'admin' },
+      { id: '6', name: 'Sportswear - Handwear', itemId: 'EXT.L4-10003707', type: 'External Level 4', status: 'Approved', completeness: '60%', modified: '4 months ago', modifiedBy: 'editor2' },
+      { id: '7', name: 'Sportswear - Headwear', itemId: 'EXT.L4-10003708', type: 'External Level 4', status: 'Pending', completeness: '40%', modified: '1 month ago', modifiedBy: 'editor1' },
+      { id: '8', name: 'Sportswear Hosiery', itemId: 'EXT.L4-10003709', type: 'External Level 4', status: 'Approved', completeness: '80%', modified: '5 months ago', modifiedBy: 'admin' },
+    ];
+
+    let compareSelection = { a: null, b: null };
+
+    function enterCompareMode() {
+      document.getElementById('compareOverlay').classList.add('active');
+      compareSelection = { a: null, b: null };
+      populateCompareSelector();
+      resetComparePanels();
+      showToast('info', 'Compare Mode', 'Select two items to compare');
+    }
+
+    function exitCompareMode() {
+      document.getElementById('compareOverlay').classList.remove('active');
+      compareSelection = { a: null, b: null };
+      
+      // Reset mode button to Browse
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.mode-btn[data-mode="browse"]').classList.add('active');
+    }
+
+    function populateCompareSelector() {
+      const list = document.getElementById('compareSelectorList');
+      list.innerHTML = compareItems.map(item => `
+        <div class="compare-item" data-id="${item.id}" onclick="selectCompareItem('${item.id}')">
+          <div class="compare-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            </svg>
+          </div>
+          <div class="compare-item-info">
+            <div class="compare-item-name">${item.name}</div>
+            <div class="compare-item-id">${item.itemId}</div>
+          </div>
+          <div class="compare-item-badge" style="display: none;"></div>
+        </div>
+      `).join('');
+    }
+
+    function selectCompareItem(id) {
+      const item = compareItems.find(i => i.id === id);
+      if (!item) return;
+
+      // If clicking already selected item, deselect it
+      if (compareSelection.a === id) {
+        compareSelection.a = null;
+        updateComparePanel('A', null);
+      } else if (compareSelection.b === id) {
+        compareSelection.b = null;
+        updateComparePanel('B', null);
+      }
+      // If no A selected, select as A
+      else if (!compareSelection.a) {
+        compareSelection.a = id;
+        updateComparePanel('A', item);
+      }
+      // If A selected but no B, select as B
+      else if (!compareSelection.b) {
+        compareSelection.b = id;
+        updateComparePanel('B', item);
+      }
+      // Both selected - replace B
+      else {
+        compareSelection.b = id;
+        updateComparePanel('B', item);
+      }
+
+      updateCompareSelectorUI();
+      updateCompareHighlights();
+    }
+
+    function updateCompareSelectorUI() {
+      document.querySelectorAll('.compare-item').forEach(el => {
+        const id = el.dataset.id;
+        const badge = el.querySelector('.compare-item-badge');
+        
+        el.classList.remove('selected-a', 'selected-b');
+        badge.style.display = 'none';
+        
+        if (compareSelection.a === id) {
+          el.classList.add('selected-a');
+          badge.textContent = 'A';
+          badge.style.display = 'flex';
+        } else if (compareSelection.b === id) {
+          el.classList.add('selected-b');
+          badge.textContent = 'B';
+          badge.style.display = 'flex';
+        }
+      });
+
+      // Update instruction visibility
+      const instruction = document.getElementById('compareInstruction');
+      if (compareSelection.a && compareSelection.b) {
+        instruction.classList.add('hidden');
+      } else {
+        instruction.classList.remove('hidden');
+      }
+    }
+
+    function updateComparePanel(panel, item) {
+      const titleEl = document.getElementById(`compareTitle${panel}`);
+      const bodyEl = document.getElementById(`compareBody${panel}`);
+
+      if (!item) {
+        titleEl.textContent = `Select ${panel === 'A' ? 'first' : 'second'} item`;
+        bodyEl.innerHTML = `
+          <div class="compare-panel-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            </svg>
+            <div>Click an item to select it as Item ${panel}</div>
+          </div>
+        `;
+        return;
+      }
+
+      titleEl.textContent = item.name;
+      bodyEl.innerHTML = `
+        <div class="compare-field">
+          <div class="compare-field-label">ID</div>
+          <div class="compare-field-value" data-field="itemId">${item.itemId}</div>
+        </div>
+        <div class="compare-field">
+          <div class="compare-field-label">Name</div>
+          <div class="compare-field-value" data-field="name">${item.name}</div>
+        </div>
+        <div class="compare-field">
+          <div class="compare-field-label">Object Type</div>
+          <div class="compare-field-value" data-field="type">${item.type}</div>
+        </div>
+        <div class="compare-field">
+          <div class="compare-field-label">Status</div>
+          <div class="compare-field-value" data-field="status">${item.status}</div>
+        </div>
+        <div class="compare-field">
+          <div class="compare-field-label">Completeness</div>
+          <div class="compare-field-value" data-field="completeness">${item.completeness}</div>
+        </div>
+        <div class="compare-field">
+          <div class="compare-field-label">Last Modified</div>
+          <div class="compare-field-value" data-field="modified">${item.modified}</div>
+        </div>
+        <div class="compare-field">
+          <div class="compare-field-label">Modified By</div>
+          <div class="compare-field-value" data-field="modifiedBy">${item.modifiedBy}</div>
+        </div>
+      `;
+    }
+
+    function updateCompareHighlights() {
+      if (!compareSelection.a || !compareSelection.b) return;
+
+      const itemA = compareItems.find(i => i.id === compareSelection.a);
+      const itemB = compareItems.find(i => i.id === compareSelection.b);
+      if (!itemA || !itemB) return;
+
+      const fields = ['itemId', 'name', 'type', 'status', 'completeness', 'modified', 'modifiedBy'];
+      
+      fields.forEach(field => {
+        const valA = document.querySelector(`#compareBodyA [data-field="${field}"]`);
+        const valB = document.querySelector(`#compareBodyB [data-field="${field}"]`);
+        
+        if (valA && valB) {
+          const isSame = itemA[field] === itemB[field];
+          valA.classList.remove('same', 'different');
+          valB.classList.remove('same', 'different');
+          valA.classList.add(isSame ? 'same' : 'different');
+          valB.classList.add(isSame ? 'same' : 'different');
+        }
+      });
+    }
+
+    function resetComparePanels() {
+      updateComparePanel('A', null);
+      updateComparePanel('B', null);
+    }
+
+    // ============================================
+    // LIST ITEM INTERACTIONS
+    // ============================================
+    document.querySelectorAll('.list-item').forEach(item => {
+      // Click handler
+      item.addEventListener('click', (e) => {
+        if (state.selectMode) {
+          const checkbox = item.querySelector('.list-item-checkbox');
+          checkbox.checked = !checkbox.checked;
+          
+          if (checkbox.checked) {
+            state.selectedItems.add(item.dataset.id);
+          } else {
+            state.selectedItems.delete(item.dataset.id);
+          }
+          updateBulkActions();
+        } else {
+          document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
+          item.classList.add('selected');
+          
+          // Update detail view
+          document.querySelector('.detail-title').textContent = item.dataset.name;
+        }
+      });
+      
+      // Right-click handler
+      item.addEventListener('contextmenu', (e) => showContextMenu(e, item));
+    });
+
+    // Checkbox change handler
+    document.querySelectorAll('.list-item-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const item = cb.closest('.list-item');
+        
+        if (cb.checked) {
+          state.selectedItems.add(item.dataset.id);
+        } else {
+          state.selectedItems.delete(item.dataset.id);
+        }
+        updateBulkActions();
+      });
+    });
+
+    // ============================================
+    // REFERENCE & TREE INTERACTIONS
+    // ============================================
+    document.querySelectorAll('.ref-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.ref-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+      });
+    });
+
+    document.querySelectorAll('.tree-expand').forEach(expand => {
+      expand.addEventListener('click', (e) => {
+        e.stopPropagation();
+        expand.classList.toggle('expanded');
+      });
+    });
+
+    document.querySelectorAll('.ref-group-header').forEach(header => {
+      header.addEventListener('click', () => {
+        header.classList.toggle('expanded');
+      });
+    });
+
+    // ============================================
+    // TREE SEARCH
+    // ============================================
+    document.querySelector('.tree-search input').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      
+      document.querySelectorAll('.tree-item').forEach(item => {
+        const label = item.querySelector('.tree-label').textContent.toLowerCase();
+        const match = label.includes(query);
+        item.style.display = match || !query ? '' : 'none';
+      });
+    });
+
+    // ============================================
+    // RESIZE HANDLES
+    // ============================================
+    let isResizing = false;
+    let currentHandle = null;
+    let startX = 0;
+    let startWidth = 0;
+
+    document.querySelectorAll('.resize-handle').forEach(handle => {
+      handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        currentHandle = handle;
+        handle.classList.add('active');
+        const panelId = handle.dataset.resize;
+        const panel = document.getElementById(panelId);
+        startX = e.clientX;
+        startWidth = panel.offsetWidth;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      
+      const panelId = currentHandle.dataset.resize;
+      const panel = document.getElementById(panelId);
+      const diff = e.clientX - startX;
+      const newWidth = Math.max(200, Math.min(500, startWidth + diff));
+      panel.style.width = newWidth + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        currentHandle.classList.remove('active');
+        currentHandle = null;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+
+    // ============================================
+    // KEYBOARD SHORTCUTS
+    // ============================================
+    document.addEventListener('keydown', (e) => {
+      // Cmd/Ctrl + 1: Toggle tree
+      if ((e.metaKey || e.ctrlKey) && e.key === '1') {
+        e.preventDefault();
+        togglePanel('treePanel');
+      }
+      // Cmd/Ctrl + 2: Toggle list
+      if ((e.metaKey || e.ctrlKey) && e.key === '2') {
+        e.preventDefault();
+        togglePanel('listPanel');
+      }
+      // Cmd/Ctrl + E: Edit
+      if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault();
+        openModal('editModal');
+      }
+      // Cmd/Ctrl + S: Save (in edit modal)
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        if (document.getElementById('editModal').classList.contains('active')) {
+          e.preventDefault();
+          saveEdit();
+        }
+      }
+    });
+
+    // ============================================
+    // VIEW SWITCHING (Cards vs Table in List Panel)
+    // ============================================
+    function setListView(view) {
+      state.currentView = view;
+      
+      // Update toggle buttons
+      document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+      });
+      
+      // Get view containers
+      const listContainer = document.getElementById('listContainer');
+      const tableView = document.getElementById('tableView');
+      
+      // Hide all views
+      listContainer.classList.remove('active');
+      tableView.classList.remove('active');
+      
+      // Show selected view
+      if (view === 'cards') {
+        listContainer.classList.add('active');
+      } else if (view === 'table') {
+        tableView.classList.add('active');
+      }
+      
+      showToast('info', 'View Changed', `Switched to ${view} view`);
+    }
+
+    // ============================================
+    // DETAILS PANEL TOGGLE (Show/Hide Right Panel)
+    // ============================================
+    function toggleDetailsPanel() {
+      const detailPanel = document.getElementById('detailPanel');
+      const listPanel = document.getElementById('listPanel');
+      const btn = document.getElementById('detailsToggleBtn');
+      
+      // Find the resize handle (it's the element right before the detail panel)
+      const resizeHandles = document.querySelectorAll('.resize-handle');
+      const detailResizeHandle = resizeHandles[resizeHandles.length - 1]; // Last one is before detail panel
+      
+      state.detailsPanelVisible = !state.detailsPanelVisible;
+      
+      if (state.detailsPanelVisible) {
+        // Show the panel
+        detailPanel.classList.remove('hidden');
+        listPanel.classList.remove('expanded');
+        if (detailResizeHandle) {
+          detailResizeHandle.classList.remove('hidden');
+        }
+        btn.classList.add('active');
+        showToast('info', 'Details Panel', 'Details panel shown');
+      } else {
+        // Hide the panel completely and expand list
+        detailPanel.classList.add('hidden');
+        listPanel.classList.add('expanded');
+        if (detailResizeHandle) {
+          detailResizeHandle.classList.add('hidden');
+        }
+        btn.classList.remove('active');
+        showToast('info', 'Details Panel', 'Details panel hidden - list expanded');
+      }
+    }
+
+    // ============================================
+    // TABLE INTERACTIONS
+    // ============================================
+    function sortTable(column) {
+      const th = document.querySelector(`th[data-sort="${column}"]`);
+      const wasDesc = th.classList.contains('desc');
+      
+      // Remove sorted class from all
+      document.querySelectorAll('.data-table th').forEach(t => {
+        t.classList.remove('sorted', 'desc');
+      });
+      
+      // Add sorted class to current
+      th.classList.add('sorted');
+      if (!wasDesc) {
+        th.classList.add('desc');
+      }
+      
+      // Actually sort the table rows
+      const tbody = document.getElementById('tableBody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      rows.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(column) {
+          case 'id':
+            aVal = a.querySelector('.cell-id').textContent;
+            bVal = b.querySelector('.cell-id').textContent;
+            break;
+          case 'name':
+            aVal = a.querySelector('.cell-name').textContent;
+            bVal = b.querySelector('.cell-name').textContent;
+            break;
+          case 'type':
+            aVal = a.querySelector('.cell-type').textContent;
+            bVal = b.querySelector('.cell-type').textContent;
+            break;
+          case 'completeness':
+            aVal = parseInt(a.querySelector('.completeness-bar').dataset.value);
+            bVal = parseInt(b.querySelector('.completeness-bar').dataset.value);
+            return wasDesc ? aVal - bVal : bVal - aVal;
+          default:
+            return 0;
+        }
+        
+        const result = aVal.localeCompare(bVal);
+        return wasDesc ? result : -result;
+      });
+      
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function toggleSelectAll(checkbox) {
+      document.querySelectorAll('.table-checkbox').forEach(cb => {
+        cb.checked = checkbox.checked;
+      });
+      
+      if (checkbox.checked) {
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+          state.selectedItems.add(row.dataset.id);
+        });
+      } else {
+        state.selectedItems.clear();
+      }
+      
+      updateBulkActions();
+    }
+
+    // Table row click handler
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.type === 'checkbox') return;
+        
+        document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        
+        // Update detail panel title
+        const name = row.querySelector('.cell-name').textContent;
+        document.querySelector('.detail-title').textContent = name;
+      });
+      
+      row.addEventListener('contextmenu', (e) => showContextMenu(e, row));
+    });
+
+    // Table checkbox handler
+    document.querySelectorAll('.table-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const row = cb.closest('tr');
+        
+        if (cb.checked) {
+          state.selectedItems.add(row.dataset.id);
+        } else {
+          state.selectedItems.delete(row.dataset.id);
+        }
+        updateBulkActions();
+      });
+    });
+
+    // ============================================
+    // INITIAL SETUP
+    // ============================================
+    document.getElementById('listCount').textContent = '12 items';
+    
+    // Set initial view (cards is already active via HTML class, so just sync state)
+    state.currentView = 'cards';
+    
+    // Details panel is visible by default, mark button as active
+    document.getElementById('detailsToggleBtn').classList.add('active');
+  </script>
+</body>
+</html>
