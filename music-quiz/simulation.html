@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Music Quiz · Animation Preview</title>
+<style>
+  :root {
+    --bg-0: #0b0420;
+    --bg-1: #170a3a;
+    --bg-2: #1f0f4a;
+    --accent: #ff3d8b;
+    --accent-2: #7b5cff;
+    --accent-3: #00e0ff;
+    --good: #2bd66a;
+    --bad: #ff4d6d;
+    --warn: #ffc043;
+    --text: #f5f1ff;
+    --text-dim: #b3a8d6;
+    --text-faint: #7c719b;
+    --surface: rgba(255, 255, 255, 0.06);
+    --surface-2: rgba(255, 255, 255, 0.1);
+    --surface-3: rgba(255, 255, 255, 0.16);
+    --border: rgba(255, 255, 255, 0.12);
+    --shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.5);
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(900px 600px at 10% -10%, rgba(255, 61, 139, 0.35), transparent 60%),
+      radial-gradient(800px 600px at 110% 10%, rgba(123, 92, 255, 0.40), transparent 60%),
+      radial-gradient(900px 700px at 50% 120%, rgba(0, 224, 255, 0.18), transparent 60%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 60%, var(--bg-2));
+    min-height: 100%;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 1100px; margin: 0 auto; padding: 28px 22px 80px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 18px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center;
+    box-shadow: 0 8px 22px -6px rgba(255, 61, 139, 0.6);
+    color: #fff; font-size: 16px;
+  }
+  .topbar-meta { color: var(--text-dim); font-size: 13px; }
+  .topbar-meta b { color: var(--text); font-weight: 600; }
+  h1, h2 { letter-spacing: -0.025em; margin: 0; }
+  h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; }
+  h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; }
+  p { margin: 0; color: var(--text-dim); line-height: 1.5; }
+
+  .card {
+    background: var(--surface);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+  .card + .card { margin-top: 18px; }
+  .card .card-head { margin-bottom: 14px; }
+  .card .card-head p { margin-top: 6px; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row.between { justify-content: space-between; }
+
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+  input[type="range"], input[type="number"], select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 15px;
+    font-family: inherit;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: transform 0.08s, background 0.15s, filter 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+    user-select: none;
+  }
+  .btn:hover:not(:disabled) { background: var(--surface-3); transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    box-shadow: 0 10px 26px -8px rgba(255, 61, 139, 0.55);
+  }
+  .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; }
+  .btn.big { padding: 16px 28px; font-size: 17px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; color: var(--text-dim);
+  }
+  .pill.live { color: var(--good); border-color: rgba(43, 214, 106, 0.4); background: rgba(43, 214, 106, 0.12); }
+
+  /* Reveal card */
+  .big-reveal {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, rgba(255, 61, 139, 0.18), rgba(123, 92, 255, 0.18));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .big-reveal .song-meta { color: var(--text-dim); font-size: 14px; text-transform: uppercase; letter-spacing: 0.16em; }
+  .big-reveal .song-title { margin: 8px 0 18px; font-size: clamp(24px, 4vw, 36px); font-weight: 800; }
+  .big-reveal .owner-label { color: var(--text-dim); font-size: 14px; text-transform: uppercase; letter-spacing: 0.16em; margin-bottom: 6px; }
+  .big-reveal .owner-name {
+    font-size: clamp(36px, 6vw, 64px); font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent-3));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: ownerPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes ownerPop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .reveal-art {
+    width: 160px; height: 160px; border-radius: 16px; overflow: hidden;
+    margin: 0 auto 14px;
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 18px 40px -12px rgba(0,0,0,0.6);
+    animation: artPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .reveal-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @keyframes artPop { from { transform: scale(0.7) rotate(-4deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .vote-summary { margin-top: 14px; display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+  .vote-summary .v-stat b { color: var(--text); font-weight: 800; font-size: 18px; }
+
+  /* Leaderboard */
+  .leaderboard { display: grid; gap: 8px; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 14px; align-items: center;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s;
+  }
+  .lb-row.up { background: rgba(43, 214, 106, 0.12); border-color: rgba(43, 214, 106, 0.4); }
+  .lb-row.down { background: rgba(255, 77, 109, 0.10); border-color: rgba(255, 77, 109, 0.3); }
+  .lb-row.gained { animation: gainPulse 1.2s ease; }
+  @keyframes gainPulse {
+    0% { box-shadow: 0 0 0 0 rgba(43, 214, 106, 0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(43, 214, 106, 0); }
+  }
+  .lb-rank {
+    font-size: 22px; font-weight: 800; text-align: center;
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+    align-self: center;
+  }
+  .lb-row:nth-child(1) .lb-rank { color: #ffd86b; }
+  .lb-row:nth-child(2) .lb-rank { color: #d6d6d6; }
+  .lb-row:nth-child(3) .lb-rank { color: #cd7f32; }
+  .lb-content { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .lb-head { display: flex; align-items: center; gap: 10px; }
+  .lb-name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .lb-name .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 11px;
+    flex-shrink: 0;
+  }
+  .lb-delta {
+    font-size: 12px; font-weight: 700; color: var(--good);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .lb-delta.show { opacity: 1; }
+  .lb-score { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .lb-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .lb-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: inherit;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 14px rgba(255, 61, 139, 0.35);
+  }
+  .lb-row:nth-child(1) .lb-bar-fill { background: linear-gradient(90deg, #ffd86b, var(--accent)); }
+  .lb-bar-label {
+    font-size: 11px; color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    display: flex; gap: 6px;
+  }
+  .lb-bar-label b { color: var(--text); font-weight: 700; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
+    padding: 12px 22px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95); color: #1a0b3e; font-weight: 700;
+    box-shadow: 0 14px 30px -10px rgba(0,0,0,0.5);
+    opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .controls-card .row { gap: 14px; align-items: end; }
+  .controls-card .field { flex: 1; min-width: 160px; }
+
+  .footer-note { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🎲</div>
+      <div>Music Quiz · Animation Preview</div>
+    </div>
+    <div class="topbar-meta">Standalone · no Firebase · all-in-browser</div>
+  </div>
+
+  <div class="card controls-card">
+    <div class="card-head">
+      <span class="pill live">Sim mode</span>
+      <h1 style="margin-top:8px;">Preview the reveal animation</h1>
+      <p>Random votes are generated for every player. Click <b>Reveal next</b> to step through the songs and watch the leaderboard rerank and the accuracy bars grow/shrink. Use <b>Re-roll</b> for a different random outcome.</p>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="player-count">Players (<span id="player-count-display">11</span>)</label>
+        <input type="range" id="player-count" min="2" max="11" value="11" />
+      </div>
+      <div class="field" style="flex:0 0 auto;">
+        <label>&nbsp;</label>
+        <button class="btn primary" id="restart-btn">🎲 Re-roll votes</button>
+      </div>
+      <div class="field" style="flex:0 0 auto;">
+        <label>&nbsp;</label>
+        <button class="btn ghost" id="skip-all-btn">Skip to end →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="big-reveal">
+      <div class="song-meta"><span id="reveal-state">Ready</span></div>
+      <div class="reveal-art" id="reveal-art-wrap" style="display:none;"><img id="reveal-song-img" alt="" /></div>
+      <div class="song-title" id="reveal-song-title">Click "Reveal next" to begin</div>
+      <div class="owner-label" id="reveal-owner-label" style="display:none;">Whose song?</div>
+      <div class="owner-name" id="reveal-owner-name" style="display:none;">—</div>
+      <div class="vote-summary" id="reveal-vote-summary" style="display:none;">
+        <div class="v-stat"><b id="reveal-correct-count">0</b> got it right</div>
+        <div class="v-stat"><b id="reveal-wrong-count">0</b> got it wrong</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head row between">
+      <div>
+        <h2>Live leaderboard</h2>
+        <p id="leader-caption">No songs revealed yet</p>
+      </div>
+      <div>
+        <button class="btn primary big" id="next-btn">Reveal next →</button>
+      </div>
+    </div>
+    <div class="leaderboard" id="leaderboard"></div>
+  </div>
+
+  <p class="footer-note">Pure preview · nothing is saved · same code paths as the real reveal screen.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   Standalone simulation — generates random votes and animates the reveal.
+   Mirrors the look & feel of the real reveal screen in index.html.
+   ========================================================================= */
+
+const DEFAULT_PLAYERS = [
+  'SEBA', 'MPER', 'TOCH', 'PIOS', 'LATS', 'PDUA',
+  'PVMA', 'PIOP', 'RHMO', 'ANBN', 'ASOA',
+];
+
+const DEFAULT_SONGS = [
+  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '' },
+  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '' },
+  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2,  imageUrl: '' },
+  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3,  imageUrl: '' },
+  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4,  imageUrl: '' },
+  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '' },
+  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '' },
+  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7,  imageUrl: '' },
+  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '' },
+  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '' },
+  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '' },
+];
+
+const state = {
+  players: [],
+  songs: [],
+  votes: {},      // votes[songIdx][voterIdx] = ownerIdx
+  revealedIdx: -1,
+};
+
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (v == null || v === false) return;
+    if (k === 'class') n.className = v;
+    else if (k === 'style' && typeof v === 'object') Object.assign(n.style, v);
+    else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2).toLowerCase(), v);
+    else n.setAttribute(k, v);
+  });
+  kids.flat().forEach(k => {
+    if (k == null || k === false) return;
+    n.appendChild(k.nodeType ? k : document.createTextNode(String(k)));
+  });
+  return n;
+};
+const initials = (name) => (name || '?').slice(0, 2).toUpperCase();
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function shuffled(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* -------------------------------------------------------------------------
+   Setup / re-roll
+   ------------------------------------------------------------------------- */
+
+function setup(n) {
+  state.players = DEFAULT_PLAYERS.slice(0, n).map(name => ({ name }));
+  state.songs = DEFAULT_SONGS.slice(0, n).map((s, i) => ({
+    title: s.title,
+    ownerIndex: i < state.players.length ? i : 0,
+    imageUrl: s.imageUrl,
+  }));
+
+  // Random votes: each voter gets a shuffled permutation of player slots,
+  // then the first S of them are their votes (no duplicates).
+  state.votes = {};
+  const S = state.songs.length;
+  for (let s = 0; s < S; s++) state.votes[s] = {};
+  state.players.forEach((_, voter) => {
+    const perm = shuffled(state.players.map((_, i) => i));
+    for (let s = 0; s < S; s++) {
+      state.votes[s][voter] = perm[s];
+    }
+  });
+
+  state.revealedIdx = -1;
+  renderReveal();
+  renderLeaderboard(state.songs.length > 0 ? 0 : 0);
+
+  // Kick off artwork fetches (async, lazy populate).
+  state.songs.forEach((song, idx) => {
+    if (song.imageUrl) return;
+    fetchSongArtwork(song.title).then(url => {
+      if (!url) return;
+      song.imageUrl = url;
+      // If this song is currently on screen, update it live.
+      if (idx === state.revealedIdx) renderReveal();
+    });
+  });
+}
+
+async function fetchSongArtwork(query) {
+  try {
+    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&limit=1&entity=song`);
+    if (!r.ok) return '';
+    const data = await r.json();
+    const raw = data.results?.[0]?.artworkUrl100 || '';
+    return raw ? raw.replace('100x100bb', '400x400bb') : '';
+  } catch {
+    return '';
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Scoring
+   ------------------------------------------------------------------------- */
+
+function computeScores(uptoIdx) {
+  const scores = {};
+  state.players.forEach((_, i) => { scores[i] = 0; });
+  for (let s = 0; s <= uptoIdx; s++) {
+    if (s < 0 || s >= state.songs.length) continue;
+    const owner = state.songs[s].ownerIndex;
+    const songVotes = state.votes[s] || {};
+    Object.entries(songVotes).forEach(([voter, guess]) => {
+      if (Number(guess) === owner) scores[Number(voter)]++;
+    });
+  }
+  return scores;
+}
+
+/* -------------------------------------------------------------------------
+   Rendering — reveal card
+   ------------------------------------------------------------------------- */
+
+function renderReveal() {
+  const idx = state.revealedIdx;
+  const totalSongs = state.songs.length;
+
+  if (idx < 0) {
+    $('#reveal-state').textContent = `Ready · ${totalSongs} songs · ${state.players.length} players`;
+    $('#reveal-song-title').textContent = 'Click "Reveal next" to begin';
+    $('#reveal-owner-label').style.display = 'none';
+    $('#reveal-owner-name').style.display = 'none';
+    $('#reveal-vote-summary').style.display = 'none';
+    $('#reveal-art-wrap').style.display = 'none';
+    $('#next-btn').textContent = 'Reveal next →';
+    $('#next-btn').disabled = false;
+    return;
+  }
+
+  if (idx >= totalSongs) {
+    const finalScores = computeScores(totalSongs - 1);
+    const top = Object.entries(finalScores).sort((a, b) => b[1] - a[1])[0];
+    $('#reveal-state').textContent = `Finished · all ${totalSongs} songs revealed`;
+    $('#reveal-song-title').textContent = '🎉 Winner!';
+    $('#reveal-owner-label').style.display = '';
+    $('#reveal-owner-label').textContent = 'And the winner is';
+    $('#reveal-owner-name').style.display = '';
+    $('#reveal-owner-name').textContent = state.players[Number(top[0])].name + ` · ${top[1]} pts`;
+    $('#reveal-vote-summary').style.display = 'none';
+    $('#reveal-art-wrap').style.display = 'none';
+    $('#next-btn').textContent = 'Re-roll & restart';
+    $('#next-btn').disabled = false;
+    return;
+  }
+
+  const song = state.songs[idx];
+  const owner = state.players[song.ownerIndex];
+  const songVotes = state.votes[idx] || {};
+  let correct = 0, wrong = 0;
+  Object.values(songVotes).forEach(g => { if (Number(g) === song.ownerIndex) correct++; else wrong++; });
+
+  $('#reveal-state').textContent = `Song ${idx + 1} of ${totalSongs}`;
+  $('#reveal-song-title').textContent = song.title;
+  $('#reveal-owner-label').style.display = '';
+  $('#reveal-owner-label').textContent = 'Whose song?';
+  $('#reveal-owner-name').style.display = '';
+  $('#reveal-owner-name').textContent = owner.name;
+
+  // Re-trigger owner-pop animation by cloning node.
+  const oldOwner = $('#reveal-owner-name');
+  const newOwner = oldOwner.cloneNode(true);
+  oldOwner.parentNode.replaceChild(newOwner, oldOwner);
+
+  $('#reveal-vote-summary').style.display = '';
+  $('#reveal-correct-count').textContent = String(correct);
+  $('#reveal-wrong-count').textContent = String(wrong);
+
+  if (song.imageUrl) {
+    $('#reveal-art-wrap').style.display = '';
+    $('#reveal-song-img').src = song.imageUrl;
+    // Re-trigger pop.
+    const oldArt = $('#reveal-art-wrap');
+    const newArt = oldArt.cloneNode(true);
+    oldArt.parentNode.replaceChild(newArt, oldArt);
+  } else {
+    $('#reveal-art-wrap').style.display = 'none';
+  }
+
+  if (idx === totalSongs - 1) {
+    $('#next-btn').textContent = 'Show winner →';
+  } else {
+    $('#next-btn').textContent = 'Reveal next →';
+  }
+  $('#next-btn').disabled = false;
+}
+
+/* -------------------------------------------------------------------------
+   Rendering — leaderboard with animated accuracy bars
+   ------------------------------------------------------------------------- */
+
+function renderLeaderboard(revealedCount) {
+  const root = $('#leaderboard');
+  const idx = state.revealedIdx;
+  const scoresAfter = idx >= 0 && idx < state.songs.length
+    ? computeScores(idx)
+    : Object.fromEntries(state.players.map((_, i) => [i, 0]));
+  const scoresBefore = idx > 0
+    ? computeScores(idx - 1)
+    : Object.fromEntries(state.players.map((_, i) => [i, 0]));
+
+  const total = revealedCount;
+
+  const entries = state.players.map((p, i) => ({
+    slot: i, name: p.name,
+    scoreAfter: scoresAfter[i] || 0,
+    scoreBefore: scoresBefore[i] || 0,
+  }));
+  entries.sort((a, b) => {
+    if (b.scoreAfter !== a.scoreAfter) return b.scoreAfter - a.scoreAfter;
+    return a.name.localeCompare(b.name);
+  });
+  const beforeOrder = [...entries].sort((a, b) => {
+    if (b.scoreBefore !== a.scoreBefore) return b.scoreBefore - a.scoreBefore;
+    return a.name.localeCompare(b.name);
+  }).map(e => e.slot);
+
+  const cap = $('#leader-caption');
+  cap.innerHTML = total > 0
+    ? `After song <b>${total}</b> of <span>${state.songs.length}</span>`
+    : 'No songs revealed yet';
+
+  root.innerHTML = '';
+  entries.forEach((e, rank) => {
+    const oldRank = beforeOrder.indexOf(e.slot);
+    let posClass = '';
+    if (oldRank > rank) posClass = ' up';
+    else if (oldRank < rank) posClass = ' down';
+    const gained = e.scoreAfter > e.scoreBefore;
+    const pct = total > 0 ? Math.round((e.scoreAfter / total) * 100) : 0;
+
+    const fill = el('div', { class: 'lb-bar-fill' });
+    fill.style.width = '0%';
+
+    const row = el('div', { class: 'lb-row' + posClass + (gained ? ' gained' : '') },
+      el('div', { class: 'lb-rank' }, String(rank + 1)),
+      el('div', { class: 'lb-content' },
+        el('div', { class: 'lb-head' },
+          el('div', { class: 'lb-name' },
+            el('div', { class: 'avatar' }, initials(e.name)),
+            el('span', {}, e.name)
+          ),
+          el('div', { class: 'lb-delta' + (gained ? ' show' : '') }, gained ? '+' + (e.scoreAfter - e.scoreBefore) : ''),
+          el('div', { class: 'lb-score' }, String(e.scoreAfter))
+        ),
+        el('div', { class: 'lb-bar' }, fill),
+        el('div', { class: 'lb-bar-label' },
+          el('b', {}, `${e.scoreAfter}/${total}`),
+          total > 0 ? `· ${pct}% correct` : '· no songs revealed yet'
+        )
+      )
+    );
+    root.appendChild(row);
+
+    requestAnimationFrame(() => { fill.style.width = pct + '%'; });
+  });
+}
+
+/* -------------------------------------------------------------------------
+   Controls
+   ------------------------------------------------------------------------- */
+
+function nextReveal() {
+  const totalSongs = state.songs.length;
+
+  // If we finished, the button becomes "Re-roll & restart".
+  if (state.revealedIdx >= totalSongs) {
+    doReroll();
+    return;
+  }
+
+  state.revealedIdx++;
+  renderReveal();
+  renderLeaderboard(Math.min(state.revealedIdx + 1, totalSongs));
+
+  if (state.revealedIdx >= totalSongs) {
+    toast('All songs revealed — check the winner!');
+  }
+}
+
+function skipToEnd() {
+  if (state.revealedIdx >= state.songs.length - 1) return;
+  state.revealedIdx = state.songs.length - 1;
+  renderReveal();
+  renderLeaderboard(state.songs.length);
+}
+
+function doReroll() {
+  const n = parseInt($('#player-count').value, 10);
+  setup(n);
+  toast(`New random votes for ${n} players`);
+}
+
+/* -------------------------------------------------------------------------
+   Wire up
+   ------------------------------------------------------------------------- */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const slider = $('#player-count');
+  const display = $('#player-count-display');
+  slider.addEventListener('input', () => {
+    display.textContent = slider.value;
+  });
+  slider.addEventListener('change', () => {
+    doReroll();
+  });
+
+  $('#next-btn').addEventListener('click', nextReveal);
+  $('#restart-btn').addEventListener('click', doReroll);
+  $('#skip-all-btn').addEventListener('click', skipToEnd);
+
+  // Keyboard shortcut: Space / Enter / Right-arrow = next
+  document.addEventListener('keydown', (ev) => {
+    if (['INPUT', 'TEXTAREA'].includes((ev.target || {}).tagName)) return;
+    if (ev.key === ' ' || ev.key === 'Enter' || ev.key === 'ArrowRight') {
+      ev.preventDefault();
+      nextReveal();
+    } else if (ev.key === 'r' || ev.key === 'R') {
+      doReroll();
+    }
+  });
+
+  setup(11);
+});
+</script>
+</body>
+</html>

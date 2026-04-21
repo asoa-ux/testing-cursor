@@ -721,10 +721,7 @@
           <h2>Players</h2>
           <p><span id="join-count">0</span> of <span id="player-total">0</span> joined</p>
         </div>
-        <div class="row" style="gap:8px;">
-          <button class="btn ghost" id="simulate-btn" title="Fill random votes and jump straight to reveals — for testing the animation">🎲 Simulate</button>
-          <button class="btn primary" id="start-game-btn" disabled>Start game →</button>
-        </div>
+        <button class="btn primary" id="start-game-btn" disabled>Start game →</button>
       </div>
       <div class="player-grid" id="lobby-players"></div>
     </div>
@@ -1469,7 +1466,6 @@ function enterHostLobby() {
 
   subscribeToGame();
   $('#start-game-btn').onclick = startGameFromLobby;
-  $('#simulate-btn').onclick = simulateGame;
 }
 
 function renderHostLobbyPlayers(game) {
@@ -1578,92 +1574,6 @@ function startGameFromLobby() {
       revealedIndex: -1,
     },
   });
-}
-
-// ---- TEST HELPER: simulate the whole quiz with random votes ----
-// Fills votes for every joined player (no-duplicate rule respected) and jumps
-// straight to the reveal phase, so the host can watch the animation without
-// having 11 people actually vote.
-function simulateGame() {
-  const game = state.game;
-  const joins = game.joins || {};
-  const joinedSlots = new Set(Object.keys(joins).map(Number));
-
-  if (joinedSlots.size < 2) {
-    toast('Need at least 2 joined players to simulate.');
-    return;
-  }
-
-  if (!confirm(
-    `🎲 Simulate mode\n\n` +
-    `This will:\n` +
-    `  • keep only joined players & their songs\n` +
-    `  • fill every player's votes with random guesses\n` +
-    `  • jump straight to the reveal phase\n\n` +
-    `Use this to preview the animation. Continue?`
-  )) return;
-
-  // Same filter/remap as startGameFromLobby.
-  const oldToNewIdx = {};
-  const newPlayers = [];
-  const newJoins = {};
-  game.players.forEach((p, oldIdx) => {
-    if (joinedSlots.has(oldIdx)) {
-      const newIdx = newPlayers.length;
-      oldToNewIdx[oldIdx] = newIdx;
-      newJoins[newIdx] = joins[oldIdx];
-      newPlayers.push({ name: p.name });
-    }
-  });
-  const newSongs = [];
-  game.songs.forEach(s => {
-    if (s.ownerIndex in oldToNewIdx) {
-      newSongs.push({
-        title: s.title,
-        ownerIndex: oldToNewIdx[s.ownerIndex],
-        imageUrl: s.imageUrl || '',
-      });
-    }
-  });
-  if (newSongs.length < 1) {
-    alert("Can't simulate — none of the joined players own any of the songs.");
-    return;
-  }
-
-  const N = newPlayers.length;
-  const S = newSongs.length;
-
-  // For each voter, build a random permutation of player slots (Fisher-Yates)
-  // and assign the first S of them as their votes across the songs.
-  // This satisfies the "no voting for the same person twice" rule.
-  const votes = {};
-  for (let s = 0; s < S; s++) votes[s] = {};
-  for (let voter = 0; voter < N; voter++) {
-    const perm = [];
-    for (let i = 0; i < N; i++) perm.push(i);
-    for (let i = perm.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [perm[i], perm[j]] = [perm[j], perm[i]];
-    }
-    for (let s = 0; s < S; s++) {
-      votes[s][voter] = perm[s];
-    }
-  }
-
-  state.gameRef.update({
-    players: newPlayers,
-    songs: newSongs,
-    joins: newJoins,
-    votes,
-    meta: {
-      ...game.meta,
-      status: 'reveal',
-      currentIndex: 0,
-      revealedIndex: -1,
-    },
-  });
-
-  toast('Random votes filled. Click "Reveal next" to watch the bars dance.');
 }
 
 /* =========================================================================
