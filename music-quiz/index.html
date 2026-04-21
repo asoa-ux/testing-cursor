@@ -734,19 +734,20 @@
 const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
 const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
 
-// Default song list pre-filled from the user's input. Owner is unset (-1).
+// Default song list pre-filled from the user's input.
+// Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN, 10=ASOA
 const DEFAULT_SONGS = [
-  { title: 'Narwhals — Mr Weebl',                                ownerIndex: -1 },
-  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: -1 },
-  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: -1 },
-  { title: 'Master of Puppets — Metallica',                      ownerIndex: -1 },
-  { title: 'The Minds of 99 — Emil',                             ownerIndex: -1 },
-  { title: 'Back to You — Lost Frequencies',                     ownerIndex: -1 },
-  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: -1 },
-  { title: 'TBD — (waiting for last song)',                      ownerIndex: -1 },
-  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: -1 },
-  { title: 'Teardrop — Massive Attack',                          ownerIndex: -1 },
-  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: -1 },
+  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0  }, // SEBA
+  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1  }, // MPER
+  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2  }, // TOCH
+  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3  }, // PIOS
+  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4  }, // LATS
+  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5  }, // PDUA
+  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6  }, // PVMA
+  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7  }, // PIOP
+  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8  }, // RHMO
+  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9  }, // ANBN
+  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10 }, // ASOA
 ];
 
 const DEFAULT_PLAYERS = [
