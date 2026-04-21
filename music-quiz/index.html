@@ -459,6 +459,58 @@
   .vote-meter .progress { flex: 1; }
   .vote-meter b { font-variant-numeric: tabular-nums; }
 
+  .review-list { display: grid; gap: 14px; }
+  .review-song {
+    padding: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .review-song-head {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
+  }
+  .review-song-num {
+    font-weight: 800; color: var(--text-faint); font-size: 14px; font-variant-numeric: tabular-nums;
+  }
+  .review-song-title {
+    font-weight: 700; font-size: 15px; flex: 1;
+  }
+  .review-song-meta {
+    font-size: 12px; color: var(--text-faint);
+  }
+  .review-options {
+    display: grid; gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+  .review-opt {
+    appearance: none;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px; font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.15s;
+    display: flex; align-items: center; gap: 8px;
+    justify-content: flex-start;
+    min-height: 36px;
+  }
+  .review-opt:hover:not(:disabled):not(.selected) { background: var(--surface-3); border-color: var(--accent-2); }
+  .review-opt.selected {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent; color: #fff;
+  }
+  .review-opt:disabled:not(.selected) { opacity: 0.3; cursor: not-allowed; }
+  .review-opt .r-avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 10px;
+    flex-shrink: 0;
+  }
+  .review-opt.selected .r-avatar { background: rgba(255,255,255,0.25); color: #fff; }
+
   .footer-note { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 30px; }
 </style>
 </head>
@@ -640,8 +692,9 @@
           <span class="pill">Song <b id="vote-song-num" style="color: var(--text); margin-left: 4px;">1</b> / <span id="vote-song-total">11</span></span>
         </div>
         <h1 style="margin-top: 12px;">Whose song is this?</h1>
-        <p id="voting-prompt">Pick the player you think owns the song that's currently playing.</p>
-        <p style="margin-top: 6px; font-size: 13px; color: var(--text-faint);">Results revealed at the end — vote on every song first.</p>
+        <div id="voting-song-title" style="margin-top: 6px; font-size: 20px; font-weight: 700; color: var(--accent-3);">—</div>
+        <p id="voting-prompt" style="margin-top: 10px;">Pick the player you think owns the song that's currently playing.</p>
+        <p style="margin-top: 6px; font-size: 13px; color: var(--text-faint);">Results revealed at the end · each person can only be picked once across all songs.</p>
       </div>
 
       <div class="vote-grid" id="vote-grid"></div>
@@ -661,6 +714,33 @@
       </div>
       <div class="row" style="margin-top: 14px;">
         <button class="btn primary big" id="close-voting-btn">Next song →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Review (final chance to change votes)
+       ============================================================ -->
+  <section class="screen" id="screen-review">
+    <div class="card">
+      <div class="card-head">
+        <span class="pill live">Last chance to edit</span>
+        <h1 style="margin-top: 8px;">Review your votes</h1>
+        <p>Scroll through all songs and edit any vote before the host starts the reveals. Each person can still only be picked once.</p>
+      </div>
+      <div id="review-list" class="review-list"></div>
+      <div id="review-unassigned" class="note" style="display:none; margin-top: 14px;"></div>
+    </div>
+
+    <div class="card" id="host-review-controls" style="display:none;">
+      <div class="card-head"><h3>Host controls</h3></div>
+      <div class="vote-meter">
+        <div><b id="review-counter-num">0</b> / <span id="review-counter-total">0</span> done reviewing</div>
+        <div class="progress"><div id="review-progress-bar" style="width: 0%"></div></div>
+      </div>
+      <p style="font-size: 13px; color: var(--text-faint); margin-top: 10px;">(Note: "done" just means every active player cast at least one vote. You can start the reveals whenever you're ready.)</p>
+      <div class="row" style="margin-top: 14px;">
+        <button class="btn primary big" id="lock-votes-btn">Lock votes & start reveals →</button>
       </div>
     </div>
   </section>
@@ -1406,12 +1486,14 @@ function routeForGameState(game) {
 
   if (state.role === 'host') {
     if (status === 'lobby') {
-      // Already on host lobby (entered via createGame). If we're somewhere else, jump there.
       if (!$('#screen-host-lobby').classList.contains('active')) showScreen('screen-host-lobby');
       renderHostLobbyPlayers(game);
     } else if (status === 'voting') {
       renderVotingScreen(game);
       showScreen('screen-voting');
+    } else if (status === 'review') {
+      renderReviewScreen(game);
+      showScreen('screen-review');
     } else if (status === 'reveal') {
       renderRevealScreen(game);
       showScreen('screen-reveal');
@@ -1437,6 +1519,14 @@ function routeForGameState(game) {
         renderVotingScreen(game);
         showScreen('screen-voting');
       }
+    } else if (status === 'review') {
+      if (state.mySlotIndex < 0) {
+        renderClaimScreen(game);
+        showScreen('screen-player-claim');
+      } else {
+        renderReviewScreen(game);
+        showScreen('screen-review');
+      }
     } else if (status === 'reveal') {
       renderRevealScreen(game);
       showScreen('screen-reveal');
@@ -1455,11 +1545,23 @@ function renderVotingScreen(game) {
   $('#vote-song-num').textContent = String(idx + 1);
   $('#vote-song-total').textContent = String(game.songs.length);
 
+  // Show the song title in the voting header so players know which one they're voting on.
+  $('#voting-song-title').textContent = game.songs[idx]?.title || '—';
+
   const myVote = game.votes?.[idx]?.[state.mySlotIndex];
   const isHost = state.role === 'host';
 
-  // For players: show vote grid
-  // For host: show vote grid (so host can also vote!) + host controls
+  // Build "owners this voter has already picked on OTHER songs" so we can
+  // prevent the same person being chosen twice.
+  const takenByMe = new Set();
+  if (state.mySlotIndex >= 0) {
+    for (let s = 0; s < game.songs.length; s++) {
+      if (s === idx) continue;
+      const v = game.votes?.[s]?.[state.mySlotIndex];
+      if (typeof v === 'number') takenByMe.add(v);
+    }
+  }
+
   $('#voting-prompt').textContent = isHost
     ? 'Players are voting now. You can vote too if you like.'
     : 'Pick the player you think owns the song that\'s currently playing.';
@@ -1468,21 +1570,24 @@ function renderVotingScreen(game) {
   grid.innerHTML = '';
   game.players.forEach((p, i) => {
     const isSelected = myVote === i;
+    const alreadyUsed = takenByMe.has(i) && !isSelected;
     const btn = el('button', {
       class: 'vote-btn' + (isSelected ? ' selected' : ''),
       onclick: () => castVote(i),
+      title: alreadyUsed ? 'You already picked this person for another song' : '',
     },
       el('div', { class: 'v-avatar' }, initials(p.name)),
       el('div', {}, p.name)
     );
     if (state.mySlotIndex < 0 && !isHost) btn.disabled = true;
+    if (alreadyUsed) btn.disabled = true;
     grid.appendChild(btn);
   });
 
   // Hide vote-status by default; show if player already voted
   const status = $('#my-vote-status');
   if (state.role === 'player' && state.mySlotIndex >= 0 && typeof myVote === 'number') {
-    status.textContent = '✓ Vote locked in: ' + game.players[myVote].name + '. (You can still change it before the host moves to the next song.)';
+    status.textContent = '✓ Voted: ' + game.players[myVote].name + '. You can change it anytime before the reveals start — there\'s a review screen at the end.';
     status.style.display = 'block';
   } else {
     status.style.display = 'none';
@@ -1501,18 +1606,15 @@ function renderVotingScreen(game) {
 
     const isLastSong = idx >= game.songs.length - 1;
     $('#close-voting-btn').textContent = isLastSong
-      ? 'Finish voting · show results →'
+      ? 'Done voting · review all →'
       : 'Next song →';
     $('#close-voting-btn').onclick = () => {
       if (isLastSong) {
-        if (!confirm('Lock in all votes and start revealing the answers? Players can no longer change their votes after this.')) return;
-        // Move from "vote all songs" phase into "reveal recap" phase, starting at song 0.
+        // Move to the review phase — everyone can still change their votes here.
         state.gameRef.child('meta').update({
-          status: 'reveal',
-          revealedIndex: 0,
+          status: 'review',
         });
       } else {
-        // Just advance to voting on the next song. No reveal in between.
         state.gameRef.child('meta').update({
           status: 'voting',
           currentIndex: idx + 1,
@@ -1524,17 +1626,124 @@ function renderVotingScreen(game) {
   }
 }
 
-async function castVote(ownerIdx) {
-  if (state.role === 'host') {
-    // Host votes too - we still need a slot. If host hasn't claimed, prevent.
-    if (state.mySlotIndex < 0) {
-      toast('Tip: claim a player slot to cast a vote.');
+async function castVote(ownerIdx, songIdx = null) {
+  if (state.role === 'host' && state.mySlotIndex < 0) {
+    toast('Tip: claim a player slot to cast a vote.');
+    return;
+  }
+  if (state.mySlotIndex < 0) return;
+  const targetSong = songIdx !== null ? songIdx : state.game.meta.currentIndex;
+
+  // Safety check: can't pick same owner twice across songs.
+  const votes = state.game.votes || {};
+  for (let s = 0; s < state.game.songs.length; s++) {
+    if (s === targetSong) continue;
+    const v = votes[s]?.[state.mySlotIndex];
+    if (typeof v === 'number' && v === ownerIdx) {
+      toast('Already picked for song ' + (s + 1) + ' — change that one first.');
       return;
     }
   }
-  if (state.mySlotIndex < 0) return;
-  const idx = state.game.meta.currentIndex;
-  await state.gameRef.child(`votes/${idx}/${state.mySlotIndex}`).set(ownerIdx);
+
+  await state.gameRef.child(`votes/${targetSong}/${state.mySlotIndex}`).set(ownerIdx);
+}
+
+/* =========================================================================
+   REVIEW SCREEN
+   ========================================================================= */
+function renderReviewScreen(game) {
+  const isHost = state.role === 'host';
+  const root = $('#review-list');
+  root.innerHTML = '';
+
+  // For each song, render a row with its current vote and re-selectable options.
+  game.songs.forEach((song, sIdx) => {
+    const myVote = state.mySlotIndex >= 0 ? game.votes?.[sIdx]?.[state.mySlotIndex] : undefined;
+
+    const row = el('div', { class: 'review-song' });
+    row.appendChild(el('div', { class: 'review-song-head' },
+      el('span', { class: 'review-song-num' }, `#${sIdx + 1}`),
+      el('span', { class: 'review-song-title' }, song.title),
+      el('span', { class: 'review-song-meta' },
+        typeof myVote === 'number'
+          ? `Your pick: ${game.players[myVote].name}`
+          : 'No vote yet'
+      ),
+    ));
+
+    const opts = el('div', { class: 'review-options' });
+    // Which owners has this voter already used on OTHER songs?
+    const usedElsewhere = new Set();
+    if (state.mySlotIndex >= 0) {
+      for (let s = 0; s < game.songs.length; s++) {
+        if (s === sIdx) continue;
+        const v = game.votes?.[s]?.[state.mySlotIndex];
+        if (typeof v === 'number') usedElsewhere.add(v);
+      }
+    }
+    game.players.forEach((p, ownerIdx) => {
+      const isSelected = myVote === ownerIdx;
+      const isUsed = usedElsewhere.has(ownerIdx) && !isSelected;
+      const btn = el('button', {
+        class: 'review-opt' + (isSelected ? ' selected' : ''),
+        onclick: () => castVote(ownerIdx, sIdx),
+        title: isUsed ? 'Already picked for another song' : '',
+      },
+        el('span', { class: 'r-avatar' }, initials(p.name)),
+        el('span', {}, p.name)
+      );
+      if (state.mySlotIndex < 0) btn.disabled = true;
+      if (isUsed) btn.disabled = true;
+      opts.appendChild(btn);
+    });
+    row.appendChild(opts);
+    root.appendChild(row);
+  });
+
+  // Show a soft note if the voter hasn't filled every song.
+  const unassignedBox = $('#review-unassigned');
+  if (state.mySlotIndex >= 0) {
+    const missing = [];
+    game.songs.forEach((_, sIdx) => {
+      const v = game.votes?.[sIdx]?.[state.mySlotIndex];
+      if (typeof v !== 'number') missing.push(sIdx + 1);
+    });
+    if (missing.length) {
+      unassignedBox.textContent = `Heads up — you haven't picked for song${missing.length > 1 ? 's' : ''} ${missing.join(', ')}.`;
+      unassignedBox.style.display = 'block';
+    } else {
+      unassignedBox.style.display = 'none';
+    }
+  } else {
+    unassignedBox.style.display = 'none';
+  }
+
+  // Host controls
+  if (isHost) {
+    $('#host-review-controls').style.display = 'block';
+    const claimedSlots = Object.keys(game.joins || {}).map(Number);
+    const done = claimedSlots.filter(slot => {
+      // "done" = at least one vote recorded (soft heuristic, doesn't force anything)
+      for (let s = 0; s < game.songs.length; s++) {
+        if (typeof game.votes?.[s]?.[slot] === 'number') return true;
+      }
+      return false;
+    }).length;
+    const total = claimedSlots.length;
+    $('#review-counter-num').textContent = String(done);
+    $('#review-counter-total').textContent = String(total);
+    $('#review-progress-bar').style.width = (total ? (done / total * 100) : 0) + '%';
+
+    $('#lock-votes-btn').onclick = () => {
+      if (!confirm('Lock in all votes and start the reveals? Nobody can change their votes after this.')) return;
+      state.gameRef.child('meta').update({
+        status: 'reveal',
+        revealedIndex: 0,
+      });
+    };
+  } else {
+    $('#host-review-controls').style.display = 'none';
+  }
 }
 
 /* =========================================================================
