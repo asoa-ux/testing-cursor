@@ -503,6 +503,11 @@
     border-color: transparent; color: #fff;
   }
   .review-opt:disabled:not(.selected) { opacity: 0.3; cursor: not-allowed; }
+  .review-opt.used-elsewhere:not(.selected) {
+    opacity: 0.45;
+    border-style: dashed;
+  }
+  .review-opt.used-elsewhere:not(.selected):hover { opacity: 0.75; }
   .review-opt .r-avatar {
     width: 22px; height: 22px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
@@ -1682,7 +1687,7 @@ function renderVotingScreen(game) {
   }
 }
 
-async function castVote(ownerIdx, songIdx = null) {
+async function castVote(ownerIdx, songIdx = null, { swapIfDup = false } = {}) {
   if (state.role === 'host' && state.mySlotIndex < 0) {
     toast('Tip: claim a player slot to cast a vote.');
     return;
@@ -1690,15 +1695,29 @@ async function castVote(ownerIdx, songIdx = null) {
   if (state.mySlotIndex < 0) return;
   const targetSong = songIdx !== null ? songIdx : state.game.meta.currentIndex;
 
-  // Safety check: can't pick same owner twice across songs.
   const votes = state.game.votes || {};
+  let dupSong = -1;
   for (let s = 0; s < state.game.songs.length; s++) {
     if (s === targetSong) continue;
     const v = votes[s]?.[state.mySlotIndex];
-    if (typeof v === 'number' && v === ownerIdx) {
-      toast('Already picked for song ' + (s + 1) + ' — change that one first.');
-      return;
-    }
+    if (typeof v === 'number' && v === ownerIdx) { dupSong = s; break; }
+  }
+
+  if (dupSong >= 0 && !swapIfDup) {
+    // Voting phase: strict. Don't let them silently clobber a previous vote.
+    toast('Already picked for song ' + (dupSong + 1) + ' — change that one first.');
+    return;
+  }
+
+  if (dupSong >= 0 && swapIfDup) {
+    // Review phase: auto-move. Clear the old song's vote, set the new one.
+    const updates = {};
+    updates[`votes/${dupSong}/${state.mySlotIndex}`] = null;
+    updates[`votes/${targetSong}/${state.mySlotIndex}`] = ownerIdx;
+    await state.gameRef.update(updates);
+    const ownerName = state.game.players[ownerIdx]?.name || '?';
+    toast(`Moved ${ownerName} from song ${dupSong + 1} to song ${targetSong + 1}.`);
+    return;
   }
 
   await state.gameRef.child(`votes/${targetSong}/${state.mySlotIndex}`).set(ownerIdx);
@@ -1741,15 +1760,16 @@ function renderReviewScreen(game) {
       const isSelected = myVote === ownerIdx;
       const isUsed = usedElsewhere.has(ownerIdx) && !isSelected;
       const btn = el('button', {
-        class: 'review-opt' + (isSelected ? ' selected' : ''),
-        onclick: () => castVote(ownerIdx, sIdx),
-        title: isUsed ? 'Already picked for another song' : '',
+        class: 'review-opt' + (isSelected ? ' selected' : '') + (isUsed ? ' used-elsewhere' : ''),
+        // Review phase allows auto-swap: clicking a "used" name moves them here and
+        // clears the other song's vote. Keeps the "one person == one song" rule intact.
+        onclick: () => castVote(ownerIdx, sIdx, { swapIfDup: true }),
+        title: isUsed ? 'Currently your pick for another song — click to move them here' : '',
       },
         el('span', { class: 'r-avatar' }, initials(p.name)),
         el('span', {}, p.name)
       );
       if (state.mySlotIndex < 0) btn.disabled = true;
-      if (isUsed) btn.disabled = true;
       opts.appendChild(btn);
     });
     row.appendChild(opts);
