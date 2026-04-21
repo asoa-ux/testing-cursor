@@ -734,6 +734,21 @@
 const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
 const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
 
+// Hardcoded Firebase config. Firebase client configs are public by design --
+// the API key is NOT a secret (that's what security rules are for). Baking it
+// in means nobody ever sees a setup screen; they just open the URL and go.
+// If you fork this, replace with your own config or set this to null to fall
+// back to the paste-your-config setup screen.
+const EMBEDDED_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBGHQxhs-3TBoAmxMPQYpkNRb3qyyUCSZ0",
+  authDomain: "music-quiz-6c9d5.firebaseapp.com",
+  databaseURL: "https://music-quiz-6c9d5-default-rtdb.firebaseio.com",
+  projectId: "music-quiz-6c9d5",
+  storageBucket: "music-quiz-6c9d5.firebasestorage.app",
+  messagingSenderId: "915960645362",
+  appId: "1:915960645362:web:f5fdab7510e707d220b26b",
+};
+
 // Default song list pre-filled from the user's input.
 // Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN, 10=ASOA
 const DEFAULT_SONGS = [
@@ -897,34 +912,30 @@ function getQueryGameId() {
 
 async function bootstrap() {
   const queryGame = getQueryGameId();
+
+  // Resolve Firebase config with a priority order:
+  //   1) Embedded constant (zero-setup mode -- normal case for this app)
+  //   2) URL hash (legacy share-links still work)
+  //   3) localStorage (legacy setup screen)
+  //   4) Fallback: show setup screen
+  const embedded = EMBEDDED_FIREBASE_CONFIG && Object.keys(EMBEDDED_FIREBASE_CONFIG).length ? EMBEDDED_FIREBASE_CONFIG : null;
+  const hashConfig = readHashConfig();
   const storedConfig = loadStoredFirebaseConfig();
+  const config = embedded || hashConfig || storedConfig;
 
   if (queryGame) {
-    // PLAYER FLOW: needs config too. If host hasn't shared a config, players can't connect.
-    // But we want players to NOT have to set up Firebase. Solution: embed the config in the link.
-    // We use the URL hash (after #) to carry the config so it isn't sent to servers.
     state.role = 'player';
     state.gameId = queryGame;
     updateTopbarMeta();
-    const hashConfig = readHashConfig();
-    if (hashConfig) {
-      try {
-        initFirebaseFromConfig(hashConfig);
-        // Persist for refresh
-        sessionStorage.setItem('mq.player.fbcfg.' + queryGame, JSON.stringify(hashConfig));
-      } catch (err) {
-        showFatal('Could not connect: ' + err.message);
-        return;
-      }
-    } else {
-      const cached = sessionStorage.getItem('mq.player.fbcfg.' + queryGame);
-      if (cached) {
-        try { initFirebaseFromConfig(JSON.parse(cached)); }
-        catch (err) { showFatal('Connection lost. Ask the host to re-share the link.'); return; }
-      } else {
-        showFatal('This link is missing connection details. Ask the host to re-share the link.');
-        return;
-      }
+    if (!config) {
+      showFatal('This link is missing connection details. Ask the host to re-share the link.');
+      return;
+    }
+    try {
+      initFirebaseFromConfig(config);
+    } catch (err) {
+      showFatal('Could not connect: ' + err.message);
+      return;
     }
     await joinAsPlayer();
     return;
@@ -933,14 +944,20 @@ async function bootstrap() {
   // HOST FLOW
   state.role = 'host';
   updateTopbarMeta();
-  if (!storedConfig) {
+  if (!config) {
     showScreen('screen-config');
     bindConfigScreen();
     return;
   }
   try {
-    initFirebaseFromConfig(storedConfig);
+    initFirebaseFromConfig(config);
   } catch (err) {
+    // Only the legacy paste-in-setup-screen path should retry; if the embedded
+    // config is broken, surface the error to the developer.
+    if (embedded) {
+      showFatal('Firebase connection error: ' + err.message);
+      return;
+    }
     localStorage.removeItem(LS_FIREBASE_CONFIG);
     showScreen('screen-config');
     bindConfigScreen();
@@ -1194,10 +1211,9 @@ async function createGame() {
    ========================================================================= */
 function enterHostLobby() {
   showScreen('screen-host-lobby');
-  // Build share link with embedded config in hash
-  const cfg = loadStoredFirebaseConfig();
-  const hash = makeHashConfig(cfg);
-  const url = `${window.location.origin}${window.location.pathname}?game=${state.gameId}#${hash}`;
+  // Share link is just the hosted URL + game id. Firebase config lives in the
+  // app code so players don't need anything in the URL beyond the game id.
+  const url = `${window.location.origin}${window.location.pathname}?game=${state.gameId}`;
   $('#share-link').value = url;
   $('#room-code-display').textContent = state.gameId;
   $('#copy-link-btn').onclick = () => {
