@@ -2129,10 +2129,10 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore, revealedCount)
     return a.name.localeCompare(b.name);
   }).map(e => e.slot);
 
-  // Preserve existing rows' bar widths by checking DOM for current state --
-  // this lets CSS transitions animate the bar growth/shrink on re-render.
-  // But since we rebuild HTML each time, the transition kicks in from the
-  // initial width of 0 anyway, which also looks good.
+  // Start each bar at the player's PREVIOUS accuracy %, then animate to the
+  // new one. That way the bar grows (or shrinks) smoothly from the previous
+  // reveal instead of snapping back to 0 every time.
+  const prevTotal = Math.max(0, total - 1);
 
   root.innerHTML = '';
   entries.forEach((e, rank) => {
@@ -2142,10 +2142,10 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore, revealedCount)
     else if (oldRank < rank) posClass = ' down';
     const gained = e.scoreAfter > e.scoreBefore;
     const pct = total > 0 ? Math.round((e.scoreAfter / total) * 100) : 0;
+    const prevPct = prevTotal > 0 ? Math.round((e.scoreBefore / prevTotal) * 100) : 0;
 
     const fill = el('div', { class: 'lb-bar-fill' });
-    // Start at 0% then animate to target width so the transition is visible.
-    fill.style.width = '0%';
+    fill.style.width = prevPct + '%';
 
     const row = el('div', { class: 'lb-row' + posClass + (gained ? ' gained' : '') },
       el('div', { class: 'lb-rank' }, String(rank + 1)),
@@ -2167,7 +2167,11 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore, revealedCount)
     );
     root.appendChild(row);
 
-    // Kick off the width transition on next frame.
+    // Force the browser to commit the starting width, then animate to target.
+    // Reading offsetWidth triggers a layout flush so the CSS transition sees
+    // two distinct values (otherwise browsers batch them and skip the anim).
+    // eslint-disable-next-line no-unused-expressions
+    fill.offsetWidth;
     requestAnimationFrame(() => {
       fill.style.width = pct + '%';
     });

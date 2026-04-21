@@ -525,6 +525,7 @@ function renderLeaderboard(revealedCount) {
     : Object.fromEntries(state.players.map((_, i) => [i, 0]));
 
   const total = revealedCount;
+  const prevTotal = Math.max(0, total - 1);
 
   const entries = state.players.map((p, i) => ({
     slot: i, name: p.name,
@@ -553,9 +554,10 @@ function renderLeaderboard(revealedCount) {
     else if (oldRank < rank) posClass = ' down';
     const gained = e.scoreAfter > e.scoreBefore;
     const pct = total > 0 ? Math.round((e.scoreAfter / total) * 100) : 0;
+    const prevPct = prevTotal > 0 ? Math.round((e.scoreBefore / prevTotal) * 100) : 0;
 
     const fill = el('div', { class: 'lb-bar-fill' });
-    fill.style.width = '0%';
+    fill.style.width = prevPct + '%';
 
     const row = el('div', { class: 'lb-row' + posClass + (gained ? ' gained' : '') },
       el('div', { class: 'lb-rank' }, String(rank + 1)),
@@ -577,6 +579,11 @@ function renderLeaderboard(revealedCount) {
     );
     root.appendChild(row);
 
+    // Force a layout flush so the starting width gets committed before we
+    // animate to the target — otherwise browsers batch both writes and skip
+    // the transition.
+    // eslint-disable-next-line no-unused-expressions
+    fill.offsetWidth;
     requestAnimationFrame(() => { fill.style.width = pct + '%'; });
   });
 }
