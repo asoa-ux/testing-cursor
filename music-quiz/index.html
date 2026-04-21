@@ -1447,6 +1447,41 @@ async function createGame() {
 /* =========================================================================
    HOST LOBBY
    ========================================================================= */
+// Render a QR for the share link. Uses the bundled qrcode.js library if
+// available; falls back to api.qrserver.com as an <img> so the host always
+// sees something scannable even if the CDN got blocked.
+function renderShareQR(url) {
+  const canvas = document.getElementById('qr-canvas');
+  const box = canvas ? canvas.parentElement : null;
+  if (!box) return;
+
+  const useFallback = (reason) => {
+    console.warn('[QR] Falling back to external service:', reason);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=4&data=${encodeURIComponent(url)}`;
+    box.innerHTML = `<img src="${qrUrl}" alt="Scan to join" style="width:100%;height:100%;object-fit:contain;" />`;
+  };
+
+  try {
+    if (typeof QRCode === 'undefined' || !QRCode.toCanvas) {
+      useFallback('QRCode library not loaded');
+      return;
+    }
+    // Ensure the element is a fresh <canvas> (in case an earlier fallback
+    // replaced it with an <img>).
+    if (canvas.tagName !== 'CANVAS') {
+      box.innerHTML = '<canvas id="qr-canvas"></canvas>';
+    }
+    QRCode.toCanvas(
+      document.getElementById('qr-canvas'),
+      url,
+      { width: 360, margin: 1, color: { dark: '#0b0420', light: '#ffffff' } },
+      (err) => { if (err) useFallback(err.message || err); }
+    );
+  } catch (e) {
+    useFallback(e.message || e);
+  }
+}
+
 function enterHostLobby() {
   showScreen('screen-host-lobby');
   // Share link is just the hosted URL + game id. Firebase config lives in the
@@ -1459,10 +1494,9 @@ function enterHostLobby() {
       $('#share-link').select(); document.execCommand('copy'); toast('Link copied!');
     });
   };
-  // QR code
-  try {
-    QRCode.toCanvas($('#qr-canvas'), url, { width: 360, margin: 1, color: { dark: '#0b0420', light: '#ffffff' } });
-  } catch (e) { /* no-op */ }
+  // QR code — try the bundled library first, fall back to an external QR
+  // service if the CDN script didn't load (ad blockers, offline CDN, etc).
+  renderShareQR(url);
 
   subscribeToGame();
   $('#start-game-btn').onclick = startGameFromLobby;
