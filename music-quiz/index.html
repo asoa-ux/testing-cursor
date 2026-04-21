@@ -413,8 +413,8 @@
   .leaderboard { display: grid; gap: 8px; position: relative; }
   .lb-row {
     display: grid;
-    grid-template-columns: 44px 1fr auto auto;
-    gap: 12px; align-items: center;
+    grid-template-columns: 44px 1fr;
+    gap: 14px; align-items: center;
     padding: 12px 14px;
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -431,15 +431,19 @@
   .lb-rank {
     font-size: 22px; font-weight: 800; text-align: center;
     color: var(--text-faint); font-variant-numeric: tabular-nums;
+    align-self: center;
   }
   .lb-row:nth-child(1) .lb-rank { color: #ffd86b; }
   .lb-row:nth-child(2) .lb-rank { color: #d6d6d6; }
   .lb-row:nth-child(3) .lb-rank { color: #cd7f32; }
-  .lb-name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+  .lb-content { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .lb-head { display: flex; align-items: center; gap: 10px; }
+  .lb-name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .lb-name .avatar {
     width: 28px; height: 28px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
     display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 11px;
+    flex-shrink: 0;
   }
   .lb-delta {
     font-size: 12px; font-weight: 700;
@@ -448,8 +452,29 @@
   }
   .lb-delta.show { opacity: 1; }
   .lb-score {
-    font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums;
+    font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums;
   }
+  .lb-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .lb-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: inherit;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 14px rgba(255, 61, 139, 0.35);
+  }
+  .lb-row:nth-child(1) .lb-bar-fill { background: linear-gradient(90deg, #ffd86b, var(--accent)); }
+  .lb-bar-label {
+    font-size: 11px; color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    display: flex; gap: 6px;
+  }
+  .lb-bar-label b { color: var(--text); font-weight: 700; }
 
   /* Toast */
   .toast {
@@ -2031,7 +2056,7 @@ function renderRevealScreen(game) {
   $('#leader-after-total').textContent = String(game.songs.length);
   const scoresAfter = computeScores(game, idx);
   const scoresBefore = idx > 0 ? computeScores(game, idx - 1) : Object.fromEntries(game.players.map((_, i) => [i, 0]));
-  renderLeaderboard($('#leaderboard'), game, scoresAfter, scoresBefore);
+  renderLeaderboard($('#leaderboard'), game, scoresAfter, scoresBefore, idx + 1);
 
   // Host controls
   if (isHost) {
@@ -2052,8 +2077,10 @@ function renderRevealScreen(game) {
   }
 }
 
-function renderLeaderboard(root, game, scoresAfter, scoresBefore) {
-  // Compute order by scoresAfter desc, with stable name tie-break
+function renderLeaderboard(root, game, scoresAfter, scoresBefore, revealedCount) {
+  // revealedCount = number of songs whose answers have been revealed so far.
+  // Used to compute accuracy % (correct / revealedCount).
+  const total = revealedCount || 0;
   const entries = game.players.map((p, i) => ({
     slot: i, name: p.name,
     scoreAfter: scoresAfter[i] || 0,
@@ -2068,6 +2095,11 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore) {
     return a.name.localeCompare(b.name);
   }).map(e => e.slot);
 
+  // Preserve existing rows' bar widths by checking DOM for current state --
+  // this lets CSS transitions animate the bar growth/shrink on re-render.
+  // But since we rebuild HTML each time, the transition kicks in from the
+  // initial width of 0 anyway, which also looks good.
+
   root.innerHTML = '';
   entries.forEach((e, rank) => {
     const oldRank = beforeOrder.indexOf(e.slot);
@@ -2075,16 +2107,36 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore) {
     if (oldRank > rank) posClass = ' up';
     else if (oldRank < rank) posClass = ' down';
     const gained = e.scoreAfter > e.scoreBefore;
+    const pct = total > 0 ? Math.round((e.scoreAfter / total) * 100) : 0;
+
+    const fill = el('div', { class: 'lb-bar-fill' });
+    // Start at 0% then animate to target width so the transition is visible.
+    fill.style.width = '0%';
+
     const row = el('div', { class: 'lb-row' + posClass + (gained ? ' gained' : '') },
       el('div', { class: 'lb-rank' }, String(rank + 1)),
-      el('div', { class: 'lb-name' },
-        el('div', { class: 'avatar' }, initials(e.name)),
-        el('span', {}, e.name)
-      ),
-      el('div', { class: 'lb-delta' + (gained ? ' show' : '') }, gained ? '+' + (e.scoreAfter - e.scoreBefore) : ''),
-      el('div', { class: 'lb-score' }, String(e.scoreAfter))
+      el('div', { class: 'lb-content' },
+        el('div', { class: 'lb-head' },
+          el('div', { class: 'lb-name' },
+            el('div', { class: 'avatar' }, initials(e.name)),
+            el('span', {}, e.name)
+          ),
+          el('div', { class: 'lb-delta' + (gained ? ' show' : '') }, gained ? '+' + (e.scoreAfter - e.scoreBefore) : ''),
+          el('div', { class: 'lb-score' }, String(e.scoreAfter))
+        ),
+        el('div', { class: 'lb-bar' }, fill),
+        el('div', { class: 'lb-bar-label' },
+          el('b', {}, `${e.scoreAfter}/${total}`),
+          total > 0 ? `· ${pct}% correct` : '· no songs revealed yet'
+        )
+      )
     );
     root.appendChild(row);
+
+    // Kick off the width transition on next frame.
+    requestAnimationFrame(() => {
+      fill.style.width = pct + '%';
+    });
   });
 }
 
@@ -2101,7 +2153,7 @@ function renderFinalScreen(game) {
   $('#final-winner-name').textContent = entries[0]?.name || '—';
   $('#final-winner-score').textContent = String(entries[0]?.scoreAfter || 0);
 
-  renderLeaderboard($('#final-leaderboard'), game, finalScores, finalScores);
+  renderLeaderboard($('#final-leaderboard'), game, finalScores, finalScores, game.songs.length);
 
   if (state.role === 'host') {
     $('#final-host-controls').style.display = 'flex';
