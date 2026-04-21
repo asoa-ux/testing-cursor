@@ -1,0 +1,1645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Music Quiz · Whose Song Is It?</title>
+<!--
+  ============================================================================
+  MUSIC QUIZ · WHOSE SONG IS IT?
+  ============================================================================
+  A multi-device music quiz for in-person team building.
+
+  HOW IT WORKS
+  ------------
+  1. Host opens this page. First time, it asks for a Firebase config (one-time,
+     stored in localStorage on the host's machine only).
+  2. Host enters player names + the song list with the secret owner of each.
+  3. Host clicks "Create game" -> gets a shareable link + QR code.
+  4. Players open the link, claim their name -> they appear in the lobby.
+  5. Host plays each song externally (Spotify / YouTube / whatever):
+        a) Click "Open voting" -> players vote on who owns it
+        b) Click "Close & reveal" -> shows the answer + animated scoreboard
+        c) Click "Next song" -> repeat
+  6. Final leaderboard at the end.
+
+  FIREBASE SETUP (one-time, ~3 minutes, free)
+  -------------------------------------------
+  1. Go to https://console.firebase.google.com/ and create a new project
+     (skip Google Analytics -- not needed).
+  2. In the project dashboard, click the </> "Web" icon to add a web app.
+     Give it any nickname, you don't need Firebase Hosting.
+  3. Copy the firebaseConfig object that's shown.
+  4. In the Firebase console left sidebar: Build > Realtime Database > Create.
+     Pick a location, then choose "Start in test mode" (rules expire in 30
+     days -- plenty for a one-off event).
+  5. Open this app. The first screen will ask you to paste the firebaseConfig.
+
+  HOSTING
+  -------
+  This is a single static HTML file. To make it shareable, host it anywhere:
+   - Drag the folder onto https://app.netlify.com/drop  (easiest)
+   - Or use GitHub Pages, Vercel, Cloudflare Pages, etc.
+   - Or run `python3 -m http.server` locally -- but only people on your WiFi
+     can reach it then.
+  ============================================================================
+-->
+<style>
+  :root {
+    --bg-0: #0b0420;
+    --bg-1: #170a3a;
+    --bg-2: #1f0f4a;
+    --accent: #ff3d8b;
+    --accent-2: #7b5cff;
+    --accent-3: #00e0ff;
+    --good: #2bd66a;
+    --bad: #ff4d6d;
+    --warn: #ffc043;
+    --text: #f5f1ff;
+    --text-dim: #b3a8d6;
+    --text-faint: #7c719b;
+    --surface: rgba(255, 255, 255, 0.06);
+    --surface-2: rgba(255, 255, 255, 0.1);
+    --surface-3: rgba(255, 255, 255, 0.16);
+    --border: rgba(255, 255, 255, 0.12);
+    --shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.5);
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(900px 600px at 10% -10%, rgba(255, 61, 139, 0.35), transparent 60%),
+      radial-gradient(800px 600px at 110% 10%, rgba(123, 92, 255, 0.40), transparent 60%),
+      radial-gradient(900px 700px at 50% 120%, rgba(0, 224, 255, 0.18), transparent 60%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 60%, var(--bg-2));
+    min-height: 100%;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mix-blend-mode: overlay;
+    opacity: 0.7;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 22px 80px;
+    position: relative;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 800; letter-spacing: -0.02em;
+    font-size: 18px;
+  }
+  .brand-mark {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center;
+    box-shadow: 0 8px 22px -6px rgba(255, 61, 139, 0.6);
+  }
+  .brand-mark svg { width: 18px; height: 18px; color: #fff; }
+  .topbar-meta { color: var(--text-dim); font-size: 13px; display: flex; gap: 14px; }
+  .topbar-meta b { color: var(--text); font-weight: 600; }
+
+  h1, h2, h3 { letter-spacing: -0.025em; margin: 0; }
+  h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; }
+  h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; }
+  h3 { font-size: 18px; font-weight: 700; }
+  p  { margin: 0; color: var(--text-dim); line-height: 1.5; }
+  small.dim { color: var(--text-faint); }
+
+  .card {
+    background: var(--surface);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+  .card + .card { margin-top: 18px; }
+  .card .card-head { margin-bottom: 14px; }
+  .card .card-head p { margin-top: 6px; }
+
+  .grid { display: grid; gap: 18px; }
+  @media (min-width: 760px) {
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row.between { justify-content: space-between; }
+  .spacer { flex: 1; }
+
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px rgba(123, 92, 255, 0.25);
+  }
+  textarea { resize: vertical; min-height: 120px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
+  select option { background: var(--bg-2); color: var(--text); }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 15px;
+    font-family: inherit;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: transform 0.08s, background 0.15s, border-color 0.15s, opacity 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+    user-select: none;
+  }
+  .btn:hover:not(:disabled) { background: var(--surface-3); transform: translateY(-1px); }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    box-shadow: 0 10px 26px -8px rgba(255, 61, 139, 0.55);
+  }
+  .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: var(--bad); border-color: rgba(255, 77, 109, 0.35); }
+  .btn.danger:hover { background: rgba(255, 77, 109, 0.1); }
+  .btn.big { padding: 16px 28px; font-size: 17px; }
+  .btn.full { width: 100%; justify-content: center; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; color: var(--text-dim);
+  }
+  .pill.live { color: var(--good); border-color: rgba(43, 214, 106, 0.4); background: rgba(43, 214, 106, 0.12); }
+  .pill.live::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--good);
+    box-shadow: 0 0 0 0 rgba(43, 214, 106, 0.7); animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(43, 214, 106, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(43, 214, 106, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(43, 214, 106, 0); }
+  }
+
+  /* Screens */
+  .screen { display: none; animation: fadeIn 0.3s ease both; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Player slots / songs editor */
+  .editor-list { display: grid; gap: 8px; }
+  .editor-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 10px; align-items: center;
+    padding: 8px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .editor-row .num {
+    text-align: center; font-weight: 700; color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .editor-row.song { grid-template-columns: 28px 1fr 1fr auto; }
+  @media (max-width: 640px) {
+    .editor-row.song { grid-template-columns: 28px 1fr auto; }
+    .editor-row.song .owner-cell { grid-column: 2 / span 2; }
+  }
+
+  .icon-btn {
+    width: 36px; height: 36px; padding: 0;
+    border-radius: 10px; display: grid; place-items: center;
+    background: transparent; border: 1px solid transparent; color: var(--text-faint);
+    cursor: pointer; transition: 0.15s;
+  }
+  .icon-btn:hover { background: var(--surface-2); color: var(--bad); }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  /* Lobby */
+  .share-card {
+    display: grid; gap: 22px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .share-card { grid-template-columns: 1fr auto; align-items: center; }
+  }
+  .qr-box {
+    width: 180px; height: 180px;
+    background: #fff; border-radius: var(--radius-sm); padding: 10px;
+    display: grid; place-items: center;
+  }
+  .qr-box img, .qr-box canvas { width: 100%; height: 100%; }
+  .copy-link {
+    display: flex; align-items: stretch; gap: 8px;
+    background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px; padding-left: 14px;
+  }
+  .copy-link input {
+    flex: 1; background: transparent; border: none; color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px;
+    padding: 6px 0;
+  }
+  .copy-link input:focus { box-shadow: none; }
+  .room-code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 28px; font-weight: 800; letter-spacing: 0.18em;
+    color: var(--accent-3);
+  }
+
+  .player-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .player-chip {
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; gap: 10px;
+    transition: 0.2s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .player-chip:hover:not(.disabled):not(.mine) { background: var(--surface-3); border-color: var(--accent-2); }
+  .player-chip.joined { border-color: rgba(43, 214, 106, 0.4); background: rgba(43, 214, 106, 0.10); }
+  .player-chip.mine { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 61, 139, 0.2); }
+  .player-chip.disabled { opacity: 0.4; cursor: not-allowed; }
+  .player-chip .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+    display: grid; place-items: center; font-weight: 800; font-size: 12px; color: #0b0420;
+    flex-shrink: 0;
+  }
+  .player-chip .name { font-weight: 600; font-size: 14px; flex: 1; }
+  .player-chip .check {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--good); display: grid; place-items: center;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .player-chip.joined .check { opacity: 1; }
+
+  /* Voting */
+  .vote-grid {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  .vote-btn {
+    appearance: none;
+    padding: 22px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-size: 18px; font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.15s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .vote-btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent-2); background: var(--surface-3); }
+  .vote-btn.selected {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent; color: #fff;
+    box-shadow: 0 12px 28px -10px rgba(255, 61, 139, 0.7);
+    transform: translateY(-2px);
+  }
+  .vote-btn:disabled:not(.selected) { opacity: 0.5; cursor: not-allowed; }
+  .vote-btn .v-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 16px;
+  }
+  .vote-btn.selected .v-avatar { background: rgba(255,255,255,0.25); color: #fff; }
+
+  /* Reveal */
+  .big-reveal {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, rgba(255, 61, 139, 0.18), rgba(123, 92, 255, 0.18));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .big-reveal .song-meta { color: var(--text-dim); font-size: 14px; text-transform: uppercase; letter-spacing: 0.16em; }
+  .big-reveal .song-title { margin: 8px 0 18px; font-size: clamp(24px, 4vw, 36px); font-weight: 800; }
+  .big-reveal .owner-label { color: var(--text-dim); font-size: 14px; text-transform: uppercase; letter-spacing: 0.16em; margin-bottom: 6px; }
+  .big-reveal .owner-name { font-size: clamp(36px, 6vw, 64px); font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent-3)); -webkit-background-clip: text; background-clip: text; color: transparent; animation: ownerPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes ownerPop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .vote-summary { margin-top: 14px; display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+  .vote-summary .v-stat b { color: var(--text); font-weight: 800; font-size: 18px; }
+
+  /* Leaderboard */
+  .leaderboard { display: grid; gap: 8px; position: relative; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto auto;
+    gap: 12px; align-items: center;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s;
+  }
+  .lb-row.up { background: rgba(43, 214, 106, 0.12); border-color: rgba(43, 214, 106, 0.4); }
+  .lb-row.down { background: rgba(255, 77, 109, 0.10); border-color: rgba(255, 77, 109, 0.3); }
+  .lb-row.gained { animation: gainPulse 1.2s ease; }
+  @keyframes gainPulse {
+    0% { box-shadow: 0 0 0 0 rgba(43, 214, 106, 0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(43, 214, 106, 0); }
+  }
+  .lb-rank {
+    font-size: 22px; font-weight: 800; text-align: center;
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
+  .lb-row:nth-child(1) .lb-rank { color: #ffd86b; }
+  .lb-row:nth-child(2) .lb-rank { color: #d6d6d6; }
+  .lb-row:nth-child(3) .lb-rank { color: #cd7f32; }
+  .lb-name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+  .lb-name .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 11px;
+  }
+  .lb-delta {
+    font-size: 12px; font-weight: 700;
+    color: var(--good);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .lb-delta.show { opacity: 1; }
+  .lb-score {
+    font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
+    padding: 12px 22px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95); color: #1a0b3e; font-weight: 700;
+    box-shadow: 0 14px 30px -10px rgba(0,0,0,0.5);
+    opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Status notes */
+  .note {
+    padding: 12px 14px;
+    background: rgba(255, 192, 67, 0.10);
+    border: 1px solid rgba(255, 192, 67, 0.35);
+    color: #ffd987;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+  }
+  .note.error { background: rgba(255, 77, 109, 0.10); border-color: rgba(255, 77, 109, 0.4); color: #ffb3c0; }
+  .note.ok { background: rgba(43, 214, 106, 0.10); border-color: rgba(43, 214, 106, 0.4); color: #b6f0c8; }
+
+  .center-stack { text-align: center; max-width: 480px; margin: 60px auto 30px; }
+  .center-stack .brand-mark { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 18px; }
+  .center-stack .brand-mark svg { width: 30px; height: 30px; }
+
+  details summary { cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 8px 0; }
+  details[open] summary { color: var(--text); }
+  details code, .code { display: block; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; overflow-x: auto; white-space: pre; color: var(--text-dim); border: 1px solid var(--border); margin-top: 8px; }
+
+  ol.steps { padding-left: 18px; color: var(--text-dim); line-height: 1.7; }
+  ol.steps li { margin-bottom: 6px; }
+  ol.steps a { color: var(--accent-3); }
+  ol.steps b { color: var(--text); }
+
+  .progress {
+    height: 6px; background: rgba(0,0,0,0.3); border-radius: 999px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress > div {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.4s;
+  }
+
+  .vote-meter {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .vote-meter .progress { flex: 1; }
+  .vote-meter b { font-variant-numeric: tabular-nums; }
+
+  .footer-note { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div>Whose Song Is It?</div>
+    </div>
+    <div class="topbar-meta" id="topbar-meta"></div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN: Firebase config (host first-run only)
+       ============================================================ -->
+  <section class="screen" id="screen-config">
+    <div class="center-stack">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <h1>One-time setup</h1>
+      <p style="margin-top: 10px;">To let players vote from their phones / laptops, we need a tiny free database. Takes ~3 minutes.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>1 · Create a Firebase project</h2>
+        <p>Free, no credit card required. The data lives in your account.</p>
+      </div>
+      <ol class="steps">
+        <li>Open <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">console.firebase.google.com</a> and click <b>Add project</b>. Name it anything (e.g. <i>music-quiz</i>). You can skip Google Analytics.</li>
+        <li>On the project dashboard, click the <b>&lt;/&gt; Web</b> icon to add a web app. Give it a nickname; you don't need Firebase Hosting.</li>
+        <li>Firebase will show you a <code>firebaseConfig</code> object. <b>Copy it.</b></li>
+        <li>In the left sidebar: <b>Build → Realtime Database → Create Database</b>. Pick any location, then choose <b>Start in test mode</b>.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>2 · Paste your Firebase config below</h2>
+        <p>Stored only in your browser's localStorage. You'll only do this once on the host machine.</p>
+      </div>
+      <textarea id="firebase-config-input" placeholder='{
+  "apiKey": "...",
+  "authDomain": "your-project.firebaseapp.com",
+  "databaseURL": "https://your-project-default-rtdb.firebaseio.com",
+  "projectId": "your-project",
+  ...
+}'></textarea>
+      <div id="config-error" class="note error" style="display:none; margin-top: 12px;"></div>
+      <div class="row" style="margin-top: 14px;">
+        <button class="btn primary big" id="save-config-btn">Save & continue</button>
+        <span class="spacer"></span>
+        <small class="dim">You can also paste raw <code>const firebaseConfig = { ... }</code></small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Host setup (players + songs)
+       ============================================================ -->
+  <section class="screen" id="screen-host-setup">
+    <div class="card">
+      <div class="card-head row between">
+        <div>
+          <h1>Set up the quiz</h1>
+          <p>Enter player names and assign the secret owner of each song. Players will pick their name when they join.</p>
+        </div>
+        <button class="btn ghost" id="reset-config-btn" title="Reset Firebase config">Reset config</button>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-head row between">
+          <div>
+            <h2>Players</h2>
+            <p>The 11 people in the room.</p>
+          </div>
+          <button class="btn" id="add-player-btn">+ Add</button>
+        </div>
+        <div class="editor-list" id="players-editor"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head row between">
+          <div>
+            <h2>Songs</h2>
+            <p>In the order you'll play them. Pick the secret owner for each.</p>
+          </div>
+          <button class="btn" id="add-song-btn">+ Add</button>
+        </div>
+        <div class="editor-list" id="songs-editor"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="setup-error" class="note error" style="display:none; margin-bottom: 14px;"></div>
+      <button class="btn primary big full" id="create-game-btn">Create game →</button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Lobby (host view)
+       ============================================================ -->
+  <section class="screen" id="screen-host-lobby">
+    <div class="card">
+      <div class="card-head">
+        <span class="pill live">Lobby</span>
+        <h1 style="margin-top: 8px;">Get everyone in</h1>
+        <p>Share the link or QR. Players pick their name from the list when they join. <b>Tap your own name below to join as a player too.</b></p>
+      </div>
+
+      <div class="share-card">
+        <div>
+          <label>Room code</label>
+          <div class="room-code" id="room-code-display">—</div>
+          <label style="margin-top: 16px;">Shareable link</label>
+          <div class="copy-link">
+            <input type="text" id="share-link" readonly />
+            <button class="btn" id="copy-link-btn">Copy</button>
+          </div>
+        </div>
+        <div class="qr-box"><canvas id="qr-canvas"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head row between">
+        <div>
+          <h2>Players</h2>
+          <p><span id="join-count">0</span> of <span id="player-total">0</span> joined</p>
+        </div>
+        <button class="btn primary" id="start-game-btn" disabled>Start game →</button>
+      </div>
+      <div class="player-grid" id="lobby-players"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Lobby (player view - claim a name)
+       ============================================================ -->
+  <section class="screen" id="screen-player-claim">
+    <div class="card">
+      <div class="card-head">
+        <span class="pill" id="claim-room-pill">Room —</span>
+        <h1 style="margin-top: 8px;">Pick your name</h1>
+        <p>Tap your name to join the quiz. (Names that someone else has already grabbed are dimmed.)</p>
+      </div>
+      <div class="player-grid" id="claim-players"></div>
+      <div id="claim-error" class="note error" style="display:none; margin-top: 14px;"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Player waiting
+       ============================================================ -->
+  <section class="screen" id="screen-player-wait">
+    <div class="center-stack">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+      <h1>You're in!</h1>
+      <p style="margin-top: 8px;">Hi <b id="me-name">—</b> · waiting for the host to start the quiz.</p>
+      <div style="margin-top: 18px;"><span class="pill live">Connected</span></div>
+      <button class="btn ghost" id="leave-btn" style="margin-top: 24px;">Change name</button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Voting (host + player share this, with subtle role split)
+       ============================================================ -->
+  <section class="screen" id="screen-voting">
+    <div class="card">
+      <div class="card-head">
+        <div class="row between">
+          <span class="pill live">Voting open</span>
+          <span class="pill">Song <b id="vote-song-num" style="color: var(--text); margin-left: 4px;">1</b> / <span id="vote-song-total">11</span></span>
+        </div>
+        <h1 style="margin-top: 12px;">Whose song is this?</h1>
+        <p id="voting-prompt">Pick the player you think owns the song that's currently playing.</p>
+      </div>
+
+      <div class="vote-grid" id="vote-grid"></div>
+
+      <div id="my-vote-status" class="note ok" style="display:none; margin-top: 18px;"></div>
+    </div>
+
+    <div class="card" id="host-voting-controls" style="display:none;">
+      <div class="card-head">
+        <h3>Host controls</h3>
+      </div>
+      <div class="vote-meter">
+        <div>
+          <b id="vote-counter-num">0</b> / <span id="vote-counter-total">0</span> voted
+        </div>
+        <div class="progress"><div id="vote-progress-bar" style="width: 0%"></div></div>
+      </div>
+      <div class="row" style="margin-top: 14px;">
+        <button class="btn primary big" id="close-voting-btn">Close & reveal →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Reveal
+       ============================================================ -->
+  <section class="screen" id="screen-reveal">
+    <div class="card">
+      <div class="big-reveal">
+        <div class="song-meta">Song <b id="reveal-song-num">1</b> of <span id="reveal-song-total">11</span></div>
+        <div class="song-title" id="reveal-song-title">—</div>
+        <div class="owner-label">Whose song?</div>
+        <div class="owner-name" id="reveal-owner-name">—</div>
+        <div class="vote-summary">
+          <div class="v-stat"><b id="reveal-correct-count">0</b> got it right</div>
+          <div class="v-stat"><b id="reveal-wrong-count">0</b> got it wrong</div>
+          <div class="v-stat" id="my-result-stat" style="display:none;">You: <b id="my-result-text">—</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head row between">
+        <div>
+          <h2>Live leaderboard</h2>
+          <p>After song <b id="leader-after-num">1</b> of <span id="leader-after-total">11</span></p>
+        </div>
+        <div id="host-reveal-controls" style="display:none;">
+          <button class="btn primary big" id="next-song-btn">Next song →</button>
+        </div>
+      </div>
+      <div class="leaderboard" id="leaderboard"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN: Final
+       ============================================================ -->
+  <section class="screen" id="screen-final">
+    <div class="card">
+      <div class="big-reveal">
+        <div class="song-meta">And the winner is</div>
+        <div class="owner-name" id="final-winner-name">—</div>
+        <div class="song-meta" style="margin-top: 8px;"><b id="final-winner-score">0</b> points</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Final leaderboard</h2></div>
+      <div class="leaderboard" id="final-leaderboard"></div>
+      <div class="row" style="margin-top: 18px;" id="final-host-controls">
+        <button class="btn ghost" id="new-game-btn">New game</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer-note">Built for one-off team-building shenanigans · works on phones & laptops · players can safely refresh.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK (compat for simplicity) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<!-- QR code generator -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+<script>
+/* =========================================================================
+   STATE & CONSTANTS
+   ========================================================================= */
+const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
+const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
+
+// Default song list pre-filled from the user's input. Owner is unset (-1).
+const DEFAULT_SONGS = [
+  { title: 'Narwhals — Mr Weebl',                                ownerIndex: -1 },
+  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: -1 },
+  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: -1 },
+  { title: 'Master of Puppets — Metallica',                      ownerIndex: -1 },
+  { title: 'The Minds of 99 — Emil',                             ownerIndex: -1 },
+  { title: 'Back to You — Lost Frequencies',                     ownerIndex: -1 },
+  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: -1 },
+  { title: 'TBD — (waiting for last song)',                      ownerIndex: -1 },
+  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: -1 },
+  { title: 'Teardrop — Massive Attack',                          ownerIndex: -1 },
+  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: -1 },
+];
+
+const DEFAULT_PLAYERS = Array.from({ length: 11 }, (_, i) => ({ name: `Player ${i + 1}` }));
+
+const state = {
+  role: null,             // 'host' | 'player'
+  gameId: null,
+  fbApp: null,
+  fbDb: null,
+  gameRef: null,          // ref to /games/{gameId}
+  game: null,             // local mirror of game state
+  // Setup-only:
+  setupPlayers: [],
+  setupSongs: [],
+  // Player-only:
+  mySessionId: null,
+  mySlotIndex: -1,        // index into players[]
+  // Reveal animations:
+  prevLeaderboardOrder: null, // array of slotIndex in last rendered order
+  prevScores: null,           // map slotIndex -> score before reveal
+};
+
+/* =========================================================================
+   TINY UTILITIES
+   ========================================================================= */
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+const el = (tag, attrs = {}, ...children) => {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === 'class') e.className = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (v === false || v == null) {} else e.setAttribute(k, v);
+  });
+  children.flat().forEach(c => e.append(c?.nodeType ? c : document.createTextNode(String(c))));
+  return e;
+};
+const initials = (name) => {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+const randomId = (n = 6) => {
+  const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no I, L, O, 0, 1
+  let s = '';
+  for (let i = 0; i < n; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return s;
+};
+const uuid = () => {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+};
+
+function showScreen(id) {
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function updateTopbarMeta() {
+  const meta = $('#topbar-meta');
+  const parts = [];
+  if (state.gameId) parts.push(`Room <b>${state.gameId}</b>`);
+  if (state.role)   parts.push(state.role === 'host' ? 'Host' : 'Player');
+  meta.innerHTML = parts.join(' · ');
+}
+
+/* =========================================================================
+   FIREBASE
+   ========================================================================= */
+function loadStoredFirebaseConfig() {
+  try {
+    const raw = localStorage.getItem(LS_FIREBASE_CONFIG);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
+function parseFirebaseConfig(text) {
+  if (!text || !text.trim()) throw new Error('Paste your Firebase config first.');
+  let t = text.trim();
+  // Strip leading "const firebaseConfig =" or "var ..." etc.
+  t = t.replace(/^(?:const|let|var)\s+\w+\s*=\s*/, '');
+  // Strip trailing semicolon
+  t = t.replace(/;\s*$/, '');
+  // Try strict JSON first
+  try { return JSON.parse(t); } catch {}
+  // Try loose JS object: convert single quotes -> double, quote keys
+  try {
+    const loose = t
+      .replace(/'/g, '"')
+      .replace(/(\s*[{,]\s*)([A-Za-z_$][A-Za-z0-9_$]*)\s*:/g, '$1"$2":');
+    return JSON.parse(loose);
+  } catch {}
+  throw new Error('Could not parse the config. Make sure you copied the entire { ... } object.');
+}
+
+function initFirebaseFromConfig(config) {
+  if (!config || typeof config !== 'object') throw new Error('Invalid config object.');
+  if (!config.databaseURL && !config.projectId) {
+    throw new Error('Config is missing databaseURL. Make sure you enabled the Realtime Database in the Firebase console.');
+  }
+  if (!config.databaseURL && config.projectId) {
+    config.databaseURL = `https://${config.projectId}-default-rtdb.firebaseio.com`;
+  }
+  if (firebase.apps.length === 0) {
+    state.fbApp = firebase.initializeApp(config);
+  } else {
+    state.fbApp = firebase.app();
+  }
+  state.fbDb = firebase.database();
+}
+
+/* =========================================================================
+   ROUTING
+   ========================================================================= */
+function getQueryGameId() {
+  const params = new URLSearchParams(window.location.search);
+  const g = params.get('game');
+  return g ? g.toUpperCase() : null;
+}
+
+async function bootstrap() {
+  const queryGame = getQueryGameId();
+  const storedConfig = loadStoredFirebaseConfig();
+
+  if (queryGame) {
+    // PLAYER FLOW: needs config too. If host hasn't shared a config, players can't connect.
+    // But we want players to NOT have to set up Firebase. Solution: embed the config in the link.
+    // We use the URL hash (after #) to carry the config so it isn't sent to servers.
+    state.role = 'player';
+    state.gameId = queryGame;
+    updateTopbarMeta();
+    const hashConfig = readHashConfig();
+    if (hashConfig) {
+      try {
+        initFirebaseFromConfig(hashConfig);
+        // Persist for refresh
+        sessionStorage.setItem('mq.player.fbcfg.' + queryGame, JSON.stringify(hashConfig));
+      } catch (err) {
+        showFatal('Could not connect: ' + err.message);
+        return;
+      }
+    } else {
+      const cached = sessionStorage.getItem('mq.player.fbcfg.' + queryGame);
+      if (cached) {
+        try { initFirebaseFromConfig(JSON.parse(cached)); }
+        catch (err) { showFatal('Connection lost. Ask the host to re-share the link.'); return; }
+      } else {
+        showFatal('This link is missing connection details. Ask the host to re-share the link.');
+        return;
+      }
+    }
+    await joinAsPlayer();
+    return;
+  }
+
+  // HOST FLOW
+  state.role = 'host';
+  updateTopbarMeta();
+  if (!storedConfig) {
+    showScreen('screen-config');
+    bindConfigScreen();
+    return;
+  }
+  try {
+    initFirebaseFromConfig(storedConfig);
+  } catch (err) {
+    localStorage.removeItem(LS_FIREBASE_CONFIG);
+    showScreen('screen-config');
+    bindConfigScreen();
+    showConfigError(err.message);
+    return;
+  }
+  startHostSetup();
+}
+
+function readHashConfig() {
+  if (!window.location.hash || window.location.hash.length < 2) return null;
+  try {
+    const raw = window.location.hash.slice(1);
+    const decoded = decodeURIComponent(escape(atob(raw)));
+    return JSON.parse(decoded);
+  } catch { return null; }
+}
+
+function makeHashConfig(config) {
+  // Encode as base64 in URL hash so it's not sent to the server.
+  const json = JSON.stringify(config);
+  return btoa(unescape(encodeURIComponent(json)));
+}
+
+function showFatal(msg) {
+  document.body.innerHTML = `
+    <div class="app">
+      <div class="center-stack">
+        <h1>Hmm.</h1>
+        <p style="margin-top: 12px;">${msg}</p>
+      </div>
+    </div>`;
+}
+
+/* =========================================================================
+   CONFIG SCREEN
+   ========================================================================= */
+function bindConfigScreen() {
+  $('#save-config-btn').onclick = () => {
+    const text = $('#firebase-config-input').value;
+    try {
+      const cfg = parseFirebaseConfig(text);
+      initFirebaseFromConfig(cfg);
+      // Quick smoke test
+      state.fbDb.ref('.info/connected').once('value').then(() => {
+        localStorage.setItem(LS_FIREBASE_CONFIG, JSON.stringify(cfg));
+        $('#config-error').style.display = 'none';
+        startHostSetup();
+      }).catch(err => {
+        showConfigError('Could not reach the database. Check that you enabled Realtime Database in test mode. (' + err.message + ')');
+      });
+    } catch (err) {
+      showConfigError(err.message);
+    }
+  };
+}
+function showConfigError(msg) {
+  const n = $('#config-error');
+  n.textContent = msg;
+  n.style.display = 'block';
+}
+
+/* =========================================================================
+   HOST SETUP SCREEN
+   ========================================================================= */
+function startHostSetup() {
+  state.setupPlayers = DEFAULT_PLAYERS.map(p => ({ ...p }));
+  state.setupSongs = DEFAULT_SONGS.map(s => ({ ...s }));
+  renderPlayersEditor();
+  renderSongsEditor();
+  showScreen('screen-host-setup');
+
+  $('#add-player-btn').onclick = () => {
+    state.setupPlayers.push({ name: '' });
+    renderPlayersEditor();
+    renderSongsEditor(); // owner dropdowns depend on players
+  };
+  $('#add-song-btn').onclick = () => {
+    state.setupSongs.push({ title: '', ownerIndex: -1 });
+    renderSongsEditor();
+  };
+  $('#reset-config-btn').onclick = () => {
+    if (!confirm('Forget the saved Firebase config and re-enter it?')) return;
+    localStorage.removeItem(LS_FIREBASE_CONFIG);
+    location.reload();
+  };
+  $('#create-game-btn').onclick = createGame;
+}
+
+function renderPlayersEditor() {
+  const root = $('#players-editor');
+  root.innerHTML = '';
+  state.setupPlayers.forEach((p, i) => {
+    const row = el('div', { class: 'editor-row' },
+      el('div', { class: 'num' }, String(i + 1)),
+      el('input', {
+        type: 'text', value: p.name, placeholder: `Player ${i + 1}`,
+        oninput: (e) => { state.setupPlayers[i].name = e.target.value; refreshOwnerDropdownLabels(); }
+      }),
+      el('button', {
+        class: 'icon-btn', title: 'Remove',
+        onclick: () => {
+          if (state.setupPlayers.length <= 2) return toast('Need at least 2 players.');
+          // Reset song owners that pointed at this player
+          state.setupSongs.forEach(s => {
+            if (s.ownerIndex === i) s.ownerIndex = -1;
+            else if (s.ownerIndex > i) s.ownerIndex -= 1;
+          });
+          state.setupPlayers.splice(i, 1);
+          renderPlayersEditor();
+          renderSongsEditor();
+        }
+      },
+        el('span', { html: '&#10005;' })
+      )
+    );
+    root.appendChild(row);
+  });
+}
+
+function renderSongsEditor() {
+  const root = $('#songs-editor');
+  root.innerHTML = '';
+  state.setupSongs.forEach((s, i) => {
+    const ownerSelect = el('select', {
+      onchange: (e) => { state.setupSongs[i].ownerIndex = parseInt(e.target.value, 10); }
+    },
+      el('option', { value: '-1' }, '— owner —'),
+      ...state.setupPlayers.map((p, pi) =>
+        el('option', { value: String(pi), ...(s.ownerIndex === pi ? { selected: 'selected' } : {}) }, p.name || `Player ${pi + 1}`)
+      )
+    );
+    const row = el('div', { class: 'editor-row song' },
+      el('div', { class: 'num' }, String(i + 1)),
+      el('input', {
+        type: 'text', value: s.title, placeholder: 'Song — Artist',
+        oninput: (e) => { state.setupSongs[i].title = e.target.value; }
+      }),
+      el('div', { class: 'owner-cell' }, ownerSelect),
+      el('button', {
+        class: 'icon-btn', title: 'Remove',
+        onclick: () => {
+          if (state.setupSongs.length <= 1) return toast('Need at least 1 song.');
+          state.setupSongs.splice(i, 1);
+          renderSongsEditor();
+        }
+      },
+        el('span', { html: '&#10005;' })
+      )
+    );
+    root.appendChild(row);
+  });
+}
+
+function refreshOwnerDropdownLabels() {
+  // Update <option> labels in-place so we don't steal focus from song inputs.
+  const songsEditor = $('#songs-editor');
+  if (!songsEditor) return;
+  songsEditor.querySelectorAll('select').forEach(sel => {
+    sel.querySelectorAll('option').forEach(opt => {
+      const v = parseInt(opt.value, 10);
+      if (v >= 0 && state.setupPlayers[v]) {
+        opt.textContent = state.setupPlayers[v].name || `Player ${v + 1}`;
+      }
+    });
+  });
+}
+
+function validateSetup() {
+  const players = state.setupPlayers.map(p => (p.name || '').trim()).filter(Boolean);
+  if (players.length < 2) return 'Need at least 2 players.';
+  const dup = players.find((n, i) => players.indexOf(n) !== i);
+  if (dup) return `Two players have the same name ("${dup}"). Please make them unique.`;
+
+  const songs = state.setupSongs;
+  for (let i = 0; i < songs.length; i++) {
+    if (!(songs[i].title || '').trim()) return `Song ${i + 1} has no title.`;
+    if (songs[i].ownerIndex < 0 || songs[i].ownerIndex >= state.setupPlayers.length || !(state.setupPlayers[songs[i].ownerIndex].name || '').trim()) {
+      return `Song ${i + 1} ("${songs[i].title}") needs an owner.`;
+    }
+  }
+  return null;
+}
+
+/* =========================================================================
+   CREATE GAME
+   ========================================================================= */
+async function createGame() {
+  const errBox = $('#setup-error');
+  errBox.style.display = 'none';
+  const err = validateSetup();
+  if (err) {
+    errBox.textContent = err;
+    errBox.style.display = 'block';
+    return;
+  }
+
+  // Build clean game payload (drop empty player slots, but preserve indices used by ownerIndex)
+  // We trim empty players: if an empty player is dropped, remap song ownerIndex.
+  const players = [];
+  const indexMap = {}; // oldIndex -> newIndex
+  state.setupPlayers.forEach((p, oldIdx) => {
+    const name = (p.name || '').trim();
+    if (!name) return;
+    indexMap[oldIdx] = players.length;
+    players.push({ name });
+  });
+  const songs = state.setupSongs.map(s => ({
+    title: (s.title || '').trim(),
+    ownerIndex: indexMap[s.ownerIndex],
+  }));
+
+  const gameId = randomId(6);
+  const gamePayload = {
+    meta: {
+      createdAt: Date.now(),
+      status: 'lobby',
+      currentIndex: 0,
+      revealedIndex: -1,
+      hostSessionId: uuid(),
+    },
+    players,
+    songs,
+    joins: {},   // slotIndex -> { sessionId, claimedAt }
+    votes: {},   // songIndex -> { slotIndex -> chosenOwnerIndex }
+  };
+
+  state.gameId = gameId;
+  // Host is also a player: reuse hostSessionId as their session id so they can claim a slot.
+  state.mySessionId = gamePayload.meta.hostSessionId;
+  state.mySlotIndex = -1;
+  try {
+    await state.fbDb.ref('games/' + gameId).set(gamePayload);
+  } catch (err) {
+    errBox.textContent = 'Could not create the game: ' + err.message;
+    errBox.style.display = 'block';
+    return;
+  }
+
+  // Persist host marker so refresh keeps host role
+  sessionStorage.setItem('mq.host.' + gameId, gamePayload.meta.hostSessionId);
+  localStorage.setItem(LS_SESSION_PREFIX + gameId, JSON.stringify({
+    sessionId: state.mySessionId, slotIndex: -1,
+  }));
+  updateTopbarMeta();
+  enterHostLobby();
+}
+
+/* =========================================================================
+   HOST LOBBY
+   ========================================================================= */
+function enterHostLobby() {
+  showScreen('screen-host-lobby');
+  // Build share link with embedded config in hash
+  const cfg = loadStoredFirebaseConfig();
+  const hash = makeHashConfig(cfg);
+  const url = `${window.location.origin}${window.location.pathname}?game=${state.gameId}#${hash}`;
+  $('#share-link').value = url;
+  $('#room-code-display').textContent = state.gameId;
+  $('#copy-link-btn').onclick = () => {
+    navigator.clipboard.writeText(url).then(() => toast('Link copied!')).catch(() => {
+      $('#share-link').select(); document.execCommand('copy'); toast('Link copied!');
+    });
+  };
+  // QR code
+  try {
+    QRCode.toCanvas($('#qr-canvas'), url, { width: 360, margin: 1, color: { dark: '#0b0420', light: '#ffffff' } });
+  } catch (e) { /* no-op */ }
+
+  subscribeToGame();
+  $('#start-game-btn').onclick = startGameFromLobby;
+}
+
+function renderHostLobbyPlayers(game) {
+  const grid = $('#lobby-players');
+  grid.innerHTML = '';
+  let joinedCount = 0;
+  game.players.forEach((p, idx) => {
+    const joinedBy = game.joins?.[idx];
+    const isJoined = !!joinedBy;
+    const isMine = isJoined && joinedBy.sessionId === state.mySessionId;
+    const claimedByOther = isJoined && !isMine;
+    if (isJoined) joinedCount++;
+    const chip = el('div', {
+      class: 'player-chip'
+        + (isJoined ? ' joined' : '')
+        + (isMine ? ' mine' : '')
+        + (claimedByOther ? ' disabled' : ''),
+      title: isMine ? 'This is you' : (claimedByOther ? 'Already claimed' : 'Click to claim this name yourself'),
+      onclick: () => {
+        if (claimedByOther) return;
+        claimSlot(idx);
+      }
+    },
+      el('div', { class: 'avatar' }, initials(p.name)),
+      el('div', { class: 'name' }, p.name),
+      el('div', { class: 'check' },
+        el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b0420" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
+      )
+    );
+    grid.appendChild(chip);
+  });
+  $('#join-count').textContent = String(joinedCount);
+  $('#player-total').textContent = String(game.players.length);
+  $('#start-game-btn').disabled = joinedCount < 2;
+  $('#start-game-btn').textContent = joinedCount === game.players.length
+    ? 'Start game →'
+    : `Start game (${joinedCount}/${game.players.length}) →`;
+}
+
+function startGameFromLobby() {
+  if (!confirm('Start the quiz now? You can no longer add players after this.')) return;
+  state.gameRef.child('meta').update({
+    status: 'voting',
+    currentIndex: 0,
+    revealedIndex: -1,
+  });
+  // Clear any stale votes
+  state.gameRef.child('votes').set({});
+}
+
+/* =========================================================================
+   PLAYER JOIN
+   ========================================================================= */
+async function joinAsPlayer() {
+  state.gameRef = state.fbDb.ref('games/' + state.gameId);
+  const sessionKey = LS_SESSION_PREFIX + state.gameId;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(sessionKey) || 'null'); } catch {}
+  if (saved && saved.sessionId) {
+    state.mySessionId = saved.sessionId;
+    state.mySlotIndex = typeof saved.slotIndex === 'number' ? saved.slotIndex : -1;
+  } else {
+    state.mySessionId = uuid();
+    state.mySlotIndex = -1;
+    localStorage.setItem(sessionKey, JSON.stringify({ sessionId: state.mySessionId, slotIndex: -1 }));
+  }
+
+  $('#claim-room-pill').textContent = 'Room ' + state.gameId;
+  subscribeToGame();
+  $('#leave-btn').onclick = leaveSlot;
+}
+
+function renderClaimScreen(game) {
+  const grid = $('#claim-players');
+  grid.innerHTML = '';
+  game.players.forEach((p, idx) => {
+    const claim = game.joins?.[idx];
+    const claimedByOther = claim && claim.sessionId !== state.mySessionId;
+    const isMine = claim && claim.sessionId === state.mySessionId;
+    const chip = el('div', {
+      class: 'player-chip'
+        + (claimedByOther ? ' disabled joined' : '')
+        + (isMine ? ' mine joined' : ''),
+      onclick: () => {
+        if (claimedByOther) return;
+        claimSlot(idx);
+      }
+    },
+      el('div', { class: 'avatar' }, initials(p.name)),
+      el('div', { class: 'name' }, p.name),
+      el('div', { class: 'check' },
+        el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b0420" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
+      )
+    );
+    grid.appendChild(chip);
+  });
+}
+
+async function claimSlot(idx) {
+  const errBox = $('#claim-error');
+  errBox.style.display = 'none';
+  // Use a transaction to avoid two people grabbing the same slot.
+  const slotRef = state.gameRef.child('joins/' + idx);
+  const result = await slotRef.transaction(current => {
+    if (current && current.sessionId && current.sessionId !== state.mySessionId) {
+      return; // abort
+    }
+    return { sessionId: state.mySessionId, claimedAt: Date.now() };
+  });
+  if (!result.committed) {
+    errBox.textContent = 'Someone just grabbed that name. Pick another.';
+    errBox.style.display = 'block';
+    return;
+  }
+  // Release any previously held slot
+  if (state.mySlotIndex >= 0 && state.mySlotIndex !== idx) {
+    state.gameRef.child('joins/' + state.mySlotIndex).remove();
+  }
+  state.mySlotIndex = idx;
+  localStorage.setItem(LS_SESSION_PREFIX + state.gameId, JSON.stringify({
+    sessionId: state.mySessionId, slotIndex: idx,
+  }));
+}
+
+function leaveSlot() {
+  if (state.mySlotIndex < 0) return;
+  state.gameRef.child('joins/' + state.mySlotIndex).remove();
+  state.mySlotIndex = -1;
+  localStorage.setItem(LS_SESSION_PREFIX + state.gameId, JSON.stringify({
+    sessionId: state.mySessionId, slotIndex: -1,
+  }));
+}
+
+/* =========================================================================
+   SUBSCRIBE TO GAME (used by both host and players)
+   ========================================================================= */
+function subscribeToGame() {
+  if (state.gameRef) {
+    // already subscribed
+  } else {
+    state.gameRef = state.fbDb.ref('games/' + state.gameId);
+  }
+  state.gameRef.on('value', (snap) => {
+    const g = snap.val();
+    if (!g) {
+      showFatal('This game no longer exists. Ask the host for a new link.');
+      return;
+    }
+    state.game = g;
+    // Auto-rediscover my slot via sessionId (handles reconnects + claim-race).
+    if (state.mySessionId) {
+      const joins = g.joins || {};
+      let found = -1;
+      for (const key of Object.keys(joins)) {
+        if (joins[key] && joins[key].sessionId === state.mySessionId) {
+          found = parseInt(key, 10);
+          break;
+        }
+      }
+      state.mySlotIndex = found;
+      if (state.gameId) {
+        localStorage.setItem(LS_SESSION_PREFIX + state.gameId, JSON.stringify({
+          sessionId: state.mySessionId, slotIndex: found,
+        }));
+      }
+    }
+    routeForGameState(g);
+  }, (err) => {
+    showFatal('Connection error: ' + err.message);
+  });
+}
+
+function routeForGameState(game) {
+  const status = game.meta?.status || 'lobby';
+
+  if (state.role === 'host') {
+    if (status === 'lobby') {
+      // Already on host lobby (entered via createGame). If we're somewhere else, jump there.
+      if (!$('#screen-host-lobby').classList.contains('active')) showScreen('screen-host-lobby');
+      renderHostLobbyPlayers(game);
+    } else if (status === 'voting') {
+      renderVotingScreen(game);
+      showScreen('screen-voting');
+    } else if (status === 'reveal') {
+      renderRevealScreen(game);
+      showScreen('screen-reveal');
+    } else if (status === 'finished') {
+      renderFinalScreen(game);
+      showScreen('screen-final');
+    }
+  } else {
+    // PLAYER
+    if (status === 'lobby') {
+      if (state.mySlotIndex < 0) {
+        renderClaimScreen(game);
+        showScreen('screen-player-claim');
+      } else {
+        $('#me-name').textContent = game.players[state.mySlotIndex].name;
+        showScreen('screen-player-wait');
+      }
+    } else if (status === 'voting') {
+      if (state.mySlotIndex < 0) {
+        renderClaimScreen(game);
+        showScreen('screen-player-claim');
+      } else {
+        renderVotingScreen(game);
+        showScreen('screen-voting');
+      }
+    } else if (status === 'reveal') {
+      renderRevealScreen(game);
+      showScreen('screen-reveal');
+    } else if (status === 'finished') {
+      renderFinalScreen(game);
+      showScreen('screen-final');
+    }
+  }
+}
+
+/* =========================================================================
+   VOTING SCREEN
+   ========================================================================= */
+function renderVotingScreen(game) {
+  const idx = game.meta.currentIndex || 0;
+  $('#vote-song-num').textContent = String(idx + 1);
+  $('#vote-song-total').textContent = String(game.songs.length);
+
+  const myVote = game.votes?.[idx]?.[state.mySlotIndex];
+  const isHost = state.role === 'host';
+
+  // For players: show vote grid
+  // For host: show vote grid (so host can also vote!) + host controls
+  $('#voting-prompt').textContent = isHost
+    ? 'Players are voting now. You can vote too if you like.'
+    : 'Pick the player you think owns the song that\'s currently playing.';
+
+  const grid = $('#vote-grid');
+  grid.innerHTML = '';
+  game.players.forEach((p, i) => {
+    const isSelected = myVote === i;
+    const btn = el('button', {
+      class: 'vote-btn' + (isSelected ? ' selected' : ''),
+      onclick: () => castVote(i),
+    },
+      el('div', { class: 'v-avatar' }, initials(p.name)),
+      el('div', {}, p.name)
+    );
+    if (state.mySlotIndex < 0 && !isHost) btn.disabled = true;
+    grid.appendChild(btn);
+  });
+
+  // Hide vote-status by default; show if player already voted
+  const status = $('#my-vote-status');
+  if (state.role === 'player' && state.mySlotIndex >= 0 && typeof myVote === 'number') {
+    status.textContent = '✓ Vote locked in: ' + game.players[myVote].name + '. (You can still change it until the host closes voting.)';
+    status.style.display = 'block';
+  } else {
+    status.style.display = 'none';
+  }
+
+  // Host controls
+  if (isHost) {
+    $('#host-voting-controls').style.display = 'block';
+    const votes = game.votes?.[idx] || {};
+    const claimedSlots = Object.keys(game.joins || {}).map(Number);
+    const voted = claimedSlots.filter(slot => typeof votes[slot] === 'number').length;
+    const total = claimedSlots.length;
+    $('#vote-counter-num').textContent = String(voted);
+    $('#vote-counter-total').textContent = String(total);
+    $('#vote-progress-bar').style.width = (total ? (voted / total * 100) : 0) + '%';
+
+    $('#close-voting-btn').onclick = () => {
+      state.gameRef.child('meta').update({
+        status: 'reveal',
+        revealedIndex: idx,
+      });
+    };
+  } else {
+    $('#host-voting-controls').style.display = 'none';
+  }
+}
+
+async function castVote(ownerIdx) {
+  if (state.role === 'host') {
+    // Host votes too - we still need a slot. If host hasn't claimed, prevent.
+    if (state.mySlotIndex < 0) {
+      toast('Tip: claim a player slot to cast a vote.');
+      return;
+    }
+  }
+  if (state.mySlotIndex < 0) return;
+  const idx = state.game.meta.currentIndex;
+  await state.gameRef.child(`votes/${idx}/${state.mySlotIndex}`).set(ownerIdx);
+}
+
+/* =========================================================================
+   REVEAL SCREEN + LEADERBOARD
+   ========================================================================= */
+function computeScores(game, throughIndex) {
+  // throughIndex: include votes for songs 0..throughIndex (inclusive)
+  const scores = {};
+  game.players.forEach((_, i) => { scores[i] = 0; });
+  for (let s = 0; s <= throughIndex; s++) {
+    const correctOwner = game.songs[s]?.ownerIndex;
+    const songVotes = game.votes?.[s] || {};
+    Object.entries(songVotes).forEach(([slot, chosen]) => {
+      if (chosen === correctOwner) scores[slot] = (scores[slot] || 0) + 1;
+    });
+  }
+  return scores;
+}
+
+function renderRevealScreen(game) {
+  const idx = game.meta.revealedIndex ?? game.meta.currentIndex ?? 0;
+  const song = game.songs[idx];
+  const isHost = state.role === 'host';
+  const isLast = idx >= game.songs.length - 1;
+
+  $('#reveal-song-num').textContent = String(idx + 1);
+  $('#reveal-song-total').textContent = String(game.songs.length);
+  $('#reveal-song-title').textContent = song.title;
+  $('#reveal-owner-name').textContent = game.players[song.ownerIndex].name;
+
+  const songVotes = game.votes?.[idx] || {};
+  let correct = 0, wrong = 0;
+  Object.entries(songVotes).forEach(([slot, chosen]) => {
+    if (chosen === song.ownerIndex) correct++; else wrong++;
+  });
+  $('#reveal-correct-count').textContent = String(correct);
+  $('#reveal-wrong-count').textContent = String(wrong);
+
+  // My result
+  if (state.role === 'player' && state.mySlotIndex >= 0) {
+    const mine = songVotes[state.mySlotIndex];
+    const myStat = $('#my-result-stat');
+    myStat.style.display = 'inline';
+    if (typeof mine !== 'number') {
+      $('#my-result-text').textContent = '— (no vote)';
+    } else if (mine === song.ownerIndex) {
+      $('#my-result-text').textContent = '✓ correct (+1)';
+    } else {
+      $('#my-result-text').textContent = `✗ guessed ${game.players[mine].name}`;
+    }
+  } else {
+    $('#my-result-stat').style.display = 'none';
+  }
+
+  // Leaderboard
+  $('#leader-after-num').textContent = String(idx + 1);
+  $('#leader-after-total').textContent = String(game.songs.length);
+  const scoresAfter = computeScores(game, idx);
+  const scoresBefore = idx > 0 ? computeScores(game, idx - 1) : Object.fromEntries(game.players.map((_, i) => [i, 0]));
+  renderLeaderboard($('#leaderboard'), game, scoresAfter, scoresBefore);
+
+  // Host controls
+  if (isHost) {
+    $('#host-reveal-controls').style.display = 'block';
+    $('#next-song-btn').textContent = isLast ? 'Show final results →' : 'Next song →';
+    $('#next-song-btn').onclick = () => {
+      if (isLast) {
+        state.gameRef.child('meta').update({ status: 'finished' });
+      } else {
+        state.gameRef.child('meta').update({
+          status: 'voting',
+          currentIndex: idx + 1,
+        });
+      }
+    };
+  } else {
+    $('#host-reveal-controls').style.display = 'none';
+  }
+}
+
+function renderLeaderboard(root, game, scoresAfter, scoresBefore) {
+  // Compute order by scoresAfter desc, with stable name tie-break
+  const entries = game.players.map((p, i) => ({
+    slot: i, name: p.name,
+    scoreAfter: scoresAfter[i] || 0,
+    scoreBefore: scoresBefore[i] || 0,
+  }));
+  entries.sort((a, b) => {
+    if (b.scoreAfter !== a.scoreAfter) return b.scoreAfter - a.scoreAfter;
+    return a.name.localeCompare(b.name);
+  });
+  const beforeOrder = [...entries].sort((a, b) => {
+    if (b.scoreBefore !== a.scoreBefore) return b.scoreBefore - a.scoreBefore;
+    return a.name.localeCompare(b.name);
+  }).map(e => e.slot);
+
+  root.innerHTML = '';
+  entries.forEach((e, rank) => {
+    const oldRank = beforeOrder.indexOf(e.slot);
+    let posClass = '';
+    if (oldRank > rank) posClass = ' up';
+    else if (oldRank < rank) posClass = ' down';
+    const gained = e.scoreAfter > e.scoreBefore;
+    const row = el('div', { class: 'lb-row' + posClass + (gained ? ' gained' : '') },
+      el('div', { class: 'lb-rank' }, String(rank + 1)),
+      el('div', { class: 'lb-name' },
+        el('div', { class: 'avatar' }, initials(e.name)),
+        el('span', {}, e.name)
+      ),
+      el('div', { class: 'lb-delta' + (gained ? ' show' : '') }, gained ? '+' + (e.scoreAfter - e.scoreBefore) : ''),
+      el('div', { class: 'lb-score' }, String(e.scoreAfter))
+    );
+    root.appendChild(row);
+  });
+}
+
+/* =========================================================================
+   FINAL SCREEN
+   ========================================================================= */
+function renderFinalScreen(game) {
+  const lastIdx = game.songs.length - 1;
+  const finalScores = computeScores(game, lastIdx);
+  const entries = game.players.map((p, i) => ({
+    slot: i, name: p.name, scoreAfter: finalScores[i] || 0, scoreBefore: finalScores[i] || 0,
+  })).sort((a, b) => b.scoreAfter - a.scoreAfter || a.name.localeCompare(b.name));
+
+  $('#final-winner-name').textContent = entries[0]?.name || '—';
+  $('#final-winner-score').textContent = String(entries[0]?.scoreAfter || 0);
+
+  renderLeaderboard($('#final-leaderboard'), game, finalScores, finalScores);
+
+  if (state.role === 'host') {
+    $('#final-host-controls').style.display = 'flex';
+    $('#new-game-btn').onclick = () => {
+      if (!confirm('Start a brand new game? (This room will end.)')) return;
+      state.gameRef.remove().then(() => {
+        // Reload to host setup
+        location.href = window.location.origin + window.location.pathname;
+      });
+    };
+  } else {
+    $('#final-host-controls').style.display = 'none';
+  }
+}
+
+/* =========================================================================
+   GO
+   ========================================================================= */
+window.addEventListener('DOMContentLoaded', bootstrap);
+</script>
+</body>
+</html>
