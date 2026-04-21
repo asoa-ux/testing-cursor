@@ -237,11 +237,24 @@
     text-align: center; font-weight: 700; color: var(--text-faint);
     font-variant-numeric: tabular-nums;
   }
-  .editor-row.song { grid-template-columns: 28px 1fr 1fr auto; }
+  .editor-row.song { grid-template-columns: 28px 44px 1fr 1fr auto; }
   @media (max-width: 640px) {
-    .editor-row.song { grid-template-columns: 28px 1fr auto; }
-    .editor-row.song .owner-cell { grid-column: 2 / span 2; }
+    .editor-row.song { grid-template-columns: 28px 44px 1fr auto; }
+    .editor-row.song .owner-cell { grid-column: 2 / span 3; }
   }
+
+  .song-thumb {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+    color: var(--text-faint);
+    cursor: pointer; overflow: hidden; position: relative;
+    transition: 0.15s;
+  }
+  .song-thumb:hover { border-color: var(--accent-2); }
+  .song-thumb svg { width: 18px; height: 18px; }
+  .song-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .icon-btn {
     width: 36px; height: 36px; padding: 0;
@@ -348,7 +361,38 @@
   }
   .vote-btn.selected .v-avatar { background: rgba(255,255,255,0.25); color: #fff; }
 
+  /* Now-playing card in voting screen */
+  .now-playing {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+  }
+  .now-playing-art {
+    width: 88px; height: 88px; border-radius: 12px;
+    overflow: hidden; flex-shrink: 0;
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 10px 24px -8px rgba(0,0,0,0.5);
+  }
+  .now-playing-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .now-playing-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--text-faint); font-weight: 700;
+  }
+
   /* Reveal */
+  .reveal-art {
+    width: 160px; height: 160px; border-radius: 16px; overflow: hidden;
+    margin: 0 auto 14px;
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 18px 40px -12px rgba(0,0,0,0.6);
+    animation: artPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .reveal-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @keyframes artPop { from { transform: scale(0.7) rotate(-4deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
   .big-reveal {
     text-align: center;
     padding: 30px 20px;
@@ -697,7 +741,14 @@
           <span class="pill">Song <b id="vote-song-num" style="color: var(--text); margin-left: 4px;">1</b> / <span id="vote-song-total">11</span></span>
         </div>
         <h1 style="margin-top: 12px;">Whose song is this?</h1>
-        <div id="voting-song-title" style="margin-top: 6px; font-size: 20px; font-weight: 700; color: var(--accent-3);">—</div>
+        <div class="now-playing" id="voting-now-playing" style="display:none;">
+          <div class="now-playing-art"><img id="voting-song-img" alt="" /></div>
+          <div>
+            <div class="now-playing-label">Now playing</div>
+            <div id="voting-song-title" style="margin-top: 4px; font-size: 20px; font-weight: 700; color: var(--accent-3);">—</div>
+          </div>
+        </div>
+        <div id="voting-song-title-fallback" style="margin-top: 6px; font-size: 20px; font-weight: 700; color: var(--accent-3);">—</div>
         <p id="voting-prompt" style="margin-top: 10px;">Pick the player you think owns the song that's currently playing.</p>
         <p style="margin-top: 6px; font-size: 13px; color: var(--text-faint);">Results revealed at the end · each person can only be picked once across all songs.</p>
       </div>
@@ -757,6 +808,7 @@
     <div class="card">
       <div class="big-reveal">
         <div class="song-meta">Song <b id="reveal-song-num">1</b> of <span id="reveal-song-total">11</span></div>
+        <div class="reveal-art" id="reveal-art-wrap" style="display:none;"><img id="reveal-song-img" alt="" /></div>
         <div class="song-title" id="reveal-song-title">—</div>
         <div class="owner-label">Whose song?</div>
         <div class="owner-name" id="reveal-owner-name">—</div>
@@ -837,18 +889,19 @@ const EMBEDDED_FIREBASE_CONFIG = {
 
 // Default song list pre-filled from the user's input.
 // Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN, 10=ASOA
+// imageUrl is optional; if empty, the app auto-fetches album art from iTunes when the host types the title.
 const DEFAULT_SONGS = [
-  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0  }, // SEBA
-  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1  }, // MPER
-  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2  }, // TOCH
-  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3  }, // PIOS
-  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4  }, // LATS
-  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5  }, // PDUA
-  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6  }, // PVMA
-  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7  }, // PIOP
-  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8  }, // RHMO
-  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9  }, // ANBN
-  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10 }, // ASOA
+  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '' },
+  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '' },
+  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2,  imageUrl: '' },
+  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3,  imageUrl: '' },
+  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4,  imageUrl: '' },
+  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '' },
+  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '' },
+  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7,  imageUrl: '' },
+  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '' },
+  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '' },
+  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '' },
 ];
 
 const DEFAULT_PLAYERS = [
@@ -916,6 +969,24 @@ const uuid = () => {
   return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
 };
+
+/* Fetch album art from iTunes Search API. Free, no auth, CORS-friendly.
+   Returns a large-resolution image URL or null. */
+async function fetchSongArtwork(query) {
+  const q = (query || '').trim();
+  if (!q) return null;
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&limit=1&entity=song`;
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const hit = data?.results?.[0];
+    if (!hit?.artworkUrl100) return null;
+    // iTunes default is 100x100; swap for 600x600 for a crisp display.
+    return hit.artworkUrl100.replace(/\/\d+x\d+bb\./, '/600x600bb.');
+  } catch {
+    return null;
+  }
+}
 
 function showScreen(id) {
   $$('.screen').forEach(s => s.classList.remove('active'));
@@ -1116,6 +1187,26 @@ function startHostSetup() {
   renderSongsEditor();
   showScreen('screen-host-setup');
 
+  // Kick off background album-art lookups for any pre-filled songs without images.
+  state.setupSongs.forEach((s, i) => {
+    if (s.title && !s.imageUrl) {
+      fetchSongArtwork(s.title).then(art => {
+        if (art && !state.setupSongs[i].imageUrl) {
+          state.setupSongs[i].imageUrl = art;
+          // Update just this thumbnail without re-rendering the whole editor.
+          const thumbs = $$('#songs-editor .song-thumb');
+          if (thumbs[i]) {
+            thumbs[i].classList.add('has-img');
+            thumbs[i].innerHTML = '';
+            const img = document.createElement('img');
+            img.src = art; img.alt = '';
+            thumbs[i].appendChild(img);
+          }
+        }
+      });
+    }
+  });
+
   $('#add-player-btn').onclick = () => {
     state.setupPlayers.push({ name: '' });
     renderPlayersEditor();
@@ -1176,11 +1267,46 @@ function renderSongsEditor() {
         el('option', { value: String(pi), ...(s.ownerIndex === pi ? { selected: 'selected' } : {}) }, p.name || `Player ${pi + 1}`)
       )
     );
+
+    // Thumbnail — shows art if any, else a music-note placeholder. Click to edit URL manually.
+    const thumb = el('div', {
+      class: 'song-thumb' + (s.imageUrl ? ' has-img' : ''),
+      title: 'Click to set/change image URL (auto-fetched from iTunes by default)',
+      onclick: async () => {
+        const current = state.setupSongs[i].imageUrl || '';
+        const next = prompt('Image URL for this song (leave blank to auto-fetch from the song title):', current);
+        if (next === null) return;
+        state.setupSongs[i].imageUrl = next.trim();
+        if (!next.trim() && state.setupSongs[i].title) {
+          const art = await fetchSongArtwork(state.setupSongs[i].title);
+          if (art) state.setupSongs[i].imageUrl = art;
+        }
+        renderSongsEditor();
+      },
+    });
+    if (s.imageUrl) {
+      thumb.appendChild(el('img', { src: s.imageUrl, alt: '' }));
+    } else {
+      thumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+    }
+
     const row = el('div', { class: 'editor-row song' },
       el('div', { class: 'num' }, String(i + 1)),
+      thumb,
       el('input', {
         type: 'text', value: s.title, placeholder: 'Song — Artist',
-        oninput: (e) => { state.setupSongs[i].title = e.target.value; }
+        oninput: (e) => { state.setupSongs[i].title = e.target.value; },
+        // Auto-fetch album art on blur if user hasn't set a custom URL.
+        onblur: async (e) => {
+          const title = e.target.value.trim();
+          if (!title) return;
+          if (state.setupSongs[i].imageUrl) return;
+          const art = await fetchSongArtwork(title);
+          if (art) {
+            state.setupSongs[i].imageUrl = art;
+            renderSongsEditor();
+          }
+        },
       }),
       el('div', { class: 'owner-cell' }, ownerSelect),
       el('button', {
@@ -1254,6 +1380,7 @@ async function createGame() {
   const songs = state.setupSongs.map(s => ({
     title: (s.title || '').trim(),
     ownerIndex: indexMap[s.ownerIndex],
+    imageUrl: (s.imageUrl || '').trim(),
   }));
 
   const gameId = randomId(6);
@@ -1396,7 +1523,11 @@ function startGameFromLobby() {
   const newSongs = [];
   game.songs.forEach(s => {
     if (s.ownerIndex in oldToNewIdx) {
-      newSongs.push({ title: s.title, ownerIndex: oldToNewIdx[s.ownerIndex] });
+      newSongs.push({
+        title: s.title,
+        ownerIndex: oldToNewIdx[s.ownerIndex],
+        imageUrl: s.imageUrl || '',
+      });
     }
   });
 
@@ -1606,8 +1737,18 @@ function renderVotingScreen(game) {
   $('#vote-song-num').textContent = String(idx + 1);
   $('#vote-song-total').textContent = String(game.songs.length);
 
-  // Show the song title in the voting header so players know which one they're voting on.
-  $('#voting-song-title').textContent = game.songs[idx]?.title || '—';
+  // Show the song title + art in the voting header so players know which one they're voting on.
+  const song = game.songs[idx] || {};
+  if (song.imageUrl) {
+    $('#voting-now-playing').style.display = 'flex';
+    $('#voting-song-title-fallback').style.display = 'none';
+    $('#voting-song-img').src = song.imageUrl;
+    $('#voting-song-title').textContent = song.title || '—';
+  } else {
+    $('#voting-now-playing').style.display = 'none';
+    $('#voting-song-title-fallback').style.display = 'block';
+    $('#voting-song-title-fallback').textContent = song.title || '—';
+  }
 
   const myVote = game.votes?.[idx]?.[state.mySlotIndex];
   const isHost = state.role === 'host';
@@ -1849,6 +1990,17 @@ function renderRevealScreen(game) {
   $('#reveal-song-total').textContent = String(game.songs.length);
   $('#reveal-song-title').textContent = song.title;
   $('#reveal-owner-name').textContent = game.players[song.ownerIndex].name;
+
+  // Album art (if any) — re-create the element so the pop animation replays on each reveal.
+  const artWrap = $('#reveal-art-wrap');
+  if (song.imageUrl) {
+    artWrap.style.display = 'block';
+    // Force reflow so the animation re-triggers for the new song.
+    artWrap.style.animation = 'none'; void artWrap.offsetWidth; artWrap.style.animation = '';
+    $('#reveal-song-img').src = song.imageUrl;
+  } else {
+    artWrap.style.display = 'none';
+  }
 
   const songVotes = game.votes?.[idx] || {};
   let correct = 0, wrong = 0;
