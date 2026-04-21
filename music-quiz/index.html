@@ -624,7 +624,7 @@
       <div class="card-head">
         <span class="pill live">Lobby</span>
         <h1 style="margin-top: 8px;">Get everyone in</h1>
-        <p>Share the link or QR. Players pick their name from the list when they join. <b>Tap your own name below to join as a player too.</b></p>
+        <p>Share the link or QR. Players pick their name from the list when they join. <b>Tap your own name below to join as a player too.</b> Only songs owned by joined players will be included — absent people's songs get dropped automatically.</p>
       </div>
 
       <div class="share-card">
@@ -1349,14 +1349,70 @@ function renderHostLobbyPlayers(game) {
 }
 
 function startGameFromLobby() {
-  if (!confirm('Start the quiz now? You can no longer add players after this.')) return;
-  state.gameRef.child('meta').update({
-    status: 'voting',
-    currentIndex: 0,
-    revealedIndex: -1,
+  const game = state.game;
+  const joins = game.joins || {};
+  const joinedSlots = new Set(Object.keys(joins).map(Number));
+
+  if (joinedSlots.size < 2) {
+    toast('Need at least 2 joined players.');
+    return;
+  }
+
+  // Figure out which songs would be dropped because their owner didn't join.
+  const droppedSongs = [];
+  game.songs.forEach((s, i) => {
+    if (!joinedSlots.has(s.ownerIndex)) {
+      const ownerName = game.players[s.ownerIndex]?.name || '?';
+      droppedSongs.push(`  • Song ${i + 1}: ${s.title} (${ownerName} didn't join)`);
+    }
   });
-  // Clear any stale votes
-  state.gameRef.child('votes').set({});
+
+  let msg = `Start the quiz with ${joinedSlots.size} players?`;
+  if (droppedSongs.length) {
+    msg += `\n\n${droppedSongs.length} song(s) will be skipped:\n` + droppedSongs.join('\n');
+  }
+  msg += '\n\nOnce started, nobody else can join.';
+  if (!confirm(msg)) return;
+
+  // Rebuild players and songs arrays, keeping only joined players + their songs,
+  // and remapping indices so ownerIndex still points to the right person.
+  const oldToNewIdx = {};
+  const newPlayers = [];
+  const newJoins = {};
+  game.players.forEach((p, oldIdx) => {
+    if (joinedSlots.has(oldIdx)) {
+      const newIdx = newPlayers.length;
+      oldToNewIdx[oldIdx] = newIdx;
+      newJoins[newIdx] = joins[oldIdx];
+      newPlayers.push({ name: p.name });
+    }
+  });
+
+  const newSongs = [];
+  game.songs.forEach(s => {
+    if (s.ownerIndex in oldToNewIdx) {
+      newSongs.push({ title: s.title, ownerIndex: oldToNewIdx[s.ownerIndex] });
+    }
+  });
+
+  if (newSongs.length < 1) {
+    alert("Can't start — none of the joined players own any of the songs.");
+    return;
+  }
+
+  // Write everything atomically.
+  state.gameRef.update({
+    players: newPlayers,
+    songs: newSongs,
+    joins: newJoins,
+    votes: {},
+    meta: {
+      ...game.meta,
+      status: 'voting',
+      currentIndex: 0,
+      revealedIndex: -1,
+    },
+  });
 }
 
 /* =========================================================================
