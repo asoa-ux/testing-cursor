@@ -641,6 +641,7 @@
         </div>
         <h1 style="margin-top: 12px;">Whose song is this?</h1>
         <p id="voting-prompt">Pick the player you think owns the song that's currently playing.</p>
+        <p style="margin-top: 6px; font-size: 13px; color: var(--text-faint);">Results revealed at the end — vote on every song first.</p>
       </div>
 
       <div class="vote-grid" id="vote-grid"></div>
@@ -659,7 +660,7 @@
         <div class="progress"><div id="vote-progress-bar" style="width: 0%"></div></div>
       </div>
       <div class="row" style="margin-top: 14px;">
-        <button class="btn primary big" id="close-voting-btn">Close & reveal →</button>
+        <button class="btn primary big" id="close-voting-btn">Next song →</button>
       </div>
     </div>
   </section>
@@ -1481,7 +1482,7 @@ function renderVotingScreen(game) {
   // Hide vote-status by default; show if player already voted
   const status = $('#my-vote-status');
   if (state.role === 'player' && state.mySlotIndex >= 0 && typeof myVote === 'number') {
-    status.textContent = '✓ Vote locked in: ' + game.players[myVote].name + '. (You can still change it until the host closes voting.)';
+    status.textContent = '✓ Vote locked in: ' + game.players[myVote].name + '. (You can still change it before the host moves to the next song.)';
     status.style.display = 'block';
   } else {
     status.style.display = 'none';
@@ -1498,11 +1499,25 @@ function renderVotingScreen(game) {
     $('#vote-counter-total').textContent = String(total);
     $('#vote-progress-bar').style.width = (total ? (voted / total * 100) : 0) + '%';
 
+    const isLastSong = idx >= game.songs.length - 1;
+    $('#close-voting-btn').textContent = isLastSong
+      ? 'Finish voting · show results →'
+      : 'Next song →';
     $('#close-voting-btn').onclick = () => {
-      state.gameRef.child('meta').update({
-        status: 'reveal',
-        revealedIndex: idx,
-      });
+      if (isLastSong) {
+        if (!confirm('Lock in all votes and start revealing the answers? Players can no longer change their votes after this.')) return;
+        // Move from "vote all songs" phase into "reveal recap" phase, starting at song 0.
+        state.gameRef.child('meta').update({
+          status: 'reveal',
+          revealedIndex: 0,
+        });
+      } else {
+        // Just advance to voting on the next song. No reveal in between.
+        state.gameRef.child('meta').update({
+          status: 'voting',
+          currentIndex: idx + 1,
+        });
+      }
     };
   } else {
     $('#host-voting-controls').style.display = 'none';
@@ -1584,14 +1599,14 @@ function renderRevealScreen(game) {
   // Host controls
   if (isHost) {
     $('#host-reveal-controls').style.display = 'block';
-    $('#next-song-btn').textContent = isLast ? 'Show final results →' : 'Next song →';
+    $('#next-song-btn').textContent = isLast ? 'Show final results →' : 'Reveal next song →';
     $('#next-song-btn').onclick = () => {
       if (isLast) {
         state.gameRef.child('meta').update({ status: 'finished' });
       } else {
+        // Stay in reveal phase; just move to next song in the recap.
         state.gameRef.child('meta').update({
-          status: 'voting',
-          currentIndex: idx + 1,
+          revealedIndex: idx + 1,
         });
       }
     };
