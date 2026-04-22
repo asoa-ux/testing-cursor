@@ -241,6 +241,31 @@
   @media (max-width: 640px) {
     .editor-row.song { grid-template-columns: 28px 44px 1fr auto; }
     .editor-row.song .owner-cell { grid-column: 2 / span 3; }
+    .editor-row.song .song-spotify-row { grid-column: 1 / -1; }
+  }
+  .song-spotify-row {
+    grid-column: 1 / -1;
+    display: flex; gap: 6px; align-items: center;
+    margin-top: 2px;
+  }
+  .song-spotify-row .spotify-prefix {
+    font-size: 12px; color: #1ed760; font-weight: 700;
+    padding: 0 4px; flex-shrink: 0;
+  }
+  .song-spotify-row input {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    background: rgba(0,0,0,0.18);
+    border: 1px dashed var(--border);
+    color: var(--text-dim);
+  }
+  .song-spotify-row input:focus { color: var(--text); }
+  .song-spotify-row.valid input {
+    border-style: solid;
+    border-color: rgba(30, 215, 96, 0.4);
+    color: var(--text);
   }
 
   .song-thumb {
@@ -730,9 +755,15 @@
             <h2>Songs</h2>
             <p>In the order you'll play them. Pick the secret owner for each.</p>
           </div>
-          <button class="btn" id="add-song-btn">+ Add</button>
+          <div class="row" style="gap:6px;">
+            <button class="btn" id="bulk-spotify-btn" title="Paste Spotify URLs for all songs at once, one per line">🎵 Bulk paste</button>
+            <button class="btn" id="add-song-btn">+ Add</button>
+          </div>
         </div>
         <div class="editor-list" id="songs-editor"></div>
+        <p style="margin-top: 10px; font-size: 12px;">
+          💡 Paste a Spotify <b>song link</b> under each song (from Spotify: right-click → <i>Share → Copy Song Link</i>). When you click "Next" during the quiz, that song auto-plays in the mini-player.
+        </p>
       </div>
     </div>
 
@@ -943,18 +974,15 @@
 <div class="toast" id="toast"></div>
 
 <!-- Persistent Spotify mini-player (host only). Lives outside all screens
-     so switching screens never interrupts playback. -->
+     so switching screens never interrupts playback. The Spotify iFrame API
+     replaces #spotify-embed-target with its own iframe once initialized. -->
 <div id="spotify-dock" class="spotify-dock" style="display:none;">
   <div class="spotify-dock-head">
     <span><span class="dot"></span><b id="spotify-dock-title">Spotify</b></span>
     <button class="btn-mini" id="spotify-toggle" type="button">Hide</button>
   </div>
   <div class="spotify-dock-frame">
-    <iframe id="spotify-iframe"
-      src="about:blank"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy"
-      allowfullscreen></iframe>
+    <div id="spotify-embed-target"></div>
   </div>
 </div>
 
@@ -990,17 +1018,17 @@ const EMBEDDED_FIREBASE_CONFIG = {
 // Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN, 10=ASOA
 // imageUrl is optional; if empty, the app auto-fetches album art from iTunes when the host types the title.
 const DEFAULT_SONGS = [
-  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '' },
-  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '' },
-  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2,  imageUrl: '' },
-  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3,  imageUrl: '' },
-  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4,  imageUrl: '' },
-  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '' },
-  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '' },
-  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7,  imageUrl: '' },
-  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '' },
-  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '' },
-  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '' },
+  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '', spotifyUrl: '' },
+  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3,  imageUrl: '', spotifyUrl: '' },
+  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '', spotifyUrl: '' },
+  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '', spotifyUrl: '' },
+  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '', spotifyUrl: '' },
 ];
 
 // Default Spotify playlist for this quiz. Host can override in setup.
@@ -1318,9 +1346,10 @@ function startHostSetup() {
     renderSongsEditor(); // owner dropdowns depend on players
   };
   $('#add-song-btn').onclick = () => {
-    state.setupSongs.push({ title: '', ownerIndex: -1 });
+    state.setupSongs.push({ title: '', ownerIndex: -1, imageUrl: '', spotifyUrl: '' });
     renderSongsEditor();
   };
+  $('#bulk-spotify-btn').onclick = openBulkSpotifyPaste;
   $('#reset-config-btn').onclick = () => {
     if (!confirm('Forget the saved Firebase config and re-enter it?')) return;
     localStorage.removeItem(LS_FIREBASE_CONFIG);
@@ -1395,6 +1424,23 @@ function renderSongsEditor() {
       thumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
     }
 
+    const spotifyInput = el('input', {
+      type: 'text',
+      value: s.spotifyUrl || '',
+      placeholder: 'Paste Spotify song link (optional)  — e.g. https://open.spotify.com/track/...',
+      oninput: (e) => {
+        const v = e.target.value.trim();
+        state.setupSongs[i].spotifyUrl = v;
+        const wrap = e.target.parentElement;
+        if (urlToSpotifyUri(v)) wrap.classList.add('valid');
+        else wrap.classList.remove('valid');
+      },
+    });
+    const spotifyWrap = el('div', { class: 'song-spotify-row' + (urlToSpotifyUri(s.spotifyUrl) ? ' valid' : '') },
+      el('span', { class: 'spotify-prefix' }, '♫'),
+      spotifyInput
+    );
+
     const row = el('div', { class: 'editor-row song' },
       el('div', { class: 'num' }, String(i + 1)),
       thumb,
@@ -1423,10 +1469,73 @@ function renderSongsEditor() {
         }
       },
         el('span', { html: '&#10005;' })
-      )
+      ),
+      spotifyWrap
     );
     root.appendChild(row);
   });
+}
+
+// Bulk-paste helper: prompt with a multi-line list of URLs, one per song, in order.
+// Uses a temporary overlay because native prompt() doesn't support multiline.
+function openBulkSpotifyPaste() {
+  const lines = state.setupSongs.map((s, i) => {
+    const label = (s.title || `Song ${i + 1}`).slice(0, 40);
+    return (s.spotifyUrl || '') + '    # ' + label;
+  }).join('\n');
+
+  const overlay = el('div', {
+    style: {
+      position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.7)',
+      backdropFilter: 'blur(6px)', zIndex: '2000',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+    }
+  });
+  const modal = el('div', {
+    style: {
+      background: 'var(--bg-1)', border: '1px solid var(--border)',
+      borderRadius: 'var(--radius)', padding: '22px', maxWidth: '560px', width: '100%',
+      boxShadow: 'var(--shadow)',
+    }
+  });
+  const ta = el('textarea', {
+    style: { width: '100%', minHeight: '260px', fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: '12px' },
+    placeholder: 'One Spotify URL per line, in song order.',
+  });
+  ta.value = lines;
+
+  const close = () => document.body.removeChild(overlay);
+
+  modal.appendChild(el('h2', { style: { marginBottom: '8px' } }, '🎵 Bulk paste Spotify URLs'));
+  modal.appendChild(el('p', { style: { marginBottom: '10px', fontSize: '13px' } },
+    'One Spotify link per line, in song order. Anything after ', el('code', {}, '#'), ' is ignored. Blank lines keep the existing URL.'));
+  modal.appendChild(ta);
+  modal.appendChild(el('div', { class: 'row', style: { marginTop: '14px', justifyContent: 'flex-end', gap: '8px' } },
+    el('button', { class: 'btn ghost', onclick: close }, 'Cancel'),
+    el('button', {
+      class: 'btn primary',
+      onclick: () => {
+        const raw = ta.value.split('\n');
+        let applied = 0;
+        raw.forEach((line, idx) => {
+          if (idx >= state.setupSongs.length) return;
+          const cleaned = line.split('#')[0].trim();
+          if (!cleaned) return;
+          if (urlToSpotifyUri(cleaned)) {
+            state.setupSongs[idx].spotifyUrl = cleaned;
+            applied++;
+          }
+        });
+        close();
+        renderSongsEditor();
+        toast(applied ? `Applied ${applied} Spotify URL${applied === 1 ? '' : 's'}` : 'No valid URLs found');
+      }
+    }, 'Apply')
+  ));
+  overlay.appendChild(modal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.body.appendChild(overlay);
+  setTimeout(() => ta.focus(), 50);
 }
 
 function refreshOwnerDropdownLabels() {
@@ -1486,6 +1595,7 @@ async function createGame() {
     title: (s.title || '').trim(),
     ownerIndex: indexMap[s.ownerIndex],
     imageUrl: (s.imageUrl || '').trim(),
+    spotifyUrl: (s.spotifyUrl || '').trim(),
   }));
 
   const gameId = randomId(6);
@@ -1565,45 +1675,141 @@ function renderShareQR(url) {
 }
 
 // -------------------------------------------------------------------------
-// Spotify dock — persistent mini-player for the host. Lives at the bottom
-// of <body>, outside all .screen sections, so switching screens never
-// unmounts the iframe and never restarts playback.
+// Spotify dock — persistent mini-player for the host with sync to the quiz.
+//
+// Uses Spotify's iFrame API (https://developer.spotify.com/documentation/embeds)
+// so we can programmatically call loadUri() and play() when the quiz moves to
+// the next song. The player lives outside all .screen sections, so switching
+// screens never restarts playback.
 // -------------------------------------------------------------------------
-function toSpotifyEmbedUrl(raw) {
+
+// Convert any Spotify URL/URI into the canonical `spotify:TYPE:ID` form
+// expected by controller.loadUri().
+function urlToSpotifyUri(raw) {
   if (!raw) return '';
+  const s = String(raw).trim();
+  if (!s) return '';
+  if (s.startsWith('spotify:')) return s;
   try {
-    const u = new URL(String(raw).trim());
+    const u = new URL(s);
     if (u.hostname !== 'open.spotify.com') return '';
-    let path = u.pathname;
-    if (!path.startsWith('/embed/')) path = '/embed' + path;
-    return `https://open.spotify.com${path}?utm_source=generator`;
+    // Path is /[embed/]TYPE/ID
+    const parts = u.pathname.split('/').filter(Boolean);
+    const typeIdx = parts[0] === 'embed' ? 1 : 0;
+    const type = parts[typeIdx];
+    const id = parts[typeIdx + 1];
+    if (!type || !id) return '';
+    return `spotify:${type}:${id}`;
   } catch {
     return '';
   }
 }
 
+function loadSpotifyIframeApi() {
+  if (state.spotifyApiLoading || state.spotifyIFrameAPI) return;
+  state.spotifyApiLoading = true;
+  window.onSpotifyIframeApiReady = (IFrameAPI) => {
+    state.spotifyIFrameAPI = IFrameAPI;
+    state.spotifyApiLoading = false;
+    // If we already queued an initial URI while the script was loading, mount now.
+    if (state.pendingInitialUri) {
+      createSpotifyController(state.pendingInitialUri);
+      state.pendingInitialUri = null;
+    }
+  };
+  const s = document.createElement('script');
+  s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+  s.async = true;
+  document.head.appendChild(s);
+}
+
+function createSpotifyController(initialUri) {
+  if (!initialUri) return;
+  if (!state.spotifyIFrameAPI) {
+    state.pendingInitialUri = initialUri;
+    loadSpotifyIframeApi();
+    return;
+  }
+  if (state.spotifyController) {
+    // Already mounted — just swap the URI.
+    try { state.spotifyController.loadUri(initialUri); } catch (e) { console.warn('[Spotify]', e); }
+    return;
+  }
+  const target = document.getElementById('spotify-embed-target');
+  if (!target) return;
+  state.spotifyIFrameAPI.createController(target, {
+    width: '100%',
+    height: 352,
+    uri: initialUri,
+  }, (controller) => {
+    state.spotifyController = controller;
+    // If a sync request arrived while we were booting, honor it now.
+    if (state.pendingSyncUri) {
+      try {
+        controller.loadUri(state.pendingSyncUri);
+        setTimeout(() => { try { controller.play(); } catch {} }, 400);
+      } catch (e) { console.warn('[Spotify]', e); }
+      state.pendingSyncUri = null;
+    }
+  });
+}
+
 function mountSpotifyDock(rawUrl) {
   const dock = document.getElementById('spotify-dock');
-  const iframe = document.getElementById('spotify-iframe');
   const title = document.getElementById('spotify-dock-title');
-  if (!dock || !iframe) return;
+  if (!dock) return;
 
-  const embedUrl = toSpotifyEmbedUrl(rawUrl);
-  if (!embedUrl || state.role !== 'host') {
+  if (!rawUrl || state.role !== 'host') {
     dock.style.display = 'none';
     return;
   }
-
+  const initialUri = urlToSpotifyUri(rawUrl);
+  if (!initialUri) {
+    dock.style.display = 'none';
+    return;
+  }
   dock.style.display = '';
-  // Only change src when URL actually changes — prevents playback restart.
-  if (iframe.getAttribute('data-src') !== embedUrl) {
-    iframe.setAttribute('data-src', embedUrl);
-    iframe.src = embedUrl;
-    if (embedUrl.includes('/playlist/'))    title.textContent = 'Playlist';
-    else if (embedUrl.includes('/album/'))  title.textContent = 'Album';
-    else if (embedUrl.includes('/track/'))  title.textContent = 'Track';
-    else if (embedUrl.includes('/episode/')) title.textContent = 'Episode';
-    else                                    title.textContent = 'Spotify';
+  if (initialUri.includes(':playlist:'))     title.textContent = 'Playlist';
+  else if (initialUri.includes(':album:'))   title.textContent = 'Album';
+  else if (initialUri.includes(':track:'))   title.textContent = 'Track';
+  else if (initialUri.includes(':episode:')) title.textContent = 'Episode';
+  else                                       title.textContent = 'Spotify';
+
+  if (!state.spotifyController && !state.pendingInitialUri) {
+    createSpotifyController(initialUri);
+  }
+}
+
+// Sync the dock's current track to whichever song the quiz is currently
+// pointing to (during voting = currentIndex, during reveal = revealedIndex).
+// Only the host does this; only fires when the target song actually changes.
+function syncSpotifyToGame(game) {
+  if (state.role !== 'host') return;
+  const status = game?.meta?.status;
+  const songs = game?.songs || [];
+  let songIdx = -1;
+  if (status === 'voting' || status === 'review') songIdx = game.meta.currentIndex ?? -1;
+  else if (status === 'reveal')                   songIdx = game.meta.revealedIndex ?? -1;
+  if (songIdx < 0 || songIdx >= songs.length) return;
+
+  const key = `${status}:${songIdx}`;
+  if (key === state.lastSyncedSongKey) return;
+  state.lastSyncedSongKey = key;
+
+  const uri = urlToSpotifyUri(songs[songIdx]?.spotifyUrl);
+  if (!uri) return;
+
+  if (!state.spotifyController) {
+    // Dock not booted yet — remember to apply once the controller is ready.
+    state.pendingSyncUri = uri;
+    return;
+  }
+  try {
+    state.spotifyController.loadUri(uri);
+    // loadUri doesn't always auto-play; give it a beat, then play.
+    setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 450);
+  } catch (e) {
+    console.warn('[Spotify] loadUri failed:', e);
   }
 }
 
@@ -1722,6 +1928,7 @@ function startGameFromLobby() {
         title: s.title,
         ownerIndex: oldToNewIdx[s.ownerIndex],
         imageUrl: s.imageUrl || '',
+        spotifyUrl: s.spotifyUrl || '',
       });
     }
   });
@@ -1847,6 +2054,8 @@ function subscribeToGame() {
     state.game = g;
     // Show / update the Spotify dock (host-only; no-op otherwise).
     mountSpotifyDock(g.meta?.spotifyUrl);
+    // Sync the player to the active song when currentIndex/revealedIndex changes.
+    syncSpotifyToGame(g);
     // Auto-rediscover my slot via sessionId (handles reconnects + claim-race).
     if (state.mySessionId) {
       const joins = g.joins || {};
