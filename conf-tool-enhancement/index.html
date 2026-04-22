@@ -539,7 +539,7 @@
     </div>
 
     <div class="filters-row">
-      <button class="chip usergroup" id="chipUserGroups" data-filter="userGroups" aria-haspopup="true" aria-expanded="false">
+      <button class="chip" id="chipUserGroups" data-filter="userGroups" aria-haspopup="true" aria-expanded="false">
         <span class="ic">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 13c-4 0-7 2-7 5v3h14v-3c0-3-3-5-7-5zm7 1c-.9 0-1.7.1-2.4.3 1.5 1.1 2.4 2.8 2.4 4.7v2h6v-2.5c0-2.5-2.7-4.5-6-4.5z"/></svg>
         </span>
@@ -768,13 +768,11 @@
       return { visible: false, matchCount: 0 };
     }
 
-    // A folder is visible if it matches the search by name (ancestor match → show subtree)
-    // OR any of its descendants is visible.
-    const visible = nameMatches && (state.search ? true : true) ? (nameMatches || anyChildVisible) : anyChildVisible;
-
-    // But: if there are active perspective-level filters (userGroups) and no descendants match,
-    // and the folder name alone matches, we should still show the folder (empty inside). That's fine.
-    return { visible: visible || anyChildVisible, matchCount: childMatchCount };
+    // A folder is visible only if at least one descendant perspective is visible.
+    // (A folder whose own name matches the search still propagates `ancestorMatches`
+    //  to its children, so relevant descendants become visible and the folder
+    //  appears through them. An otherwise empty folder is hidden.)
+    return { visible: anyChildVisible, matchCount: childMatchCount };
   }
 
   function totalPerspectives(nodes = TREE) {
@@ -1025,6 +1023,7 @@
     gBadge.textContent = gCount;
     gBadge.style.display = gCount > 0 ? 'inline-flex' : 'none';
 
+    document.getElementById('chipUserGroups').classList.toggle('usergroup', ugCount > 0);
     document.getElementById('chipUserGroups').classList.toggle('active', ugCount > 0 || state.openDropdown === 'userGroups');
     document.getElementById('chipGroups').classList.toggle('active', gCount > 0 || state.openDropdown === 'groups');
 
