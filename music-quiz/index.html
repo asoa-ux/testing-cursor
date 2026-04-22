@@ -1641,6 +1641,19 @@ async function createGame() {
     return;
   }
 
+  // If the host set a playlist URL but no per-song URLs, the music won't
+  // auto-advance. Warn once so they can go back and paste the track links.
+  const playlistSet = !!urlToSpotifyUri(($('#spotify-url')?.value || '').trim());
+  const linkedSongs = state.setupSongs.filter(s => urlToSpotifyUri(s.spotifyUrl)).length;
+  if (playlistSet && linkedSongs === 0) {
+    const proceed = confirm(
+      "🎵 Heads-up: you set a Spotify playlist, but no individual song links.\n\n" +
+      "The mini-player will show your playlist, but the music WON'T auto-advance when you click Next — you'll have to skip tracks manually in Spotify.\n\n" +
+      "To enable auto-advance, click Cancel, then press '🎵 Paste Spotify links' and paste one link per song.\n\n" +
+      "Continue without auto-advance?"
+    );
+    if (!proceed) return;
+  }
 
   // Build clean game payload (drop empty player slots, but preserve indices used by ownerIndex)
   // We trim empty players: if an empty player is dropped, remap song ownerIndex.
@@ -1960,21 +1973,7 @@ function startGameFromLobby() {
     return;
   }
 
-  // Figure out which songs would be dropped because their owner didn't join.
-  const droppedSongs = [];
-  game.songs.forEach((s, i) => {
-    if (!joinedSlots.has(s.ownerIndex)) {
-      const ownerName = game.players[s.ownerIndex]?.name || '?';
-      droppedSongs.push(`  • Song ${i + 1}: ${s.title} (${ownerName} didn't join)`);
-    }
-  });
-
-  let msg = `Start the quiz with ${joinedSlots.size} players?`;
-  if (droppedSongs.length) {
-    msg += `\n\n${droppedSongs.length} song(s) will be skipped:\n` + droppedSongs.join('\n');
-  }
-  msg += '\n\nOnce started, nobody else can join.';
-  if (!confirm(msg)) return;
+  // Silently drop songs whose owner didn't join — no confirmation needed.
 
   // Rebuild players and songs arrays, keeping only joined players + their songs,
   // and remapping indices so ownerIndex still points to the right person.
