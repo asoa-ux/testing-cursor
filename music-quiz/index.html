@@ -268,6 +268,33 @@
     color: var(--text);
   }
 
+  .sync-status {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 12px;
+    background: rgba(255, 192, 67, 0.10);
+    border: 1px solid rgba(255, 192, 67, 0.35);
+    color: #ffd987;
+  }
+  .sync-status.all-linked {
+    background: rgba(30, 215, 96, 0.10);
+    border-color: rgba(30, 215, 96, 0.4);
+    color: #b6f0c8;
+  }
+  .sync-status .sync-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .sync-status > span:not(.sync-dot) { flex: 1; }
+  .sync-status .btn-mini {
+    margin-left: auto;
+    border-color: currentColor;
+    color: inherit;
+  }
+
   .song-thumb {
     width: 44px; height: 44px; border-radius: 8px;
     background: rgba(0,0,0,0.25);
@@ -756,13 +783,18 @@
             <p>In the order you'll play them. Pick the secret owner for each.</p>
           </div>
           <div class="row" style="gap:6px;">
-            <button class="btn" id="bulk-spotify-btn" title="Paste Spotify URLs for all songs at once, one per line">🎵 Bulk paste</button>
+            <button class="btn" id="bulk-spotify-btn" title="Paste Spotify URLs for all songs at once, one per line">🎵 Paste Spotify links</button>
             <button class="btn" id="add-song-btn">+ Add</button>
           </div>
         </div>
+        <div id="spotify-sync-status" class="sync-status" style="display:none;">
+          <span class="sync-dot"></span>
+          <span id="sync-status-text">0 of 0 songs linked to Spotify</span>
+          <button class="btn-mini" id="sync-status-btn" type="button">Fix ↓</button>
+        </div>
         <div class="editor-list" id="songs-editor"></div>
         <p style="margin-top: 10px; font-size: 12px;">
-          💡 Paste a Spotify <b>song link</b> under each song (from Spotify: right-click → <i>Share → Copy Song Link</i>). When you click "Next" during the quiz, that song auto-plays in the mini-player.
+          💡 For the music to auto-advance when you click "Next song", each song needs its own Spotify link. Easiest way: open your playlist in Spotify, right-click each song → <i>Share → Copy Song Link</i>, then click <b>🎵 Paste Spotify links</b> above to drop all 11 in at once.
         </p>
       </div>
     </div>
@@ -1350,6 +1382,8 @@ function startHostSetup() {
     renderSongsEditor();
   };
   $('#bulk-spotify-btn').onclick = openBulkSpotifyPaste;
+  const syncFixBtn = document.getElementById('sync-status-btn');
+  if (syncFixBtn) syncFixBtn.onclick = openBulkSpotifyPaste;
   $('#reset-config-btn').onclick = () => {
     if (!confirm('Forget the saved Firebase config and re-enter it?')) return;
     localStorage.removeItem(LS_FIREBASE_CONFIG);
@@ -1387,6 +1421,30 @@ function renderPlayersEditor() {
     );
     root.appendChild(row);
   });
+}
+
+function refreshSpotifySyncStatus() {
+  const bar = document.getElementById('spotify-sync-status');
+  const text = document.getElementById('sync-status-text');
+  if (!bar || !text) return;
+  const total = state.setupSongs.length;
+  const linked = state.setupSongs.filter(s => urlToSpotifyUri(s.spotifyUrl)).length;
+  if (total === 0) {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = '';
+  if (linked === total && total > 0) {
+    bar.classList.add('all-linked');
+    text.textContent = `✓ All ${total} songs linked — music will auto-advance`;
+  } else {
+    bar.classList.remove('all-linked');
+    if (linked === 0) {
+      text.textContent = `No songs linked to Spotify yet — music won't auto-advance (${total} to link)`;
+    } else {
+      text.textContent = `${linked} of ${total} songs linked — the other ${total - linked} won't auto-advance`;
+    }
+  }
 }
 
 function renderSongsEditor() {
@@ -1427,13 +1485,14 @@ function renderSongsEditor() {
     const spotifyInput = el('input', {
       type: 'text',
       value: s.spotifyUrl || '',
-      placeholder: 'Paste Spotify song link (optional)  — e.g. https://open.spotify.com/track/...',
+      placeholder: 'Paste Spotify song link (needed for auto-advance) — e.g. https://open.spotify.com/track/...',
       oninput: (e) => {
         const v = e.target.value.trim();
         state.setupSongs[i].spotifyUrl = v;
         const wrap = e.target.parentElement;
         if (urlToSpotifyUri(v)) wrap.classList.add('valid');
         else wrap.classList.remove('valid');
+        refreshSpotifySyncStatus();
       },
     });
     const spotifyWrap = el('div', { class: 'song-spotify-row' + (urlToSpotifyUri(s.spotifyUrl) ? ' valid' : '') },
@@ -1474,6 +1533,7 @@ function renderSongsEditor() {
     );
     root.appendChild(row);
   });
+  refreshSpotifySyncStatus();
 }
 
 // Bulk-paste helper: prompt with a multi-line list of URLs, one per song, in order.
@@ -1579,6 +1639,20 @@ async function createGame() {
     errBox.textContent = err;
     errBox.style.display = 'block';
     return;
+  }
+
+  // If the host set a playlist URL but no per-song URLs, the music won't
+  // auto-advance. Warn once so they can go back and paste the track links.
+  const playlistSet = !!urlToSpotifyUri(($('#spotify-url')?.value || '').trim());
+  const linkedSongs = state.setupSongs.filter(s => urlToSpotifyUri(s.spotifyUrl)).length;
+  if (playlistSet && linkedSongs === 0) {
+    const proceed = confirm(
+      "🎵 Heads-up: you set a Spotify playlist, but no individual song links.\n\n" +
+      "The mini-player will show your playlist, but the music WON'T auto-advance when you click Next — you'll have to skip tracks manually in Spotify.\n\n" +
+      "To enable auto-advance, click Cancel, then press '🎵 Paste Spotify links' and paste one link per song.\n\n" +
+      "Continue without auto-advance?"
+    );
+    if (!proceed) return;
   }
 
   // Build clean game payload (drop empty player slots, but preserve indices used by ownerIndex)
@@ -1708,10 +1782,11 @@ function urlToSpotifyUri(raw) {
 function loadSpotifyIframeApi() {
   if (state.spotifyApiLoading || state.spotifyIFrameAPI) return;
   state.spotifyApiLoading = true;
+  console.log('[Spotify] Loading iFrame API…');
   window.onSpotifyIframeApiReady = (IFrameAPI) => {
+    console.log('[Spotify] iFrame API ready');
     state.spotifyIFrameAPI = IFrameAPI;
     state.spotifyApiLoading = false;
-    // If we already queued an initial URI while the script was loading, mount now.
     if (state.pendingInitialUri) {
       createSpotifyController(state.pendingInitialUri);
       state.pendingInitialUri = null;
@@ -1720,6 +1795,7 @@ function loadSpotifyIframeApi() {
   const s = document.createElement('script');
   s.src = 'https://open.spotify.com/embed/iframe-api/v1';
   s.async = true;
+  s.onerror = () => console.error('[Spotify] Failed to load iFrame API script (CSP / adblocker?)');
   document.head.appendChild(s);
 }
 
@@ -1797,17 +1873,23 @@ function syncSpotifyToGame(game) {
   state.lastSyncedSongKey = key;
 
   const uri = urlToSpotifyUri(songs[songIdx]?.spotifyUrl);
-  if (!uri) return;
+  if (!uri) {
+    console.log(`[Spotify] Song ${songIdx + 1} has no linked URL — skipping sync (mini-player stays on current track).`);
+    return;
+  }
 
   if (!state.spotifyController) {
-    // Dock not booted yet — remember to apply once the controller is ready.
+    console.log('[Spotify] Controller not ready yet, queueing URI:', uri);
     state.pendingSyncUri = uri;
     return;
   }
+  console.log(`[Spotify] Syncing to song ${songIdx + 1}:`, uri);
   try {
     state.spotifyController.loadUri(uri);
     // loadUri doesn't always auto-play; give it a beat, then play.
-    setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 450);
+    setTimeout(() => {
+      try { state.spotifyController.play(); } catch (e) { console.warn('[Spotify] play() failed:', e); }
+    }, 450);
   } catch (e) {
     console.warn('[Spotify] loadUri failed:', e);
   }
