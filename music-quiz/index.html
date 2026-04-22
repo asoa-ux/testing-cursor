@@ -586,6 +586,58 @@
   .review-opt.selected .r-avatar { background: rgba(255,255,255,0.25); color: #fff; }
 
   .footer-note { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 30px; }
+
+  /* Sticky Spotify dock (host only) */
+  .spotify-dock {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    background: rgba(20, 10, 48, 0.85);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 22px 50px -16px rgba(0,0,0,0.6);
+    z-index: 900;
+    overflow: hidden;
+    transition: width 0.25s, transform 0.25s;
+  }
+  .spotify-dock.collapsed { width: 200px; }
+  .spotify-dock.collapsed .spotify-dock-frame { display: none; }
+  .spotify-dock-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 4px 4px 8px;
+    font-size: 13px; color: var(--text-dim);
+    font-weight: 600;
+  }
+  .spotify-dock-head .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #1ed760; margin-right: 6px;
+    box-shadow: 0 0 8px rgba(30, 215, 96, 0.6);
+    flex-shrink: 0;
+  }
+  .spotify-dock-head > span { display: flex; align-items: center; min-width: 0; }
+  .spotify-dock-head > span > b { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .spotify-dock-frame iframe {
+    width: 100%; height: 352px;
+    border: 0; border-radius: 12px; display: block;
+  }
+  .btn-mini {
+    padding: 4px 10px; font-size: 12px; font-weight: 600;
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: 8px; cursor: pointer; font-family: inherit;
+    transition: 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-mini:hover { color: var(--text); border-color: var(--text-faint); background: var(--surface-2); }
+  @media (max-width: 640px) {
+    .spotify-dock { left: 8px; right: 8px; bottom: 8px; width: auto; }
+    .spotify-dock.collapsed { width: auto; }
+    .spotify-dock-frame iframe { height: 80px; }
+  }
 </style>
 </head>
 <body>
@@ -682,6 +734,12 @@
         </div>
         <div class="editor-list" id="songs-editor"></div>
       </div>
+    </div>
+
+    <div class="card">
+      <label for="spotify-url">🎵 Spotify playlist URL <span style="font-weight:400;color:var(--text-faint);">(optional, host-only)</span></label>
+      <input type="text" id="spotify-url" placeholder="https://open.spotify.com/playlist/..." />
+      <p style="margin-top:8px; font-size:12px;">Embeds a sticky mini-player in the corner of your host screen so you can control the music without leaving the app. Any Spotify playlist / album / track URL works.</p>
     </div>
 
     <div class="card">
@@ -884,6 +942,22 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Persistent Spotify mini-player (host only). Lives outside all screens
+     so switching screens never interrupts playback. -->
+<div id="spotify-dock" class="spotify-dock" style="display:none;">
+  <div class="spotify-dock-head">
+    <span><span class="dot"></span><b id="spotify-dock-title">Spotify</b></span>
+    <button class="btn-mini" id="spotify-toggle" type="button">Hide</button>
+  </div>
+  <div class="spotify-dock-frame">
+    <iframe id="spotify-iframe"
+      src="about:blank"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy"
+      allowfullscreen></iframe>
+  </div>
+</div>
+
 <!-- Firebase SDK (compat for simplicity) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
@@ -928,6 +1002,9 @@ const DEFAULT_SONGS = [
   { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '' },
   { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '' },
 ];
+
+// Default Spotify playlist for this quiz. Host can override in setup.
+const DEFAULT_SPOTIFY_URL = 'https://open.spotify.com/playlist/7sKWww2QFFwCpibKf1QUqt';
 
 const DEFAULT_PLAYERS = [
   { name: 'SEBA' },
@@ -1093,6 +1170,7 @@ function getQueryGameId() {
 }
 
 async function bootstrap() {
+  setupSpotifyDockControls();
   const queryGame = getQueryGameId();
 
   // Resolve Firebase config with a priority order:
@@ -1210,6 +1288,8 @@ function startHostSetup() {
   state.setupSongs = DEFAULT_SONGS.map(s => ({ ...s }));
   renderPlayersEditor();
   renderSongsEditor();
+  // Prefill the Spotify playlist field.
+  if ($('#spotify-url')) $('#spotify-url').value = DEFAULT_SPOTIFY_URL;
   showScreen('screen-host-setup');
 
   // Kick off background album-art lookups for any pre-filled songs without images.
@@ -1409,6 +1489,7 @@ async function createGame() {
   }));
 
   const gameId = randomId(6);
+  const spotifyUrl = ($('#spotify-url')?.value || '').trim();
   const gamePayload = {
     meta: {
       createdAt: Date.now(),
@@ -1416,6 +1497,7 @@ async function createGame() {
       currentIndex: 0,
       revealedIndex: -1,
       hostSessionId: uuid(),
+      spotifyUrl,
     },
     players,
     songs,
@@ -1480,6 +1562,60 @@ function renderShareQR(url) {
   } catch (e) {
     useFallback(e.message || e);
   }
+}
+
+// -------------------------------------------------------------------------
+// Spotify dock — persistent mini-player for the host. Lives at the bottom
+// of <body>, outside all .screen sections, so switching screens never
+// unmounts the iframe and never restarts playback.
+// -------------------------------------------------------------------------
+function toSpotifyEmbedUrl(raw) {
+  if (!raw) return '';
+  try {
+    const u = new URL(String(raw).trim());
+    if (u.hostname !== 'open.spotify.com') return '';
+    let path = u.pathname;
+    if (!path.startsWith('/embed/')) path = '/embed' + path;
+    return `https://open.spotify.com${path}?utm_source=generator`;
+  } catch {
+    return '';
+  }
+}
+
+function mountSpotifyDock(rawUrl) {
+  const dock = document.getElementById('spotify-dock');
+  const iframe = document.getElementById('spotify-iframe');
+  const title = document.getElementById('spotify-dock-title');
+  if (!dock || !iframe) return;
+
+  const embedUrl = toSpotifyEmbedUrl(rawUrl);
+  if (!embedUrl || state.role !== 'host') {
+    dock.style.display = 'none';
+    return;
+  }
+
+  dock.style.display = '';
+  // Only change src when URL actually changes — prevents playback restart.
+  if (iframe.getAttribute('data-src') !== embedUrl) {
+    iframe.setAttribute('data-src', embedUrl);
+    iframe.src = embedUrl;
+    if (embedUrl.includes('/playlist/'))    title.textContent = 'Playlist';
+    else if (embedUrl.includes('/album/'))  title.textContent = 'Album';
+    else if (embedUrl.includes('/track/'))  title.textContent = 'Track';
+    else if (embedUrl.includes('/episode/')) title.textContent = 'Episode';
+    else                                    title.textContent = 'Spotify';
+  }
+}
+
+function setupSpotifyDockControls() {
+  const btn = document.getElementById('spotify-toggle');
+  const dock = document.getElementById('spotify-dock');
+  if (!btn || !dock || btn.dataset.wired) return;
+  btn.dataset.wired = '1';
+  btn.addEventListener('click', () => {
+    const collapsed = dock.classList.toggle('collapsed');
+    btn.textContent = collapsed ? 'Show' : 'Hide';
+  });
 }
 
 function enterHostLobby() {
@@ -1709,6 +1845,8 @@ function subscribeToGame() {
       return;
     }
     state.game = g;
+    // Show / update the Spotify dock (host-only; no-op otherwise).
+    mountSpotifyDock(g.meta?.spotifyUrl);
     // Auto-rediscover my slot via sessionId (handles reconnects + claim-race).
     if (state.mySessionId) {
       const joins = g.joins || {};
