@@ -990,7 +990,7 @@
   <section class="screen" id="screen-final">
     <div class="card">
       <div class="big-reveal">
-        <div class="song-meta">And the winner is</div>
+        <div class="song-meta" id="final-winner-label">And the winner is</div>
         <div class="owner-name" id="final-winner-name">—</div>
         <div class="song-meta" style="margin-top: 8px;"><b id="final-winner-score">0</b> points</div>
       </div>
@@ -2837,8 +2837,25 @@ function renderFinalScreen(game) {
     slot: i, name: p.name, scoreAfter: finalScores[i] || 0, scoreBefore: finalScores[i] || 0,
   })).sort((a, b) => b.scoreAfter - a.scoreAfter || a.name.localeCompare(b.name));
 
-  $('#final-winner-name').textContent = entries[0]?.name || '—';
-  $('#final-winner-score').textContent = String(entries[0]?.scoreAfter || 0);
+  // Honor ties: everyone who shares the top score is a winner.
+  const topScore = entries[0]?.scoreAfter ?? 0;
+  const winners = entries.filter(e => e.scoreAfter === topScore);
+
+  const label = $('#final-winner-label');
+  const nameEl = $('#final-winner-name');
+
+  if (winners.length <= 1) {
+    if (label) label.textContent = 'And the winner is';
+    nameEl.textContent = winners[0]?.name || '—';
+  } else {
+    if (label) label.textContent = `It's a ${winners.length}-way tie! The winners are`;
+    const names = winners.map(w => w.name);
+    // Format: "A & B"   |   "A, B & C"   |   "A, B, C & D"
+    nameEl.textContent = names.length === 2
+      ? names.join(' & ')
+      : names.slice(0, -1).join(', ') + ' & ' + names[names.length - 1];
+  }
+  $('#final-winner-score').textContent = String(topScore);
 
   renderLeaderboard($('#final-leaderboard'), game, finalScores, finalScores, game.songs.length);
 
