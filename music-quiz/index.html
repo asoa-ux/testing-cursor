@@ -760,7 +760,10 @@
           <h1>Set up the quiz</h1>
           <p>Enter player names and assign the secret owner of each song. Players will pick their name when they join.</p>
         </div>
-        <button class="btn ghost" id="reset-config-btn" title="Reset Firebase config">Reset config</button>
+        <div class="row gap">
+          <button class="btn ghost" id="reset-setup-btn" title="Clear saved players & songs and restore defaults">Reset setup</button>
+          <button class="btn ghost" id="reset-config-btn" title="Reset Firebase config">Reset config</button>
+        </div>
       </div>
     </div>
 
@@ -793,6 +796,7 @@
           <button class="btn-mini" id="sync-status-btn" type="button">Fix ↓</button>
         </div>
         <div class="editor-list" id="songs-editor"></div>
+        <div id="setup-autosave-indicator" style="margin-top: 10px; font-size: 11px; color: var(--text-faint); transition: opacity 0.8s; opacity: 0.55;">💾 Auto-save ready</div>
         <p style="margin-top: 10px; font-size: 12px;">
           💡 For the music to auto-advance when you click "Next song", each song needs its own Spotify link. Easiest way: open your playlist in Spotify, right-click each song → <i>Share → Copy Song Link</i>, then click <b>🎵 Paste Spotify links</b> above to drop all 11 in at once.
         </p>
@@ -1030,6 +1034,9 @@
    ========================================================================= */
 const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
 const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
+const LS_SETUP_DRAFT     = 'mq.setupDraft.v2'; // persists players, songs, playlist URL across reloads
+// Old draft keys are cleaned up in startHostSetup so stale data doesn't linger.
+const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1'];
 
 // Hardcoded Firebase config. Firebase client configs are public by design --
 // the API key is NOT a secret (that's what security rules are for). Baking it
@@ -1050,17 +1057,17 @@ const EMBEDDED_FIREBASE_CONFIG = {
 // Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN, 10=ASOA
 // imageUrl is optional; if empty, the app auto-fetches album art from iTunes when the host types the title.
 const DEFAULT_SONGS = [
-  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '', spotifyUrl: '' },
-  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3,  imageUrl: '', spotifyUrl: '' },
-  { title: 'The Minds of 99 — Emil',                             ownerIndex: 4,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '', spotifyUrl: '' },
-  { title: 'TBD — (waiting for last song)',                      ownerIndex: 7,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '', spotifyUrl: '' },
-  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '', spotifyUrl: '' },
+  { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/5Ush5YElzq1zjldlllP7hp' },
+  { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0IGZylmMbKqXAEE8CHtaX8' },
+  { title: 'Blackwater (feat. Ann Saunderson) — Octave One',     ownerIndex: 2,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/3etLHAzGr30F9G4bnUpdxw' },
+  { title: 'Master of Puppets — Metallica',                      ownerIndex: 3,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/54bm2e3tk8cliUz3VSdCPZ' },
+  { title: 'Emil — The Minds of 99',                             ownerIndex: 4,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0cDHgTZcDMFyFV5gTqVxEv' },
+  { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/2giFxOFIKhb1b4xRtooUUX' },
+  { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/6mFkJmJqdDVQ1REhVfGgd1' },
+  { title: 'Bitter Sweet Symphony — The Verve',                  ownerIndex: 7,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/57iDDD9N9tTWe75x6qhStw' },
+  { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/73CKjW3vsUXRpy3NnX4H7F' },
+  { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/4y6sQj6cJIXZpoUILO8hRY' },
+  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0QnONzv3TvHAWk294h6DaQ' },
 ];
 
 // Default Spotify playlist for this quiz. Host can override in setup.
@@ -1166,6 +1173,14 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+function formatRelativeTime(date) {
+  const diff = Date.now() - date.getTime();
+  if (diff < 60 * 1000) return 'just now';
+  if (diff < 60 * 60 * 1000) return `${Math.round(diff / 60000)} min ago`;
+  if (diff < 24 * 60 * 60 * 1000) return `${Math.round(diff / 3600000)}h ago`;
+  return date.toLocaleString();
+}
+
 function updateTopbarMeta() {
   const meta = $('#topbar-meta');
   const parts = [];
@@ -1229,7 +1244,9 @@ function getQueryGameId() {
   return g ? g.toUpperCase() : null;
 }
 
+const APP_BUILD = 'music-quiz build 2026-04-21-c — all 11 Spotify URLs baked into DEFAULT_SONGS';
 async function bootstrap() {
+  console.log('%c' + APP_BUILD, 'background:#1DB954;color:#000;padding:4px 8px;border-radius:4px;font-weight:700;');
   setupSpotifyDockControls();
   const queryGame = getQueryGameId();
 
@@ -1343,14 +1360,125 @@ function showConfigError(msg) {
 /* =========================================================================
    HOST SETUP SCREEN
    ========================================================================= */
+
+// Persist the host's setup between page loads so they don't have to paste
+// Spotify URLs / fix player names / etc. every time.
+function saveSetupDraft() {
+  try {
+    const data = {
+      players: state.setupPlayers,
+      songs: state.setupSongs,
+      spotifyPlaylistUrl: ($('#spotify-url')?.value || '').trim(),
+      savedAt: Date.now(),
+    };
+    const json = JSON.stringify(data);
+    localStorage.setItem(LS_SETUP_DRAFT, json);
+    const linked = (state.setupSongs || []).filter(s => s && s.spotifyUrl).length;
+    console.log(`[setup] Saved draft · ${state.setupSongs?.length || 0} songs (${linked} with Spotify URL) · ${json.length} bytes`);
+    updateAutosaveIndicator(linked);
+  } catch (e) {
+    console.warn('[setup] Failed to save draft:', e);
+  }
+}
+
+function loadSetupDraft() {
+  try {
+    const raw = localStorage.getItem(LS_SETUP_DRAFT);
+    if (!raw) { console.log('[setup] No saved draft found in localStorage.'); return null; }
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.players) || !Array.isArray(parsed.songs)) {
+      console.warn('[setup] Draft exists but is malformed; ignoring.'); return null;
+    }
+    const linked = parsed.songs.filter(s => s && s.spotifyUrl).length;
+    console.log(`[setup] Loaded draft · ${parsed.songs.length} songs (${linked} with Spotify URL) · saved ${new Date(parsed.savedAt || 0).toLocaleString()}`);
+    return parsed;
+  } catch (e) { console.warn('[setup] Failed to read draft:', e); return null; }
+}
+
+function clearSetupDraft() {
+  try { localStorage.removeItem(LS_SETUP_DRAFT); } catch {}
+}
+
+// Small visible feedback so the host can verify persistence is working.
+function updateAutosaveIndicator(linkedCount) {
+  const el = document.getElementById('setup-autosave-indicator');
+  if (!el) return;
+  const total = state.setupSongs?.length || 0;
+  const t = new Date();
+  const hhmm = t.toTimeString().slice(0, 8);
+  el.textContent = `💾 Auto-saved · ${linkedCount}/${total} songs have Spotify links · ${hhmm}`;
+  el.style.opacity = '1';
+  clearTimeout(el._fadeTimer);
+  el._fadeTimer = setTimeout(() => { el.style.opacity = '0.55'; }, 1500);
+}
+
 function startHostSetup() {
-  state.setupPlayers = DEFAULT_PLAYERS.map(p => ({ ...p }));
-  state.setupSongs = DEFAULT_SONGS.map(s => ({ ...s }));
+  // Clean up any stale draft keys from older versions of the app.
+  try { LS_SETUP_DRAFT_OLD.forEach(k => localStorage.removeItem(k)); } catch {}
+  const draft = loadSetupDraft();
+  if (draft) {
+    state.setupPlayers = draft.players.map(p => ({ name: p.name || '' }));
+    state.setupSongs   = draft.songs.map(s => ({
+      title: s.title || '',
+      ownerIndex: typeof s.ownerIndex === 'number' ? s.ownerIndex : -1,
+      imageUrl: s.imageUrl || '',
+      spotifyUrl: s.spotifyUrl || '',
+    }));
+  } else {
+    state.setupPlayers = DEFAULT_PLAYERS.map(p => ({ ...p }));
+    state.setupSongs   = DEFAULT_SONGS.map(s => ({ ...s }));
+  }
+
+  // Self-healing: if any song is missing a Spotify URL but the hardcoded DEFAULT_SONGS
+  // row with the same title has one, copy it in. This ensures a stale draft (from before
+  // the URLs were baked in) or a partially-edited draft always gets the canonical links.
+  let patched = 0;
+  state.setupSongs.forEach((s, i) => {
+    if (!s.spotifyUrl) {
+      const match = DEFAULT_SONGS.find(d => d.title === s.title) || DEFAULT_SONGS[i];
+      if (match && match.spotifyUrl) {
+        s.spotifyUrl = match.spotifyUrl;
+        patched++;
+      }
+    }
+  });
+  if (patched > 0) {
+    console.log(`[setup] Patched ${patched} song(s) with Spotify URLs from DEFAULT_SONGS.`);
+  }
+  console.log('[setup] Active setup songs:', state.setupSongs.map((s, i) =>
+    `${i + 1}. ${s.title || '(untitled)'} · ${s.spotifyUrl ? '✓' : '✗ NO URL'}`
+  ).join('\n'));
   renderPlayersEditor();
   renderSongsEditor();
-  // Prefill the Spotify playlist field.
-  if ($('#spotify-url')) $('#spotify-url').value = DEFAULT_SPOTIFY_URL;
+  if ($('#spotify-url')) {
+    $('#spotify-url').value = draft?.spotifyPlaylistUrl ?? DEFAULT_SPOTIFY_URL;
+    $('#spotify-url').oninput = saveSetupDraft;
+  }
   showScreen('screen-host-setup');
+
+  // Visible restoration feedback — the host can verify persistence works across reloads.
+  if (draft) {
+    const linked = (draft.songs || []).filter(s => s && s.spotifyUrl).length;
+    const when = draft.savedAt ? new Date(draft.savedAt) : null;
+    const ago = when ? ` · saved ${formatRelativeTime(when)}` : '';
+    toast(`🔁 Restored your saved setup · ${linked} Spotify link${linked === 1 ? '' : 's'}${ago}`);
+  }
+
+  // Always write a draft immediately after setup opens, so the very first reload after
+  // loading defaults is guaranteed to find a draft (even if the user never edited).
+  saveSetupDraft();
+
+  // Safety net: save once more right before the page unloads, in case any interactive
+  // mutation path forgot to call saveSetupDraft(). Only register once per session.
+  if (!window._mqUnloadSaveRegistered) {
+    window._mqUnloadSaveRegistered = true;
+    const backupSave = () => { try { saveSetupDraft(); } catch {} };
+    window.addEventListener('beforeunload', backupSave);
+    window.addEventListener('pagehide', backupSave);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') backupSave();
+    });
+  }
 
   // Kick off background album-art lookups for any pre-filled songs without images.
   state.setupSongs.forEach((s, i) => {
@@ -1358,6 +1486,7 @@ function startHostSetup() {
       fetchSongArtwork(s.title).then(art => {
         if (art && !state.setupSongs[i].imageUrl) {
           state.setupSongs[i].imageUrl = art;
+          saveSetupDraft();
           // Update just this thumbnail without re-rendering the whole editor.
           const thumbs = $$('#songs-editor .song-thumb');
           if (thumbs[i]) {
@@ -1376,10 +1505,12 @@ function startHostSetup() {
     state.setupPlayers.push({ name: '' });
     renderPlayersEditor();
     renderSongsEditor(); // owner dropdowns depend on players
+    saveSetupDraft();
   };
   $('#add-song-btn').onclick = () => {
     state.setupSongs.push({ title: '', ownerIndex: -1, imageUrl: '', spotifyUrl: '' });
     renderSongsEditor();
+    saveSetupDraft();
   };
   $('#bulk-spotify-btn').onclick = openBulkSpotifyPaste;
   const syncFixBtn = document.getElementById('sync-status-btn');
@@ -1389,6 +1520,15 @@ function startHostSetup() {
     localStorage.removeItem(LS_FIREBASE_CONFIG);
     location.reload();
   };
+  const resetSetupBtn = $('#reset-setup-btn');
+  if (resetSetupBtn) {
+    resetSetupBtn.onclick = () => {
+      if (!confirm('Clear your saved players and songs and restore the defaults?')) return;
+      clearSetupDraft();
+      startHostSetup();
+      toast('Setup restored to defaults');
+    };
+  }
   $('#create-game-btn').onclick = createGame;
 }
 
@@ -1400,7 +1540,7 @@ function renderPlayersEditor() {
       el('div', { class: 'num' }, String(i + 1)),
       el('input', {
         type: 'text', value: p.name, placeholder: `Player ${i + 1}`,
-        oninput: (e) => { state.setupPlayers[i].name = e.target.value; refreshOwnerDropdownLabels(); }
+        oninput: (e) => { state.setupPlayers[i].name = e.target.value; refreshOwnerDropdownLabels(); saveSetupDraft(); }
       }),
       el('button', {
         class: 'icon-btn', title: 'Remove',
@@ -1414,6 +1554,7 @@ function renderPlayersEditor() {
           state.setupPlayers.splice(i, 1);
           renderPlayersEditor();
           renderSongsEditor();
+          saveSetupDraft();
         }
       },
         el('span', { html: '&#10005;' })
@@ -1452,7 +1593,7 @@ function renderSongsEditor() {
   root.innerHTML = '';
   state.setupSongs.forEach((s, i) => {
     const ownerSelect = el('select', {
-      onchange: (e) => { state.setupSongs[i].ownerIndex = parseInt(e.target.value, 10); }
+      onchange: (e) => { state.setupSongs[i].ownerIndex = parseInt(e.target.value, 10); saveSetupDraft(); }
     },
       el('option', { value: '-1' }, '— owner —'),
       ...state.setupPlayers.map((p, pi) =>
@@ -1474,6 +1615,7 @@ function renderSongsEditor() {
           if (art) state.setupSongs[i].imageUrl = art;
         }
         renderSongsEditor();
+        saveSetupDraft();
       },
     });
     if (s.imageUrl) {
@@ -1493,6 +1635,7 @@ function renderSongsEditor() {
         if (urlToSpotifyUri(v)) wrap.classList.add('valid');
         else wrap.classList.remove('valid');
         refreshSpotifySyncStatus();
+        saveSetupDraft();
       },
     });
     const spotifyWrap = el('div', { class: 'song-spotify-row' + (urlToSpotifyUri(s.spotifyUrl) ? ' valid' : '') },
@@ -1505,7 +1648,7 @@ function renderSongsEditor() {
       thumb,
       el('input', {
         type: 'text', value: s.title, placeholder: 'Song — Artist',
-        oninput: (e) => { state.setupSongs[i].title = e.target.value; },
+        oninput: (e) => { state.setupSongs[i].title = e.target.value; saveSetupDraft(); },
         // Auto-fetch album art on blur if user hasn't set a custom URL.
         onblur: async (e) => {
           const title = e.target.value.trim();
@@ -1515,6 +1658,7 @@ function renderSongsEditor() {
           if (art) {
             state.setupSongs[i].imageUrl = art;
             renderSongsEditor();
+            saveSetupDraft();
           }
         },
       }),
@@ -1525,6 +1669,7 @@ function renderSongsEditor() {
           if (state.setupSongs.length <= 1) return toast('Need at least 1 song.');
           state.setupSongs.splice(i, 1);
           renderSongsEditor();
+          saveSetupDraft();
         }
       },
         el('span', { html: '&#10005;' })
@@ -1588,6 +1733,7 @@ function openBulkSpotifyPaste() {
         });
         close();
         renderSongsEditor();
+        saveSetupDraft();
         toast(applied ? `Applied ${applied} Spotify URL${applied === 1 ? '' : 's'}` : 'No valid URLs found');
       }
     }, 'Apply')
@@ -1819,11 +1965,25 @@ function createSpotifyController(initialUri) {
     uri: initialUri,
   }, (controller) => {
     state.spotifyController = controller;
+
+    // Reliable autoplay: when we set `spotifyAutoplayPending`, call play() as soon as
+    // the freshly-loaded track reports back as paused-and-ready (isBuffering=false, near position 0).
+    // This avoids the fragile setTimeout-after-loadUri race.
+    controller.addListener('playback_update', (e) => {
+      const d = e?.data || {};
+      if (!state.spotifyAutoplayPending) return;
+      if (d.isPaused && !d.isBuffering && (d.position ?? 0) < 500) {
+        console.log('[Spotify] playback_update: track loaded & paused — calling play()');
+        state.spotifyAutoplayPending = false;
+        try { controller.play(); } catch (err) { console.warn('[Spotify] play() from listener failed:', err); }
+      }
+    });
+
     // If a sync request arrived while we were booting, honor it now.
     if (state.pendingSyncUri) {
       try {
+        state.spotifyAutoplayPending = true;
         controller.loadUri(state.pendingSyncUri);
-        setTimeout(() => { try { controller.play(); } catch {} }, 400);
       } catch (e) { console.warn('[Spotify]', e); }
       state.pendingSyncUri = null;
     }
@@ -1835,11 +1995,23 @@ function mountSpotifyDock(rawUrl) {
   const title = document.getElementById('spotify-dock-title');
   if (!dock) return;
 
-  if (!rawUrl || state.role !== 'host') {
+  if (state.role !== 'host') {
     dock.style.display = 'none';
     return;
   }
-  const initialUri = urlToSpotifyUri(rawUrl);
+
+  // Figure out the best initial URI to boot the controller with. Prefer the global
+  // playlist URL; otherwise fall back to the first individual song URL we can find.
+  // Booting the controller early matters — by the time the host clicks "Start game",
+  // the controller must already exist for play() to work inside the user-gesture window.
+  let initialUri = urlToSpotifyUri(rawUrl);
+  if (!initialUri) {
+    const songs = state.game?.songs || [];
+    for (const s of songs) {
+      const u = urlToSpotifyUri(s?.spotifyUrl);
+      if (u) { initialUri = u; break; }
+    }
+  }
   if (!initialUri) {
     dock.style.display = 'none';
     return;
@@ -1881,17 +2053,51 @@ function syncSpotifyToGame(game) {
   if (!state.spotifyController) {
     console.log('[Spotify] Controller not ready yet, queueing URI:', uri);
     state.pendingSyncUri = uri;
+    state.spotifyAutoplayPending = true;
     return;
   }
   console.log(`[Spotify] Syncing to song ${songIdx + 1}:`, uri);
   try {
+    state.spotifyAutoplayPending = true;
     state.spotifyController.loadUri(uri);
-    // loadUri doesn't always auto-play; give it a beat, then play.
+    // Optimistic early play() in case we still have user-gesture context.
+    // The playback_update listener is the reliable backup.
     setTimeout(() => {
-      try { state.spotifyController.play(); } catch (e) { console.warn('[Spotify] play() failed:', e); }
-    }, 450);
+      try { state.spotifyController.play(); } catch (e) { /* silent; listener handles it */ }
+    }, 300);
   } catch (e) {
     console.warn('[Spotify] loadUri failed:', e);
+  }
+}
+
+// Call this SYNCHRONOUSLY from inside a click handler (before any Firebase round-trip)
+// to preserve the browser's user-activation window for Spotify autoplay. It mirrors
+// what syncSpotifyToGame would do once Firebase echoes back, but runs immediately.
+function spotifyJumpToSongAt(songIdx, status) {
+  if (state.role !== 'host') return;
+  const song = state.game?.songs?.[songIdx];
+  if (!song) return;
+  const uri = urlToSpotifyUri(song.spotifyUrl);
+  if (!uri) return;
+
+  // Pre-mark this sync so the Firebase-triggered syncSpotifyToGame() dedupes against it.
+  state.lastSyncedSongKey = `${status}:${songIdx}`;
+  state.spotifyAutoplayPending = true;
+
+  if (!state.spotifyController) {
+    console.log('[Spotify] Controller not ready at click-time, queueing:', uri);
+    state.pendingSyncUri = uri;
+    loadSpotifyIframeApi();
+    return;
+  }
+  console.log(`[Spotify] (click) Jumping to song ${songIdx + 1}:`, uri);
+  try {
+    state.spotifyController.loadUri(uri);
+    // Best-effort synchronous play() inside the user-gesture chain.
+    try { state.spotifyController.play(); } catch {}
+    setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+  } catch (e) {
+    console.warn('[Spotify] click-time loadUri failed:', e);
   }
 }
 
@@ -2004,6 +2210,29 @@ function startGameFromLobby() {
   if (newSongs.length < 1) {
     alert("Can't start — none of the joined players own any of the songs.");
     return;
+  }
+
+  // Kick off Spotify playback INSIDE the user-gesture context (before the Firebase
+  // round-trip) so the browser allows autoplay. We use newSongs because game.songs
+  // is about to be overwritten.
+  if (state.role === 'host') {
+    const firstUri = urlToSpotifyUri(newSongs[0]?.spotifyUrl);
+    if (firstUri) {
+      state.lastSyncedSongKey = `voting:0`;
+      state.spotifyAutoplayPending = true;
+      if (state.spotifyController) {
+        try {
+          state.spotifyController.loadUri(firstUri);
+          try { state.spotifyController.play(); } catch {}
+          setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+          console.log('[Spotify] (Start Game) Jumped to song 1:', firstUri);
+        } catch (e) { console.warn('[Spotify] (Start Game) loadUri failed:', e); }
+      } else {
+        state.pendingSyncUri = firstUri;
+        loadSpotifyIframeApi();
+        console.log('[Spotify] (Start Game) Controller not ready — queued:', firstUri);
+      }
+    }
   }
 
   // Write everything atomically.
@@ -2291,6 +2520,8 @@ function renderVotingScreen(game) {
           status: 'review',
         });
       } else {
+        // Sync Spotify synchronously in the click handler (preserves user-gesture for autoplay).
+        spotifyJumpToSongAt(idx + 1, 'voting');
         state.gameRef.child('meta').update({
           status: 'voting',
           currentIndex: idx + 1,
@@ -2427,6 +2658,7 @@ function renderReviewScreen(game) {
 
     $('#lock-votes-btn').onclick = () => {
       if (!confirm('Lock in all votes and start the reveals? Nobody can change their votes after this.')) return;
+      spotifyJumpToSongAt(0, 'reveal');
       state.gameRef.child('meta').update({
         status: 'reveal',
         revealedIndex: 0,
@@ -2515,6 +2747,8 @@ function renderRevealScreen(game) {
       if (isLast) {
         state.gameRef.child('meta').update({ status: 'finished' });
       } else {
+        // Sync Spotify synchronously in the click handler (preserves user-gesture for autoplay).
+        spotifyJumpToSongAt(idx + 1, 'reveal');
         // Stay in reveal phase; just move to next song in the recap.
         state.gameRef.child('meta').update({
           revealedIndex: idx + 1,
