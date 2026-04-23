@@ -46,23 +46,25 @@
 -->
 <style>
   :root {
-    --bg-0: #0b0420;
-    --bg-1: #170a3a;
-    --bg-2: #1f0f4a;
-    --accent: #ff3d8b;
-    --accent-2: #7b5cff;
-    --accent-3: #00e0ff;
-    --good: #2bd66a;
-    --bad: #ff4d6d;
-    --warn: #ffc043;
-    --text: #f5f1ff;
-    --text-dim: #b3a8d6;
-    --text-faint: #7c719b;
-    --surface: rgba(255, 255, 255, 0.06);
-    --surface-2: rgba(255, 255, 255, 0.1);
-    --surface-3: rgba(255, 255, 255, 0.16);
-    --border: rgba(255, 255, 255, 0.12);
-    --shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.5);
+    /* Graphite theme: near-black warm greys with a single amber accent.
+       Designed to feel professional and music-neutral (no purple glow). */
+    --bg-0: #0a0a0c;
+    --bg-1: #111114;
+    --bg-2: #17171b;
+    --accent:   #f5a524; /* warm amber - primary */
+    --accent-2: #e08820; /* deeper amber  - gradient partner */
+    --accent-3: #c9a86a; /* muted gold    - tertiary highlights */
+    --good: #3fc97b;
+    --bad:  #ef4b58;
+    --warn: #f5a524;
+    --text:       #f2f2f5;
+    --text-dim:   #a8a8b0;
+    --text-faint: #6c6c75;
+    --surface:   rgba(255, 255, 255, 0.035);
+    --surface-2: rgba(255, 255, 255, 0.065);
+    --surface-3: rgba(255, 255, 255, 0.115);
+    --border:    rgba(255, 255, 255, 0.08);
+    --shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.65);
     --radius: 18px;
     --radius-sm: 12px;
   }
@@ -73,9 +75,10 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text);
     background:
-      radial-gradient(900px 600px at 10% -10%, rgba(255, 61, 139, 0.35), transparent 60%),
-      radial-gradient(800px 600px at 110% 10%, rgba(123, 92, 255, 0.40), transparent 60%),
-      radial-gradient(900px 700px at 50% 120%, rgba(0, 224, 255, 0.18), transparent 60%),
+      /* Subtle warm amber spotlight top-right + a barely-there one bottom-left
+         to give depth without shouting. */
+      radial-gradient(900px 600px at 110% -10%, rgba(245, 165, 36, 0.08), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(245, 165, 36, 0.04), transparent 60%),
       linear-gradient(180deg, var(--bg-0), var(--bg-1) 60%, var(--bg-2));
     min-height: 100%;
     overflow-x: hidden;
@@ -114,9 +117,9 @@
     border-radius: 10px;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     display: grid; place-items: center;
-    box-shadow: 0 8px 22px -6px rgba(255, 61, 139, 0.6);
+    box-shadow: 0 8px 22px -6px rgba(245, 165, 36, 0.45);
   }
-  .brand-mark svg { width: 18px; height: 18px; color: #fff; }
+  .brand-mark svg { width: 18px; height: 18px; color: #0a0a0c; }
   .topbar-meta { color: var(--text-dim); font-size: 13px; display: flex; gap: 14px; }
   .topbar-meta b { color: var(--text); font-weight: 600; }
 
@@ -164,8 +167,8 @@
     transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
   }
   input:focus, select:focus, textarea:focus {
-    border-color: var(--accent-2);
-    box-shadow: 0 0 0 3px rgba(123, 92, 255, 0.25);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.22);
   }
   textarea { resize: vertical; min-height: 120px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
   select option { background: var(--bg-2); color: var(--text); }
@@ -191,12 +194,20 @@
   .btn.primary {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     border-color: transparent;
-    box-shadow: 0 10px 26px -8px rgba(255, 61, 139, 0.55);
+    color: #0a0a0c;
+    box-shadow: 0 10px 26px -8px rgba(245, 165, 36, 0.45);
   }
-  .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn.primary:hover:not(:disabled) {
+    /* Re-assert the amber gradient here because `.btn:hover` has higher
+       specificity than `.btn.primary` and would otherwise override it
+       with a translucent white surface, making the dark text unreadable. */
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    filter: brightness(1.08);
+    color: #0a0a0c;
+  }
   .btn.ghost { background: transparent; }
-  .btn.danger { color: var(--bad); border-color: rgba(255, 77, 109, 0.35); }
-  .btn.danger:hover { background: rgba(255, 77, 109, 0.1); }
+  .btn.danger { color: var(--bad); border-color: rgba(239, 75, 88, 0.35); }
+  .btn.danger:hover { background: rgba(239, 75, 88, 0.1); }
   .btn.big { padding: 16px 28px; font-size: 17px; }
   .btn.full { width: 100%; justify-content: center; }
 
@@ -274,14 +285,14 @@
     border-radius: var(--radius-sm);
     font-size: 13px; font-weight: 600;
     margin-bottom: 12px;
-    background: rgba(255, 192, 67, 0.10);
-    border: 1px solid rgba(255, 192, 67, 0.35);
-    color: #ffd987;
+    background: rgba(245, 165, 36, 0.08);
+    border: 1px solid rgba(245, 165, 36, 0.30);
+    color: #f3c27a;
   }
   .sync-status.all-linked {
-    background: rgba(30, 215, 96, 0.10);
-    border-color: rgba(30, 215, 96, 0.4);
-    color: #b6f0c8;
+    background: rgba(63, 201, 123, 0.10);
+    border-color: rgba(63, 201, 123, 0.35);
+    color: #9be3b6;
   }
   .sync-status .sync-dot {
     width: 8px; height: 8px; border-radius: 50%;
@@ -364,12 +375,12 @@
   }
   .player-chip:hover:not(.disabled):not(.mine) { background: var(--surface-3); border-color: var(--accent-2); }
   .player-chip.joined { border-color: rgba(43, 214, 106, 0.4); background: rgba(43, 214, 106, 0.10); }
-  .player-chip.mine { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 61, 139, 0.2); }
+  .player-chip.mine { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.25); }
   .player-chip.disabled { opacity: 0.4; cursor: not-allowed; }
   .player-chip .avatar {
     width: 30px; height: 30px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; font-size: 12px; color: #0b0420;
+    display: grid; place-items: center; font-weight: 800; font-size: 12px; color: #0a0a0c;
     flex-shrink: 0;
   }
   .player-chip .name { font-weight: 600; font-size: 14px; flex: 1; }
@@ -401,15 +412,15 @@
   .vote-btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent-2); background: var(--surface-3); }
   .vote-btn.selected {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    border-color: transparent; color: #fff;
-    box-shadow: 0 12px 28px -10px rgba(255, 61, 139, 0.7);
+    border-color: transparent; color: #0a0a0c;
+    box-shadow: 0 12px 28px -10px rgba(245, 165, 36, 0.55);
     transform: translateY(-2px);
   }
   .vote-btn:disabled:not(.selected) { opacity: 0.5; cursor: not-allowed; }
   .vote-btn .v-avatar {
     width: 44px; height: 44px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 16px;
+    display: grid; place-items: center; font-weight: 800; color: #0a0a0c; font-size: 16px;
   }
   .vote-btn.selected .v-avatar { background: rgba(255,255,255,0.25); color: #fff; }
 
@@ -448,7 +459,9 @@
   .big-reveal {
     text-align: center;
     padding: 30px 20px;
-    background: linear-gradient(135deg, rgba(255, 61, 139, 0.18), rgba(123, 92, 255, 0.18));
+    background:
+      radial-gradient(400px 200px at 50% 0%, rgba(245, 165, 36, 0.14), transparent 70%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
@@ -473,12 +486,12 @@
     border-radius: var(--radius-sm);
     transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s;
   }
-  .lb-row.up { background: rgba(43, 214, 106, 0.12); border-color: rgba(43, 214, 106, 0.4); }
-  .lb-row.down { background: rgba(255, 77, 109, 0.10); border-color: rgba(255, 77, 109, 0.3); }
+  .lb-row.up { background: rgba(63, 201, 123, 0.12); border-color: rgba(63, 201, 123, 0.4); }
+  .lb-row.down { background: rgba(239, 75, 88, 0.08); border-color: rgba(239, 75, 88, 0.3); }
   .lb-row.gained { animation: gainPulse 1.2s ease; }
   @keyframes gainPulse {
-    0% { box-shadow: 0 0 0 0 rgba(43, 214, 106, 0.6); }
-    50% { box-shadow: 0 0 0 8px rgba(43, 214, 106, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(63, 201, 123, 0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(63, 201, 123, 0); }
   }
   .lb-rank {
     font-size: 22px; font-weight: 800; text-align: center;
@@ -494,7 +507,7 @@
   .lb-name .avatar {
     width: 28px; height: 28px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 11px;
+    display: grid; place-items: center; font-weight: 800; color: #0a0a0c; font-size: 11px;
     flex-shrink: 0;
   }
   .lb-delta {
@@ -515,10 +528,10 @@
   }
   .lb-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
     border-radius: inherit;
     transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-    box-shadow: 0 0 14px rgba(255, 61, 139, 0.35);
+    box-shadow: 0 0 14px rgba(245, 165, 36, 0.32);
   }
   .lb-row:nth-child(1) .lb-bar-fill { background: linear-gradient(90deg, #ffd86b, var(--accent)); }
   .lb-bar-label {
@@ -532,8 +545,8 @@
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
     padding: 12px 22px; border-radius: 999px;
-    background: rgba(255, 255, 255, 0.95); color: #1a0b3e; font-weight: 700;
-    box-shadow: 0 14px 30px -10px rgba(0,0,0,0.5);
+    background: rgba(245, 165, 36, 0.96); color: #0a0a0c; font-weight: 700;
+    box-shadow: 0 14px 30px -10px rgba(0,0,0,0.6);
     opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -541,14 +554,14 @@
   /* Status notes */
   .note {
     padding: 12px 14px;
-    background: rgba(255, 192, 67, 0.10);
-    border: 1px solid rgba(255, 192, 67, 0.35);
-    color: #ffd987;
+    background: rgba(245, 165, 36, 0.08);
+    border: 1px solid rgba(245, 165, 36, 0.30);
+    color: #f3c27a;
     border-radius: var(--radius-sm);
     font-size: 14px;
   }
-  .note.error { background: rgba(255, 77, 109, 0.10); border-color: rgba(255, 77, 109, 0.4); color: #ffb3c0; }
-  .note.ok { background: rgba(43, 214, 106, 0.10); border-color: rgba(43, 214, 106, 0.4); color: #b6f0c8; }
+  .note.error { background: rgba(239, 75, 88, 0.08); border-color: rgba(239, 75, 88, 0.35); color: #f5a3aa; }
+  .note.ok { background: rgba(63, 201, 123, 0.08); border-color: rgba(63, 201, 123, 0.35); color: #9be3b6; }
 
   .center-stack { text-align: center; max-width: 480px; margin: 60px auto 30px; }
   .center-stack .brand-mark { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 18px; }
@@ -621,7 +634,7 @@
   .review-opt:hover:not(:disabled):not(.selected) { background: var(--surface-3); border-color: var(--accent-2); }
   .review-opt.selected {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    border-color: transparent; color: #fff;
+    border-color: transparent; color: #0a0a0c;
   }
   .review-opt:disabled:not(.selected) { opacity: 0.3; cursor: not-allowed; }
   .review-opt.used-elsewhere:not(.selected) {
@@ -632,10 +645,10 @@
   .review-opt .r-avatar {
     width: 22px; height: 22px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; color: #0b0420; font-size: 10px;
+    display: grid; place-items: center; font-weight: 800; color: #0a0a0c; font-size: 10px;
     flex-shrink: 0;
   }
-  .review-opt.selected .r-avatar { background: rgba(255,255,255,0.25); color: #fff; }
+  .review-opt.selected .r-avatar { background: rgba(10,10,12,0.22); color: #0a0a0c; }
 
   .footer-note { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 30px; }
 
@@ -646,7 +659,7 @@
     right: 16px;
     width: 380px;
     max-width: calc(100vw - 32px);
-    background: rgba(20, 10, 48, 0.85);
+    background: rgba(14, 14, 18, 0.88);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
     border: 1px solid var(--border);
@@ -957,7 +970,7 @@
   <section class="screen" id="screen-reveal">
     <div class="card">
       <div class="big-reveal">
-        <div class="song-meta">Song <b id="reveal-song-num">1</b> of <span id="reveal-song-total">11</span></div>
+        <div class="song-meta" style="margin-bottom: 18px;">Song <b id="reveal-song-num">1</b> of <span id="reveal-song-total">11</span></div>
         <div class="reveal-art" id="reveal-art-wrap" style="display:none;"><img id="reveal-song-img" alt="" /></div>
         <div class="song-title" id="reveal-song-title">—</div>
         <div class="owner-label">Whose song?</div>
@@ -1033,9 +1046,9 @@
    ========================================================================= */
 const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
 const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
-const LS_SETUP_DRAFT     = 'mq.setupDraft.v2'; // persists players, songs, playlist URL across reloads
+const LS_SETUP_DRAFT     = 'mq.setupDraft.v3'; // persists players, songs, playlist URL across reloads
 // Old draft keys are cleaned up in startHostSetup so stale data doesn't linger.
-const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1'];
+const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1', 'mq.setupDraft.v2'];
 
 // Hardcoded Firebase config. Firebase client configs are public by design --
 // the API key is NOT a secret (that's what security rules are for). Baking it
@@ -1053,8 +1066,9 @@ const EMBEDDED_FIREBASE_CONFIG = {
 };
 
 // Default song list pre-filled from the user's input.
-// Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN, 10=ASOA
+// Player indices: 0=SEBA, 1=MPER, 2=TOCH, 3=PIOS, 4=LATS, 5=PDUA, 6=PVMA, 7=PIOP, 8=RHMO, 9=ANBN
 // imageUrl is optional; if empty, the app auto-fetches album art from iTunes when the host types the title.
+// Note: the host (ASOA) doesn't play — they already know every answer, which would be unfair.
 const DEFAULT_SONGS = [
   { title: 'Narwhals — Mr Weebl',                                ownerIndex: 0,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/5Ush5YElzq1zjldlllP7hp' },
   { title: 'She Will Be Loved — Maroon 5',                       ownerIndex: 1,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0IGZylmMbKqXAEE8CHtaX8' },
@@ -1066,7 +1080,6 @@ const DEFAULT_SONGS = [
   { title: 'Bitter Sweet Symphony — The Verve',                  ownerIndex: 7,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/57iDDD9N9tTWe75x6qhStw' },
   { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/73CKjW3vsUXRpy3NnX4H7F' },
   { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/4y6sQj6cJIXZpoUILO8hRY' },
-  { title: 'Last Kiss — Pearl Jam',                              ownerIndex: 10, imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0QnONzv3TvHAWk294h6DaQ' },
 ];
 
 // Default Spotify playlist for this quiz. Host can override in setup.
@@ -1083,7 +1096,6 @@ const DEFAULT_PLAYERS = [
   { name: 'PIOP' },
   { name: 'RHMO' },
   { name: 'ANBN' },
-  { name: 'ASOA' },
 ];
 
 const state = {
@@ -1102,7 +1114,38 @@ const state = {
   // Reveal animations:
   prevLeaderboardOrder: null, // array of slotIndex in last rendered order
   prevScores: null,           // map slotIndex -> score before reveal
+  // Spotify preview-mode (auto-pause after N seconds of real playback):
+  previewMode: false,         // true during voting/reveal (enforce cutoff), false during review (free navigation)
+  previewEnforced: false,     // true once the current track has been auto-paused at the cutoff
+  previewTimerId: null,       // wall-clock backup timer id (setTimeout) in case playback_update misbehaves
 };
+
+function clearPreviewTimer() {
+  if (state.previewTimerId) {
+    clearTimeout(state.previewTimerId);
+    state.previewTimerId = null;
+  }
+}
+
+// Wall-clock backup cutoff. If the `playback_update` listener stalls or the
+// embed doesn't report position increases (e.g. Spotify Premium full-playback
+// path), this fires ~PREVIEW_SECONDS+2 after the user-initiated play() and
+// forcibly pauses the controller.
+function armPreviewBackupTimer() {
+  clearPreviewTimer();
+  state.previewTimerId = setTimeout(() => {
+    state.previewTimerId = null;
+    if (!state.previewMode || state.previewEnforced) return;
+    state.previewEnforced = true;
+    console.log(`[Spotify] Preview backup timer fired after ~${PREVIEW_SECONDS + 2}s — pausing.`);
+    try { state.spotifyController?.pause(); } catch (err) { console.warn('[Spotify] backup pause failed:', err); }
+  }, (PREVIEW_SECONDS + 2) * 1000);
+}
+
+// How long to auto-play a song before pausing it when preview-mode is on.
+// 25s mirrors the host's original "play ~25 sec of each song" plan; we give a
+// tiny bit of extra headroom to compensate for Spotify's buffer jitter.
+const PREVIEW_SECONDS = 28;
 
 /* =========================================================================
    TINY UTILITIES
@@ -1243,9 +1286,9 @@ function getQueryGameId() {
   return g ? g.toUpperCase() : null;
 }
 
-const APP_BUILD = 'music-quiz build 2026-04-21-c — all 11 Spotify URLs baked into DEFAULT_SONGS';
+const APP_BUILD = 'music-quiz build 2026-04-21-h — preview cutoff backup timer + tick diagnostics';
 async function bootstrap() {
-  console.log('%c' + APP_BUILD, 'background:#1DB954;color:#000;padding:4px 8px;border-radius:4px;font-weight:700;');
+  console.log('%c' + APP_BUILD, 'background:#f5a524;color:#0a0a0c;padding:4px 8px;border-radius:4px;font-weight:700;');
   setupSpotifyDockControls();
   const queryGame = getQueryGameId();
 
@@ -1885,7 +1928,7 @@ function renderShareQR(url) {
     QRCode.toCanvas(
       document.getElementById('qr-canvas'),
       url,
-      { width: 360, margin: 1, color: { dark: '#0b0420', light: '#ffffff' } },
+      { width: 360, margin: 1, color: { dark: '#0a0a0c', light: '#ffffff' } },
       (err) => { if (err) useFallback(err.message || err); }
     );
   } catch (e) {
@@ -1965,16 +2008,41 @@ function createSpotifyController(initialUri) {
   }, (controller) => {
     state.spotifyController = controller;
 
-    // Reliable autoplay: when we set `spotifyAutoplayPending`, call play() as soon as
-    // the freshly-loaded track reports back as paused-and-ready (isBuffering=false, near position 0).
-    // This avoids the fragile setTimeout-after-loadUri race.
+    // Single listener handles two things on every playback update:
+    //  1) Reliable autoplay: when we've flagged `spotifyAutoplayPending`, call
+    //     play() as soon as the freshly-loaded track reports back as
+    //     paused-and-ready (isBuffering=false, near position 0). This avoids
+    //     the fragile setTimeout-after-loadUri race.
+    //  2) Preview-mode cutoff: during voting/reveal we only want to play ~25s
+    //     of each song, so when position >= PREVIEW_SECONDS we pause once
+    //     (previewEnforced) and leave the player alone afterwards so the host
+    //     can still manually unpause if they want to hear more.
     controller.addListener('playback_update', (e) => {
       const d = e?.data || {};
-      if (!state.spotifyAutoplayPending) return;
-      if (d.isPaused && !d.isBuffering && (d.position ?? 0) < 500) {
+
+      if (state.spotifyAutoplayPending &&
+          d.isPaused && !d.isBuffering && (d.position ?? 0) < 500) {
         console.log('[Spotify] playback_update: track loaded & paused — calling play()');
         state.spotifyAutoplayPending = false;
         try { controller.play(); } catch (err) { console.warn('[Spotify] play() from listener failed:', err); }
+      }
+
+      // Extra diagnostics: log position every ~5s so we can confirm events are
+      // arriving. (Harmless spam; remove if you want it quieter.)
+      if (state.previewMode && !d.isPaused) {
+        const sec = Math.floor((d.position ?? 0) / 1000);
+        if (sec !== state._lastPreviewTick) {
+          state._lastPreviewTick = sec;
+          if (sec % 5 === 0) console.log(`[Spotify] preview tick: ${sec}s`);
+        }
+      }
+
+      if (state.previewMode && !state.previewEnforced &&
+          !d.isPaused && (d.position ?? 0) >= PREVIEW_SECONDS * 1000) {
+        state.previewEnforced = true;
+        clearPreviewTimer();
+        console.log(`[Spotify] Preview cutoff hit at ~${Math.round((d.position||0)/1000)}s — pausing.`);
+        try { controller.pause(); } catch (err) { console.warn('[Spotify] preview pause failed:', err); }
       }
     });
 
@@ -2033,10 +2101,39 @@ function mountSpotifyDock(rawUrl) {
 function syncSpotifyToGame(game) {
   if (state.role !== 'host') return;
   const status = game?.meta?.status;
+
+  // Review phase: players get a last chance to change votes. Load the full
+  // playlist (if one is configured) so the host can freely scrub around and
+  // replay any specific song. Preview-mode is disabled here so tracks play
+  // their full length if the host wants to listen back carefully.
+  if (status === 'review') {
+    const playlistUri = urlToSpotifyUri(game?.meta?.spotifyUrl);
+    const reviewKey = playlistUri ? `review:playlist:${playlistUri}` : 'review:paused';
+    if (state.lastSyncedSongKey !== reviewKey) {
+      state.lastSyncedSongKey = reviewKey;
+      state.spotifyAutoplayPending = false;
+      state.previewMode = false;
+      state.previewEnforced = false;
+      clearPreviewTimer();
+      if (state.spotifyController) {
+        if (playlistUri) {
+          try {
+            state.spotifyController.loadUri(playlistUri);
+            console.log('[Spotify] Entering review — loaded playlist for manual replay.');
+          } catch (e) { console.warn('[Spotify] review playlist load failed:', e); }
+        } else {
+          try { state.spotifyController.pause(); } catch {}
+          console.log('[Spotify] Entering review — paused (no playlist URL set).');
+        }
+      }
+    }
+    return;
+  }
+
   const songs = game?.songs || [];
   let songIdx = -1;
-  if (status === 'voting' || status === 'review') songIdx = game.meta.currentIndex ?? -1;
-  else if (status === 'reveal')                   songIdx = game.meta.revealedIndex ?? -1;
+  if (status === 'voting')      songIdx = game.meta.currentIndex ?? -1;
+  else if (status === 'reveal') songIdx = game.meta.revealedIndex ?? -1;
   if (songIdx < 0 || songIdx >= songs.length) return;
 
   const key = `${status}:${songIdx}`;
@@ -2053,17 +2150,20 @@ function syncSpotifyToGame(game) {
     console.log('[Spotify] Controller not ready yet, queueing URI:', uri);
     state.pendingSyncUri = uri;
     state.spotifyAutoplayPending = true;
+    state.previewMode = true;
+    state.previewEnforced = false;
     return;
   }
-  console.log(`[Spotify] Syncing to song ${songIdx + 1}:`, uri);
+  console.log(`[Spotify] Syncing to song ${songIdx + 1} (preview mode ~${PREVIEW_SECONDS}s):`, uri);
   try {
     state.spotifyAutoplayPending = true;
+    state.previewMode = true;
+    state.previewEnforced = false;
     state.spotifyController.loadUri(uri);
-    // Optimistic early play() in case we still have user-gesture context.
-    // The playback_update listener is the reliable backup.
     setTimeout(() => {
       try { state.spotifyController.play(); } catch (e) { /* silent; listener handles it */ }
     }, 300);
+    armPreviewBackupTimer();
   } catch (e) {
     console.warn('[Spotify] loadUri failed:', e);
   }
@@ -2082,6 +2182,10 @@ function spotifyJumpToSongAt(songIdx, status) {
   // Pre-mark this sync so the Firebase-triggered syncSpotifyToGame() dedupes against it.
   state.lastSyncedSongKey = `${status}:${songIdx}`;
   state.spotifyAutoplayPending = true;
+  // Re-arm preview mode for this new track (voting/reveal). We reset even when
+  // jumping between songs in the same phase so each track gets its own ~25s slice.
+  state.previewMode = true;
+  state.previewEnforced = false;
 
   if (!state.spotifyController) {
     console.log('[Spotify] Controller not ready at click-time, queueing:', uri);
@@ -2089,12 +2193,12 @@ function spotifyJumpToSongAt(songIdx, status) {
     loadSpotifyIframeApi();
     return;
   }
-  console.log(`[Spotify] (click) Jumping to song ${songIdx + 1}:`, uri);
+  console.log(`[Spotify] (click) Jumping to song ${songIdx + 1} (preview ~${PREVIEW_SECONDS}s):`, uri);
   try {
     state.spotifyController.loadUri(uri);
-    // Best-effort synchronous play() inside the user-gesture chain.
     try { state.spotifyController.play(); } catch {}
     setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+    armPreviewBackupTimer();
   } catch (e) {
     console.warn('[Spotify] click-time loadUri failed:', e);
   }
@@ -2155,7 +2259,7 @@ function renderHostLobbyPlayers(game) {
       el('div', { class: 'avatar' }, initials(p.name)),
       el('div', { class: 'name' }, p.name),
       el('div', { class: 'check' },
-        el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b0420" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
+        el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0a0a0c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
       )
     );
     grid.appendChild(chip);
@@ -2219,12 +2323,15 @@ function startGameFromLobby() {
     if (firstUri) {
       state.lastSyncedSongKey = `voting:0`;
       state.spotifyAutoplayPending = true;
+      state.previewMode = true;
+      state.previewEnforced = false;
       if (state.spotifyController) {
         try {
           state.spotifyController.loadUri(firstUri);
           try { state.spotifyController.play(); } catch {}
           setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
-          console.log('[Spotify] (Start Game) Jumped to song 1:', firstUri);
+          armPreviewBackupTimer();
+          console.log(`[Spotify] (Start Game) Jumped to song 1 (preview ~${PREVIEW_SECONDS}s):`, firstUri);
         } catch (e) { console.warn('[Spotify] (Start Game) loadUri failed:', e); }
       } else {
         state.pendingSyncUri = firstUri;
@@ -2290,7 +2397,7 @@ function renderClaimScreen(game) {
       el('div', { class: 'avatar' }, initials(p.name)),
       el('div', { class: 'name' }, p.name),
       el('div', { class: 'check' },
-        el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b0420" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
+        el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0a0a0c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
       )
     );
     grid.appendChild(chip);
@@ -2488,14 +2595,10 @@ function renderVotingScreen(game) {
     grid.appendChild(btn);
   });
 
-  // Hide vote-status by default; show a minimal confirmation if the player has voted.
+  // The highlighted player chip already communicates who was voted for,
+  // so we keep this status element hidden.
   const status = $('#my-vote-status');
-  if (state.role === 'player' && state.mySlotIndex >= 0 && typeof myVote === 'number') {
-    status.textContent = '✓ Voted: ' + game.players[myVote].name;
-    status.style.display = 'block';
-  } else {
-    status.style.display = 'none';
-  }
+  if (status) status.style.display = 'none';
 
   // Host controls
   if (isHost) {
@@ -2656,7 +2759,6 @@ function renderReviewScreen(game) {
     $('#review-progress-bar').style.width = (total ? (done / total * 100) : 0) + '%';
 
     $('#lock-votes-btn').onclick = () => {
-      if (!confirm('Lock in all votes and start the reveals? Nobody can change their votes after this.')) return;
       spotifyJumpToSongAt(0, 'reveal');
       state.gameRef.child('meta').update({
         status: 'reveal',
