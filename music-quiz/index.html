@@ -1004,7 +1004,6 @@
     </div>
   </section>
 
-  <p class="footer-note">Built for one-off team-building shenanigans · works on phones & laptops · players can safely refresh.</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2489,10 +2488,10 @@ function renderVotingScreen(game) {
     grid.appendChild(btn);
   });
 
-  // Hide vote-status by default; show if player already voted
+  // Hide vote-status by default; show a minimal confirmation if the player has voted.
   const status = $('#my-vote-status');
   if (state.role === 'player' && state.mySlotIndex >= 0 && typeof myVote === 'number') {
-    status.textContent = '✓ Voted: ' + game.players[myVote].name + '. You can change it anytime before the reveals start — there\'s a review screen at the end.';
+    status.textContent = '✓ Voted: ' + game.players[myVote].name;
     status.style.display = 'block';
   } else {
     status.style.display = 'none';
