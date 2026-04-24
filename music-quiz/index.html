@@ -1072,9 +1072,9 @@
    ========================================================================= */
 const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
 const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
-const LS_SETUP_DRAFT     = 'mq.setupDraft.v9'; // persists players, songs, playlist URL across reloads
+const LS_SETUP_DRAFT     = 'mq.setupDraft.v10'; // persists players, songs, playlist URL across reloads
 // Old draft keys are cleaned up in startHostSetup so stale data doesn't linger.
-const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1', 'mq.setupDraft.v2', 'mq.setupDraft.v3', 'mq.setupDraft.v4', 'mq.setupDraft.v5', 'mq.setupDraft.v6', 'mq.setupDraft.v7', 'mq.setupDraft.v8'];
+const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1', 'mq.setupDraft.v2', 'mq.setupDraft.v3', 'mq.setupDraft.v4', 'mq.setupDraft.v5', 'mq.setupDraft.v6', 'mq.setupDraft.v7', 'mq.setupDraft.v8', 'mq.setupDraft.v9'];
 
 // Hardcoded Firebase config. Firebase client configs are public by design --
 // the API key is NOT a secret (that's what security rules are for). Baking it
@@ -1103,7 +1103,7 @@ const DEFAULT_SONGS = [
   { title: 'Emil — The Minds of 99',                             ownerIndex: 4,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0cDHgTZcDMFyFV5gTqVxEv' },
   { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/2giFxOFIKhb1b4xRtooUUX' },
   { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/6mFkJmJqdDVQ1REhVfGgd1' },
-  { title: 'M01 Chant I - Making of Cyborg — Kenji Kawai',       ownerIndex: 7,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/6EYee9GvhO4waKN8MCXu4Q' },
+  { title: 'Making of a Cyborg — Cinescore (cover of Kenji Kawai, Ghost in the Shell OST)', ownerIndex: 7, imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/6EYee9GvhO4waKN8MCXu4Q' },
   { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/73CKjW3vsUXRpy3NnX4H7F' },
   { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/4y6sQj6cJIXZpoUILO8hRY' },
 ];
@@ -1332,7 +1332,7 @@ function getQueryGameId() {
   return g ? g.toUpperCase() : null;
 }
 
-const APP_BUILD = 'music-quiz build 2026-04-21-p — switched Making of Cyborg track URL';
+const APP_BUILD = 'music-quiz build 2026-04-21-q — clarified Making of Cyborg as Cinescore cover';
 async function bootstrap() {
   console.log('%c' + APP_BUILD, 'background:#f5a524;color:#0a0a0c;padding:4px 8px;border-radius:4px;font-weight:700;');
   setupSpotifyDockControls();
