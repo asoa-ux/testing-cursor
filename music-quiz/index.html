@@ -378,9 +378,13 @@
   .player-chip.mine { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.25); }
   .player-chip.disabled { opacity: 0.4; cursor: not-allowed; }
   .player-chip .avatar {
-    width: 30px; height: 30px; border-radius: 50%;
+    /* Pill (not circle) so the 4-letter team codes (e.g. "SEBA") fit
+       comfortably without cramped typography. */
+    min-width: 42px; height: 24px; padding: 0 6px; border-radius: 999px;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; font-size: 12px; color: #0a0a0c;
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 11px; letter-spacing: 0.02em; color: #0a0a0c;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
     flex-shrink: 0;
   }
   .player-chip .name { font-weight: 600; font-size: 14px; flex: 1; }
@@ -418,11 +422,14 @@
   }
   .vote-btn:disabled:not(.selected) { opacity: 0.5; cursor: not-allowed; }
   .vote-btn .v-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
+    /* Pill to accommodate 4-letter codes. Still reads as a "badge above the name". */
+    min-width: 56px; height: 30px; padding: 0 10px; border-radius: 999px;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; color: #0a0a0c; font-size: 16px;
+    display: grid; place-items: center;
+    font-weight: 800; color: #0a0a0c; font-size: 14px; letter-spacing: 0.02em;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
-  .vote-btn.selected .v-avatar { background: rgba(255,255,255,0.25); color: #fff; }
+  .vote-btn.selected .v-avatar { background: rgba(10,10,12,0.22); color: #0a0a0c; }
 
   /* Now-playing card in voting screen */
   .now-playing {
@@ -505,9 +512,11 @@
   .lb-head { display: flex; align-items: center; gap: 10px; }
   .lb-name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .lb-name .avatar {
-    width: 28px; height: 28px; border-radius: 50%;
+    min-width: 42px; height: 22px; padding: 0 6px; border-radius: 999px;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; color: #0a0a0c; font-size: 11px;
+    display: grid; place-items: center;
+    font-weight: 800; color: #0a0a0c; font-size: 10px; letter-spacing: 0.02em;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
     flex-shrink: 0;
   }
   .lb-delta {
@@ -643,9 +652,11 @@
   }
   .review-opt.used-elsewhere:not(.selected):hover { opacity: 0.75; }
   .review-opt .r-avatar {
-    width: 22px; height: 22px; border-radius: 50%;
+    min-width: 36px; height: 18px; padding: 0 5px; border-radius: 999px;
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    display: grid; place-items: center; font-weight: 800; color: #0a0a0c; font-size: 10px;
+    display: grid; place-items: center;
+    font-weight: 800; color: #0a0a0c; font-size: 9px; letter-spacing: 0.02em;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
     flex-shrink: 0;
   }
   .review-opt.selected .r-avatar { background: rgba(10,10,12,0.22); color: #0a0a0c; }
@@ -1046,9 +1057,9 @@
    ========================================================================= */
 const LS_FIREBASE_CONFIG = 'mq.firebaseConfig.v1';
 const LS_SESSION_PREFIX  = 'mq.session.';   // mq.session.<gameId> = { slotIndex, sessionId }
-const LS_SETUP_DRAFT     = 'mq.setupDraft.v3'; // persists players, songs, playlist URL across reloads
+const LS_SETUP_DRAFT     = 'mq.setupDraft.v6'; // persists players, songs, playlist URL across reloads
 // Old draft keys are cleaned up in startHostSetup so stale data doesn't linger.
-const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1', 'mq.setupDraft.v2'];
+const LS_SETUP_DRAFT_OLD = ['mq.setupDraft.v1', 'mq.setupDraft.v2', 'mq.setupDraft.v3', 'mq.setupDraft.v4', 'mq.setupDraft.v5'];
 
 // Hardcoded Firebase config. Firebase client configs are public by design --
 // the API key is NOT a secret (that's what security rules are for). Baking it
@@ -1077,7 +1088,7 @@ const DEFAULT_SONGS = [
   { title: 'Emil — The Minds of 99',                             ownerIndex: 4,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/0cDHgTZcDMFyFV5gTqVxEv' },
   { title: 'Back to You — Lost Frequencies',                     ownerIndex: 5,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/2giFxOFIKhb1b4xRtooUUX' },
   { title: 'Wish You Were Here — Pink Floyd',                    ownerIndex: 6,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/6mFkJmJqdDVQ1REhVfGgd1' },
-  { title: 'Bitter Sweet Symphony — The Verve',                  ownerIndex: 7,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/57iDDD9N9tTWe75x6qhStw' },
+  { title: '🦗 Crickets — (no song received in time)',          ownerIndex: 7,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/6uxb3XcephIsRYpZybGivn' },
   { title: 'Fake Plastic Trees — Radiohead',                     ownerIndex: 8,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/73CKjW3vsUXRpy3NnX4H7F' },
   { title: 'Teardrop — Massive Attack',                          ownerIndex: 9,  imageUrl: '', spotifyUrl: 'https://open.spotify.com/track/4y6sQj6cJIXZpoUILO8hRY' },
 ];
@@ -1085,17 +1096,20 @@ const DEFAULT_SONGS = [
 // Default Spotify playlist for this quiz. Host can override in setup.
 const DEFAULT_SPOTIFY_URL = 'https://open.spotify.com/playlist/7sKWww2QFFwCpibKf1QUqt';
 
+// `name` is the public display name shown on vote buttons / leaderboard /
+// reveal screen. `avatar` is the short code (4-letter IMDb-ish handle) shown
+// inside the round avatar chip — more recognisable than 2-letter initials.
 const DEFAULT_PLAYERS = [
-  { name: 'SEBA' },
-  { name: 'MPER' },
-  { name: 'TOCH' },
-  { name: 'PIOS' },
-  { name: 'LATS' },
-  { name: 'PDUA' },
-  { name: 'PVMA' },
-  { name: 'PIOP' },
-  { name: 'RHMO' },
-  { name: 'ANBN' },
+  { name: 'Sebastian', avatar: 'SEBA' },
+  { name: 'Marta',     avatar: 'MPER' },
+  { name: 'Toma',      avatar: 'TOCH' },
+  { name: 'PIOS',      avatar: 'PIOS' },
+  { name: 'Lars',      avatar: 'LATS' },
+  { name: 'Pooja',     avatar: 'PDUA' },
+  { name: 'Peder',     avatar: 'PVMA' },
+  { name: 'PIOP',      avatar: 'PIOP' },
+  { name: 'Rene',      avatar: 'RHMO' },
+  { name: 'Anders',    avatar: 'ANBN' },
 ];
 
 const state = {
@@ -1118,6 +1132,10 @@ const state = {
   previewMode: false,         // true during voting/reveal (enforce cutoff), false during review (free navigation)
   previewEnforced: false,     // true once the current track has been auto-paused at the cutoff
   previewTimerId: null,       // wall-clock backup timer id (setTimeout) in case playback_update misbehaves
+  // What's currently loaded in the embed. Used to skip redundant loadUri()
+  // calls (which re-trigger buffering) and to power the "preload first song
+  // while in lobby" trick that makes Start Game click → audio near-instant.
+  spotifyLoadedUri: null,
 };
 
 function clearPreviewTimer() {
@@ -1168,6 +1186,16 @@ const initials = (name) => {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+// Avatar label: prefer an explicit `avatar` handle (e.g. the 4-letter team
+// code) when the player has one; otherwise derive it from the display name.
+// Keeping the fallback makes this safe against older games / custom players
+// created at runtime that don't carry an `avatar` field yet.
+const avatarFor = (player) => {
+  if (!player) return '?';
+  const a = (player.avatar || '').trim();
+  return a || initials(player.name || '');
 };
 const randomId = (n = 6) => {
   const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no I, L, O, 0, 1
@@ -1286,7 +1314,7 @@ function getQueryGameId() {
   return g ? g.toUpperCase() : null;
 }
 
-const APP_BUILD = 'music-quiz build 2026-04-21-h — preview cutoff backup timer + tick diagnostics';
+const APP_BUILD = 'music-quiz build 2026-04-21-l — preload first song in lobby for instant start';
 async function bootstrap() {
   console.log('%c' + APP_BUILD, 'background:#f5a524;color:#0a0a0c;padding:4px 8px;border-radius:4px;font-weight:700;');
   setupSpotifyDockControls();
@@ -1459,7 +1487,10 @@ function startHostSetup() {
   try { LS_SETUP_DRAFT_OLD.forEach(k => localStorage.removeItem(k)); } catch {}
   const draft = loadSetupDraft();
   if (draft) {
-    state.setupPlayers = draft.players.map(p => ({ name: p.name || '' }));
+    state.setupPlayers = draft.players.map(p => ({
+      name: p.name || '',
+      avatar: p.avatar || '',
+    }));
     state.setupSongs   = draft.songs.map(s => ({
       title: s.title || '',
       ownerIndex: typeof s.ownerIndex === 'number' ? s.ownerIndex : -1,
@@ -1851,7 +1882,8 @@ async function createGame() {
     const name = (p.name || '').trim();
     if (!name) return;
     indexMap[oldIdx] = players.length;
-    players.push({ name });
+    const avatar = (p.avatar || '').trim();
+    players.push(avatar ? { name, avatar } : { name });
   });
   const songs = state.setupSongs.map(s => ({
     title: (s.title || '').trim(),
@@ -1995,8 +2027,13 @@ function createSpotifyController(initialUri) {
     return;
   }
   if (state.spotifyController) {
-    // Already mounted — just swap the URI.
-    try { state.spotifyController.loadUri(initialUri); } catch (e) { console.warn('[Spotify]', e); }
+    // Already mounted — just swap the URI (skip the call entirely if the
+    // embed is already pointed at this URI to avoid redundant re-buffering).
+    if (state.spotifyLoadedUri === initialUri) return;
+    try {
+      state.spotifyController.loadUri(initialUri);
+      state.spotifyLoadedUri = initialUri;
+    } catch (e) { console.warn('[Spotify]', e); }
     return;
   }
   const target = document.getElementById('spotify-embed-target');
@@ -2007,6 +2044,7 @@ function createSpotifyController(initialUri) {
     uri: initialUri,
   }, (controller) => {
     state.spotifyController = controller;
+    state.spotifyLoadedUri = initialUri;
 
     // Single listener handles two things on every playback update:
     //  1) Reliable autoplay: when we've flagged `spotifyAutoplayPending`, call
@@ -2051,6 +2089,7 @@ function createSpotifyController(initialUri) {
       try {
         state.spotifyAutoplayPending = true;
         controller.loadUri(state.pendingSyncUri);
+        state.spotifyLoadedUri = state.pendingSyncUri;
       } catch (e) { console.warn('[Spotify]', e); }
       state.pendingSyncUri = null;
     }
@@ -2067,11 +2106,18 @@ function mountSpotifyDock(rawUrl) {
     return;
   }
 
-  // Figure out the best initial URI to boot the controller with. Prefer the global
-  // playlist URL; otherwise fall back to the first individual song URL we can find.
-  // Booting the controller early matters — by the time the host clicks "Start game",
-  // the controller must already exist for play() to work inside the user-gesture window.
-  let initialUri = urlToSpotifyUri(rawUrl);
+  // Figure out the best initial URI to boot the controller with.
+  //
+  // While the game is in the LOBBY, we deliberately prefer the FIRST SONG's
+  // track URI over the playlist URI. This way Spotify has fetched and buffered
+  // the track by the time the host clicks "Start Game", so the click → audio
+  // latency drops from ~1–3s (full track-load) to "instant play".
+  //
+  // Outside the lobby we still prefer the playlist URI when available, so the
+  // review phase can show the full playlist (host can replay any song).
+  const status = state.game?.meta?.status;
+  const firstSongUri = urlToSpotifyUri(state.game?.songs?.[0]?.spotifyUrl);
+  let initialUri = (status === 'lobby' && firstSongUri) ? firstSongUri : urlToSpotifyUri(rawUrl);
   if (!initialUri) {
     const songs = state.game?.songs || [];
     for (const s of songs) {
@@ -2092,6 +2138,37 @@ function mountSpotifyDock(rawUrl) {
 
   if (!state.spotifyController && !state.pendingInitialUri) {
     createSpotifyController(initialUri);
+  }
+}
+
+// While the host is on the LOBBY screen, quietly pre-buffer the first song
+// in the Spotify dock. Called every time we (re-)render the lobby, but
+// deduped by `state.spotifyLoadedUri` so it only actually loads when the
+// dock is pointed at something else (e.g. the playlist URI). We never call
+// play() here — we want the track ready but silent. As a result, clicking
+// "Start Game" later only needs to call play() on an already-buffered
+// track, making the click → audio transition near-instant.
+function preloadFirstSongInDock(game) {
+  if (state.role !== 'host') return;
+  const uri = urlToSpotifyUri(game?.songs?.[0]?.spotifyUrl);
+  if (!uri) return;
+
+  if (!state.spotifyController) {
+    // Controller not mounted yet (e.g. no playlist URL configured): boot it
+    // directly onto the first song. `mountSpotifyDock` normally handles this
+    // when there's a playlist URL, but we also want it for the no-playlist path.
+    state.pendingInitialUri = uri;
+    loadSpotifyIframeApi();
+    return;
+  }
+  if (state.spotifyLoadedUri === uri) return;
+
+  console.log('[Spotify] Preloading first song in lobby (silent):', uri);
+  try {
+    state.spotifyController.loadUri(uri);
+    state.spotifyLoadedUri = uri;
+  } catch (e) {
+    console.warn('[Spotify] lobby preload failed:', e);
   }
 }
 
@@ -2119,6 +2196,7 @@ function syncSpotifyToGame(game) {
         if (playlistUri) {
           try {
             state.spotifyController.loadUri(playlistUri);
+            state.spotifyLoadedUri = playlistUri;
             console.log('[Spotify] Entering review — loaded playlist for manual replay.');
           } catch (e) { console.warn('[Spotify] review playlist load failed:', e); }
         } else {
@@ -2156,13 +2234,21 @@ function syncSpotifyToGame(game) {
   }
   console.log(`[Spotify] Syncing to song ${songIdx + 1} (preview mode ~${PREVIEW_SECONDS}s):`, uri);
   try {
-    state.spotifyAutoplayPending = true;
     state.previewMode = true;
     state.previewEnforced = false;
-    state.spotifyController.loadUri(uri);
-    setTimeout(() => {
-      try { state.spotifyController.play(); } catch (e) { /* silent; listener handles it */ }
-    }, 300);
+    if (state.spotifyLoadedUri === uri) {
+      // Already buffered (thanks to the lobby preload or a prior sync) —
+      // skip loadUri and just play. This eliminates the click → audio lag.
+      state.spotifyAutoplayPending = false;
+      try { state.spotifyController.play(); } catch {}
+    } else {
+      state.spotifyAutoplayPending = true;
+      state.spotifyController.loadUri(uri);
+      state.spotifyLoadedUri = uri;
+      setTimeout(() => {
+        try { state.spotifyController.play(); } catch (e) { /* silent; listener handles it */ }
+      }, 300);
+    }
     armPreviewBackupTimer();
   } catch (e) {
     console.warn('[Spotify] loadUri failed:', e);
@@ -2195,9 +2281,17 @@ function spotifyJumpToSongAt(songIdx, status) {
   }
   console.log(`[Spotify] (click) Jumping to song ${songIdx + 1} (preview ~${PREVIEW_SECONDS}s):`, uri);
   try {
-    state.spotifyController.loadUri(uri);
-    try { state.spotifyController.play(); } catch {}
-    setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+    if (state.spotifyLoadedUri === uri) {
+      // Track already preloaded (lobby preload, or same song as before) —
+      // skip the reload so play() is instant.
+      state.spotifyAutoplayPending = false;
+      try { state.spotifyController.play(); } catch {}
+    } else {
+      state.spotifyController.loadUri(uri);
+      state.spotifyLoadedUri = uri;
+      try { state.spotifyController.play(); } catch {}
+      setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+    }
     armPreviewBackupTimer();
   } catch (e) {
     console.warn('[Spotify] click-time loadUri failed:', e);
@@ -2256,7 +2350,7 @@ function renderHostLobbyPlayers(game) {
         claimSlot(idx);
       }
     },
-      el('div', { class: 'avatar' }, initials(p.name)),
+      el('div', { class: 'avatar' }, avatarFor(p)),
       el('div', { class: 'name' }, p.name),
       el('div', { class: 'check' },
         el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0a0a0c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
@@ -2294,7 +2388,7 @@ function startGameFromLobby() {
       const newIdx = newPlayers.length;
       oldToNewIdx[oldIdx] = newIdx;
       newJoins[newIdx] = joins[oldIdx];
-      newPlayers.push({ name: p.name });
+      newPlayers.push(p.avatar ? { name: p.name, avatar: p.avatar } : { name: p.name });
     }
   });
 
@@ -2327,11 +2421,19 @@ function startGameFromLobby() {
       state.previewEnforced = false;
       if (state.spotifyController) {
         try {
-          state.spotifyController.loadUri(firstUri);
-          try { state.spotifyController.play(); } catch {}
-          setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+          if (state.spotifyLoadedUri === firstUri) {
+            // Preloaded during the lobby — audio starts within a frame.
+            state.spotifyAutoplayPending = false;
+            try { state.spotifyController.play(); } catch {}
+            console.log(`[Spotify] (Start Game) Playing preloaded song 1 (preview ~${PREVIEW_SECONDS}s):`, firstUri);
+          } else {
+            state.spotifyController.loadUri(firstUri);
+            state.spotifyLoadedUri = firstUri;
+            try { state.spotifyController.play(); } catch {}
+            setTimeout(() => { try { state.spotifyController.play(); } catch {} }, 300);
+            console.log(`[Spotify] (Start Game) Loading song 1 fresh (preview ~${PREVIEW_SECONDS}s):`, firstUri);
+          }
           armPreviewBackupTimer();
-          console.log(`[Spotify] (Start Game) Jumped to song 1 (preview ~${PREVIEW_SECONDS}s):`, firstUri);
         } catch (e) { console.warn('[Spotify] (Start Game) loadUri failed:', e); }
       } else {
         state.pendingSyncUri = firstUri;
@@ -2394,7 +2496,7 @@ function renderClaimScreen(game) {
         claimSlot(idx);
       }
     },
-      el('div', { class: 'avatar' }, initials(p.name)),
+      el('div', { class: 'avatar' }, avatarFor(p)),
       el('div', { class: 'name' }, p.name),
       el('div', { class: 'check' },
         el('span', { html: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0a0a0c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' })
@@ -2489,6 +2591,8 @@ function routeForGameState(game) {
     if (status === 'lobby') {
       if (!$('#screen-host-lobby').classList.contains('active')) showScreen('screen-host-lobby');
       renderHostLobbyPlayers(game);
+      // Silently preload first song into the dock so "Start Game" → audio is instant.
+      preloadFirstSongInDock(game);
     } else if (status === 'voting') {
       renderVotingScreen(game);
       showScreen('screen-voting');
@@ -2587,7 +2691,7 @@ function renderVotingScreen(game) {
       onclick: () => castVote(i),
       title: alreadyUsed ? 'You already picked this person for another song' : '',
     },
-      el('div', { class: 'v-avatar' }, initials(p.name)),
+      el('div', { class: 'v-avatar' }, avatarFor(p)),
       el('div', {}, p.name)
     );
     if (state.mySlotIndex < 0 && !isHost) btn.disabled = true;
@@ -2714,7 +2818,7 @@ function renderReviewScreen(game) {
         onclick: () => castVote(ownerIdx, sIdx, { swapIfDup: true }),
         title: isUsed ? 'Currently your pick for another song — click to move them here' : '',
       },
-        el('span', { class: 'r-avatar' }, initials(p.name)),
+        el('span', { class: 'r-avatar' }, avatarFor(p)),
         el('span', {}, p.name)
       );
       if (state.mySlotIndex < 0) btn.disabled = true;
@@ -2866,7 +2970,7 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore, revealedCount)
   // Used to compute accuracy % (correct / revealedCount).
   const total = revealedCount || 0;
   const entries = game.players.map((p, i) => ({
-    slot: i, name: p.name,
+    slot: i, name: p.name, avatar: p.avatar || '',
     scoreAfter: scoresAfter[i] || 0,
     scoreBefore: scoresBefore[i] || 0,
   }));
@@ -2902,7 +3006,7 @@ function renderLeaderboard(root, game, scoresAfter, scoresBefore, revealedCount)
       el('div', { class: 'lb-content' },
         el('div', { class: 'lb-head' },
           el('div', { class: 'lb-name' },
-            el('div', { class: 'avatar' }, initials(e.name)),
+            el('div', { class: 'avatar' }, avatarFor(e)),
             el('span', {}, e.name)
           ),
           el('div', { class: 'lb-delta' + (gained ? ' show' : '') }, gained ? '+' + (e.scoreAfter - e.scoreBefore) : ''),
@@ -2935,7 +3039,8 @@ function renderFinalScreen(game) {
   const lastIdx = game.songs.length - 1;
   const finalScores = computeScores(game, lastIdx);
   const entries = game.players.map((p, i) => ({
-    slot: i, name: p.name, scoreAfter: finalScores[i] || 0, scoreBefore: finalScores[i] || 0,
+    slot: i, name: p.name, avatar: p.avatar || '',
+    scoreAfter: finalScores[i] || 0, scoreBefore: finalScores[i] || 0,
   })).sort((a, b) => b.scoreAfter - a.scoreAfter || a.name.localeCompare(b.name));
 
   // Honor ties: everyone who shares the top score is a winner.
