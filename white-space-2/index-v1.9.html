@@ -1,0 +1,4126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V1.9 - Info Panel Only on Attribute Tab</title>
+  <style>
+    /* CSS Variables */
+    :root {
+      --color-primary: #006d77;
+      --color-primary-dark: #005a63;
+      --color-primary-light: #e0f4f5;
+      --color-text: #333;
+      --color-text-secondary: #666;
+      --color-text-muted: #999;
+      --color-border: #e0e0e0;
+      --color-border-light: #f0f0f0;
+      --color-bg: #fff;
+      --color-bg-gray: #f5f5f5;
+      --color-bg-hover: #fafafa;
+      --color-selected: #e8f5f5;
+      --color-link: #0066cc;
+      --header-height: 48px;
+      --toolbar-height: 40px;
+      --tab-bar-height: 36px;
+      --breadcrumb-height: 32px;
+      --panel-header-height: 40px;
+      --left-panel-width: 384px;
+      --middle-panel-width: 384px;
+      --right-panel-width: 384px;
+      --collapsed-panel-width: 32px;
+      --panel-min-width: 200px;
+      --panel-max-width: 600px;
+      --transition-speed: 0.25s;
+    }
+
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--color-text);
+      background: var(--color-bg);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Layout */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--color-primary);
+      color: white;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .header-logo {
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .header-title {
+      flex: 1;
+    }
+
+    .header-title h1 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .header-title .subtitle {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions select,
+    .header-actions input {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .header-actions input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .header-actions select option {
+      color: var(--color-text);
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .header-btn:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .toolbar-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 8px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--color-text-secondary);
+    }
+
+    .toolbar-btn:hover {
+      background: var(--color-bg-hover);
+    }
+
+    .toolbar-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .toolbar-separator {
+      width: 1px;
+      height: 32px;
+      background: var(--color-border);
+      margin: 0 4px;
+    }
+
+    .toolbar-spacer {
+      flex: 1;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-select {
+      padding: 6px 8px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 12px;
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+
+    .toolbar-search {
+      padding: 6px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 12px;
+      width: 120px;
+      background: var(--color-bg);
+    }
+
+    .toolbar-search::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    /* Tab Bar */
+    .tab-bar {
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: flex-end;
+      padding: 0 12px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .tab-bar-item {
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      border-radius: 4px 4px 0 0;
+      background: var(--color-bg);
+      cursor: pointer;
+      font-size: 12px;
+      position: relative;
+      margin-bottom: -1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-bar-item.active {
+      background: var(--color-bg-gray);
+      border-bottom: 1px solid var(--color-bg-gray);
+    }
+
+    /* Breadcrumb Bar */
+    .breadcrumb-bar {
+      background: var(--color-bg-gray);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .breadcrumb-container {
+      display: flex;
+      align-items: center;
+      background: var(--color-bg);
+      padding: 4px 12px;
+      border-radius: 0;
+      flex: 1;
+    }
+
+    .breadcrumb-bar a {
+      color: var(--color-link);
+      text-decoration: none;
+    }
+
+    .breadcrumb-bar a:hover {
+      text-decoration: underline;
+    }
+
+    .breadcrumb-bar span {
+      margin: 0 6px;
+      color: var(--color-text-muted);
+    }
+
+    .breadcrumb-container span {
+      margin: 0 6px;
+    }
+
+    /* App Body - Contains main content + AI panel */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* App Main - Contains toolbar, breadcrumb, and main-container */
+    .app-main {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    /* Main Content Area */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Collapsible Panels */
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--color-border);
+      background: var(--color-bg);
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .panel.collapsed {
+      min-width: var(--collapsed-panel-width) !important;
+      width: var(--collapsed-panel-width) !important;
+    }
+
+    .panel.collapsed .panel-content {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .panel.collapsed .panel-header-title,
+    .panel.collapsed .panel-header-actions {
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+    }
+
+    .panel.collapsed .panel-header {
+      justify-content: center;
+    }
+
+    .panel.collapsed .panel-toggle {
+      margin-left: 0;
+    }
+
+    .panel.collapsed .resize-handle {
+      display: none;
+    }
+
+    .panel.collapsed .panel-footer {
+      display: none;
+    }
+
+    /* Collapsed vertical title */
+    .panel-collapsed-title {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) rotate(180deg);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      white-space: nowrap;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--color-text);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition-speed) ease;
+    }
+
+    .panel.collapsed .panel-collapsed-title {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .panel.resizing {
+      user-select: none;
+    }
+
+    /* Resize Handle */
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 10;
+      transition: background 0.15s ease;
+    }
+
+    .resize-handle:hover,
+    .resize-handle.active {
+      background: var(--color-primary);
+    }
+
+    .resize-handle-left {
+      right: auto;
+      left: 0;
+    }
+
+    .panel-header {
+      height: var(--panel-header-height);
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg);
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    .panel-toggle {
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+
+    .panel-toggle:hover {
+      background: var(--color-border);
+    }
+
+    .panel-header-title {
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity var(--transition-speed) ease;
+      flex: 1;
+    }
+
+    .panel-toggle.toggle-right {
+      margin-left: auto;
+    }
+
+    .panel-header-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 4px;
+      transition: opacity var(--transition-speed) ease;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: opacity var(--transition-speed) ease;
+    }
+
+    /* Left Panel - Browse */
+    .panel-left {
+      width: var(--left-panel-width);
+      min-width: var(--panel-min-width);
+      max-width: var(--panel-max-width);
+    }
+
+    .tree-list {
+      padding: 8px 0;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px 4px 12px;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .tree-item:hover {
+      background: var(--color-bg-hover);
+    }
+
+    .tree-item.selected {
+      background: var(--color-selected);
+    }
+
+    .tree-item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--color-primary);
+    }
+
+    .tree-item .tree-icon {
+      color: var(--color-text-muted);
+      font-size: 10px;
+      width: 12px;
+    }
+
+    .tree-item.indent-1 { padding-left: 24px; }
+    .tree-item.indent-2 { padding-left: 36px; }
+
+    /* Middle Panel - Tree Items */
+    .panel-middle {
+      width: var(--middle-panel-width);
+      min-width: var(--panel-min-width);
+      max-width: var(--panel-max-width);
+    }
+
+    .folder-section {
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .item-card {
+      display: flex;
+      padding: 10px 12px;
+      gap: 10px;
+      border-bottom: 1px solid var(--color-border-light);
+      cursor: pointer;
+    }
+
+    .item-card:hover {
+      background: var(--color-bg-hover);
+    }
+
+    .item-card.selected {
+      background: var(--color-primary-light);
+      color: var(--color-text);
+    }
+
+    .item-card.selected .item-label,
+    .item-card.selected .item-secondary {
+      color: var(--color-text-secondary);
+    }
+
+    .item-star {
+      color: var(--color-text-muted);
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .item-card.selected .item-star {
+      color: var(--color-primary);
+    }
+
+    .item-thumbnail {
+      width: 48px;
+      height: 48px;
+      background: var(--color-bg-gray);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .item-thumbnail svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-text-muted);
+    }
+
+    .item-card.selected .item-thumbnail {
+      background: var(--color-bg);
+      border-color: var(--color-primary);
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .item-label {
+      font-size: 10px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+
+    .item-primary {
+      font-weight: 500;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-secondary {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-expand {
+      align-self: center;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    .panel-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--color-border);
+      font-size: 11px;
+      color: var(--color-text-muted);
+      background: var(--color-bg-gray);
+      flex-shrink: 0;
+    }
+
+    /* Product Details Area */
+    .product-area {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .product-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* Horizontal Tiles Row (below product name) */
+    .product-tiles-row {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .tiles-scroll-wrapper {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      position: relative;
+    }
+
+    .tiles-container {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex: 1;
+    }
+
+    .tiles-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tiles-nav-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-bg);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .tiles-nav-btn:hover {
+      background: var(--color-border-light);
+      color: var(--color-text);
+    }
+
+    .tiles-nav-btn.visible {
+      display: flex;
+    }
+
+    /* Info Tiles */
+    .info-tile {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      width: 384px;
+      min-width: 384px;
+      flex-shrink: 0;
+    }
+
+    .info-tile-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .info-tile-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-tile-header .info-tile-title {
+      margin-bottom: 0;
+    }
+
+    .info-tile-link {
+      font-size: 11px;
+      color: var(--color-primary);
+      text-decoration: none;
+      display: block;
+      margin-top: 8px;
+    }
+
+    .info-tile-link:hover {
+      text-decoration: underline;
+    }
+
+    .help-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--color-border);
+      color: var(--color-text-muted);
+      font-size: 9px;
+      font-weight: 600;
+      cursor: help;
+    }
+
+    .completeness-ring {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--color-border);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .completeness-ring.small {
+      width: 36px;
+      height: 36px;
+      border-width: 2px;
+    }
+
+    .completeness-ring .percent {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .completeness-ring .label {
+      font-size: 7px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+
+    .sufficiency-meta {
+      font-size: 10px;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+    }
+
+    /* Smaller text for tiles */
+    .info-tile .progress-item {
+      margin-bottom: 4px;
+    }
+
+    .info-tile .progress-item .label {
+      font-size: 11px;
+    }
+
+    .info-tile .progress-item .value {
+      font-size: 11px;
+    }
+
+    .info-tile .workflow-item {
+      font-size: 11px;
+      padding: 3px 0;
+    }
+
+    .info-tile .info-field {
+      margin-bottom: 4px;
+    }
+
+    .info-tile .info-field-label {
+      font-size: 10px;
+    }
+
+    .info-tile .info-field-value {
+      font-size: 11px;
+    }
+
+    /* Panel Sections */
+    .panel-section {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .panel-section:last-child {
+      border-bottom: none;
+    }
+
+    .panel-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--color-bg-gray);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .panel-section-header:hover {
+      background: var(--color-border-light);
+    }
+
+    .panel-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-secondary);
+    }
+
+    .panel-section-toggle {
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .panel-section.collapsed .panel-section-toggle {
+      transform: rotate(-90deg);
+    }
+
+    .panel-section-content {
+      padding: 16px;
+    }
+
+    .panel-section.collapsed .panel-section-content {
+      display: none;
+    }
+
+    /* Tab-specific section */
+    .panel-section-tab {
+      transition: all 0.3s ease;
+    }
+
+    .panel-section-tab.hidden {
+      display: none;
+    }
+
+    .panel-section-tab .panel-section-header {
+      background: var(--color-primary-light);
+    }
+
+    .panel-section-tab .panel-section-title {
+      color: var(--color-primary);
+    }
+
+
+    .panel-close {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--color-text-muted);
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .panel-close:hover {
+      background: var(--color-border);
+      color: var(--color-text);
+    }
+
+    /* Tab Info Panel (inside tab) */
+    .tab-info-panel {
+      position: relative;
+      width: 384px;
+      min-width: 384px;
+      border-left: 1px solid var(--color-border);
+      background: var(--color-bg);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .tab-info-panel.resizing {
+      user-select: none;
+    }
+
+    .tab-info-panel.collapsed {
+      width: 32px;
+      min-width: 32px;
+    }
+
+    .tab-info-panel.collapsed .resize-handle {
+      display: none;
+    }
+
+    .tab-info-panel.collapsed .tab-info-content {
+      display: none;
+    }
+
+    .tab-info-panel.collapsed .tab-info-title {
+      display: none;
+    }
+
+    .tab-info-panel.collapsed .tab-info-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .tab-info-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg);
+    }
+
+    .tab-info-panel.collapsed .tab-info-header {
+      justify-content: center;
+      padding: 12px 8px;
+    }
+
+    .tab-info-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .tab-info-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--color-text-muted);
+    }
+
+    .tab-info-toggle:hover {
+      background: var(--color-border-light);
+      color: var(--color-text);
+    }
+
+    .tab-info-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* Tab pane */
+    .tab-pane {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .tab-pane .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    /* Wrapper that holds all attribute-state tab panes; sits next to the
+       shared info panel inside .tab-content-area. */
+    .tab-panes-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Read-only attribute styling — baseline for testing read-only field
+       designs. Applied to a whole .tab-content (whole tab) or to a single
+       .form-row for mixed states. Tweak these to iterate on the look. */
+    .is-read-only .form-input,
+    .is-read-only .form-static-value {
+      color: rgba(0, 0, 0, 0.60);
+    }
+
+    .is-read-only .form-input,
+    .is-read-only .form-static-value {
+      background: transparent;
+      border-color: transparent;
+      border-bottom: 1px solid #F5F5F5;
+    }
+
+    .is-read-only .form-input {
+      cursor: default;
+    }
+
+    /* No hover state on read-only fields — explicitly pin the resting look
+       so the editable .form-input:hover / :focus:hover rules can't leak
+       through. Excludes :focus so the focus styles below win when both
+       states are active. */
+    .is-read-only .form-input:hover:not(:focus) {
+      background: transparent;
+      border-color: transparent;
+      border-bottom: 1px solid #F5F5F5;
+    }
+
+    /* Focus uses the same blue accent as editable fields so the affordance
+       reads consistently across states. */
+    .is-read-only .form-input:focus {
+      outline: none;
+      background: #F5F5F5;
+      color: rgba(0, 0, 0, 0.87);
+      border-color: #52BDEC;
+    }
+
+    /* No placeholder text in read-only fields — defense in depth alongside
+       the JS that strips the `placeholder` attribute. */
+    .is-read-only .form-input::placeholder {
+      color: transparent;
+      opacity: 0;
+    }
+
+    .is-read-only .input-trailing-icon,
+    .is-read-only .multi-value-item .action-btn,
+    .is-read-only .add-new-link,
+    .is-read-only .data-toolbar {
+      display: none !important;
+    }
+
+    /* Once the trailing icon is hidden, reclaim the right padding so the
+       value doesn't sit awkwardly far from the right edge. */
+    .is-read-only .input-with-trailing-icon .form-input {
+      padding-right: 12px;
+    }
+
+    /* Clickable tabs */
+    .product-tab {
+      cursor: pointer;
+    }
+
+    .product-tab:hover:not(.active) {
+      background: var(--color-bg-hover);
+    }
+
+    /* Tab content switching - additional styles */
+
+    /* Compare table styles */
+    .compare-table-container {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .compare-table th {
+      background: var(--color-bg-gray);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      position: sticky;
+      top: 0;
+    }
+
+    .compare-table th:first-child {
+      width: 200px;
+    }
+
+    .compare-table tr:hover td {
+      background: var(--color-bg-hover);
+    }
+
+    .compare-table .attribute-name {
+      font-weight: 500;
+      color: var(--color-text);
+    }
+
+    .compare-table .diff {
+      background: #fef3c7;
+    }
+
+    .compare-table .match {
+      color: var(--color-text-muted);
+    }
+
+    /* Empty state for other tabs */
+    .empty-tab-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 300px;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+
+    .empty-tab-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-tab-state h3 {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .product-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .product-breadcrumb {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-bottom: 8px;
+    }
+
+    .product-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .product-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .product-more-link {
+      font-size: 12px;
+      color: var(--color-link);
+      text-decoration: none;
+    }
+
+    .product-more-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Info Cards Row */
+    .info-cards-wrapper {
+      position: relative;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .info-cards-row {
+      display: flex;
+      gap: 16px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .info-cards-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cards-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      color: var(--color-text-secondary);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease;
+    }
+
+    .cards-nav-btn:hover {
+      background: var(--color-bg-gray);
+    }
+
+    .cards-nav-btn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cards-nav-btn.prev {
+      left: 8px;
+    }
+
+    .cards-nav-btn.next {
+      right: 8px;
+    }
+
+    .info-card {
+      flex: 0 0 384px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .info-card-title {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .info-card-title .help-icon {
+      color: var(--color-text-muted);
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .completeness-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 4px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .completeness-ring .percent {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .completeness-ring .label {
+      font-size: 8px;
+      color: var(--color-text-muted);
+    }
+
+    .progress-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .progress-item .label {
+      flex: 1;
+      color: var(--color-text-secondary);
+    }
+
+    .progress-bar {
+      width: 60px;
+      height: 4px;
+      background: var(--color-border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--color-primary);
+      border-radius: 2px;
+    }
+
+    .progress-item .value {
+      width: 32px;
+      text-align: right;
+      font-size: 11px;
+      color: var(--color-text-muted);
+    }
+
+    .info-card-link {
+      font-size: 11px;
+      color: var(--color-link);
+      text-decoration: none;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    .info-card-link:hover {
+      text-decoration: underline;
+    }
+
+    .workflow-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    .workflow-item .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    .sufficiency-meta {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+
+    .info-card-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    /* Product Tabs */
+    .product-tabs-wrapper {
+      position: relative;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg);
+      flex-shrink: 0;
+    }
+
+    .product-tabs {
+      display: flex;
+      padding: 0 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .product-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tabs-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      color: var(--color-text-secondary);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease;
+    }
+
+    .tabs-nav-btn:hover {
+      background: var(--color-bg-gray);
+      color: var(--color-text);
+    }
+
+    .tabs-nav-btn.prev {
+      left: 4px;
+    }
+
+    .tabs-nav-btn.next {
+      right: 4px;
+    }
+
+    .product-tabs-wrapper:hover .tabs-nav-btn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .product-tab {
+      padding: 10px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .product-tab:hover {
+      color: var(--color-text);
+    }
+
+    .product-tab.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      background: var(--color-bg);
+    }
+
+    /* Tab Content Area */
+    .tab-content-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      container-type: inline-size;
+      container-name: tab-content;
+    }
+
+    /* Form Fields */
+    .form-section {
+      margin-bottom: 24px;
+    }
+
+    .form-section-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 16px;
+      color: var(--color-text);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      align-items: flex-start;
+      /* Split the gap: 24px applies horizontally between label and input
+         when they sit side by side; 4px applies vertically when the row
+         stacks (either from flex-wrap or the @container column override).
+         Using a single `gap` would also put 24px between rows once they
+         stack, which looks like wasted space. */
+      column-gap: 24px;
+      row-gap: 4px;
+      position: relative;
+    }
+
+    .form-label {
+      width: 240px;
+      padding-top: 8px;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.60);
+      flex-shrink: 0;
+    }
+
+    /* Inline info icon + tooltip after label text */
+    .attr-info {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 12px;
+      height: 12px;
+      margin: 0 0 0 4px;
+      padding: 0;
+      vertical-align: -1px;
+      color: var(--color-text-muted);
+      cursor: help;
+      background: none;
+      border: none;
+      border-radius: 50%;
+      font: inherit;
+      line-height: 1;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .attr-info:hover,
+    .attr-info:focus-visible {
+      color: var(--color-primary);
+      outline: none;
+    }
+
+    .attr-info svg {
+      width: 12px;
+      height: 12px;
+      display: block;
+      overflow: visible;
+    }
+
+    /* Keeps the info icon glued to the last word of the label so the
+       icon never wraps to a new line on its own. */
+    .attr-label-tail {
+      white-space: nowrap;
+    }
+
+    .attr-tooltip {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      background: #1f2937;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.4;
+      padding: 8px 10px;
+      border-radius: 4px;
+      width: max-content;
+      max-width: 280px;
+      text-align: left;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .attr-tooltip.is-shown {
+      opacity: 1;
+    }
+
+    .attr-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: var(--arrow-left, 50%);
+      transform: translateX(-50%);
+      border-width: 5px;
+      border-style: solid;
+      border-color: #1f2937 transparent transparent transparent;
+    }
+
+    .attr-tooltip.attr-tooltip-below::after {
+      top: auto;
+      bottom: 100%;
+      border-color: transparent transparent #1f2937 transparent;
+    }
+
+    .form-field {
+      flex: 1;
+      min-width: 16rem;
+    }
+
+    /* Field size variants */
+    .form-field.size-small {
+      flex: 1 1 auto;
+      min-width: calc(16rem + 24px + 8px);
+      max-width: calc(16rem + 24px + 8px);
+    }
+
+    .form-field.size-medium {
+      flex: 1 1 auto;
+      min-width: calc(16rem + 24px + 8px);
+      max-width: calc(35rem + 24px + 8px);
+    }
+
+    .form-field.size-full {
+      flex: 1 1 calc(16rem + 24px + 8px);
+      max-width: none;
+      min-width: calc(16rem + 24px + 8px);
+    }
+
+    /* Responsive label positioning using container queries */
+    @container tab-content (max-width: 600px) {
+      .form-row {
+        flex-direction: column;
+      }
+      .form-label {
+        width: 100%;
+        padding-top: 0;
+        margin-bottom: 0;
+      }
+      .form-field,
+      .form-field.size-small,
+      .form-field.size-medium,
+      .form-field.size-full {
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        width: 100% !important;
+      }
+      .input-with-icon {
+        display: flex !important;
+        width: 100% !important;
+      }
+      .input-with-icon .form-input {
+        flex: 1 !important;
+        width: auto !important;
+      }
+      .input-with-icon .icon-placeholder {
+        flex: 0 0 24px !important;
+      }
+      .multi-value-item,
+      .multi-value-list {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+      .multi-value-item {
+        display: flex !important;
+      }
+      .multi-value-item .input-wrapper {
+        flex: 1 !important;
+      }
+      .multi-value-item .form-input {
+        width: 100% !important;
+      }
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      border-bottom-color: #D4D4D4;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+      color: rgba(0, 0, 0, 0.87);
+      background: var(--color-bg);
+      box-sizing: border-box;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-input::placeholder {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.38);
+      opacity: 1;
+    }
+
+    .form-input:hover {
+      border-bottom-color: #737373;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #52BDEC;
+    }
+
+    .form-input:focus:hover {
+      border-color: #52BDEC;
+    }
+
+    /* Textareas auto-size to fit their content, capped at 7.5 rows.
+       `field-sizing: content` lets the browser size the box to its content;
+       `min-height` keeps it from collapsing below 1 row, and `max-height`
+       (in `lh` units) caps growth at exactly 7.5 rows — beyond that the
+       textarea scrolls. */
+    .form-input.textarea {
+      line-height: 1.5;
+      field-sizing: content;
+      min-height: calc(1lh + 18px);
+      max-height: calc(7.5lh + 18px);
+      resize: none;
+      overflow-y: auto;
+    }
+
+    /* Read-only / static text values shown inside a form-field
+       (e.g. the Parent attribute). Matches form-input vertical metrics
+       so it lines up with the label baseline. */
+    .form-static-value {
+      display: inline-block;
+      padding: 8px 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    /* Multi-value Fields */
+    .multi-value-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .multi-value-item {
+      display: grid;
+      grid-template-columns: 1fr 24px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .multi-value-item .input-wrapper {
+      min-width: 0;
+    }
+
+    .multi-value-item .form-input {
+      width: 100%;
+    }
+
+    .multi-value-item .actions {
+      display: flex;
+      gap: 4px;
+      justify-content: flex-end;
+    }
+
+    /* Input with icon placeholder structure */
+    .input-with-icon {
+      display: grid;
+      grid-template-columns: 1fr 24px;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-with-icon .form-input {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .icon-placeholder {
+      width: 24px;
+      height: 24px;
+      visibility: hidden;
+    }
+
+    /* Input with an icon overlaid inside its right edge (e.g. date picker
+       trigger). The icon is absolutely positioned over the input and the
+       input gets matching right padding so typed text never sits under it. */
+    .input-with-trailing-icon {
+      position: relative;
+      width: 100%;
+    }
+
+    .input-with-trailing-icon .form-input {
+      padding-right: 36px;
+      width: 100%;
+    }
+
+    .input-trailing-icon {
+      position: absolute;
+      top: 50%;
+      right: 6px;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      padding: 0;
+    }
+
+    .input-trailing-icon:hover,
+    .input-trailing-icon:focus-visible {
+      background: var(--color-border-light);
+      color: var(--color-text);
+      outline: none;
+    }
+
+    .input-trailing-icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+
+    .multi-value-item .action-btn {
+      width: 24px;
+      min-width: 24px;
+      height: 24px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+      overflow: visible;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s ease, background 0.12s ease;
+    }
+
+    .multi-value-item:hover .action-btn,
+    .multi-value-item:focus-within .action-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .multi-value-item .action-btn:hover {
+      background: var(--color-bg-hover);
+    }
+
+    .add-new-link {
+      color: var(--color-primary);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .add-new-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Data Container */
+    .data-container {
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .data-toolbar {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--color-bg-gray);
+      border-bottom: 1px solid var(--color-border);
+      gap: 8px;
+    }
+
+    .data-toolbar-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 8px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--color-text-secondary);
+    }
+
+    .data-toolbar-btn:hover {
+      background: var(--color-bg-hover);
+    }
+
+    .data-toolbar-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .zoom-control {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--color-text-muted);
+    }
+
+    .zoom-control input[type="range"] {
+      width: 80px;
+      accent-color: var(--color-primary);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border-light);
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background: var(--color-primary-light);
+      font-weight: 500;
+      color: var(--color-text);
+    }
+
+    .data-table tr:hover td {
+      background: var(--color-bg-hover);
+    }
+
+    .data-table input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--color-primary);
+    }
+
+    .table-footer {
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--color-text-muted);
+      background: var(--color-bg-gray);
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Right Info Panel */
+    .panel-right {
+      width: var(--right-panel-width);
+      min-width: var(--panel-min-width);
+      max-width: var(--panel-max-width);
+      border-left: 1px solid var(--color-border);
+      border-right: none;
+    }
+
+    .panel-right.collapsed {
+      min-width: var(--collapsed-panel-width) !important;
+      width: var(--collapsed-panel-width) !important;
+    }
+
+    .info-panel-content {
+      padding: 16px;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 120px;
+      background: var(--color-bg-gray);
+      border: 1px dashed var(--color-border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      margin-bottom: 16px;
+    }
+
+    .image-placeholder svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+    }
+
+    .image-placeholder span {
+      font-size: 11px;
+    }
+
+    .info-section {
+      margin-bottom: 20px;
+    }
+
+    .info-section-title {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .info-field {
+      margin-bottom: 8px;
+    }
+
+    .info-field-label {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+
+    .info-field-value {
+      font-size: 12px;
+    }
+
+    .additional-images {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .additional-image {
+      aspect-ratio: 1;
+      background: var(--color-bg-gray);
+      border: 1px dashed var(--color-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .additional-image svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-text-muted);
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 140px;
+      background: #e8e8e8;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-placeholder::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      background: #e53935;
+      border-radius: 50% 50% 50% 0;
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1400px) {
+      .info-card {
+        flex: 0 0 320px;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .header-actions .hide-small {
+        display: none;
+      }
+      
+      .toolbar .hide-small {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .panel-left.auto-collapsed {
+        width: var(--collapsed-panel-width) !important;
+        min-width: var(--collapsed-panel-width) !important;
+      }
+      
+      .panel-left.auto-collapsed .panel-content,
+      .panel-left.auto-collapsed .panel-header-title {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .panel-middle.auto-collapsed {
+        width: var(--collapsed-panel-width) !important;
+        min-width: var(--collapsed-panel-width) !important;
+      }
+      
+      .panel-middle.auto-collapsed .panel-content,
+      .panel-middle.auto-collapsed .panel-header-title,
+      .panel-middle.auto-collapsed .panel-footer {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .info-cards-row {
+        padding: 12px;
+      }
+      
+      .tab-content {
+        padding: 12px;
+      }
+      
+      .panel-right.auto-collapsed {
+        width: var(--collapsed-panel-width) !important;
+        min-width: var(--collapsed-panel-width) !important;
+      }
+      
+      .panel-right.auto-collapsed .panel-content,
+      .panel-right.auto-collapsed .panel-header-title {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    /* Icons */
+    .icon {
+      display: inline-flex;
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo">px</div>
+      <div class="header-title">
+        <h1>Summer collection 2026</h1>
+        <div class="subtitle">Nothing to save</div>
+      </div>
+    </header>
+
+    <!-- App Body: Contains main content + AI panel side by side -->
+    <div class="app-body">
+      <!-- App Main: Toolbar + Breadcrumb + Main Container -->
+      <div class="app-main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="toolbar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M3 12h12M3 18h6"/>
+        </svg>
+        Sort
+      </button>
+      <button class="toolbar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        Filter
+      </button>
+      <div class="toolbar-separator"></div>
+      <button class="toolbar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Create
+      </button>
+      <button class="toolbar-btn hide-small">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        References
+      </button>
+      <button class="toolbar-btn hide-small">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Import
+      </button>
+      <div class="toolbar-separator hide-small"></div>
+      <button class="toolbar-btn hide-small">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 11 12 14 22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Submit
+      </button>
+      <button class="toolbar-btn hide-small">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Add to workflow
+      </button>
+      <button class="toolbar-btn hide-small">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Assign
+      </button>
+      <button class="toolbar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+        </svg>
+        More
+      </button>
+      <div class="toolbar-spacer"></div>
+      <div class="toolbar-actions">
+        <button class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          Zoom level (0.5x)
+        </button>
+        <button class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Customize
+        </button>
+        <button class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+          Details
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <div class="tab-bar-item">Tab title</div>
+      <div class="tab-bar-item active">Tab title</div>
+      <div class="tab-bar-item">Tab title with a longer na...</div>
+      <div class="tab-bar-item hide-small">Tab title</div>
+      <div class="tab-bar-item hide-small">Tab title</div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+      <div class="breadcrumb-container">
+        <a href="#">Home</a>
+        <span>/</span>
+        <a href="#">Breadcrumb item 1</a>
+        <span>/</span>
+        <a href="#">Breadcrumb item 2</a>
+        <span>/</span>
+        <a href="#">Breadcrumb item 3</a>
+        <span>/</span>
+        <span style="color: var(--color-text);">Last item</span>
+      </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Left Panel - Browse (collapsed by default) -->
+      <aside class="panel panel-left collapsed" id="panelLeft">
+        <div class="panel-header">
+          <span class="panel-header-title">Browse</span>
+          <button class="panel-toggle toggle-right" onclick="togglePanel('panelLeft')" title="Collapse panel">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        </div>
+        <div class="panel-content">
+          <div class="tree-list">
+            <div class="tree-item">
+              <span class="tree-icon">▼</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item indent-1">
+              <span class="tree-icon">▼</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item indent-1">
+              <span class="tree-icon">▼</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item indent-1 selected">
+              <span class="tree-icon">▼</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item indent-2">
+              <span class="tree-icon">▶</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item">
+              <span class="tree-icon">▶</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item">
+              <span class="tree-icon">▶</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item">
+              <span class="tree-icon">▶</span>
+              <span>Tree item</span>
+            </div>
+            <div class="tree-item">
+              <span class="tree-icon">▶</span>
+              <span>Tree item</span>
+            </div>
+          </div>
+        </div>
+        <div class="resize-handle" data-panel="panelLeft"></div>
+        <span class="panel-collapsed-title">Browse</span>
+      </aside>
+
+      <!-- Middle Panel - Tree Item -->
+      <aside class="panel panel-middle" id="panelMiddle">
+        <div class="panel-header">
+          <span class="panel-header-title">Tree item</span>
+          <button class="panel-toggle toggle-right" onclick="togglePanel('panelMiddle')" title="Collapse panel">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        </div>
+        <div class="panel-content">
+          <div class="folder-section">Current folder</div>
+          
+          <!-- Item cards -->
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="folder-section">Folder item</div>
+
+          <div class="item-card selected">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+            <span class="item-expand">∧</span>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+
+          <div class="item-card">
+            <span class="item-star">☆</span>
+            <div class="item-thumbnail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <span class="item-label">Label</span>
+              <span class="item-primary">Primary info</span>
+              <span class="item-label">Label</span>
+              <span class="item-secondary">Secondary info</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">120 items, 0 selected</div>
+        <div class="resize-handle" data-panel="panelMiddle"></div>
+        <span class="panel-collapsed-title">Tree item</span>
+      </aside>
+
+      <!-- Product Area -->
+      <main class="product-area">
+        <div class="product-main">
+          <!-- Product Header -->
+          <div class="product-header">
+            <div class="product-breadcrumb">Home | Last item</div>
+            <div class="product-title-row">
+              <h2 class="product-title">Product A</h2>
+            </div>
+          </div>
+
+          <!-- Product Info Tiles (horizontal row below product name) -->
+          <div class="product-tiles-row">
+            <div class="tiles-scroll-wrapper">
+              <button class="tiles-nav-btn prev" id="tilesPrev" onclick="scrollTiles(-1)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <div class="tiles-container" id="tilesContainer">
+                <!-- Completeness -->
+                <div class="info-tile">
+                  <div class="info-tile-header">
+                    <div class="completeness-ring small">
+                      <span class="percent">0%</span>
+                    </div>
+                    <div class="info-tile-title">Completeness</div>
+                  </div>
+                  <div class="progress-item">
+                    <span class="label">Product details</span>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width: 50%"></div></div>
+                    <span class="value">50%</span>
+                  </div>
+                  <div class="progress-item">
+                    <span class="label">Web Bullets</span>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width: 25%"></div></div>
+                    <span class="value">25%</span>
+                  </div>
+                  <a href="#" class="info-tile-link">See more</a>
+                </div>
+
+                <!-- Workflows -->
+                <div class="info-tile">
+                  <div class="info-tile-title">Workflows <span class="help-icon">?</span></div>
+                  <div class="workflow-item">
+                    <span class="indicator"></span>
+                    <span>Internal record creation</span>
+                    <div class="progress-bar" style="width: 40px;"><div class="progress-bar-fill" style="width: 60%"></div></div>
+                  </div>
+                  <div class="workflow-item">
+                    <span class="indicator"></span>
+                    <span>Quality review</span>
+                    <div class="progress-bar" style="width: 40px;"><div class="progress-bar-fill" style="width: 40%"></div></div>
+                  </div>
+                  <a href="#" class="info-tile-link">View details</a>
+                </div>
+
+                <!-- Sufficiency Scores -->
+                <div class="info-tile">
+                  <div class="info-tile-title">Sufficiency scores <span class="help-icon">?</span></div>
+                  <div class="sufficiency-meta">Updated 2 months ago</div>
+                  <div class="progress-item">
+                    <span class="label">eCommerce readiness</span>
+                    <span class="value">50%</span>
+                  </div>
+                  <div class="progress-item">
+                    <span class="label">eCommerce quality</span>
+                    <span class="value">25%</span>
+                  </div>
+                  <a href="#" class="info-tile-link">See more</a>
+                </div>
+
+                <!-- Channel Status -->
+                <div class="info-tile">
+                  <div class="info-tile-title">Channel status</div>
+                  <div class="info-field">
+                    <div class="info-field-label">eCommerce</div>
+                    <div class="info-field-value">
+                      <span style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
+                        Published
+                      </span>
+                    </div>
+                  </div>
+                  <div class="info-field">
+                    <div class="info-field-label">Mobile App</div>
+                    <div class="info-field-value">
+                      <span style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></span>
+                        Draft
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <button class="tiles-nav-btn next" id="tilesNext" onclick="scrollTiles(1)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Product Tabs -->
+          <div class="product-tabs-wrapper">
+            <button class="tabs-nav-btn prev" id="tabsPrev" onclick="scrollTabs(-1)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div class="product-tabs" id="productTabs">
+              <div class="product-tab" onclick="switchTab('empty', true)" data-tab="empty">Empty</div>
+              <div class="product-tab" onclick="switchTab('empty-ro', true)" data-tab="empty-ro">Empty (read-only)</div>
+              <div class="product-tab active" onclick="switchTab('filled', true)" data-tab="filled">Filled</div>
+              <div class="product-tab" onclick="switchTab('filled-ro', true)" data-tab="filled-ro">Filled (read-only)</div>
+              <div class="product-tab" onclick="switchTab('mixed', true)" data-tab="mixed">Mixed</div>
+            </div>
+            <button class="tabs-nav-btn next" id="tabsNext" onclick="scrollTabs(1)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+
+        <!-- Tab Content Area -->
+        <div class="tab-content-area">
+          <!-- Attribute state tab panes (Empty / Empty RO / Filled / Filled RO / Mixed) -->
+          <div class="tab-panes-wrap">
+            <!-- Empty -->
+            <div class="tab-pane" id="tab-empty">
+              <div class="tab-content"></div>
+            </div>
+            <!-- Empty (read-only) -->
+            <div class="tab-pane" id="tab-empty-ro">
+              <div class="tab-content"></div>
+            </div>
+            <!-- Filled (source - cloned by JS into other state panes) -->
+            <div class="tab-pane active" id="tab-filled">
+              <div class="tab-content">
+              <!-- Marketing Descriptions -->
+            <div class="form-section">
+              <h3 class="form-section-title">Marketing descriptions</h3>
+              
+              <div class="form-row">
+                <span class="form-label">Description (long)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A detailed product description (typically several sentences) used on product detail pages and for SEO.</span></button></span>
+                <div class="form-field size-medium">
+                  <div class="input-with-icon">
+                    <textarea class="form-input textarea">Premium champagne crafted in Reims since 1760. Distinguished by its trademark crisp character and notes of citrus, white peach, and toasted brioche. Lanson's signature non-vintage cuvée preserves the freshness and acidity that connoisseurs cherish.</textarea>
+                    <span class="icon-placeholder"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <span class="form-label">Description (short)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A brief 1–2 sentence summary used in listings, search results, and product previews.</span></button></span>
+                <div class="form-field size-medium">
+                  <div class="input-with-icon">
+                    <textarea class="form-input textarea">Lanson Black Label Brut — bright, citrusy, and elegant non-vintage champagne.</textarea>
+                    <span class="icon-placeholder"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <span class="form-label">Feature bullet 1<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A key product feature or benefit displayed as a bullet point in marketing copy.</span></button></span>
+                <div class="form-field size-medium">
+                  <div class="input-with-icon">
+                    <input type="text" class="form-input" value="Notes of citrus and white peach">
+                    <span class="icon-placeholder"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <span class="form-label">Feature bullet 2<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A key product feature or benefit displayed as a bullet point in marketing copy.</span></button></span>
+                <div class="form-field size-medium">
+                  <div class="input-with-icon">
+                    <input type="text" class="form-input" value="No malolactic fermentation preserves freshness">
+                    <span class="icon-placeholder"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <span class="form-label">Feature bullet 3<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A key product feature or benefit displayed as a bullet point in marketing copy.</span></button></span>
+                <div class="form-field size-medium">
+                  <div class="input-with-icon">
+                    <input type="text" class="form-input" value="Aged a minimum of 3 years">
+                    <span class="icon-placeholder"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-value Attribute (small) -->
+            <div class="form-row">
+              <span class="form-label">Multi-value attribute (small)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A list of single-line text values for this attribute. Use the “+ Add new” link to append items.</span></button></span>
+              <div class="form-field size-small">
+                <div class="multi-value-list">
+                  <div class="multi-value-item">
+                    <div class="input-wrapper">
+                      <input type="text" class="form-input" value="This is the content">
+                    </div>
+                    <div class="actions">
+                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="multi-value-item">
+                    <div class="input-wrapper">
+                      <input type="text" class="form-input" value="This is the content">
+                    </div>
+                    <div class="actions">
+                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="multi-value-item">
+                    <div class="input-wrapper">
+                      <input type="text" class="form-input" value="This is the content">
+                    </div>
+                    <div class="actions">
+                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="add-new-link">+ Add new</div>
+              </div>
+            </div>
+
+            <!-- Multi-value Attribute (large) -->
+            <div class="form-row" style="margin-top: 20px;">
+              <span class="form-label">Multi-value attribute (large)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A list of multi-line text values for this attribute. Each entry supports paragraph-style content.</span></button></span>
+              <div class="form-field size-medium">
+                <div class="multi-value-list">
+                  <div class="multi-value-item">
+                    <div class="input-wrapper">
+                      <textarea class="form-input textarea">This is the content</textarea>
+                    </div>
+                    <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="multi-value-item">
+                    <div class="input-wrapper">
+                      <textarea class="form-input textarea">This is the content</textarea>
+                    </div>
+                    <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="multi-value-item">
+                    <div class="input-wrapper">
+                      <textarea class="form-input textarea">This is the content</textarea>
+                    </div>
+                    <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="add-new-link">+ Add new</div>
+              </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="form-row" style="margin-top: 20px;">
+              <span class="form-label">Related items<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Other products linked to this item, such as accessories, variants, or alternatives.</span></button></span>
+              <div class="form-field size-full">
+                <div class="data-container">
+                  <div class="data-toolbar">
+                    <button class="data-toolbar-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M3 12h18M3 18h18"/>
+                      </svg>
+                      Sort
+                    </button>
+                    <button class="data-toolbar-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                      </svg>
+                      Filter
+                    </button>
+                    <button class="data-toolbar-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                      Add
+                    </button>
+                    <button class="data-toolbar-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                      Delete
+                    </button>
+                    <div class="zoom-control">
+                      <input type="range" min="0" max="100" value="50">
+                      <span>Zoom level (0.5x)</span>
+                      +
+                    </div>
+                  </div>
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 40px;"><input type="checkbox"></th>
+                        <th>Item name</th>
+                        <th>Category</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><input type="checkbox"></td>
+                        <td>Related product 1</td>
+                        <td>Accessories</td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox"></td>
+                        <td>Related product 2</td>
+                        <td>Bundles</td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox"></td>
+                        <td>Related product 3</td>
+                        <td>Accessories</td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox"></td>
+                        <td>Related product 4</td>
+                        <td>Components</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="table-footer">4 items, 0 selected</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Other Attributes -->
+            <div class="form-section" style="margin-top: 24px;">
+              <h3 class="form-section-title">Other attributes</h3>
+              
+              <div class="form-row">
+                <span class="form-label">Date<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A date value associated with this attribute (e.g., creation, expiry, or release date). Use dd/mm/yyyy.</span></button></span>
+                <div class="form-field size-small">
+                  <div class="input-with-trailing-icon">
+                    <input type="text" class="form-input" placeholder="dd/mm/yyyy" value="15/03/2026">
+                    <button type="button" class="input-trailing-icon" aria-label="Open calendar" aria-haspopup="dialog">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <span class="form-label">Data container<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A nested set of attributes grouped together as a structured data table.</span></button></span>
+                <div class="form-field size-full">
+                  <div class="data-container">
+                    <div class="data-toolbar">
+                      <button class="data-toolbar-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 6h18M3 12h18M3 18h18"/>
+                        </svg>
+                        Sort
+                      </button>
+                      <button class="data-toolbar-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                        </svg>
+                        Filter
+                      </button>
+                      <button class="data-toolbar-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add
+                      </button>
+                      <button class="data-toolbar-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        Delete
+                      </button>
+                      <div class="zoom-control">
+                        <input type="range" min="0" max="100" value="50">
+                        <span>Zoom level (0.5x)</span>
+                        +
+                      </div>
+                    </div>
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 40px;"><input type="checkbox"></th>
+                          <th>This is the header</th>
+                          <th>This is the header</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><input type="checkbox"></td>
+                          <td>This is content</td>
+                          <td>This is content</td>
+                        </tr>
+                        <tr>
+                          <td><input type="checkbox"></td>
+                          <td>This is content</td>
+                          <td>This is content</td>
+                        </tr>
+                        <tr>
+                          <td><input type="checkbox"></td>
+                          <td>This is content</td>
+                          <td>This is content</td>
+                        </tr>
+                        <tr>
+                          <td><input type="checkbox"></td>
+                          <td>This is content</td>
+                          <td>This is content</td>
+                        </tr>
+                        <tr>
+                          <td><input type="checkbox"></td>
+                          <td>This is content</td>
+                          <td>This is content</td>
+                        </tr>
+                        <tr>
+                          <td><input type="checkbox"></td>
+                          <td>This is content</td>
+                          <td>This is content</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="table-footer">100 items, 0 selected</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+              <!-- Parent Field -->
+              <div class="form-row" style="margin-top: 24px;">
+                <span class="form-label">Parent<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">The parent product or master record this item is associated with.</span></button></span>
+                <div class="form-field size-medium">
+                  <span class="form-static-value">Champagne Lanson Black Label brut - 750 ml (Master Product)</span>
+                </div>
+              </div>
+              </div>
+            </div><!-- end tab-pane#tab-filled -->
+
+            <!-- Filled (read-only) -->
+            <div class="tab-pane" id="tab-filled-ro">
+              <div class="tab-content"></div>
+            </div>
+            <!-- Mixed -->
+            <div class="tab-pane" id="tab-mixed">
+              <div class="tab-content"></div>
+            </div>
+          </div><!-- end .tab-panes-wrap -->
+
+          <!-- Shared Attribute Info Panel -->
+          <aside class="tab-info-panel" id="tabInfoPanel" data-default-width="384">
+            <div class="resize-handle resize-handle-left" data-panel="tabInfoPanel"></div>
+            <div class="tab-info-header">
+              <span class="tab-info-title">Info</span>
+              <button class="tab-info-toggle" onclick="toggleTabInfoPanel()" title="Collapse">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+            <div class="tab-info-content">
+              <!-- Image -->
+              <div class="image-placeholder" style="margin-bottom: 16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span>Product image</span>
+              </div>
+
+              <!-- Quick Info -->
+              <div class="info-section">
+                <h4 class="info-section-title">Quick info</h4>
+                <div class="info-field">
+                  <div class="info-field-label">SKU</div>
+                  <div class="info-field-value" style="font-family: monospace;">SKU-2026-CHMP-001</div>
+                </div>
+                <div class="info-field">
+                  <div class="info-field-label">Status</div>
+                  <div class="info-field-value">
+                    <span style="display: inline-flex; align-items: center; gap: 6px;">
+                      <span style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></span>
+                      Draft
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Validation -->
+              <div class="info-section">
+                <h4 class="info-section-title">Validation</h4>
+                <div class="info-field">
+                  <div class="info-field-label">Required fields</div>
+                  <div class="info-field-value">3 of 5 complete</div>
+                </div>
+                <div class="info-field">
+                  <div class="info-field-label">Errors</div>
+                  <div class="info-field-value" style="color: #dc2626;">2 validation errors</div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div><!-- end .tab-content-area -->
+        </div><!-- End product-main -->
+      </main>
+    </div>
+      </div>
+      <!-- End of app-main: closes main-container and app-main -->
+
+
+      <!-- AI Side Panel (at app-body level, spans full height below teal header) -->
+      <aside class="ai-panel" id="aiPanel">
+        <div class="ai-popover-header">
+          <div class="ai-popover-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+              <circle cx="7.5" cy="14.5" r="1.5" fill="currentColor"/>
+              <circle cx="16.5" cy="14.5" r="1.5" fill="currentColor"/>
+            </svg>
+            AI Assistant
+          </div>
+          <div class="ai-popover-actions">
+            <button class="ai-popover-btn" onclick="closeAiPanel()" title="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="ai-popover-content">
+          <div class="ai-messages">
+            <div class="ai-message assistant">
+              <div class="ai-message-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+                </svg>
+              </div>
+              <div class="ai-message-bubble">
+                Hi! I'm your AI assistant. I can help you with product data, answer questions about attributes, or suggest improvements. What would you like help with?
+              </div>
+            </div>
+            <div class="ai-message user">
+              <div class="ai-message-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="ai-message-bubble">
+                Can you check the data quality for this product?
+              </div>
+            </div>
+            <div class="ai-message assistant">
+              <div class="ai-message-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+                </svg>
+              </div>
+              <div class="ai-message-bubble">
+                I've analyzed the product data. Here's what I found:<br><br>
+                <strong>Issues detected:</strong><br>
+                • Missing marketing description (English)<br>
+                • Short title could be more descriptive<br>
+                • No alternate images provided<br><br>
+                <strong>Completeness score:</strong> 72%<br><br>
+                Would you like me to suggest improvements for any of these?
+              </div>
+            </div>
+          </div>
+          <div class="ai-suggestions">
+            <button class="ai-suggestion">Generate description</button>
+            <button class="ai-suggestion">Improve title</button>
+            <button class="ai-suggestion">Find similar products</button>
+          </div>
+        </div>
+        <div class="ai-popover-input">
+          <input type="text" placeholder="Ask me anything..." />
+          <button class="ai-send-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="resize-handle resize-handle-left" data-panel="aiPanel"></div>
+      </aside>
+    </div>
+    <!-- End of app-body -->
+  </div>
+
+  <script>
+    // Configuration
+    const PANEL_MIN_WIDTH = 200;
+    const PANEL_MAX_WIDTH = 600;
+    const COLLAPSED_WIDTH = 32;
+    // Tab info panel resize bounds (Attributes tab right-side panel).
+    const TAB_INFO_PANEL_MIN_WIDTH = 384;
+    // Form panel must keep this much room while the info panel grows.
+    // 600px matches the @container breakpoint where the form layout
+    // collapses to a single column.
+    const FORM_PANEL_MIN_WIDTH = 600;
+
+    // Tab navigation
+    function scrollTabs(direction) {
+      const tabs = document.getElementById('productTabs');
+      const scrollAmount = 150;
+      tabs.scrollLeft += direction * scrollAmount;
+      updateTabsNavVisibility();
+    }
+
+    function updateTabsNavVisibility() {
+      const tabs = document.getElementById('productTabs');
+      const prevBtn = document.getElementById('tabsPrev');
+      const nextBtn = document.getElementById('tabsNext');
+      
+      if (!tabs || !prevBtn || !nextBtn) return;
+      
+      const isScrollable = tabs.scrollWidth > tabs.clientWidth;
+      const isAtStart = tabs.scrollLeft <= 0;
+      const isAtEnd = tabs.scrollLeft >= tabs.scrollWidth - tabs.clientWidth - 1;
+      
+      if (isScrollable && !isAtStart) {
+        prevBtn.classList.add('visible');
+      } else {
+        prevBtn.classList.remove('visible');
+      }
+      
+      if (isScrollable && !isAtEnd) {
+        nextBtn.classList.add('visible');
+      } else {
+        nextBtn.classList.remove('visible');
+      }
+    }
+
+    function initTabsNav() {
+      const tabs = document.getElementById('productTabs');
+      if (tabs) {
+        tabs.addEventListener('scroll', updateTabsNavVisibility);
+        window.addEventListener('resize', updateTabsNavVisibility);
+        updateTabsNavVisibility();
+      }
+    }
+
+    // Tiles horizontal scroll navigation
+    function scrollTiles(direction) {
+      const container = document.getElementById('tilesContainer');
+      if (container) {
+        const scrollAmount = 200;
+        container.scrollLeft += direction * scrollAmount;
+      }
+    }
+
+    function updateTilesNavVisibility() {
+      const container = document.getElementById('tilesContainer');
+      const prevBtn = document.getElementById('tilesPrev');
+      const nextBtn = document.getElementById('tilesNext');
+      
+      if (!container || !prevBtn || !nextBtn) return;
+      
+      const isScrollable = container.scrollWidth > container.clientWidth;
+      const isAtStart = container.scrollLeft <= 0;
+      const isAtEnd = container.scrollLeft >= container.scrollWidth - container.clientWidth - 1;
+      
+      if (isScrollable && !isAtStart) {
+        prevBtn.classList.add('visible');
+      } else {
+        prevBtn.classList.remove('visible');
+      }
+      
+      if (isScrollable && !isAtEnd) {
+        nextBtn.classList.add('visible');
+      } else {
+        nextBtn.classList.remove('visible');
+      }
+    }
+
+    function initTilesNav() {
+      const container = document.getElementById('tilesContainer');
+      if (container) {
+        container.addEventListener('scroll', updateTilesNavVisibility);
+        window.addEventListener('resize', updateTilesNavVisibility);
+        updateTilesNavVisibility();
+      }
+    }
+
+    // Tab info panel toggle
+    function toggleTabInfoPanel() {
+      const panel = document.getElementById('tabInfoPanel');
+      if (panel) {
+        panel.classList.toggle('collapsed');
+      }
+    }
+
+    // Tab switching functionality
+    function switchTab(tabName, hasTabInfo) {
+      // Update active tab styling
+      const tabs = document.querySelectorAll('.product-tab');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Switch tab content pane
+      const tabPanes = document.querySelectorAll('.tab-pane');
+      tabPanes.forEach(pane => pane.classList.remove('active'));
+      const targetPane = document.getElementById('tab-' + tabName);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+    }
+
+    // Section collapse/expand
+    function toggleSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      section.classList.toggle('collapsed');
+    }
+
+    // Debounce helper function
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Check if main content is in narrow mode
+    // Trigger collapse when main content would go below 16rem (256px)
+    // We use a higher threshold to ensure content stays comfortable
+    const NARROW_MODE_THRESHOLD = 384; // 24rem - triggers collapse early enough to maintain 16rem minimum
+    
+    function isNarrowMode() {
+      const productMain = document.querySelector('.product-main');
+      if (!productMain) return false;
+      return productMain.offsetWidth < NARROW_MODE_THRESHOLD;
+    }
+    
+    // Collapse a panel programmatically (auto = system collapsed, not user)
+    function collapsePanel(panelId, isAuto = false) {
+      const panel = document.getElementById(panelId);
+      if (!panel || panel.classList.contains('collapsed')) return;
+      
+      panel.dataset.previousWidth = panel.style.width || getComputedStyle(panel).width;
+      panel.classList.add('collapsed');
+      
+      // Track if this was an auto-collapse (not user initiated)
+      if (isAuto) {
+        panel.dataset.autoCollapsed = 'true';
+      }
+      
+      updateToggleIcon(panel, panelId);
+    }
+    
+    // Expand a panel programmatically
+    function expandPanel(panelId) {
+      const panel = document.getElementById(panelId);
+      if (!panel || !panel.classList.contains('collapsed')) return;
+      
+      panel.classList.remove('collapsed');
+      delete panel.dataset.autoCollapsed; // Clear auto-collapse flag
+      
+      const storedWidth = panel.dataset.previousWidth;
+      if (storedWidth) {
+        panel.style.width = storedWidth;
+      }
+      updateToggleIcon(panel, panelId);
+    }
+    
+    // Check and apply narrow mode restrictions
+    function checkNarrowMode() {
+      const browsePanel = document.getElementById('panelLeft');
+      const treePanel = document.getElementById('panelMiddle');
+      
+      if (isNarrowMode()) {
+        // In narrow mode, only one left panel can be expanded at a time
+        const browseExpanded = browsePanel && !browsePanel.classList.contains('collapsed');
+        const treeExpanded = treePanel && !treePanel.classList.contains('collapsed');
+        
+        // If both are expanded, auto-collapse Browse (keep Tree as the default)
+        if (browseExpanded && treeExpanded) {
+          collapsePanel('panelLeft', true); // true = auto-collapsed
+        }
+      } else {
+        // Not in narrow mode - try to expand auto-collapsed panels
+        // But only if it won't put us back into narrow mode
+        
+        // Try to expand Browse first
+        if (browsePanel && browsePanel.dataset.autoCollapsed === 'true') {
+          expandPanel('panelLeft');
+          
+          // Re-check if we're now in narrow mode after expanding
+          if (isNarrowMode()) {
+            // Oops, not enough space - collapse it back
+            collapsePanel('panelLeft', true);
+            return; // Don't try to expand Tree either
+          }
+        }
+        
+        // Try to expand Tree
+        if (treePanel && treePanel.dataset.autoCollapsed === 'true') {
+          expandPanel('panelMiddle');
+          
+          // Re-check if we're now in narrow mode after expanding
+          if (isNarrowMode()) {
+            // Not enough space - collapse it back
+            collapsePanel('panelMiddle', true);
+          }
+        }
+      }
+    }
+    
+    // Debounced version of checkNarrowMode to prevent flickering
+    const debouncedCheckNarrowMode = debounce(checkNarrowMode, 150);
+
+    // Check if expanding a left panel would cause narrow mode
+    function wouldCauseNarrowMode(panelId) {
+      const panel = document.getElementById(panelId);
+      if (!panel) return false;
+      
+      const productMain = document.querySelector('.product-main');
+      if (!productMain) return false;
+      
+      // Get the width the panel would take when expanded
+      const expandedWidth = parseInt(panel.dataset.previousWidth) || 
+                            parseInt(getComputedStyle(document.documentElement).getPropertyValue('--left-panel-width')) || 
+                            384;
+      const collapsedWidth = COLLAPSED_WIDTH;
+      const widthDifference = expandedWidth - collapsedWidth;
+      
+      // Check if main content would be too narrow after expansion
+      const currentMainWidth = productMain.offsetWidth;
+      const projectedMainWidth = currentMainWidth - widthDifference;
+      
+      return projectedMainWidth < NARROW_MODE_THRESHOLD;
+    }
+
+    // Check if AI panel is visible (info panel is now at tab level, not affecting main layout)
+    function isAiPanelVisible() {
+      const aiPanel = document.getElementById('aiPanel');
+      return aiPanel && aiPanel.classList.contains('visible');
+    }
+
+    // Panel collapse/expand functionality
+    function togglePanel(panelId) {
+      const panel = document.getElementById(panelId);
+      const isCollapsed = panel.classList.contains('collapsed');
+      
+      if (isCollapsed) {
+        // For left panels, check if expanding would cause narrow mode
+        if (panelId === 'panelLeft' || panelId === 'panelMiddle') {
+          const otherPanelId = panelId === 'panelLeft' ? 'panelMiddle' : 'panelLeft';
+          const otherPanel = document.getElementById(otherPanelId);
+          
+          // If expanding this panel would cause narrow mode, or we're already in narrow mode,
+          // collapse the other panel first
+          if (otherPanel && !otherPanel.classList.contains('collapsed')) {
+            if (isNarrowMode() || wouldCauseNarrowMode(panelId)) {
+              collapsePanel(otherPanelId, true); // true = auto-collapsed
+            }
+          }
+        }
+
+        // Opening Browse should free up horizontal space, so collapse the
+        // (right-side) tab info panel automatically. This only applies to
+        // user-initiated toggles — programmatic restores (e.g. when the
+        // window grows back from narrow mode) leave the info panel alone.
+        if (panelId === 'panelLeft') {
+          const infoPanel = document.getElementById('tabInfoPanel');
+          if (infoPanel && !infoPanel.classList.contains('collapsed')) {
+            infoPanel.classList.add('collapsed');
+          }
+        }
+
+        panel.classList.remove('collapsed');
+        delete panel.dataset.autoCollapsed; // User is expanding, clear auto flag
+        
+        // Restore previous width if stored
+        const storedWidth = panel.dataset.previousWidth;
+        if (storedWidth) {
+          panel.style.width = storedWidth;
+        }
+      } else {
+        // User is manually collapsing - clear auto flag
+        delete panel.dataset.autoCollapsed;
+        
+        // Store current width before collapsing
+        panel.dataset.previousWidth = panel.style.width || getComputedStyle(panel).width;
+        panel.classList.add('collapsed');
+      }
+      
+      updateToggleIcon(panel, panelId);
+      
+    }
+
+    function updateToggleIcon(panel, panelId) {
+      const isCollapsed = panel.classList.contains('collapsed');
+      const toggleBtn = panel.querySelector('.panel-toggle');
+      if (toggleBtn) {
+        const svg = toggleBtn.querySelector('svg');
+        const isLeftCollapse = toggleBtn.classList.contains('toggle-left');
+        
+        if (isLeftCollapse) {
+          // Info panel (collapses to the left)
+          if (isCollapsed) {
+            // Arrow points left (<)
+            svg.innerHTML = '<polyline points="15 18 9 12 15 6"/>';
+          } else {
+            // Arrow points right (>)
+            svg.innerHTML = '<polyline points="9 18 15 12 9 6"/>';
+          }
+        } else {
+          // Browse/Tree panels (collapse to the right)
+          if (isCollapsed) {
+            // Arrow points right (>)
+            svg.innerHTML = '<polyline points="9 18 15 12 9 6"/>';
+          } else {
+            // Arrow points left (<)
+            svg.innerHTML = '<polyline points="15 18 9 12 15 6"/>';
+          }
+        }
+      }
+    }
+
+    // Resize functionality
+    let isResizing = false;
+    let currentHandle = null;
+    let currentPanel = null;
+    let startX = 0;
+    let startWidth = 0;
+
+    function initResize() {
+      const handles = document.querySelectorAll('.resize-handle');
+      
+      handles.forEach(handle => {
+        handle.addEventListener('mousedown', startResize);
+        handle.addEventListener('touchstart', startResize, { passive: false });
+      });
+
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('touchmove', resize, { passive: false });
+      document.addEventListener('mouseup', stopResize);
+      document.addEventListener('touchend', stopResize);
+    }
+
+    function startResize(e) {
+      e.preventDefault();
+      
+      const panelId = e.target.dataset.panel;
+      currentPanel = document.getElementById(panelId);
+      
+      if (!currentPanel || currentPanel.classList.contains('collapsed')) return;
+      
+      isResizing = true;
+      currentHandle = e.target;
+      currentHandle.classList.add('active');
+      currentPanel.classList.add('resizing');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      
+      startX = e.clientX || e.touches[0].clientX;
+      startWidth = currentPanel.offsetWidth;
+    }
+
+    function resize(e) {
+      if (!isResizing || !currentPanel) return;
+      
+      e.preventDefault();
+      
+      const clientX = e.clientX || e.touches[0].clientX;
+      const isRightPanel = currentPanel.classList.contains('panel-right') || 
+                           currentPanel.classList.contains('panel-unified') || 
+                           currentPanel.classList.contains('ai-panel') ||
+                           currentPanel.classList.contains('tab-info-panel');
+      
+      let delta = clientX - startX;
+      if (isRightPanel) {
+        delta = -delta; // Reverse for right panel (resize from left edge)
+      }
+      
+      let newWidth = startWidth + delta;
+      
+      // Tab info panel uses its own min and a max that reserves room for
+      // the form panel within the same flex container.
+      let minW = PANEL_MIN_WIDTH;
+      let maxW = PANEL_MAX_WIDTH;
+      if (currentPanel.classList.contains('tab-info-panel')) {
+        minW = TAB_INFO_PANEL_MIN_WIDTH;
+        const container = currentPanel.parentElement;
+        const containerWidth = container ? container.clientWidth : 0;
+        maxW = Math.max(minW, containerWidth - FORM_PANEL_MIN_WIDTH);
+      }
+      
+      newWidth = Math.max(minW, Math.min(maxW, newWidth));
+      
+      currentPanel.style.width = newWidth + 'px';
+      
+      // Sync width between AI panel and info panel
+      syncPanelWidths(currentPanel, newWidth);
+    }
+    
+    // Sync width - info panel is now at tab level, no sync needed
+    function syncPanelWidths(sourcePanel, width) {
+      // No longer syncing with product-level panel since info panel is at tab level
+    }
+
+    function stopResize() {
+      if (!isResizing) return;
+      
+      isResizing = false;
+      
+      const wasRightPanel = currentPanel && (
+        currentPanel.classList.contains('panel-unified') || 
+        currentPanel.classList.contains('ai-panel')
+      );
+      
+      if (currentHandle) {
+        currentHandle.classList.remove('active');
+      }
+      if (currentPanel) {
+        currentPanel.classList.remove('resizing');
+      }
+      
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      
+      currentHandle = null;
+      currentPanel = null;
+      
+      // Check narrow mode after any resize (debounced to prevent flicker)
+      debouncedCheckNarrowMode();
+    }
+
+    // Double-click to reset to default width
+    function initDoubleClickReset() {
+      const handles = document.querySelectorAll('.resize-handle');
+      
+      handles.forEach(handle => {
+        handle.addEventListener('dblclick', (e) => {
+          const panelId = e.target.dataset.panel;
+          const panel = document.getElementById(panelId);
+          
+          if (panel && !panel.classList.contains('collapsed')) {
+            const defaultWidth = panel.dataset.defaultWidth;
+            panel.style.width = (defaultWidth ? defaultWidth : '380') + 'px';
+          }
+        });
+      });
+    }
+
+    // Cards navigation
+    function scrollCards(direction) {
+      const row = document.getElementById('infoCardsRow');
+      const cardWidth = 384 + 16; // card width + gap
+      row.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
+    }
+
+    function updateCardsNavVisibility() {
+      const row = document.getElementById('infoCardsRow');
+      const prevBtn = document.getElementById('cardsPrev');
+      const nextBtn = document.getElementById('cardsNext');
+      
+      if (!row || !prevBtn || !nextBtn) return;
+      
+      const isScrollable = row.scrollWidth > row.clientWidth;
+      const atStart = row.scrollLeft <= 0;
+      const atEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 1;
+      
+      if (isScrollable && !atStart) {
+        prevBtn.classList.add('visible');
+      } else {
+        prevBtn.classList.remove('visible');
+      }
+      
+      if (isScrollable && !atEnd) {
+        nextBtn.classList.add('visible');
+      } else {
+        nextBtn.classList.remove('visible');
+      }
+    }
+
+    function initCardsNav() {
+      const row = document.getElementById('infoCardsRow');
+      if (row) {
+        row.addEventListener('scroll', updateCardsNavVisibility);
+        window.addEventListener('resize', updateCardsNavVisibility);
+        updateCardsNavVisibility();
+      }
+    }
+
+    // Position attribute tooltips with fixed positioning so they escape
+    // ancestor overflow (.tab-pane / .tab-content) and are never clipped.
+    function positionAttrTooltip(icon) {
+      const tooltip = icon.querySelector('.attr-tooltip');
+      if (!tooltip) return;
+      const iconRect = icon.getBoundingClientRect();
+      const tipRect = tooltip.getBoundingClientRect();
+      const margin = 8;
+      const gap = 8;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const iconCenterX = iconRect.left + iconRect.width / 2;
+      let left = iconCenterX - tipRect.width / 2;
+      left = Math.max(margin, Math.min(left, vw - tipRect.width - margin));
+      let top = iconRect.top - tipRect.height - gap;
+      let placeBelow = false;
+      if (top < margin) {
+        top = iconRect.bottom + gap;
+        placeBelow = true;
+      }
+      top = Math.min(top, vh - tipRect.height - margin);
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      const arrowLeft = iconCenterX - left;
+      tooltip.style.setProperty('--arrow-left', arrowLeft + 'px');
+      tooltip.classList.toggle('attr-tooltip-below', placeBelow);
+    }
+
+    function showAttrTooltip(icon) {
+      const tooltip = icon.querySelector('.attr-tooltip');
+      if (!tooltip) return;
+      positionAttrTooltip(icon);
+      tooltip.classList.add('is-shown');
+    }
+
+    function hideAttrTooltip(icon) {
+      const tooltip = icon.querySelector('.attr-tooltip');
+      if (!tooltip) return;
+      tooltip.classList.remove('is-shown');
+    }
+
+    // Re-clamp the tab info panel's width when the window resizes, so it
+    // never exceeds its dynamic max (container width - form panel min).
+    function clampTabInfoPanelWidth() {
+      const panel = document.getElementById('tabInfoPanel');
+      if (!panel || panel.classList.contains('collapsed')) return;
+      const container = panel.parentElement;
+      if (!container) return;
+      const minW = TAB_INFO_PANEL_MIN_WIDTH;
+      const maxW = Math.max(minW, container.clientWidth - FORM_PANEL_MIN_WIDTH);
+      const current = panel.offsetWidth;
+      if (current > maxW) {
+        panel.style.width = maxW + 'px';
+      } else if (current < minW) {
+        panel.style.width = minW + 'px';
+      }
+    }
+
+    function initAttrTooltips() {
+      document.querySelectorAll('.attr-info').forEach(icon => {
+        icon.addEventListener('mouseenter', () => showAttrTooltip(icon));
+        icon.addEventListener('mouseleave', () => hideAttrTooltip(icon));
+        icon.addEventListener('focus', () => showAttrTooltip(icon));
+        icon.addEventListener('blur', () => hideAttrTooltip(icon));
+      });
+      // Hide any open tooltip when the user scrolls so it doesn't drift
+      // away from its anchor icon.
+      window.addEventListener('scroll', () => {
+        document.querySelectorAll('.attr-tooltip.is-shown').forEach(t => {
+          t.classList.remove('is-shown');
+        });
+      }, true);
+    }
+
+    // Clone the "Filled" attribute form into the other state panes
+    // (Empty / Empty RO / Filled RO / Mixed) and apply per-state tweaks.
+    function buildAttrStatePanes() {
+      const sourcePane = document.getElementById('tab-filled');
+      if (!sourcePane) return;
+      const sourceContent = sourcePane.querySelector('.tab-content');
+      if (!sourceContent) return;
+
+      const states = ['empty', 'empty-ro', 'filled-ro', 'mixed'];
+      states.forEach(state => {
+        const targetPane = document.getElementById('tab-' + state);
+        if (!targetPane) return;
+        const targetContent = targetPane.querySelector('.tab-content');
+        if (!targetContent || targetContent.children.length > 0) return;
+        Array.from(sourceContent.children).forEach(child => {
+          targetContent.appendChild(child.cloneNode(true));
+        });
+        applyAttrState(targetContent, state);
+      });
+    }
+
+    function applyAttrState(scope, state) {
+      const isEmpty = state === 'empty' || state === 'empty-ro';
+      const isReadOnly = state === 'empty-ro' || state === 'filled-ro';
+      const isMixed = state === 'mixed';
+
+      if (isEmpty) {
+        scope.querySelectorAll('input.form-input').forEach(input => {
+          input.value = '';
+        });
+        scope.querySelectorAll('textarea.form-input').forEach(textarea => {
+          textarea.value = '';
+          textarea.textContent = '';
+        });
+        // Read-only static values show as truly empty (no "—" placeholder)
+        // to stay consistent with how empty editable fields look.
+        scope.querySelectorAll('.form-static-value').forEach(el => {
+          el.textContent = '';
+        });
+      }
+
+      if (isReadOnly) {
+        scope.classList.add('is-read-only');
+        markReadOnlyInputs(scope);
+      }
+
+      if (isMixed) {
+        scope.querySelectorAll('.form-row').forEach((row, idx) => {
+          if (idx % 2 === 1) {
+            row.classList.add('is-read-only');
+            markReadOnlyInputs(row);
+          }
+        });
+      }
+    }
+
+    // Mark every input/textarea in `root` as read-only and strip its
+    // placeholder so read-only fields never advertise placeholder hints
+    // (and screen readers don't announce them either).
+    function markReadOnlyInputs(root) {
+      root.querySelectorAll('input.form-input, textarea.form-input').forEach(input => {
+        input.setAttribute('readonly', '');
+        input.removeAttribute('placeholder');
+      });
+    }
+
+    // Bind the last word of each form label to the trailing info icon so
+    // the icon never ends up alone on a new line when the label wraps.
+    function bindAttrLabelTails() {
+      document.querySelectorAll('.form-label').forEach(label => {
+        if (label.querySelector('.attr-label-tail')) return;
+        const icon = label.querySelector('.attr-info');
+        if (!icon) return;
+        const textNode = label.firstChild;
+        if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return;
+        const text = textNode.textContent;
+        const lastSpace = text.lastIndexOf(' ');
+        const wrapper = document.createElement('span');
+        wrapper.className = 'attr-label-tail';
+        if (lastSpace === -1) {
+          label.removeChild(textNode);
+          wrapper.appendChild(document.createTextNode(text));
+        } else {
+          textNode.textContent = text.slice(0, lastSpace + 1);
+          wrapper.appendChild(document.createTextNode(text.slice(lastSpace + 1)));
+        }
+        wrapper.appendChild(icon);
+        label.appendChild(wrapper);
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      initResize();
+      initDoubleClickReset();
+      initCardsNav();
+      initTabsNav();
+      initTilesNav();
+      checkNarrowMode();
+      buildAttrStatePanes();
+      bindAttrLabelTails();
+      initAttrTooltips();
+      
+      // Listen for window resize to check narrow mode (debounced)
+      window.addEventListener('resize', debouncedCheckNarrowMode);
+      window.addEventListener('resize', clampTabInfoPanelWidth);
+    });
+  </script>
+
+  <!-- AI Assistant Styles -->
+  <style>
+    /* AI Floating Button - Fixed at bottom-right */
+    .ai-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      z-index: 1000;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .ai-fab:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    }
+
+    .ai-fab.hidden {
+      display: none;
+    }
+
+    .ai-fab svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    /* AI Popover */
+    .ai-popover {
+      position: fixed;
+      bottom: 24px;
+      right: calc(var(--right-panel-width) + 24px);
+      width: 380px;
+      height: 480px;
+      background: var(--color-bg);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      z-index: 1001;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      transition: right 0.3s ease;
+    }
+
+    /* When info panel is collapsed, shift popover closer to the right */
+    .ai-popover.panel-collapsed {
+      right: calc(var(--collapsed-panel-width) + 24px);
+    }
+
+    .ai-popover.visible {
+      display: flex;
+    }
+
+    .ai-popover-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .ai-popover-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .ai-popover-title svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ai-popover-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ai-popover-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: background 0.2s ease;
+    }
+
+    .ai-popover-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .ai-popover-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ai-popover-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .ai-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ai-message {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ai-message.assistant {
+      flex-direction: row;
+    }
+
+    .ai-message.user {
+      flex-direction: row-reverse;
+    }
+
+    .ai-message-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ai-message.assistant .ai-message-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .ai-message.user .ai-message-avatar {
+      background: var(--color-bg-gray);
+      color: var(--color-text-secondary);
+    }
+
+    .ai-message-avatar svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ai-message-bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 85%;
+    }
+
+    .ai-message.assistant .ai-message-bubble {
+      background: var(--color-bg-gray);
+      color: var(--color-text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .ai-message.user .ai-message-bubble {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .ai-popover-input {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg);
+    }
+
+    .ai-popover-input input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .ai-popover-input input:focus {
+      border-color: #667eea;
+    }
+
+    .ai-send-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .ai-send-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* AI Side Panel - Integrated into layout */
+    .ai-panel {
+      width: var(--right-panel-width);
+      min-width: var(--panel-min-width);
+      max-width: var(--panel-max-width);
+      background: var(--color-bg);
+      border-left: 1px solid var(--color-border);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .ai-panel.visible {
+      display: flex;
+    }
+
+    .ai-panel .ai-popover-header {
+      border-radius: 0;
+    }
+
+    /* When AI panel is visible, both panels can show side by side */
+    /* No longer hiding info panel - both can be visible */
+
+    /* Suggestions */
+    .ai-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .ai-suggestion {
+      padding: 8px 12px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ai-suggestion:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+  </style>
+
+  <!-- AI Assistant HTML -->
+  <button class="ai-fab" id="aiFab" onclick="openAiPopover()" title="AI Assistant">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+      <circle cx="7.5" cy="14.5" r="1.5" fill="currentColor"/>
+      <circle cx="16.5" cy="14.5" r="1.5" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <!-- AI Popover -->
+  <div class="ai-popover" id="aiPopover">
+    <div class="ai-popover-header">
+      <div class="ai-popover-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+          <circle cx="7.5" cy="14.5" r="1.5" fill="currentColor"/>
+          <circle cx="16.5" cy="14.5" r="1.5" fill="currentColor"/>
+        </svg>
+        AI Assistant
+      </div>
+      <div class="ai-popover-actions">
+        <button class="ai-popover-btn" onclick="expandAiPanel()" title="Expand to panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"/>
+            <polyline points="9 21 3 21 3 15"/>
+            <line x1="21" y1="3" x2="14" y2="10"/>
+            <line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </button>
+        <button class="ai-popover-btn" onclick="closeAiPopover()" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="ai-popover-content">
+      <div class="ai-messages">
+        <div class="ai-message assistant">
+          <div class="ai-message-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+            </svg>
+          </div>
+          <div class="ai-message-bubble">
+            Hi! I'm your AI assistant. I can help you with product data, answer questions about attributes, or suggest improvements. What would you like help with?
+          </div>
+        </div>
+      </div>
+      <div class="ai-suggestions">
+        <button class="ai-suggestion">Check data quality</button>
+        <button class="ai-suggestion">Suggest descriptions</button>
+        <button class="ai-suggestion">Find missing attributes</button>
+        <button class="ai-suggestion">Compare products</button>
+      </div>
+    </div>
+    <div class="ai-popover-input">
+      <input type="text" placeholder="Ask me anything..." />
+      <button class="ai-send-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- AI Assistant JavaScript -->
+  <script>
+    // In v1.6, clicking the FAB opens the panel directly
+    function openAiPopover() {
+      // Open panel directly
+      openAiPanel();
+    }
+
+    function openAiPanel() {
+      document.getElementById('aiFab').classList.add('hidden');
+      document.getElementById('aiPanel').classList.add('visible');
+      document.querySelector('.app-body').classList.add('ai-panel-active');
+    }
+
+    function closeAiPanel() {
+      document.getElementById('aiPanel').classList.remove('visible');
+      document.getElementById('aiFab').classList.remove('hidden');
+      
+      // Restore auto-collapsed Browse panel
+      const browsePanel = document.getElementById('panelLeft');
+      if (browsePanel && browsePanel.dataset.autoCollapsed === 'true') {
+        expandPanel('panelLeft');
+      }
+      
+      document.querySelector('.app-body').classList.remove('ai-panel-active');
+    }
+  </script>
+</body>
+</html>
