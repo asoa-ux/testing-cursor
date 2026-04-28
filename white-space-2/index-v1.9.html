@@ -3107,15 +3107,16 @@
 
   <script>
     // Configuration
-    const PANEL_MIN_WIDTH = 200;
+    const PANEL_MIN_WIDTH = 384;
     const PANEL_MAX_WIDTH = 600;
     const COLLAPSED_WIDTH = 32;
     // Tab info panel resize bounds (Attributes tab right-side panel).
     const TAB_INFO_PANEL_MIN_WIDTH = 384;
     // Form panel must keep this much room while the info panel grows.
-    // 600px matches the @container breakpoint where the form layout
-    // collapses to a single column.
-    const FORM_PANEL_MIN_WIDTH = 600;
+    // 21rem (336px) is the smallest the form area is ever allowed to
+    // get. Below 600 the form layout switches to single-column mode
+    // via the @container query, but it never goes narrower than this.
+    const FORM_PANEL_MIN_WIDTH = 21 * 16;
 
     // Tab navigation
     function scrollTabs(direction) {
@@ -3207,7 +3208,8 @@
     function toggleTabInfoPanel() {
       const panel = document.getElementById('tabInfoPanel');
       if (!panel) return;
-      if (panel.classList.contains('collapsed')) {
+      const wasCollapsed = panel.classList.contains('collapsed');
+      if (wasCollapsed) {
         enforcePanelLimit('tabInfoPanel');
         panel.classList.remove('collapsed');
         if (panel.dataset.previousWidth) {
@@ -3217,6 +3219,7 @@
       } else {
         collapseTabInfoPanel(panel);
       }
+      refreshLayoutAfterPanelChange();
     }
 
     // Collapse helper that preserves the current resized width so it
@@ -3277,7 +3280,7 @@
       } else if (id === 'tabInfoPanel') {
         collapseTabInfoPanel(panel);
       } else {
-        collapsePanel(id, true);
+        collapsePanel(id);
       }
     }
 
@@ -3387,114 +3390,26 @@
       };
     }
 
-    // Check if main content is in narrow mode
-    // Trigger collapse when main content would go below 16rem (256px)
-    // We use a higher threshold to ensure content stays comfortable
-    const NARROW_MODE_THRESHOLD = 384; // 24rem - triggers collapse early enough to maintain 16rem minimum
-    
-    function isNarrowMode() {
-      const productMain = document.querySelector('.product-main');
-      if (!productMain) return false;
-      return productMain.offsetWidth < NARROW_MODE_THRESHOLD;
-    }
-    
-    // Collapse a panel programmatically (auto = system collapsed, not user)
-    function collapsePanel(panelId, isAuto = false) {
+    // Collapse a panel programmatically (kept around for the max-3
+    // eviction logic; not used as a spatial cascade anymore).
+    function collapsePanel(panelId) {
       const panel = document.getElementById(panelId);
       if (!panel || panel.classList.contains('collapsed')) return;
-      
       panel.dataset.previousWidth = panel.style.width || getComputedStyle(panel).width;
       panel.classList.add('collapsed');
-      
-      // Track if this was an auto-collapse (not user initiated)
-      if (isAuto) {
-        panel.dataset.autoCollapsed = 'true';
-      }
-      
       updateToggleIcon(panel, panelId);
     }
-    
+
     // Expand a panel programmatically
     function expandPanel(panelId) {
       const panel = document.getElementById(panelId);
       if (!panel || !panel.classList.contains('collapsed')) return;
-      
       panel.classList.remove('collapsed');
-      delete panel.dataset.autoCollapsed; // Clear auto-collapse flag
-      
       const storedWidth = panel.dataset.previousWidth;
       if (storedWidth) {
         panel.style.width = storedWidth;
       }
       updateToggleIcon(panel, panelId);
-    }
-    
-    // Check and apply narrow mode restrictions
-    function checkNarrowMode() {
-      const browsePanel = document.getElementById('panelLeft');
-      const treePanel = document.getElementById('panelMiddle');
-      
-      if (isNarrowMode()) {
-        // In narrow mode, only one left panel can be expanded at a time
-        const browseExpanded = browsePanel && !browsePanel.classList.contains('collapsed');
-        const treeExpanded = treePanel && !treePanel.classList.contains('collapsed');
-        
-        // If both are expanded, auto-collapse Browse (keep Tree as the default)
-        if (browseExpanded && treeExpanded) {
-          collapsePanel('panelLeft', true); // true = auto-collapsed
-        }
-      } else {
-        // Not in narrow mode - try to expand auto-collapsed panels
-        // But only if it won't put us back into narrow mode
-        
-        // Try to expand Browse first
-        if (browsePanel && browsePanel.dataset.autoCollapsed === 'true') {
-          expandPanel('panelLeft');
-          
-          // Re-check if we're now in narrow mode after expanding
-          if (isNarrowMode()) {
-            // Oops, not enough space - collapse it back
-            collapsePanel('panelLeft', true);
-            return; // Don't try to expand Tree either
-          }
-        }
-        
-        // Try to expand Tree
-        if (treePanel && treePanel.dataset.autoCollapsed === 'true') {
-          expandPanel('panelMiddle');
-          
-          // Re-check if we're now in narrow mode after expanding
-          if (isNarrowMode()) {
-            // Not enough space - collapse it back
-            collapsePanel('panelMiddle', true);
-          }
-        }
-      }
-    }
-    
-    // Debounced version of checkNarrowMode to prevent flickering
-    const debouncedCheckNarrowMode = debounce(checkNarrowMode, 150);
-
-    // Check if expanding a left panel would cause narrow mode
-    function wouldCauseNarrowMode(panelId) {
-      const panel = document.getElementById(panelId);
-      if (!panel) return false;
-      
-      const productMain = document.querySelector('.product-main');
-      if (!productMain) return false;
-      
-      // Get the width the panel would take when expanded
-      const expandedWidth = parseInt(panel.dataset.previousWidth) || 
-                            parseInt(getComputedStyle(document.documentElement).getPropertyValue('--left-panel-width')) || 
-                            384;
-      const collapsedWidth = COLLAPSED_WIDTH;
-      const widthDifference = expandedWidth - collapsedWidth;
-      
-      // Check if main content would be too narrow after expansion
-      const currentMainWidth = productMain.offsetWidth;
-      const projectedMainWidth = currentMainWidth - widthDifference;
-      
-      return projectedMainWidth < NARROW_MODE_THRESHOLD;
     }
 
     // Check if AI panel is visible (info panel is now at tab level, not affecting main layout)
@@ -3513,23 +3428,8 @@
         // close a panel on the opposite side if needed.
         enforcePanelLimit(panelId);
 
-        // For left panels, check if expanding would cause narrow mode
-        if (panelId === 'panelLeft' || panelId === 'panelMiddle') {
-          const otherPanelId = panelId === 'panelLeft' ? 'panelMiddle' : 'panelLeft';
-          const otherPanel = document.getElementById(otherPanelId);
-          
-          // If expanding this panel would cause narrow mode, or we're already in narrow mode,
-          // collapse the other panel first
-          if (otherPanel && !otherPanel.classList.contains('collapsed')) {
-            if (isNarrowMode() || wouldCauseNarrowMode(panelId)) {
-              collapsePanel(otherPanelId, true); // true = auto-collapsed
-            }
-          }
-        }
-
         panel.classList.remove('collapsed');
-        delete panel.dataset.autoCollapsed; // User is expanding, clear auto flag
-        
+
         // Restore previous width if stored
         const storedWidth = panel.dataset.previousWidth;
         if (storedWidth) {
@@ -3538,16 +3438,16 @@
 
         markPanelOpened(panel);
       } else {
-        // User is manually collapsing - clear auto flag
-        delete panel.dataset.autoCollapsed;
-        
         // Store current width before collapsing
         panel.dataset.previousWidth = panel.style.width || getComputedStyle(panel).width;
         panel.classList.add('collapsed');
       }
       
       updateToggleIcon(panel, panelId);
-      
+
+      // Re-clamp the info panel so it always honours its [min, container − form-min]
+      // bounds. We never auto-collapse other panels here.
+      refreshLayoutAfterPanelChange();
     }
 
     function updateToggleIcon(panel, panelId) {
@@ -3638,7 +3538,8 @@
       let newWidth = startWidth + delta;
       
       // Tab info panel uses its own min and a max that reserves room for
-      // the form panel within the same flex container.
+      // the form panel within the same flex container. Resizing only
+      // changes this panel — it never collapses neighbouring panels.
       let minW = PANEL_MIN_WIDTH;
       let maxW = PANEL_MAX_WIDTH;
       if (currentPanel.classList.contains('tab-info-panel')) {
@@ -3646,12 +3547,36 @@
         const container = currentPanel.parentElement;
         const containerWidth = container ? container.clientWidth : 0;
         maxW = Math.max(minW, containerWidth - FORM_PANEL_MIN_WIDTH);
+      } else if (currentPanel.id === 'panelLeft' || currentPanel.id === 'panelMiddle') {
+        // Left side panel: cap so that, after accounting for the OTHER
+        // left panel and the info panel's reserved width, the form area
+        // can still be at FORM_PANEL_MIN_WIDTH. Once the info panel has
+        // shrunk to its own min, the left panel can't grow further.
+        const mainContainer = currentPanel.parentElement;
+        const otherId = currentPanel.id === 'panelLeft' ? 'panelMiddle' : 'panelLeft';
+        const other = document.getElementById(otherId);
+        const otherWidth = other ? other.offsetWidth : 0;
+        const infoPanel = document.getElementById('tabInfoPanel');
+        const infoReserved = infoPanel
+          ? (infoPanel.classList.contains('collapsed') ? COLLAPSED_WIDTH : TAB_INFO_PANEL_MIN_WIDTH)
+          : 0;
+        const containerWidth = mainContainer ? mainContainer.clientWidth : 0;
+        const dynamicMax = containerWidth - otherWidth - infoReserved - FORM_PANEL_MIN_WIDTH;
+        maxW = Math.max(minW, Math.min(maxW, dynamicMax));
       }
       
       newWidth = Math.max(minW, Math.min(maxW, newWidth));
       
       currentPanel.style.width = newWidth + 'px';
-      
+
+      // When the user resizes a left side panel (Browse/Tree), the
+      // available space for the info panel changes. Re-clamp it on
+      // every frame so the info panel yields width — never the form
+      // area — until it hits its own minimum.
+      if (currentPanel.id === 'panelLeft' || currentPanel.id === 'panelMiddle') {
+        clampTabInfoPanelWidth();
+      }
+
       // Sync width between AI panel and info panel
       syncPanelWidths(currentPanel, newWidth);
     }
@@ -3684,8 +3609,10 @@
       currentHandle = null;
       currentPanel = null;
       
-      // Check narrow mode after any resize (debounced to prevent flicker)
-      debouncedCheckNarrowMode();
+      // Note: we deliberately do NOT run the narrow-mode cascade here.
+      // Resizing a panel should never collapse another panel — the
+      // clamp inside resize() already prevents the form panel from
+      // dropping below its minimum width.
     }
 
     // Double-click to reset to default width
@@ -3803,6 +3730,18 @@
       }
     }
 
+    // Re-run the info-panel clamp after a layout change (panel toggle,
+    // resize end). Wrapped in rAF so we measure after the browser has
+    // applied the new flex layout. The info panel may need to shrink
+    // toward its minimum when another panel opens, but no other panel
+    // is auto-collapsed here — the max-3-panels rule (enforcePanelLimit)
+    // is the only place that closes panels for us.
+    function refreshLayoutAfterPanelChange() {
+      requestAnimationFrame(() => {
+        clampTabInfoPanelWidth();
+      });
+    }
+
     function initAttrTooltips() {
       document.querySelectorAll('.attr-info').forEach(icon => {
         icon.addEventListener('mouseenter', () => showAttrTooltip(icon));
@@ -3917,7 +3856,6 @@
       initCardsNav();
       initTabsNav();
       initTilesNav();
-      checkNarrowMode();
       buildAttrStatePanes();
       bindAttrLabelTails();
       initAttrTooltips();
@@ -3937,8 +3875,9 @@
         }
       });
       
-      // Listen for window resize to check narrow mode (debounced)
-      window.addEventListener('resize', debouncedCheckNarrowMode);
+      // On window resize, re-clamp the info panel so it always honours
+      // its [min, container − form-min] bounds. We don't auto-collapse
+      // any panels here — the user controls open/close explicitly.
       window.addEventListener('resize', clampTabInfoPanelWidth);
     });
   </script>
@@ -4297,19 +4236,14 @@
       aiPanel.classList.add('visible');
       markPanelOpened(aiPanel);
       document.querySelector('.app-body').classList.add('ai-panel-active');
+      refreshLayoutAfterPanelChange();
     }
 
     function closeAiPanel() {
       document.getElementById('aiPanel').classList.remove('visible');
       document.getElementById('aiFab').classList.remove('hidden');
-      
-      // Restore auto-collapsed Browse panel
-      const browsePanel = document.getElementById('panelLeft');
-      if (browsePanel && browsePanel.dataset.autoCollapsed === 'true') {
-        expandPanel('panelLeft');
-      }
-      
       document.querySelector('.app-body').classList.remove('ai-panel-active');
+      refreshLayoutAfterPanelChange();
     }
   </script>
 </body>
