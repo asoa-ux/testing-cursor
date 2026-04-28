@@ -364,7 +364,8 @@
       transition: opacity var(--transition-speed) ease;
     }
 
-    .panel.collapsed .panel-collapsed-title {
+    .panel.collapsed .panel-collapsed-title,
+    .tab-info-panel.collapsed .panel-collapsed-title {
       opacity: 1;
       visibility: visible;
     }
@@ -2971,6 +2972,7 @@
                 </svg>
               </button>
             </div>
+            <span class="panel-collapsed-title">Info</span>
             <div class="tab-info-content">
               <!-- Image -->
               <div class="image-placeholder" style="margin-bottom: 16px;">
