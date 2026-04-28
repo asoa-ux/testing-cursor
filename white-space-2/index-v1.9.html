@@ -905,9 +905,15 @@
       user-select: none;
     }
 
+    /* `!important` is required so this overrides the inline `style.width`
+       that the resize handle sets — without it, a resized info panel
+       collapses to an empty wide box instead of the 32px strip. Matches
+       the pattern used by `.panel.collapsed`. The original inline width
+       is preserved (not cleared), so re-expanding restores the
+       user-resized width. */
     .tab-info-panel.collapsed {
-      width: 32px;
-      min-width: 32px;
+      width: 32px !important;
+      min-width: 32px !important;
     }
 
     .tab-info-panel.collapsed .resize-handle {
@@ -1000,13 +1006,12 @@
     /* Read-only attribute styling — baseline for testing read-only field
        designs. Applied to a whole .tab-content (whole tab) or to a single
        .form-row for mixed states. Tweak these to iterate on the look. */
-    .is-read-only .form-input,
-    .is-read-only .form-static-value {
+    /* Read-only inputs/textareas pick up the same muted text + light
+       underline that .form-static-value uses by default — so a Parent
+       row sitting next to a read-only Description row reads as the
+       same kind of field. */
+    .is-read-only .form-input {
       color: rgba(0, 0, 0, 0.60);
-    }
-
-    .is-read-only .form-input,
-    .is-read-only .form-static-value {
       background: transparent;
       border-color: transparent;
       border-bottom: 1px solid #F5F5F5;
@@ -1677,15 +1682,16 @@
     }
 
     /* Textareas auto-size to fit their content, capped at 7.5 rows.
-       `field-sizing: content` lets the browser size the box to its content;
-       `min-height` keeps it from collapsing below 1 row, and `max-height`
-       (in `lh` units) caps growth at exactly 7.5 rows — beyond that the
-       textarea scrolls. */
+       Height is driven by JS (see autoGrowTextarea) so the textarea's
+       width stays purely parent-driven — using `field-sizing: content`
+       leaks the textarea's intrinsic content width into its grid/flex
+       parent and breaks consistent shrink-then-wrap across rows. */
     .form-input.textarea {
       line-height: 1.5;
-      field-sizing: content;
       min-height: calc(1lh + 18px);
       max-height: calc(7.5lh + 18px);
+      min-width: 0;
+      max-width: 100%;
       resize: none;
       overflow-y: auto;
     }
@@ -1693,12 +1699,39 @@
     /* Read-only / static text values shown inside a form-field
        (e.g. the Parent attribute). Matches form-input vertical metrics
        so it lines up with the label baseline. */
+    /* Read-only / static text values shown inside a form-field
+       (e.g. the Parent attribute). Always rendered like a read-only
+       field — same muted text, same #F5F5F5 underline, same focus
+       interaction — regardless of whether the surrounding tab is in
+       read-only mode. The Parent is never user-editable, so treating
+       it as a permanent read-only field keeps its appearance and
+       interaction consistent across every tab/state.
+       Fills its parent like a real input so long values don't force
+       the form-field wider than its min-width and break responsive
+       behaviour. */
     .form-static-value {
-      display: inline-block;
+      display: block;
+      width: 100%;
       padding: 8px 12px;
       font-size: 14px;
       line-height: 1.4;
+      color: rgba(0, 0, 0, 0.60);
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom-color: #F5F5F5;
+      border-radius: 4px;
+      box-sizing: border-box;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      cursor: default;
+    }
+
+    /* Same focus state as read-only inputs/textareas. */
+    .form-static-value:focus {
+      outline: none;
+      background: #F5F5F5;
       color: rgba(0, 0, 0, 0.87);
+      border-color: #52BDEC;
     }
 
     /* Multi-value Fields */
@@ -1733,7 +1766,11 @@
     /* Input with icon placeholder structure */
     .input-with-icon {
       display: grid;
-      grid-template-columns: 1fr 24px;
+      /* Use minmax(0, 1fr) so the input track can shrink below its
+         intrinsic content width — without this, a long-content textarea
+         would force the grid (and the form-field) wider than the row's
+         min-width, breaking the consistent shrink-then-wrap behavior. */
+      grid-template-columns: minmax(0, 1fr) 24px;
       gap: 8px;
       align-items: center;
       width: 100%;
@@ -2913,7 +2950,7 @@
               <div class="form-row" style="margin-top: 24px;">
                 <span class="form-label">Parent<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">The parent product or master record this item is associated with.</span></button></span>
                 <div class="form-field size-medium">
-                  <span class="form-static-value">Champagne Lanson Black Label brut - 750 ml (Master Product)</span>
+                  <span class="form-static-value" tabindex="0">Champagne Lanson Black Label brut - 750 ml (Master Product)</span>
                 </div>
               </div>
               </div>
@@ -3188,7 +3225,43 @@
       const targetPane = document.getElementById('tab-' + tabName);
       if (targetPane) {
         targetPane.classList.add('active');
+        // Hidden panes have scrollHeight 0 — recompute textarea heights
+        // now that the pane is laid out.
+        recomputeTextareaHeights(targetPane);
       }
+    }
+
+    // Auto-grow a single textarea to fit its content. CSS max-height caps
+    // growth at 7.5 rows; beyond that the textarea scrolls. Width is left
+    // entirely to the parent (no field-sizing) so all rows shrink/wrap
+    // consistently when the panel is resized.
+    function autoGrowTextarea(ta) {
+      ta.style.height = 'auto';
+      // +2 accounts for 1px top + 1px bottom borders under border-box.
+      ta.style.height = (ta.scrollHeight + 2) + 'px';
+    }
+
+    function bindTextareaAutoGrow(ta) {
+      if (ta._autoGrowBound) return;
+      ta._autoGrowBound = true;
+      ta.addEventListener('input', () => autoGrowTextarea(ta));
+    }
+
+    function initTextareaAutoGrow() {
+      document.querySelectorAll('textarea.form-input').forEach(ta => {
+        bindTextareaAutoGrow(ta);
+        autoGrowTextarea(ta);
+      });
+    }
+
+    // Recompute textarea heights inside `scope` (e.g. after activating a
+    // previously hidden tab pane).
+    function recomputeTextareaHeights(scope) {
+      const root = scope || document;
+      root.querySelectorAll('textarea.form-input').forEach(ta => {
+        bindTextareaAutoGrow(ta);
+        autoGrowTextarea(ta);
+      });
     }
 
     // Section collapse/expand
@@ -3749,6 +3822,7 @@
       buildAttrStatePanes();
       bindAttrLabelTails();
       initAttrTooltips();
+      initTextareaAutoGrow();
       
       // Listen for window resize to check narrow mode (debounced)
       window.addEventListener('resize', debouncedCheckNarrowMode);
