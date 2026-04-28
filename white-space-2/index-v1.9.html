@@ -905,15 +905,9 @@
       user-select: none;
     }
 
-    /* `!important` is required so this overrides the inline `style.width`
-       that the resize handle sets — without it, a resized info panel
-       collapses to an empty wide box instead of the 32px strip. Matches
-       the pattern used by `.panel.collapsed`. The original inline width
-       is preserved (not cleared), so re-expanding restores the
-       user-resized width. */
     .tab-info-panel.collapsed {
-      width: 32px !important;
-      min-width: 32px !important;
+      width: 32px;
+      min-width: 32px;
     }
 
     .tab-info-panel.collapsed .resize-handle {
@@ -2283,9 +2277,9 @@
       <aside class="panel panel-left collapsed" id="panelLeft">
         <div class="panel-header">
           <span class="panel-header-title">Browse</span>
-          <button class="panel-toggle toggle-right" onclick="togglePanel('panelLeft')" title="Collapse panel">
+          <button class="panel-toggle toggle-right" onclick="togglePanel('panelLeft')" title="Expand panel">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6"/>
+              <polyline points="9 18 15 12 9 6"/>
             </svg>
           </button>
         </div>
@@ -3204,12 +3198,120 @@
       }
     }
 
-    // Tab info panel toggle
+    // Tab info panel toggle. Saves/restores the resized width so an
+    // auto-collapse (or user collapse) doesn't leave an inline width
+    // beating the CSS .collapsed rule (which would render the panel as
+    // a wide empty strip).
     function toggleTabInfoPanel() {
       const panel = document.getElementById('tabInfoPanel');
-      if (panel) {
-        panel.classList.toggle('collapsed');
+      if (!panel) return;
+      if (panel.classList.contains('collapsed')) {
+        enforcePanelLimit('tabInfoPanel');
+        panel.classList.remove('collapsed');
+        if (panel.dataset.previousWidth) {
+          panel.style.width = panel.dataset.previousWidth;
+        }
+        markPanelOpened(panel);
+      } else {
+        collapseTabInfoPanel(panel);
       }
+    }
+
+    // Collapse helper that preserves the current resized width so it
+    // can be restored when the panel reopens. Used by toggleTabInfoPanel
+    // and by enforcePanelLimit when evicting the info panel.
+    function collapseTabInfoPanel(panel) {
+      panel = panel || document.getElementById('tabInfoPanel');
+      if (!panel || panel.classList.contains('collapsed')) return;
+      if (panel.style.width) {
+        panel.dataset.previousWidth = panel.style.width;
+        panel.style.width = '';
+      }
+      panel.classList.add('collapsed');
+    }
+
+    // ---- Multi-panel limit (max 3 open across both sides) ----
+    // Panels are split into "left" (Browse, Tree) and "right" (Info, AI).
+    // Opening a panel that would push the total above 3 evicts the
+    // oldest-opened panel on the OPPOSITE side. If no opposite-side
+    // panel is open, the oldest same-side panel is evicted.
+
+    const MAX_OPEN_PANELS = 3;
+    const ALL_PANEL_IDS = ['panelLeft', 'panelMiddle', 'tabInfoPanel', 'aiPanel'];
+    // Eviction priority — lower number is closed first when we need
+    // to free a slot. Tree (task list) and AI are the "primary"
+    // panels on each side; Browse and Info are the "secondary" ones,
+    // so they yield first when the opposite side opens a new panel.
+    const PANEL_PRIORITY = {
+      panelLeft: 1,
+      tabInfoPanel: 1,
+      panelMiddle: 2,
+      aiPanel: 2,
+    };
+    let panelOpenCounter = 0;
+
+    function getPanelSide(panelId) {
+      if (panelId === 'panelLeft' || panelId === 'panelMiddle') return 'left';
+      if (panelId === 'tabInfoPanel' || panelId === 'aiPanel') return 'right';
+      return null;
+    }
+
+    function isPanelOpen(panel) {
+      if (!panel) return false;
+      if (panel.id === 'aiPanel') return panel.classList.contains('visible');
+      return !panel.classList.contains('collapsed');
+    }
+
+    function markPanelOpened(panel) {
+      if (!panel) return;
+      panel.dataset.openOrder = String(++panelOpenCounter);
+    }
+
+    function closePanelById(id) {
+      const panel = document.getElementById(id);
+      if (!panel) return;
+      if (id === 'aiPanel') {
+        closeAiPanel();
+      } else if (id === 'tabInfoPanel') {
+        collapseTabInfoPanel(panel);
+      } else {
+        collapsePanel(id, true);
+      }
+    }
+
+    function enforcePanelLimit(openingPanelId) {
+      const openingSide = getPanelSide(openingPanelId);
+      if (!openingSide) return;
+
+      const openPanels = ALL_PANEL_IDS
+        .map(id => document.getElementById(id))
+        .filter(p => p && p.id !== openingPanelId && isPanelOpen(p));
+
+      // Total after opening = openPanels.length + 1. We only need to
+      // evict if that would exceed MAX_OPEN_PANELS.
+      if (openPanels.length + 1 <= MAX_OPEN_PANELS) return;
+
+      const oppositeSide = openingSide === 'left' ? 'right' : 'left';
+
+      // Evict secondary panels (Browse, Info) before primary panels
+      // (Tree, AI). When two panels share a priority, fall back to
+      // oldest-opened first.
+      const byEvictionPriority = (a, b) => {
+        const pa = PANEL_PRIORITY[a.id] || 0;
+        const pb = PANEL_PRIORITY[b.id] || 0;
+        if (pa !== pb) return pa - pb;
+        return Number(a.dataset.openOrder || 0) - Number(b.dataset.openOrder || 0);
+      };
+
+      const oppositeCandidates = openPanels
+        .filter(p => getPanelSide(p.id) === oppositeSide)
+        .sort(byEvictionPriority);
+      const sameSideCandidates = openPanels
+        .filter(p => getPanelSide(p.id) === openingSide)
+        .sort(byEvictionPriority);
+
+      const target = oppositeCandidates[0] || sameSideCandidates[0];
+      if (target) closePanelById(target.id);
     }
 
     // Tab switching functionality
@@ -3405,6 +3507,10 @@
       const isCollapsed = panel.classList.contains('collapsed');
       
       if (isCollapsed) {
+        // Enforce the global "max 3 panels" rule before opening — may
+        // close a panel on the opposite side if needed.
+        enforcePanelLimit(panelId);
+
         // For left panels, check if expanding would cause narrow mode
         if (panelId === 'panelLeft' || panelId === 'panelMiddle') {
           const otherPanelId = panelId === 'panelLeft' ? 'panelMiddle' : 'panelLeft';
@@ -3419,17 +3525,6 @@
           }
         }
 
-        // Opening Browse should free up horizontal space, so collapse the
-        // (right-side) tab info panel automatically. This only applies to
-        // user-initiated toggles — programmatic restores (e.g. when the
-        // window grows back from narrow mode) leave the info panel alone.
-        if (panelId === 'panelLeft') {
-          const infoPanel = document.getElementById('tabInfoPanel');
-          if (infoPanel && !infoPanel.classList.contains('collapsed')) {
-            infoPanel.classList.add('collapsed');
-          }
-        }
-
         panel.classList.remove('collapsed');
         delete panel.dataset.autoCollapsed; // User is expanding, clear auto flag
         
@@ -3438,6 +3533,8 @@
         if (storedWidth) {
           panel.style.width = storedWidth;
         }
+
+        markPanelOpened(panel);
       } else {
         // User is manually collapsing - clear auto flag
         delete panel.dataset.autoCollapsed;
@@ -3823,6 +3920,20 @@
       bindAttrLabelTails();
       initAttrTooltips();
       initTextareaAutoGrow();
+
+      // Seed open-order for any panels that are visible at load so the
+      // max-3 eviction rule has a deterministic order from the start.
+      // Also sync each panel's toggle icon to its actual class state so
+      // changing a panel's default open/collapsed state in HTML doesn't
+      // require also flipping the SVG by hand.
+      ALL_PANEL_IDS.forEach(id => {
+        const p = document.getElementById(id);
+        if (!p) return;
+        if (isPanelOpen(p)) markPanelOpened(p);
+        if (id === 'panelLeft' || id === 'panelMiddle') {
+          updateToggleIcon(p, id);
+        }
+      });
       
       // Listen for window resize to check narrow mode (debounced)
       window.addEventListener('resize', debouncedCheckNarrowMode);
@@ -4178,8 +4289,11 @@
     }
 
     function openAiPanel() {
+      enforcePanelLimit('aiPanel');
       document.getElementById('aiFab').classList.add('hidden');
-      document.getElementById('aiPanel').classList.add('visible');
+      const aiPanel = document.getElementById('aiPanel');
+      aiPanel.classList.add('visible');
+      markPanelOpened(aiPanel);
       document.querySelector('.app-body').classList.add('ai-panel-active');
     }
 
