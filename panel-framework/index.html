@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel Framework Prototype</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --surface-muted: #fafafa;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --text-soft: #374151;
+    --accent: #2563eb;
+    --accent-soft: rgba(37, 99, 235, 0.18);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    overflow: hidden;
+    font-size: 14px;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- App toolbar (mode switcher) ---------- */
+  .app-toolbar {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 16px;
+    position: relative;
+    z-index: 70;
+  }
+  .app-toolbar-brand {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .mode-switcher {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    margin-left: auto;
+  }
+  .mode-btn {
+    padding: 4px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 120ms, color 120ms, box-shadow 120ms;
+  }
+  .mode-btn:hover { color: var(--text); }
+  .mode-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .app {
+    display: flex;
+    width: 100vw;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* In bulk mode, both inner panels (Task list + Info panel) are hidden.
+     Info panel will be re-enabled once per-row context is wired up. */
+  .app.mode-bulk .panel[data-id="leftB"]  { display: none !important; }
+  .app.mode-bulk .panel[data-id="rightA"] { display: none !important; }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    background: var(--surface);
+    overflow: hidden;
+    transition: width 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    min-width: 64px;
+  }
+  .panel.left  { border-right: 1px solid var(--border); }
+  .panel.right { border-left:  1px solid var(--border); }
+
+  .panel.resizing,
+  .app.resizing .panel { transition: none; }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-muted);
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .panel.collapsed .panel-header {
+    flex-direction: column;
+    justify-content: flex-start;
+    height: auto;
+    padding: 12px 0;
+    border-bottom: none;
+    background: transparent;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel.collapsed .panel-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    margin-top: 16px;
+    flex: 0 0 auto;
+  }
+
+  .toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 120ms, color 120ms;
+  }
+  .toggle-btn:hover { background: var(--border); color: var(--text); }
+
+  .panel.collapsed .toggle-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .panel-body {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+    color: var(--text-soft);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .panel.collapsed .panel-body { display: none; }
+
+  .panel.collapsed { cursor: pointer; }
+  .panel.collapsed:hover { background: var(--surface-muted); }
+
+  /* ---------- Resize handle ---------- */
+  .resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    z-index: 5;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 120ms;
+  }
+  .panel.left  .resize-handle { right: -4px; }
+  .panel.right .resize-handle { left: -4px; }
+  .resize-handle:hover,
+  .resize-handle.active { background: var(--accent-soft); }
+  .panel.collapsed .resize-handle { display: none; }
+
+  /* ---------- Content area ---------- */
+  .content {
+    flex: 1;
+    /* Mode-specific floors — kept in sync with CONTENT_MIN_BY_MODE in JS:
+       details = 21rem (form layout), bulk = 40rem (table). */
+    min-width: 21rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    overflow: hidden;
+    position: relative; /* anchors hamburger menu & overlay backdrop */
+  }
+  /* Bulk view shows a table — needs a wider floor than the form layout.
+     Order matters: this rule comes BEFORE the hamburger override, so the
+     hamburger rule (last, same specificity) still wins when both apply. */
+  .app.mode-bulk .content { min-width: 40rem; }
+  /* In hamburger mode the rails are hidden, so the content can be as
+     narrow as the viewport itself (e.g. small tablet portrait). */
+  .app.hamburger .content { min-width: 0; }
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 12px;
+    position: relative;
+    z-index: 60; /* keeps header above the overlay backdrop */
+  }
+  .content-header h1 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  /* Flex row containing the content body and the Info panel.
+     Lives below .content-header so the header naturally extends over
+     the Info panel column. */
+  .center-row {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .content-body {
+    flex: 1;
+    padding: 24px;
+    overflow: auto;
+    min-width: 0;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .status-pill.full {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .info-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .info-card ul {
+    padding-left: 18px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-soft);
+  }
+  .info-card code {
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .panel-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+  }
+  .panel-card-info { font-size: 12.5px; min-width: 0; }
+  .panel-card-info strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .panel-card-info span {
+    color: var(--text-muted);
+    font-size: 11.5px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .badge-open      { background: #dcfce7; color: #166534; }
+  .badge-collapsed { background: #f3f4f6; color: #4b5563; }
+
+  .btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-soft);
+    transition: background 120ms, border-color 120ms;
+    flex-shrink: 0;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+
+  /* ---------- Form ---------- */
+  .form-grid {
+    /* The form itself is the container for the responsive break.
+       Wrap threshold = 240 (label) + 24 (gutter) + 336 (21rem) = 600px. */
+    container-type: inline-size;
+    container-name: formgrid;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    column-gap: 24px;
+    align-items: start;
+    padding: 10px 0;
+  }
+  .form-row + .form-row {
+    border-top: 1px solid var(--border);
+  }
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    padding-top: 9px; /* aligns label baseline with input text */
+    line-height: 1.4;
+  }
+  .form-label small {
+    display: block;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 11.5px;
+    margin-top: 2px;
+  }
+
+  .form-control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0; /* allow input to shrink inside grid track */
+  }
+  .form-help {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  .form-textarea {
+    height: auto;
+    padding: 10px 12px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 80px;
+  }
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* Size variants */
+  .size-full     .form-input,
+  .size-full     .form-select,
+  .size-full     .form-textarea  { width: 100%; }
+
+  .size-medium   .form-input,
+  .size-medium   .form-select,
+  .size-medium   .form-textarea  { width: 100%; max-width: 35rem; }
+
+  .size-fixed    .form-input,
+  .size-fixed    .form-select,
+  .size-fixed    .form-textarea  { width: 21rem; max-width: 100%; }
+
+  /* Stacked layout when there isn't 21rem of room for the input */
+  @container formgrid (max-width: 599px) {
+    .form-row {
+      grid-template-columns: 1fr;
+      row-gap: 6px;
+    }
+    .form-label {
+      padding-top: 0;
+    }
+    /* In stacked mode the fixed-21rem input behaves like full-width
+       since the content area itself is at its 21rem minimum. */
+    .size-fixed .form-input,
+    .size-fixed .form-select,
+    .size-fixed .form-textarea { width: 100%; }
+  }
+
+  .size-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    vertical-align: middle;
+  }
+
+  /* ---------- Mode-based view switch ---------- */
+  /* Default (.app.mode-details) shows the form + details title;
+     .app.mode-bulk shows the table + bulk title. */
+  .app.mode-details .bulk-view             { display: none; }
+  .app.mode-bulk    .details-view          { display: none; }
+  .app.mode-details .content-title-bulk    { display: none; }
+  .app.mode-bulk    .content-title-details { display: none; }
+
+  /* ---------- Bulk view (dummy table) ---------- */
+  .bulk-view {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .bulk-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .bulk-view-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .bulk-view-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .bulk-view-scroll {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table thead th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .data-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover td { background: var(--surface-muted); }
+
+  .data-table .col-check   { width: 40px; padding-left: 16px; }
+  .data-table .col-actions { width: 44px; padding-right: 16px; text-align: right; }
+  .data-table .col-name    { min-width: 220px; }
+  .data-table .col-num     { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .data-table input[type="checkbox"] { cursor: pointer; }
+
+  .data-table .name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .data-table .name-text {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .data-table .row-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .data-table .row-icon.type-project  { background: #dbeafe; color: #1d4ed8; }
+  .data-table .row-icon.type-workflow { background: #ede9fe; color: #6d28d9; }
+  .data-table .row-icon.type-doc      { background: #fef3c7; color: #b45309; }
+
+  .data-table .row-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .data-table .row-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.9;
+  }
+  .data-table .row-status.active   { background: #dcfce7; color: #166534; }
+  .data-table .row-status.draft    { background: #fef3c7; color: #92400e; }
+  .data-table .row-status.archived { background: #f3f4f6; color: #4b5563; }
+
+  .data-table .owner-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .data-table .avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10.5px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .data-table .row-action-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+  }
+  .data-table .row-action-btn:hover { background: var(--bg); color: var(--text); }
+
+  .order-list {
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .order-list .chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: var(--text);
+  }
+  .order-list .arrow { color: var(--text-muted); }
+
+  .meta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .meta-row b { color: var(--text); font-weight: 600; }
+
+  .icon { width: 16px; height: 16px; }
+
+  /* ---------- Breakpoint indicator ---------- */
+  .bp-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #f3e8ff;
+    color: #6b21a8;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+
+  /* ---------- Hamburger mode ---------- */
+  .hamburger-btn {
+    display: none; /* hidden unless hamburger mode is active */
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .hamburger-btn:hover    { background: var(--border); }
+  .hamburger-btn.is-active { background: var(--border); color: var(--text); }
+
+  .app.hamburger .panel.left,
+  .app.hamburger .panel.right {
+    display: none !important;
+  }
+  .app.hamburger .hamburger-btn {
+    display: inline-flex;
+  }
+
+  /* Hamburger menu dropdown */
+  .hamburger-menu {
+    position: absolute;
+    top: 56px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+    min-width: 220px;
+    z-index: 50;
+    display: none;
+  }
+  .hamburger-menu.menu-left  { left: 16px; }
+  .hamburger-menu.menu-right { right: 16px; }
+  .hamburger-menu.open { display: block; }
+
+  .hamburger-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+    text-align: left;
+  }
+  .hamburger-menu-item:hover { background: var(--bg); }
+  .hamburger-menu-item .item-label { flex: 1; }
+  .hamburger-menu-item .item-state {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .hamburger-menu-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+  .hamburger-menu-section {
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Overlay panel (hamburger mode) */
+  .panel-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.32);
+    z-index: 40;
+    display: none;
+  }
+  .panel-overlay-backdrop.open { display: block; }
+
+  .app.hamburger .panel.overlay-active {
+    display: flex !important;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: min(360px, 90vw) !important;
+    z-index: 45;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .app.hamburger .panel.left.overlay-active  { left: 0;  transform: translateX(0); }
+  .app.hamburger .panel.right.overlay-active { right: 0; transform: translateX(0); }
+  .app.hamburger .panel.overlay-active .resize-handle { display: none; }
+  .app.hamburger .panel.overlay-active.collapsed { /* not collapsed in overlay */
+    width: min(360px, 90vw) !important;
+  }
+  .app.hamburger .panel.overlay-active .panel-header { background: var(--surface-muted); }
+
+</style>
+</head>
+<body>
+
+<!-- App-level toolbar — switches between Details (single record) and Bulk
+     (table / many-record) views. Lives above the panel framework so it's
+     always visible regardless of breakpoint. -->
+<div class="app-toolbar" id="appToolbar">
+  <span class="app-toolbar-brand">Panel Framework</span>
+  <div class="mode-switcher" role="tablist" aria-label="View mode">
+    <button class="mode-btn"        data-mode="bulk"    role="tab" aria-selected="false">Bulk</button>
+    <button class="mode-btn active" data-mode="details" role="tab" aria-selected="true">Details</button>
+  </div>
+</div>
+
+<div class="app mode-details" id="app">
+
+  <!-- Outer left — high-level navigation (project, sections, files) -->
+  <aside class="panel left collapsed" data-id="leftA" data-side="left">
+    <div class="panel-header">
+      <div class="panel-title"><span class="title-text">Browse</span></div>
+      <button class="toggle-btn" data-action="toggle" title="Collapse"></button>
+    </div>
+    <div class="panel-body">
+      <p style="margin-bottom:10px;"><strong>Browse</strong> · High-level navigation</p>
+      <p>Top-level structure of the workspace — projects, sections, files. The starting point for finding what you want to work on.</p>
+    </div>
+    <div class="resize-handle" data-resize></div>
+  </aside>
+
+  <!-- Inner left — secondary navigation (items in the current scope) -->
+  <aside class="panel left expanded" data-id="leftB" data-side="left">
+    <div class="panel-header">
+      <div class="panel-title"><span class="title-text">Task list</span></div>
+      <button class="toggle-btn" data-action="toggle" title="Collapse"></button>
+    </div>
+    <div class="panel-body">
+      <p style="margin-bottom:10px;"><strong>Task list</strong> · Secondary navigation</p>
+      <p>Items inside the currently-selected scope — headings, layers, blocks. Sits next to the content so you can jump between items quickly.</p>
+    </div>
+    <div class="resize-handle" data-resize></div>
+  </aside>
+
+  <!-- Content -->
+  <main class="content" id="content">
+    <div class="content-header">
+      <button class="hamburger-btn" id="hamburgerLeftBtn" data-side="left" title="Show left panels" aria-label="Show left panels">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <rect x="4" y="5" width="5" height="14" rx="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+      <h1 class="content-title content-title-details" style="flex:1;">Product details</h1>
+      <h1 class="content-title content-title-bulk"    style="flex:1;">Table</h1>
+      <span class="bp-pill" id="bpPill">—</span>
+      <span class="status-pill" id="statusPill">0 / 3 panels open</span>
+      <button class="hamburger-btn" id="hamburgerRightBtn" data-side="right" title="Show right panels" aria-label="Show right panels">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <rect x="15" y="5" width="5" height="14" rx="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+    </div>
+    <div class="hamburger-menu menu-left"  id="hamburgerMenuLeft"  role="menu"></div>
+    <div class="hamburger-menu menu-right" id="hamburgerMenuRight" role="menu"></div>
+    <div class="panel-overlay-backdrop" id="overlayBackdrop"></div>
+    <div class="center-row">
+    <div class="content-body">
+
+      <!-- Details view: the form (visible when .app.mode-details). -->
+      <div class="details-view">
+        <div class="info-card">
+          <form class="form-grid" onsubmit="event.preventDefault();">
+
+            <div class="form-row size-full">
+              <label class="form-label" for="f-name">
+                Display name
+                <span class="size-tag">full width</span>
+                <small>Stretches to fill all remaining space.</small>
+              </label>
+              <div class="form-control">
+                <input id="f-name" class="form-input" type="text" placeholder="Ada Lovelace" />
+              </div>
+            </div>
+
+            <div class="form-row size-medium">
+              <label class="form-label" for="f-email">
+                Email address
+                <span class="size-tag">max 35rem</span>
+                <small>Grows up to 35rem, then stops; shrinks down to 21rem before wrapping.</small>
+              </label>
+              <div class="form-control">
+                <input id="f-email" class="form-input" type="email" placeholder="ada@example.com" />
+              </div>
+            </div>
+
+            <div class="form-row size-medium">
+              <label class="form-label" for="f-bio">
+                Short bio
+                <span class="size-tag">max 35rem</span>
+                <small>Same width rules as a 35rem input.</small>
+              </label>
+              <div class="form-control">
+                <textarea id="f-bio" class="form-textarea" placeholder="Tell us a bit about yourself…"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row size-fixed">
+              <label class="form-label" for="f-country">
+                Country
+                <span class="size-tag">21rem</span>
+                <small>Fixed 21rem wide; becomes full-width when the row wraps.</small>
+              </label>
+              <div class="form-control">
+                <select id="f-country" class="form-select">
+                  <option>United States</option>
+                  <option>United Kingdom</option>
+                  <option>Germany</option>
+                  <option>France</option>
+                  <option>Japan</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row size-fixed">
+              <label class="form-label" for="f-zip">
+                Postal code
+                <span class="size-tag">21rem</span>
+              </label>
+              <div class="form-control">
+                <input id="f-zip" class="form-input" type="text" placeholder="94103" />
+                <span class="form-help">Numeric, no spaces.</span>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Bulk view: dummy table (visible when .app.mode-bulk). -->
+      <div class="bulk-view">
+        <div class="bulk-view-header">
+          <div class="bulk-view-title">Items</div>
+          <div class="bulk-view-meta">10 items · sorted by Updated</div>
+        </div>
+        <div class="bulk-view-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-check"><input type="checkbox" aria-label="Select all" /></th>
+                <th class="col-name">Name</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>Type</th>
+                <th class="col-num">Members</th>
+                <th>Updated</th>
+                <th class="col-actions" aria-label="Actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-project">P</span><span class="name-text">Q3 marketing plan</span></div></td>
+                <td><span class="row-status active">Active</span></td>
+                <td><div class="owner-cell"><span class="avatar">SK</span>Sara Khan</div></td>
+                <td>Project</td>
+                <td class="col-num">8</td>
+                <td>2 hrs ago</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-workflow">W</span><span class="name-text">Customer onboarding</span></div></td>
+                <td><span class="row-status active">Active</span></td>
+                <td><div class="owner-cell"><span class="avatar">JW</span>Jin Wu</div></td>
+                <td>Workflow</td>
+                <td class="col-num">12</td>
+                <td>Yesterday</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-doc">D</span><span class="name-text">API rate limits</span></div></td>
+                <td><span class="row-status draft">Draft</span></td>
+                <td><div class="owner-cell"><span class="avatar">AM</span>Alex Morales</div></td>
+                <td>Doc</td>
+                <td class="col-num">3</td>
+                <td>3 days ago</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-project">P</span><span class="name-text">Mobile redesign</span></div></td>
+                <td><span class="row-status archived">Archived</span></td>
+                <td><div class="owner-cell"><span class="avatar">PS</span>Priya Shah</div></td>
+                <td>Project</td>
+                <td class="col-num">5</td>
+                <td>Last week</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-workflow">W</span><span class="name-text">Pricing experiment</span></div></td>
+                <td><span class="row-status active">Active</span></td>
+                <td><div class="owner-cell"><span class="avatar">SK</span>Sara Khan</div></td>
+                <td>Workflow</td>
+                <td class="col-num">4</td>
+                <td>1 hr ago</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-doc">D</span><span class="name-text">Brand guidelines v3</span></div></td>
+                <td><span class="row-status active">Active</span></td>
+                <td><div class="owner-cell"><span class="avatar">JW</span>Jin Wu</div></td>
+                <td>Doc</td>
+                <td class="col-num">9</td>
+                <td>4 hrs ago</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-workflow">W</span><span class="name-text">Onboarding emails</span></div></td>
+                <td><span class="row-status active">Active</span></td>
+                <td><div class="owner-cell"><span class="avatar">AM</span>Alex Morales</div></td>
+                <td>Workflow</td>
+                <td class="col-num">6</td>
+                <td>Today</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-doc">D</span><span class="name-text">Q2 retro notes</span></div></td>
+                <td><span class="row-status archived">Archived</span></td>
+                <td><div class="owner-cell"><span class="avatar">PS</span>Priya Shah</div></td>
+                <td>Doc</td>
+                <td class="col-num">11</td>
+                <td>2 weeks ago</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-doc">D</span><span class="name-text">New feature spec</span></div></td>
+                <td><span class="row-status draft">Draft</span></td>
+                <td><div class="owner-cell"><span class="avatar">SK</span>Sara Khan</div></td>
+                <td>Doc</td>
+                <td class="col-num">2</td>
+                <td>30 min ago</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="col-check"><input type="checkbox" /></td>
+                <td><div class="name-cell"><span class="row-icon type-project">P</span><span class="name-text">Holiday campaign</span></div></td>
+                <td><span class="row-status active">Active</span></td>
+                <td><div class="owner-cell"><span class="avatar">JW</span>Jin Wu</div></td>
+                <td>Project</td>
+                <td class="col-num">7</td>
+                <td>Yesterday</td>
+                <td class="col-actions"><button class="row-action-btn" aria-label="More">⋯</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+      <!-- Inner right — meta-data / additional info about the selection.
+           Nested inside .content so the workspace header visually extends
+           over its column. Open by default in details mode. -->
+      <aside class="panel right expanded" data-id="rightA" data-side="right">
+        <div class="panel-header">
+          <button class="toggle-btn" data-action="toggle" title="Expand"></button>
+          <div class="panel-title"><span class="title-text">Info panel</span></div>
+        </div>
+        <div class="panel-body">
+          <p style="margin-bottom:10px;"><strong>Info panel</strong> · Meta-data &amp; details</p>
+          <p>Attributes of the currently-selected item — settings, values, formatting. Updates in place as the selection changes.</p>
+        </div>
+        <div class="resize-handle" data-resize></div>
+      </aside>
+    </div><!-- /.center-row -->
+  </main>
+
+  <!-- Outer right — AI chat / activity / conversation. -->
+  <aside class="panel right collapsed" data-id="rightB" data-side="right">
+    <div class="panel-header">
+      <button class="toggle-btn" data-action="toggle" title="Expand"></button>
+      <div class="panel-title"><span class="title-text">Assistant</span></div>
+    </div>
+    <div class="panel-body">
+      <p style="margin-bottom:10px;"><strong>Assistant</strong> · AI chat &amp; activity</p>
+      <p>Conversational helper, history, and activity feed. A persistent companion you can return to without losing your place.</p>
+    </div>
+    <div class="resize-handle" data-resize></div>
+  </aside>
+
+</div>
+
+<script>
+(() => {
+  const REM = 16;
+  const PANEL_MIN     = 20 * REM;   // 320px
+  const COLLAPSED_W   = 64;
+
+  // ---------- Per-mode content minimums ----------
+  // Details = form layout, fits comfortably in 21rem.
+  // Bulk    = table layout, needs more horizontal room.
+  const CONTENT_MIN_BY_MODE = {
+    details: 21 * REM,   // 336px
+    bulk:    40 * REM,   // 640px
+  };
+  function contentMin() { return CONTENT_MIN_BY_MODE[currentMode]; }
+
+  // ---------- Per-mode breakpoints ----------
+  // Aligned with Tailwind's lg / xl / 2xl plus FullHD for 4-panel mode.
+  // Each mode's thresholds are sized so the layout always fits at the
+  // breakpoint's lower edge (1 expanded + the rest collapsed + content).
+  //
+  // Details (content min 21rem):
+  //   bp4: 4*320 +       336 = 1616 (slack 304 at 1920)
+  //   bp3: 3*320 +  64 + 336 = 1360 (slack 176 at 1536)
+  //   bp2: 2*320 + 128 + 336 = 1104 (slack 176 at 1280)
+  //   bp1:   320 + 192 + 336 =  848 (slack 176 at 1024)
+  //
+  // Bulk (content min 40rem, 2 panels max — leftB & rightA hidden):
+  //   bp2: 2*320 +       640 = 1280 (slack 256 at 1536)
+  //   bp1:   320 +  64 + 640 = 1024 (slack 256 at 1280)
+  // (bp4/bp3 collapse to bp2 since the cap is 2 anyway.)
+  //
+  // Below `bp1` we switch to hamburger mode — rails hide, panels overlay.
+  const BP_THRESHOLDS = {
+    details: { bp4: 1920, bp3: 1536, bp2: 1280, bp1: 1024 },
+    bulk:    { bp4: 1920, bp3: 1920, bp2: 1536, bp1: 1280 },
+  };
+  function bpThresholds() { return BP_THRESHOLDS[currentMode]; }
+
+  // Roles:
+  //   leftA  (outer-left)  — high-level navigation  (project / sections / files)
+  //   leftB  (inner-left)  — secondary navigation   (items in the current scope)
+  //   rightA (inner-right) — meta-data / details    (attributes of the selection)
+  //   rightB (outer-right) — AI chat / activity     (conversation, history)
+  const PANEL_DATA = {
+    leftA:  { title: 'Browse',     side: 'left',  position: 'outer' },
+    leftB:  { title: 'Task list',  side: 'left',  position: 'inner' },
+    rightA: { title: 'Info panel', side: 'right', position: 'inner' },
+    rightB: { title: 'Assistant',  side: 'right', position: 'outer' },
+  };
+
+  // Eviction priority — lower number collapses first when we need to free
+  // a slot. The "secondary" panels on each side yield first; the "primary"
+  // ones (Layers on the left, Inspector on the right) are kept the longest.
+  // Ties fall back to oldest-opened first.
+  const PANEL_PRIORITY = {
+    leftA:  1, // Browse     — secondary on left  (outer)
+    leftB:  2, // Task list  — primary  on left  (inner)
+    rightA: 1, // Info panel — secondary on right (inner)
+    rightB: 2, // Assistant  — primary  on right (outer)
+  };
+
+  // ---------- View modes ----------
+  // The framework supports two top-level views, switchable from the toolbar:
+  //   details — single-record editor; all four panels available.
+  //   bulk    — table / many-record view. The inner panels (Task list and
+  //             Info panel) are hidden — Task list belongs to a single
+  //             record's outline, Info panel will eventually show details
+  //             for the selected row but isn't wired up yet. The outer-left
+  //             (Browse) is auto-expanded.
+  const MODE_PANELS = {
+    details: ['leftA', 'leftB', 'rightA', 'rightB'],
+    bulk:    ['leftA',                    'rightB'],
+  };
+  let currentMode = 'details';
+  function activePanels()      { return MODE_PANELS[currentMode]; }
+  function isActivePanel(id)   { return activePanels().includes(id); }
+
+  // Panel runtime state — default details layout has Task list (inner-left)
+  // and Info panel (inner-right) open. Browse and Assistant are collapsed.
+  const state = {
+    leftA:  { open: false, width: PANEL_MIN },
+    leftB:  { open: true,  width: PANEL_MIN },
+    rightA: { open: true,  width: PANEL_MIN },
+    rightB: { open: false, width: PANEL_MIN },
+  };
+
+  // Order panels were opened, oldest first.
+  let openOrder = ['leftB', 'rightA'];
+
+  const $app                = document.getElementById('app');
+  const $content            = document.getElementById('content');
+  const $statusPill         = document.getElementById('statusPill');
+  const $bpPill             = document.getElementById('bpPill');
+  const $hamburgerLeftBtn   = document.getElementById('hamburgerLeftBtn');
+  const $hamburgerRightBtn  = document.getElementById('hamburgerRightBtn');
+  const $hamburgerMenuLeft  = document.getElementById('hamburgerMenuLeft');
+  const $hamburgerMenuRight = document.getElementById('hamburgerMenuRight');
+  const $overlayBackdrop    = document.getElementById('overlayBackdrop');
+
+  let activeOverlayId = null; // panel currently shown as overlay in hamburger mode
+  let currentBp       = null; // 'bp3' | 'bp2' | 'bp1' | 'hamburger'
+
+  const panelEl = (id) => document.querySelector(`.panel[data-id="${id}"]`);
+
+  // ---------- Icon helpers ----------
+  function chevronIcon(direction) {
+    // direction: 'left' | 'right'
+    if (direction === 'left') {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+    }
+    return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+  }
+
+  function toggleIconFor(id) {
+    const { side } = PANEL_DATA[id];
+    const open = state[id].open;
+    // Open + left  -> chevron points left  (collapse outward)
+    // Open + right -> chevron points right
+    // Collapsed + left  -> chevron points right (expand toward content)
+    // Collapsed + right -> chevron points left
+    if (side === 'left')  return chevronIcon(open ? 'left'  : 'right');
+    if (side === 'right') return chevronIcon(open ? 'right' : 'left');
+  }
+
+  // ---------- Render ----------
+  function applyPanel(id) {
+    const el = panelEl(id);
+    const s = state[id];
+    el.classList.toggle('expanded',  s.open);
+    el.classList.toggle('collapsed', !s.open);
+    el.style.width = (s.open ? s.width : COLLAPSED_W) + 'px';
+    const btn = el.querySelector('[data-action="toggle"]');
+    btn.innerHTML = toggleIconFor(id);
+    btn.title = s.open ? 'Collapse' : 'Expand';
+  }
+
+  function applyAll() {
+    Object.keys(state).forEach(applyPanel);
+  }
+
+  function updateUI() {
+    const openCount = Object.values(state).filter(s => s.open).length;
+    const max = currentMaxAllowed();
+    $statusPill.textContent = `${openCount} / ${max} panels open`;
+    $statusPill.classList.toggle('full', openCount >= max);
+
+    const w = $app.offsetWidth;
+    const t = bpThresholds();
+    const ranges = {
+      bp4: `≥ ${t.bp4}px`,
+      bp3: `${t.bp3}–${t.bp4 - 1}px`,
+      bp2: `${t.bp2}–${t.bp3 - 1}px`,
+      bp1: `${t.bp1}–${t.bp2 - 1}px`,
+      hamburger: `< ${t.bp1}px · hamburger`,
+    };
+    const maxLabel = currentBp === 'hamburger' ? '' : ` · ${currentMaxAllowed()} max`;
+    $bpPill.textContent = `${Math.round(w)}px — ${ranges[currentBp] || '—'}${maxLabel} · ${currentMode}`;
+
+    // Status pill is irrelevant in hamburger mode (rails are hidden)
+    $statusPill.style.display = (currentBp === 'hamburger') ? 'none' : '';
+
+    if (currentBp === 'hamburger') {
+      renderHamburgerMenu('left');
+      renderHamburgerMenu('right');
+    }
+  }
+
+  // ---------- Breakpoints ----------
+  function getBreakpoint(w) {
+    const t = bpThresholds();
+    if (w >= t.bp4) return 'bp4';
+    if (w >= t.bp3) return 'bp3';
+    if (w >= t.bp2) return 'bp2';
+    if (w >= t.bp1) return 'bp1';
+    return 'hamburger';
+  }
+
+  function getMaxExpanded(bp) {
+    const baseMax =
+      bp === 'bp4' ? 4 :
+      bp === 'bp3' ? 3 :
+      bp === 'bp2' ? 2 :
+      bp === 'bp1' ? 1 : 0; // hamburger — handled separately via overlay
+    // In bulk mode there are only 3 panels available, so cap accordingly.
+    return Math.min(baseMax, activePanels().length);
+  }
+
+  function currentMaxAllowed() {
+    return getMaxExpanded(currentBp);
+  }
+
+  // Comparator: lower priority number first. Ties broken by oldest-opened.
+  function byEvictionPriority(aId, bId) {
+    const pa = PANEL_PRIORITY[aId] || 0;
+    const pb = PANEL_PRIORITY[bId] || 0;
+    if (pa !== pb) return pa - pb;
+    return openOrder.indexOf(aId) - openOrder.indexOf(bId);
+  }
+
+  function enforceBreakpoint() {
+    const w = $app.offsetWidth;
+    const newBp = getBreakpoint(w);
+    const wasHamburger = currentBp === 'hamburger';
+    currentBp = newBp;
+
+    if (newBp === 'hamburger') {
+      // Hide rails, collapse all rail-state panels (they're hidden anyway,
+      // but keep state consistent). Close any open menu.
+      $app.classList.add('hamburger');
+      // Don't mutate the persisted "open" state — preserve it for when
+      // we leave hamburger mode again. But close any panel that was being
+      // shown as overlay.
+      if (activeOverlayId) closeOverlay();
+    } else {
+      $app.classList.remove('hamburger');
+      closeHamburgerMenu();
+      closeOverlay();
+
+      // If we just left hamburger mode, restore panel widths from state
+      if (wasHamburger) applyAll();
+
+      // Auto-collapse the lowest-priority panels until we're under the
+      // new max (Browse & Info panel yield first; ties go to oldest).
+      const max = getMaxExpanded(newBp);
+      while (openOrder.length > max) {
+        const sorted = [...openOrder].sort(byEvictionPriority);
+        closePanel(sorted[0], /*silent*/ true);
+      }
+      // Refit remaining widths
+      fitWidthsForViewport();
+      applyAll();
+    }
+  }
+
+  // ---------- Open / close logic ----------
+  function openPanel(id) {
+    if (state[id].open) return;
+    if (!isActivePanel(id)) return; // not part of the current mode
+
+    // Hamburger mode: panels open as overlays, not as inline rail items.
+    if (currentBp === 'hamburger') {
+      openOverlay(id);
+      return;
+    }
+
+    const max = currentMaxAllowed();
+    const openCount = openOrder.length;
+
+    if (openCount >= max) {
+      // Prefer to evict the lowest-priority panel on the OPPOSITE side.
+      // If no opposite-side panel is open, fall back to the lowest-priority
+      // panel overall. Ties break to oldest-opened first.
+      const newSide = PANEL_DATA[id].side;
+      const opposite = newSide === 'left' ? 'right' : 'left';
+      const oppositeIds = openOrder.filter(pid => PANEL_DATA[pid].side === opposite);
+      oppositeIds.sort(byEvictionPriority);
+      const evictId = oppositeIds[0] || [...openOrder].sort(byEvictionPriority)[0];
+      if (evictId) closePanel(evictId, /*silent*/ true);
+    }
+
+    state[id].open = true;
+    openOrder.push(id);
+    fitWidthsForViewport();
+    applyAll();
+    updateUI();
+  }
+
+  function closePanel(id, silent = false) {
+    if (!state[id].open) return;
+    state[id].open = false;
+    openOrder = openOrder.filter(pid => pid !== id);
+    if (!silent) {
+      applyPanel(id);
+      updateUI();
+    }
+  }
+
+  function togglePanel(id) {
+    if (state[id].open) {
+      closePanel(id);
+    } else {
+      openPanel(id);
+    }
+  }
+
+  // ---------- Mode switching (Details / Bulk) ----------
+  function setMode(mode) {
+    if (mode === currentMode || !MODE_PANELS[mode]) return;
+
+    // 1. Close any panel that's not part of the new mode (e.g. Task list
+    //    when switching into Bulk). Silent — we'll re-render once at end.
+    for (const id of Object.keys(state)) {
+      if (!MODE_PANELS[mode].includes(id) && state[id].open) {
+        closePanel(id, /*silent*/ true);
+      }
+    }
+
+    currentMode = mode;
+    $app.classList.toggle('mode-bulk',    mode === 'bulk');
+    $app.classList.toggle('mode-details', mode === 'details');
+
+    // 2. Re-evaluate the breakpoint — getMaxExpanded depends on the active
+    //    panel count, so the cap may have changed.
+    enforceBreakpoint();
+
+    // 3. Per-mode defaults (skipped in hamburger — there's no rail to
+    //    place panels on; the user opens panels via the menu instead).
+    if (currentBp !== 'hamburger') {
+      if (mode === 'bulk') {
+        // Bulk: auto-expand the outer-left (Browse) panel.
+        openPanel('leftA');
+      } else if (mode === 'details') {
+        // Details: Browse collapsed, Task list + Info panel open. Close
+        // leftA first so opening leftB doesn't have to evict it.
+        if (state.leftA.open) closePanel('leftA', /*silent*/ true);
+        openPanel('leftB');
+        // Info panel only auto-opens if there's room — at narrow widths
+        // (bp1, max=1) Task list is the primary default.
+        if (!state.rightA.open && openOrder.length < currentMaxAllowed()) {
+          openPanel('rightA');
+        }
+      }
+    }
+
+    // 4. Sync the toolbar buttons.
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      const isActive = btn.dataset.mode === mode;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    applyAll();
+    updateUI();
+  }
+
+  // ---------- Hamburger menu & overlay ----------
+  function menuElFor(side)  { return side === 'left' ? $hamburgerMenuLeft : $hamburgerMenuRight; }
+  function menuBtnFor(side) { return side === 'left' ? $hamburgerLeftBtn  : $hamburgerRightBtn;  }
+
+  function renderHamburgerMenu(side) {
+    const items = activePanels()
+      .filter(id => PANEL_DATA[id].side === side)
+      .map(id => {
+        const d = PANEL_DATA[id];
+        const isActive = activeOverlayId === id;
+        return `<button class="hamburger-menu-item" data-overlay-id="${id}">
+          <span class="item-label">${d.title}</span>
+          <span class="item-state">${isActive ? 'showing' : d.position}</span>
+        </button>`;
+      });
+    menuElFor(side).innerHTML =
+      `<div class="hamburger-menu-section">${side === 'left' ? 'Left' : 'Right'} panels</div>` +
+      items.join('');
+  }
+
+  function openHamburgerMenu(side) {
+    closeHamburgerMenu(side === 'left' ? 'right' : 'left'); // only one open at a time
+    renderHamburgerMenu(side);
+    menuElFor(side).classList.add('open');
+    menuBtnFor(side).classList.add('is-active');
+  }
+  function closeHamburgerMenu(side) {
+    if (!side) {
+      closeHamburgerMenu('left');
+      closeHamburgerMenu('right');
+      return;
+    }
+    menuElFor(side).classList.remove('open');
+    menuBtnFor(side).classList.remove('is-active');
+  }
+  function toggleHamburgerMenu(side) {
+    if (menuElFor(side).classList.contains('open')) closeHamburgerMenu(side);
+    else openHamburgerMenu(side);
+  }
+
+  function openOverlay(id) {
+    closeHamburgerMenu();
+    if (activeOverlayId && activeOverlayId !== id) {
+      const prev = panelEl(activeOverlayId);
+      if (prev) prev.classList.remove('overlay-active');
+    }
+    activeOverlayId = id;
+    const el = panelEl(id);
+    el.classList.remove('collapsed');
+    el.classList.add('expanded', 'overlay-active');
+    el.style.width = ''; // CSS controls overlay width
+    // Make sure toggle button shows close-style icon
+    const btn = el.querySelector('[data-action="toggle"]');
+    btn.innerHTML = chevronIcon(PANEL_DATA[id].side === 'left' ? 'left' : 'right');
+    btn.title = 'Close';
+    $overlayBackdrop.classList.add('open');
+  }
+
+  function closeOverlay() {
+    if (activeOverlayId) {
+      const el = panelEl(activeOverlayId);
+      if (el) {
+        el.classList.remove('overlay-active');
+        el.classList.add('collapsed');
+        el.classList.remove('expanded');
+      }
+      activeOverlayId = null;
+    }
+    $overlayBackdrop.classList.remove('open');
+  }
+
+  // If the viewport is too narrow for all expanded panels at their current widths,
+  // shrink them (newest first) down to PANEL_MIN so the content keeps its
+  // mode-specific minimum (21rem in details, 40rem in bulk).
+  function fitWidthsForViewport() {
+    const containerW = $app.offsetWidth;
+    let totalUsed = 0;
+    for (const id of activePanels()) {
+      totalUsed += state[id].open ? state[id].width : COLLAPSED_W;
+    }
+    let overflow = (totalUsed + contentMin()) - containerW;
+    if (overflow <= 0) return;
+
+    // Shrink newest open panels first (only those visible in the current mode)
+    const openIdsNewestFirst = [...openOrder].reverse();
+    for (const id of openIdsNewestFirst) {
+      if (overflow <= 0) break;
+      if (!isActivePanel(id)) continue;
+      const reducible = state[id].width - PANEL_MIN;
+      if (reducible <= 0) continue;
+      const reduce = Math.min(reducible, overflow);
+      state[id].width -= reduce;
+      overflow -= reduce;
+    }
+  }
+
+  // ---------- Click handlers ----------
+  document.addEventListener('click', (e) => {
+    // Toolbar mode switcher
+    const modeBtn = e.target.closest('.mode-btn');
+    if (modeBtn) {
+      setMode(modeBtn.dataset.mode);
+      return;
+    }
+
+    // Hamburger buttons (left / right)
+    const hamburgerBtn = e.target.closest('.hamburger-btn');
+    if (hamburgerBtn) {
+      e.stopPropagation();
+      toggleHamburgerMenu(hamburgerBtn.dataset.side);
+      return;
+    }
+
+    // Hamburger menu item -> open the corresponding panel as overlay
+    const menuItem = e.target.closest('[data-overlay-id]');
+    if (menuItem) {
+      e.stopPropagation();
+      openOverlay(menuItem.dataset.overlayId);
+      return;
+    }
+
+    // Backdrop click -> close overlay
+    if (e.target === $overlayBackdrop) {
+      closeOverlay();
+      return;
+    }
+
+    // Toggle button on a panel header
+    const toggleBtn = e.target.closest('[data-action="toggle"]');
+    if (toggleBtn) {
+      e.stopPropagation();
+      const panel = toggleBtn.closest('.panel');
+      const id = panel.dataset.id;
+      // In hamburger mode, the toggle is a "close overlay" action
+      if (currentBp === 'hamburger' && activeOverlayId === id) {
+        closeOverlay();
+      } else {
+        togglePanel(id);
+      }
+      return;
+    }
+
+    const ctrlBtn = e.target.closest('[data-toggle-id]');
+    if (ctrlBtn) {
+      togglePanel(ctrlBtn.dataset.toggleId);
+      return;
+    }
+
+    // Click on a collapsed panel rail to expand it (rail mode only)
+    if (currentBp !== 'hamburger') {
+      const collapsedPanel = e.target.closest('.panel.collapsed');
+      if (collapsedPanel) {
+        togglePanel(collapsedPanel.dataset.id);
+        return;
+      }
+    }
+
+    // Any other click outside an open menu closes both menus
+    if (!e.target.closest('.hamburger-menu')) {
+      closeHamburgerMenu();
+    }
+  });
+
+  // ---------- Resize logic ----------
+  let drag = null;
+
+  document.addEventListener('mousedown', (e) => {
+    const handle = e.target.closest('[data-resize]');
+    if (!handle) return;
+    const panel = handle.closest('.panel');
+    const id = panel.dataset.id;
+    if (!state[id].open) return;
+    if (currentBp === 'hamburger') return; // overlays aren't resizable
+
+    e.preventDefault();
+
+    const containerW = $app.offsetWidth;
+
+    // Capture the starting widths of every other open panel. During drag
+    // we restore from these each frame so shrinks don't accumulate, then
+    // re-shrink others (oldest first) to make room for the dragged panel.
+    // Only active panels (visible in the current mode) contribute to the
+    // width budget — hidden ones don't take any space.
+    const startOtherWidths = {};
+    let otherMinSum = 0;
+    for (const pid of activePanels()) {
+      if (pid === id) continue;
+      if (state[pid].open) {
+        startOtherWidths[pid] = state[pid].width;
+        otherMinSum += PANEL_MIN;
+      } else {
+        otherMinSum += COLLAPSED_W;
+      }
+    }
+    // Hard upper bound: when every other open panel is squeezed to its
+    // own minimum and the content stays at its mode-specific min, this
+    // is the largest the dragged panel can ever be.
+    const maxAllowed = containerW - contentMin() - otherMinSum;
+
+    drag = {
+      id,
+      side:       PANEL_DATA[id].side,
+      startX:     e.clientX,
+      startWidth: state[id].width,
+      maxWidth:   Math.max(PANEL_MIN, maxAllowed),
+      handle,
+      startOtherWidths,
+    };
+
+    handle.classList.add('active');
+    $app.classList.add('resizing');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!drag) return;
+    let delta = e.clientX - drag.startX;
+    if (drag.side === 'right') delta = -delta;
+
+    let desired = drag.startWidth + delta;
+    desired = Math.max(PANEL_MIN, Math.min(drag.maxWidth, desired));
+
+    // Restore other open panels to their pre-drag widths so we recompute
+    // the redistribution from a clean baseline each frame.
+    for (const pid in drag.startOtherWidths) {
+      state[pid].width = drag.startOtherWidths[pid];
+    }
+
+    // Total used if the dragged panel were at `desired`. Hidden panels
+    // (e.g. Task list in bulk mode) don't contribute to the budget.
+    const containerW = $app.offsetWidth;
+    let totalUsed = 0;
+    for (const pid of activePanels()) {
+      if (pid === drag.id) {
+        totalUsed += desired;
+      } else {
+        totalUsed += state[pid].open ? state[pid].width : COLLAPSED_W;
+      }
+    }
+    let overflow = (totalUsed + contentMin()) - containerW;
+
+    // Shrink other open panels (oldest first), down to PANEL_MIN, to absorb
+    // overflow. Same-side panels shrink first so the user's drag visually
+    // pushes the adjacent panel before reaching across the workspace.
+    if (overflow > 0) {
+      const sameSide = openOrder.filter(pid =>
+        pid !== drag.id && PANEL_DATA[pid].side === drag.side);
+      const otherSide = openOrder.filter(pid =>
+        pid !== drag.id && PANEL_DATA[pid].side !== drag.side);
+      const order = [...sameSide, ...otherSide];
+
+      for (const oid of order) {
+        if (overflow <= 0) break;
+        const reducible = state[oid].width - PANEL_MIN;
+        if (reducible <= 0) continue;
+        const reduce = Math.min(reducible, overflow);
+        state[oid].width -= reduce;
+        overflow -= reduce;
+      }
+    }
+
+    // If we still couldn't fit, cap the dragged panel's width.
+    if (overflow > 0) desired = Math.max(PANEL_MIN, desired - overflow);
+
+    state[drag.id].width = desired;
+
+    // Apply widths to DOM (only the panels whose width may have changed)
+    panelEl(drag.id).style.width = desired + 'px';
+    for (const pid in drag.startOtherWidths) {
+      panelEl(pid).style.width = state[pid].width + 'px';
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!drag) return;
+    drag.handle.classList.remove('active');
+    $app.classList.remove('resizing');
+    drag = null;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+
+  // Re-fit on viewport resize
+  window.addEventListener('resize', () => {
+    enforceBreakpoint();
+    updateUI();
+  });
+
+  // ---------- Init ----------
+  enforceBreakpoint();
+  applyAll();
+  updateUI();
+})();
+</script>
+</body>
+</html>
