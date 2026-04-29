@@ -763,8 +763,11 @@
 
   .app.hamburger .panel.overlay-active {
     display: flex !important;
-    position: absolute;
-    top: 0;
+    /* Fixed (not absolute) so the same offset applies to every panel
+       regardless of where it sits in the DOM — leftA/leftB are direct
+       children of .app, rightA is nested inside .content-row. */
+    position: fixed;
+    top: var(--overlay-top, 89px); /* synced from .content-header bottom */
     bottom: 0;
     width: min(360px, 90vw) !important;
     z-index: 45;
@@ -1191,7 +1194,15 @@
     return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
   }
 
+  function closeIcon() {
+    return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  }
+
   function toggleIconFor(id) {
+    // In hamburger mode, panels are only visible as overlays — the toggle
+    // button is a "close overlay" action, so use an X instead of a chevron.
+    if (currentBp === 'hamburger') return closeIcon();
+
     const { side } = PANEL_DATA[id];
     const open = state[id].open;
     // Open + left  -> chevron points left  (collapse outward)
@@ -1466,7 +1477,7 @@
     el.style.width = ''; // CSS controls overlay width
     // Make sure toggle button shows close-style icon
     const btn = el.querySelector('[data-action="toggle"]');
-    btn.innerHTML = chevronIcon(PANEL_DATA[id].side === 'left' ? 'left' : 'right');
+    btn.innerHTML = closeIcon();
     btn.title = 'Close';
     $overlayBackdrop.classList.add('open');
   }
@@ -1696,15 +1707,28 @@
     document.body.style.userSelect = '';
   });
 
+  // ---------- Overlay-top sync ----------
+  // Hamburger overlays are position:fixed and need to start exactly at
+  // the bottom of the workspace header. The header is taller in hamburger
+  // mode (32px hamburger buttons vs ~21px h1 only), so we measure it.
+  function syncOverlayTop() {
+    const headerEl = document.querySelector('.content-header');
+    if (!headerEl) return;
+    const bottom = headerEl.getBoundingClientRect().bottom;
+    document.documentElement.style.setProperty('--overlay-top', bottom + 'px');
+  }
+
   // Re-fit on viewport resize
   window.addEventListener('resize', () => {
     enforceBreakpoint();
+    syncOverlayTop();
     updateUI();
   });
 
   // ---------- Init ----------
   enforceBreakpoint();
   applyAll();
+  syncOverlayTop();
   updateUI();
 })();
 </script>
