@@ -29,6 +29,38 @@
     overflow: hidden;
     font-size: 14px;
   }
+
+  /* Respect OS-level reduced-motion: kill panel width/transform animations
+     and the long content transitions. Hover/colour transitions stay because
+     they're functional feedback, not motion. */
+  @media (prefers-reduced-motion: reduce) {
+    .panel,
+    .app.hamburger .panel.overlay-active {
+      transition: none !important;
+    }
+  }
+
+  /* Visible keyboard-focus indicators. Mouse users still get the subtle
+     hover; keyboard / switch users get a clear accent ring. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .toggle-btn:focus-visible,
+  .hamburger-btn:focus-visible,
+  .mode-btn:focus-visible,
+  .hamburger-menu-item:focus-visible,
+  .row-action-btn:focus-visible {
+    outline-offset: 1px;
+  }
+  /* Inputs have their own focus style (border + box-shadow) so suppress
+     the global outline on them to avoid double-rings. */
+  .form-input:focus-visible,
+  .form-select:focus-visible,
+  .form-textarea:focus-visible {
+    outline: none;
+  }
   body {
     display: flex;
     flex-direction: column;
@@ -182,21 +214,34 @@
   .panel.collapsed { cursor: pointer; }
   .panel.collapsed:hover { background: var(--surface-muted); }
 
-  /* ---------- Resize handle ---------- */
+  /* ---------- Resize handle ----------
+     Hit area is 14px (touch-friendly); the visible accent on hover/drag is
+     a 4px inner stripe so it doesn't look chunky. */
   .resize-handle {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 8px;
+    width: 14px;
     z-index: 5;
     cursor: col-resize;
     background: transparent;
+    touch-action: none; /* prevent scroll on touch drag */
+  }
+  .panel.left  .resize-handle { right: -7px; }
+  .panel.right .resize-handle { left:  -7px; }
+  .resize-handle::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    transform: translateX(-50%);
+    background: transparent;
     transition: background 120ms;
   }
-  .panel.left  .resize-handle { right: -4px; }
-  .panel.right .resize-handle { left: -4px; }
-  .resize-handle:hover,
-  .resize-handle.active { background: var(--accent-soft); }
+  .resize-handle:hover::after,
+  .resize-handle.active::after { background: var(--accent-soft); }
   .panel.collapsed .resize-handle { display: none; }
 
   /* ---------- Content area ---------- */
@@ -828,25 +873,29 @@
   <!-- Content -->
   <main class="content" id="content">
     <div class="content-header">
-      <button class="hamburger-btn" id="hamburgerLeftBtn" data-side="left" title="Show left panels" aria-label="Show left panels">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <button class="hamburger-btn" id="hamburgerLeftBtn" data-side="left"
+              title="Show left panels" aria-label="Show left panels"
+              aria-haspopup="menu" aria-controls="hamburgerMenuLeft" aria-expanded="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <rect x="3" y="4" width="18" height="16" rx="2"/>
           <rect x="4" y="5" width="5" height="14" rx="1" fill="currentColor" stroke="none"/>
         </svg>
       </button>
       <h1 class="content-title content-title-details" style="flex:1;">Product details</h1>
       <h1 class="content-title content-title-bulk"    style="flex:1;">Table</h1>
-      <span class="bp-pill" id="bpPill">—</span>
-      <span class="status-pill" id="statusPill">0 / 3 panels open</span>
-      <button class="hamburger-btn" id="hamburgerRightBtn" data-side="right" title="Show right panels" aria-label="Show right panels">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <span class="bp-pill" id="bpPill" aria-live="polite">—</span>
+      <span class="status-pill" id="statusPill" aria-live="polite">0 / 3 panels open</span>
+      <button class="hamburger-btn" id="hamburgerRightBtn" data-side="right"
+              title="Show right panels" aria-label="Show right panels"
+              aria-haspopup="menu" aria-controls="hamburgerMenuRight" aria-expanded="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <rect x="3" y="4" width="18" height="16" rx="2"/>
           <rect x="15" y="5" width="5" height="14" rx="1" fill="currentColor" stroke="none"/>
         </svg>
       </button>
     </div>
-    <div class="hamburger-menu menu-left"  id="hamburgerMenuLeft"  role="menu"></div>
-    <div class="hamburger-menu menu-right" id="hamburgerMenuRight" role="menu"></div>
+    <div class="hamburger-menu menu-left"  id="hamburgerMenuLeft"  role="menu" aria-label="Left panels"></div>
+    <div class="hamburger-menu menu-right" id="hamburgerMenuRight" role="menu" aria-label="Right panels"></div>
     <div class="panel-overlay-backdrop" id="overlayBackdrop"></div>
     <div class="center-row">
     <div class="content-body">
@@ -1082,7 +1131,7 @@
 </div>
 
 <script>
-(() => {
+window.PanelFramework = (() => {
   const REM = 16;
   const PANEL_MIN     = 20 * REM;   // 320px
   const COLLAPSED_W   = 64;
@@ -1096,51 +1145,63 @@
   };
   function contentMin() { return CONTENT_MIN_BY_MODE[currentMode]; }
 
-  // ---------- Per-mode breakpoints ----------
-  // Aligned with Tailwind's lg / xl / 2xl plus FullHD for 4-panel mode.
-  // Each mode's thresholds are sized so the layout always fits at the
-  // breakpoint's lower edge (1 expanded + the rest collapsed + content).
+  // ---------- Panel definitions ----------
+  // Each panel's role, side, position, and eviction priority in one place.
+  // `priority` is consulted when we need to free a slot — lower number
+  // yields first. The "secondary" panel on each side has priority 1, the
+  // "primary" has 2. Ties fall back to oldest-opened.
   //
-  // Details (content min 21rem):
-  //   bp4: 4*320 +       336 = 1616 (slack 304 at 1920)
-  //   bp3: 3*320 +  64 + 336 = 1360 (slack 176 at 1536)
-  //   bp2: 2*320 + 128 + 336 = 1104 (slack 176 at 1280)
-  //   bp1:   320 + 192 + 336 =  848 (slack 176 at 1024)
-  //
-  // Bulk (content min 40rem, 2 panels max — leftB & rightA hidden):
-  //   bp2: 2*320 +       640 = 1280 (slack 256 at 1536)
-  //   bp1:   320 +  64 + 640 = 1024 (slack 256 at 1280)
-  // (bp4/bp3 collapse to bp2 since the cap is 2 anyway.)
-  //
-  // Below `bp1` we switch to hamburger mode — rails hide, panels overlay.
-  const BP_THRESHOLDS = {
-    details: { bp4: 1920, bp3: 1536, bp2: 1280, bp1: 1024 },
-    bulk:    { bp4: 1920, bp3: 1920, bp2: 1536, bp1: 1280 },
-  };
-  function bpThresholds() { return BP_THRESHOLDS[currentMode]; }
-
   // Roles:
-  //   leftA  (outer-left)  — high-level navigation  (project / sections / files)
-  //   leftB  (inner-left)  — secondary navigation   (items in the current scope)
-  //   rightA (inner-right) — meta-data / details    (attributes of the selection)
-  //   rightB (outer-right) — AI chat / activity     (conversation, history)
-  const PANEL_DATA = {
-    leftA:  { title: 'Browse',     side: 'left',  position: 'outer' },
-    leftB:  { title: 'Task list',  side: 'left',  position: 'inner' },
-    rightA: { title: 'Info panel', side: 'right', position: 'inner' },
-    rightB: { title: 'Assistant',  side: 'right', position: 'outer' },
+  //   leftA  (outer-left)  — high-level navigation  (Browse)
+  //   leftB  (inner-left)  — secondary navigation   (Task list)
+  //   rightA (inner-right) — meta-data / details    (Info panel)
+  //   rightB (outer-right) — AI chat / activity     (Assistant)
+  const PANELS = {
+    leftA:  { title: 'Browse',     side: 'left',  position: 'outer', priority: 1, shortcut: '1' },
+    leftB:  { title: 'Task list',  side: 'left',  position: 'inner', priority: 2, shortcut: '2' },
+    rightA: { title: 'Info panel', side: 'right', position: 'inner', priority: 1, shortcut: '3' },
+    rightB: { title: 'Assistant',  side: 'right', position: 'outer', priority: 2, shortcut: '4' },
   };
 
-  // Eviction priority — lower number collapses first when we need to free
-  // a slot. The "secondary" panels on each side yield first; the "primary"
-  // ones (Layers on the left, Inspector on the right) are kept the longest.
-  // Ties fall back to oldest-opened first.
-  const PANEL_PRIORITY = {
-    leftA:  1, // Browse     — secondary on left  (outer)
-    leftB:  2, // Task list  — primary  on left  (inner)
-    rightA: 1, // Info panel — secondary on right (inner)
-    rightB: 2, // Assistant  — primary  on right (outer)
+  // ---------- Per-mode breakpoint ladders ----------
+  // A ladder is a list of tiers ordered largest → smallest. `from` is the
+  // minimum viewport width at which the tier applies; `max` caps the open
+  // panel count. The last tier is hamburger (rails hidden, panels overlay).
+  //
+  // Math (each tier must fit at its `from`):
+  //   1 expanded  = PANEL_MIN (320)      |   N collapsed = N * COLLAPSED_W (64)
+  //   content     = contentMin()         |   336 details, 640 bulk
+  //
+  // Details (content min 21rem = 336):
+  //   max 4: 4*320           + 336 = 1616  (slack 304 at 1920)
+  //   max 3: 3*320 +  64     + 336 = 1360  (slack 176 at 1536)
+  //   max 2: 2*320 + 128     + 336 = 1104  (slack 176 at 1280)
+  //   max 1:   320 + 192     + 336 =  848  (slack  48 at  896)
+  //
+  // Bulk (content min 40rem = 640, leftB + rightA hidden):
+  //   max 2: 2*320           + 640 = 1280  (slack 256 at 1536)
+  //   max 1:   320 +  64     + 640 = 1024  (slack  64 at 1088)
+  const BP_LADDER = {
+    details: [
+      { from: 1920, max: 4, name: 'bp4' },
+      { from: 1536, max: 3, name: 'bp3' },
+      { from: 1280, max: 2, name: 'bp2' },
+      { from:  896, max: 1, name: 'bp1' },
+      { from:    0, max: 0, name: 'hamburger', hamburger: true },
+    ],
+    bulk: [
+      { from: 1536, max: 2, name: 'bp2' },
+      { from: 1088, max: 1, name: 'bp1' },
+      { from:    0, max: 0, name: 'hamburger', hamburger: true },
+    ],
   };
+  function tierForWidth(w) {
+    const ladder = BP_LADDER[currentMode];
+    return ladder.find(t => w >= t.from) || ladder[ladder.length - 1];
+  }
+  function tierByName(name) {
+    return BP_LADDER[currentMode].find(t => t.name === name);
+  }
 
   // ---------- View modes ----------
   // The framework supports two top-level views, switchable from the toolbar:
@@ -1181,9 +1242,37 @@
   const $overlayBackdrop    = document.getElementById('overlayBackdrop');
 
   let activeOverlayId = null; // panel currently shown as overlay in hamburger mode
-  let currentBp       = null; // 'bp3' | 'bp2' | 'bp1' | 'hamburger'
+  let currentBp       = null; // 'bp4' | 'bp3' | 'bp2' | 'bp1' | 'hamburger'
 
   const panelEl = (id) => document.querySelector(`.panel[data-id="${id}"]`);
+
+  // ---------- Event bus (public) ----------
+  // Events emitted:
+  //   'open'              { id }
+  //   'close'             { id }
+  //   'mode-change'       { mode, previousMode }
+  //   'breakpoint-change' { bp, previousBp, viewportWidth }
+  //   'resize'            { id, width }
+  // Listeners get any thrown errors caught and logged so one bad
+  // subscriber can't break the rest.
+  const listeners = new Map();
+  function on(evt, fn) {
+    if (!listeners.has(evt)) listeners.set(evt, new Set());
+    listeners.get(evt).add(fn);
+    return () => off(evt, fn);
+  }
+  function off(evt, fn) {
+    const set = listeners.get(evt);
+    if (set) set.delete(fn);
+  }
+  function emit(evt, payload) {
+    const set = listeners.get(evt);
+    if (!set) return;
+    for (const fn of set) {
+      try { fn(payload); }
+      catch (err) { console.error(`PanelFramework listener for "${evt}" threw:`, err); }
+    }
+  }
 
   // ---------- Icon helpers ----------
   function chevronIcon(direction) {
@@ -1203,7 +1292,7 @@
     // button is a "close overlay" action, so use an X instead of a chevron.
     if (currentBp === 'hamburger') return closeIcon();
 
-    const { side } = PANEL_DATA[id];
+    const { side } = PANELS[id];
     const open = state[id].open;
     // Open + left  -> chevron points left  (collapse outward)
     // Open + right -> chevron points right
@@ -1217,12 +1306,21 @@
   function applyPanel(id) {
     const el = panelEl(id);
     const s = state[id];
-    el.classList.toggle('expanded',  s.open);
-    el.classList.toggle('collapsed', !s.open);
-    el.style.width = (s.open ? s.width : COLLAPSED_W) + 'px';
+    const isOverlay = el.classList.contains('overlay-active');
+
+    if (!isOverlay) {
+      el.classList.toggle('expanded',  s.open);
+      el.classList.toggle('collapsed', !s.open);
+      el.style.width = (s.open ? s.width : COLLAPSED_W) + 'px';
+    }
+
     const btn = el.querySelector('[data-action="toggle"]');
     btn.innerHTML = toggleIconFor(id);
-    btn.title = s.open ? 'Collapse' : 'Expand';
+    const expanded = isOverlay || s.open;
+    const action = isOverlay ? 'Close' : (s.open ? 'Collapse' : 'Expand');
+    btn.title = action;
+    btn.setAttribute('aria-label', `${action} ${PANELS[id].title}`);
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
   }
 
   function applyAll() {
@@ -1236,16 +1334,22 @@
     $statusPill.classList.toggle('full', openCount >= max);
 
     const w = $app.offsetWidth;
-    const t = bpThresholds();
-    const ranges = {
-      bp4: `≥ ${t.bp4}px`,
-      bp3: `${t.bp3}–${t.bp4 - 1}px`,
-      bp2: `${t.bp2}–${t.bp3 - 1}px`,
-      bp1: `${t.bp1}–${t.bp2 - 1}px`,
-      hamburger: `< ${t.bp1}px · hamburger`,
-    };
+    const ladder = BP_LADDER[currentMode];
+    let label = '—';
+    for (let i = 0; i < ladder.length; i++) {
+      const t = ladder[i];
+      if (t.name !== currentBp) continue;
+      if (t.hamburger) {
+        label = `< ${ladder[i - 1].from}px · hamburger`;
+      } else if (i === 0) {
+        label = `≥ ${t.from}px`;
+      } else {
+        label = `${t.from}–${ladder[i - 1].from - 1}px`;
+      }
+      break;
+    }
     const maxLabel = currentBp === 'hamburger' ? '' : ` · ${currentMaxAllowed()} max`;
-    $bpPill.textContent = `${Math.round(w)}px — ${ranges[currentBp] || '—'}${maxLabel} · ${currentMode}`;
+    $bpPill.textContent = `${Math.round(w)}px — ${label}${maxLabel} · ${currentMode}`;
 
     // Status pill is irrelevant in hamburger mode (rails are hidden)
     $statusPill.style.display = (currentBp === 'hamburger') ? 'none' : '';
@@ -1258,21 +1362,14 @@
 
   // ---------- Breakpoints ----------
   function getBreakpoint(w) {
-    const t = bpThresholds();
-    if (w >= t.bp4) return 'bp4';
-    if (w >= t.bp3) return 'bp3';
-    if (w >= t.bp2) return 'bp2';
-    if (w >= t.bp1) return 'bp1';
-    return 'hamburger';
+    return tierForWidth(w).name;
   }
 
   function getMaxExpanded(bp) {
-    const baseMax =
-      bp === 'bp4' ? 4 :
-      bp === 'bp3' ? 3 :
-      bp === 'bp2' ? 2 :
-      bp === 'bp1' ? 1 : 0; // hamburger — handled separately via overlay
-    // In bulk mode there are only 3 panels available, so cap accordingly.
+    const tier = tierByName(bp);
+    const baseMax = tier ? tier.max : 0;
+    // The active panel count caps the breakpoint max — modes that hide
+    // panels (bulk hides leftB + rightA) shouldn't pretend to allow more.
     return Math.min(baseMax, activePanels().length);
   }
 
@@ -1282,8 +1379,8 @@
 
   // Comparator: lower priority number first. Ties broken by oldest-opened.
   function byEvictionPriority(aId, bId) {
-    const pa = PANEL_PRIORITY[aId] || 0;
-    const pb = PANEL_PRIORITY[bId] || 0;
+    const pa = PANELS[aId].priority || 0;
+    const pb = PANELS[bId].priority || 0;
     if (pa !== pb) return pa - pb;
     return openOrder.indexOf(aId) - openOrder.indexOf(bId);
   }
@@ -1291,8 +1388,12 @@
   function enforceBreakpoint() {
     const w = $app.offsetWidth;
     const newBp = getBreakpoint(w);
+    const previousBp = currentBp;
     const wasHamburger = currentBp === 'hamburger';
     currentBp = newBp;
+    if (newBp !== previousBp) {
+      emit('breakpoint-change', { bp: newBp, previousBp, viewportWidth: w });
+    }
 
     if (newBp === 'hamburger') {
       // Hide rails, collapse all rail-state panels (they're hidden anyway,
@@ -1341,9 +1442,9 @@
       // Prefer to evict the lowest-priority panel on the OPPOSITE side.
       // If no opposite-side panel is open, fall back to the lowest-priority
       // panel overall. Ties break to oldest-opened first.
-      const newSide = PANEL_DATA[id].side;
+      const newSide = PANELS[id].side;
       const opposite = newSide === 'left' ? 'right' : 'left';
-      const oppositeIds = openOrder.filter(pid => PANEL_DATA[pid].side === opposite);
+      const oppositeIds = openOrder.filter(pid => PANELS[pid].side === opposite);
       oppositeIds.sort(byEvictionPriority);
       const evictId = oppositeIds[0] || [...openOrder].sort(byEvictionPriority)[0];
       if (evictId) closePanel(evictId, /*silent*/ true);
@@ -1354,6 +1455,7 @@
     fitWidthsForViewport();
     applyAll();
     updateUI();
+    emit('open', { id });
   }
 
   function closePanel(id, silent = false) {
@@ -1364,6 +1466,7 @@
       applyPanel(id);
       updateUI();
     }
+    emit('close', { id });
   }
 
   function togglePanel(id) {
@@ -1377,6 +1480,7 @@
   // ---------- Mode switching (Details / Bulk) ----------
   function setMode(mode) {
     if (mode === currentMode || !MODE_PANELS[mode]) return;
+    const previousMode = currentMode;
 
     // 1. Close any panel that's not part of the new mode (e.g. Task list
     //    when switching into Bulk). Silent — we'll re-render once at end.
@@ -1422,6 +1526,7 @@
 
     applyAll();
     updateUI();
+    emit('mode-change', { mode, previousMode });
   }
 
   // ---------- Hamburger menu & overlay ----------
@@ -1430,11 +1535,11 @@
 
   function renderHamburgerMenu(side) {
     const items = activePanels()
-      .filter(id => PANEL_DATA[id].side === side)
+      .filter(id => PANELS[id].side === side)
       .map(id => {
-        const d = PANEL_DATA[id];
+        const d = PANELS[id];
         const isActive = activeOverlayId === id;
-        return `<button class="hamburger-menu-item" data-overlay-id="${id}">
+        return `<button class="hamburger-menu-item" role="menuitem" data-overlay-id="${id}" aria-current="${isActive ? 'true' : 'false'}">
           <span class="item-label">${d.title}</span>
           <span class="item-state">${isActive ? 'showing' : d.position}</span>
         </button>`;
@@ -1448,7 +1553,12 @@
     closeHamburgerMenu(side === 'left' ? 'right' : 'left'); // only one open at a time
     renderHamburgerMenu(side);
     menuElFor(side).classList.add('open');
-    menuBtnFor(side).classList.add('is-active');
+    const btn = menuBtnFor(side);
+    btn.classList.add('is-active');
+    btn.setAttribute('aria-expanded', 'true');
+    // Focus the first menu item so keyboard users land where they can act.
+    const firstItem = menuElFor(side).querySelector('[role="menuitem"]');
+    if (firstItem) firstItem.focus();
   }
   function closeHamburgerMenu(side) {
     if (!side) {
@@ -1457,29 +1567,51 @@
       return;
     }
     menuElFor(side).classList.remove('open');
-    menuBtnFor(side).classList.remove('is-active');
+    const btn = menuBtnFor(side);
+    btn.classList.remove('is-active');
+    btn.setAttribute('aria-expanded', 'false');
   }
   function toggleHamburgerMenu(side) {
     if (menuElFor(side).classList.contains('open')) closeHamburgerMenu(side);
     else openHamburgerMenu(side);
   }
 
+  // Element to restore focus to when an overlay closes.
+  let overlayReturnFocus = null;
+
   function openOverlay(id) {
+    // Capture the trigger so focus can return to it on close. If we're
+    // already replacing an overlay, keep the original return target.
+    if (!activeOverlayId) {
+      overlayReturnFocus = document.activeElement;
+    }
+
     closeHamburgerMenu();
     if (activeOverlayId && activeOverlayId !== id) {
       const prev = panelEl(activeOverlayId);
-      if (prev) prev.classList.remove('overlay-active');
+      if (prev) {
+        prev.classList.remove('overlay-active');
+        prev.setAttribute('role', 'region');
+        prev.removeAttribute('aria-modal');
+      }
     }
     activeOverlayId = id;
     const el = panelEl(id);
     el.classList.remove('collapsed');
     el.classList.add('expanded', 'overlay-active');
     el.style.width = ''; // CSS controls overlay width
-    // Make sure toggle button shows close-style icon
-    const btn = el.querySelector('[data-action="toggle"]');
-    btn.innerHTML = closeIcon();
-    btn.title = 'Close';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    // applyPanel renders the close (X) icon when currentBp === 'hamburger'
+    // and updates ARIA state. Single render path → no icon drift.
+    applyPanel(id);
     $overlayBackdrop.classList.add('open');
+
+    // Move focus to the close button — first interactive element a user
+    // is likely to want, and it satisfies the dialog-pattern requirement
+    // that focus moves into the dialog on open.
+    const closeBtn = el.querySelector('[data-action="toggle"]');
+    if (closeBtn) closeBtn.focus();
   }
 
   function closeOverlay() {
@@ -1489,10 +1621,41 @@
         el.classList.remove('overlay-active');
         el.classList.add('collapsed');
         el.classList.remove('expanded');
+        el.setAttribute('role', 'region');
+        el.removeAttribute('aria-modal');
       }
       activeOverlayId = null;
     }
     $overlayBackdrop.classList.remove('open');
+
+    // Return focus to whatever opened the overlay (hamburger trigger or
+    // menu item). Skip if it's no longer in the DOM or in the document.
+    if (overlayReturnFocus && document.contains(overlayReturnFocus)) {
+      try { overlayReturnFocus.focus(); } catch (_) {}
+    }
+    overlayReturnFocus = null;
+  }
+
+  // Focus trap inside the active overlay — Tab/Shift+Tab cycle within.
+  function focusableInside(root) {
+    return Array.from(root.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]),' +
+      ' select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(el => el.offsetParent !== null || el === document.activeElement);
+  }
+  function trapTab(e) {
+    if (e.key !== 'Tab' || !activeOverlayId) return;
+    const overlayEl = panelEl(activeOverlayId);
+    if (!overlayEl) return;
+    const focusables = focusableInside(overlayEl);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last  = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
   }
 
   // If the viewport is too narrow for all expanded panels at their current widths,
@@ -1588,25 +1751,32 @@
   });
 
   // ---------- Resize logic ----------
+  // Pointer events (instead of mouse) → unified mouse / touch / pen /
+  // stylus support. `setPointerCapture` keeps the drag stream attached to
+  // the handle even when the pointer leaves the window or moves over an
+  // iframe. We coalesce moves through requestAnimationFrame so high-Hz
+  // trackpads don't flood layout.
   let drag = null;
+  let dragRafId = null;
+  let pendingPointerEvent = null;
 
-  document.addEventListener('mousedown', (e) => {
+  document.addEventListener('pointerdown', (e) => {
     const handle = e.target.closest('[data-resize]');
     if (!handle) return;
     const panel = handle.closest('.panel');
     const id = panel.dataset.id;
     if (!state[id].open) return;
     if (currentBp === 'hamburger') return; // overlays aren't resizable
+    if (e.button !== undefined && e.button !== 0) return; // primary button only
 
     e.preventDefault();
 
     const containerW = $app.offsetWidth;
 
-    // Capture the starting widths of every other open panel. During drag
-    // we restore from these each frame so shrinks don't accumulate, then
-    // re-shrink others (oldest first) to make room for the dragged panel.
-    // Only active panels (visible in the current mode) contribute to the
-    // width budget — hidden ones don't take any space.
+    // Snapshot starting widths of every other open panel. During drag we
+    // restore from these each frame so shrinks don't accumulate, then
+    // re-shrink others (same-side first) to make room. Hidden panels
+    // (e.g. Task list in bulk mode) don't contribute to the budget.
     const startOtherWidths = {};
     let otherMinSum = 0;
     for (const pid of activePanels()) {
@@ -1625,13 +1795,16 @@
 
     drag = {
       id,
-      side:       PANEL_DATA[id].side,
+      side:       PANELS[id].side,
       startX:     e.clientX,
       startWidth: state[id].width,
       maxWidth:   Math.max(PANEL_MIN, maxAllowed),
       handle,
+      pointerId:  e.pointerId,
       startOtherWidths,
     };
+
+    try { handle.setPointerCapture(e.pointerId); } catch (_) { /* older browsers */ }
 
     handle.classList.add('active');
     $app.classList.add('resizing');
@@ -1639,44 +1812,41 @@
     document.body.style.userSelect = 'none';
   });
 
-  document.addEventListener('mousemove', (e) => {
-    if (!drag) return;
+  function processDragMove() {
+    dragRafId = null;
+    if (!drag || !pendingPointerEvent) return;
+    const e = pendingPointerEvent;
+    pendingPointerEvent = null;
+
     let delta = e.clientX - drag.startX;
     if (drag.side === 'right') delta = -delta;
 
     let desired = drag.startWidth + delta;
     desired = Math.max(PANEL_MIN, Math.min(drag.maxWidth, desired));
 
-    // Restore other open panels to their pre-drag widths so we recompute
-    // the redistribution from a clean baseline each frame.
+    // Restore others to pre-drag widths so each frame recomputes from a
+    // clean baseline.
     for (const pid in drag.startOtherWidths) {
       state[pid].width = drag.startOtherWidths[pid];
     }
 
-    // Total used if the dragged panel were at `desired`. Hidden panels
-    // (e.g. Task list in bulk mode) don't contribute to the budget.
     const containerW = $app.offsetWidth;
     let totalUsed = 0;
     for (const pid of activePanels()) {
-      if (pid === drag.id) {
-        totalUsed += desired;
-      } else {
-        totalUsed += state[pid].open ? state[pid].width : COLLAPSED_W;
-      }
+      totalUsed += pid === drag.id
+        ? desired
+        : (state[pid].open ? state[pid].width : COLLAPSED_W);
     }
     let overflow = (totalUsed + contentMin()) - containerW;
 
-    // Shrink other open panels (oldest first), down to PANEL_MIN, to absorb
-    // overflow. Same-side panels shrink first so the user's drag visually
-    // pushes the adjacent panel before reaching across the workspace.
+    // Shrink others (same-side first) to absorb overflow, oldest within
+    // each side first.
     if (overflow > 0) {
       const sameSide = openOrder.filter(pid =>
-        pid !== drag.id && PANEL_DATA[pid].side === drag.side);
+        pid !== drag.id && PANELS[pid].side === drag.side);
       const otherSide = openOrder.filter(pid =>
-        pid !== drag.id && PANEL_DATA[pid].side !== drag.side);
-      const order = [...sameSide, ...otherSide];
-
-      for (const oid of order) {
+        pid !== drag.id && PANELS[pid].side !== drag.side);
+      for (const oid of [...sameSide, ...otherSide]) {
         if (overflow <= 0) break;
         const reducible = state[oid].width - PANEL_MIN;
         if (reducible <= 0) continue;
@@ -1686,31 +1856,51 @@
       }
     }
 
-    // If we still couldn't fit, cap the dragged panel's width.
     if (overflow > 0) desired = Math.max(PANEL_MIN, desired - overflow);
-
     state[drag.id].width = desired;
 
-    // Apply widths to DOM (only the panels whose width may have changed)
     panelEl(drag.id).style.width = desired + 'px';
     for (const pid in drag.startOtherWidths) {
       panelEl(pid).style.width = state[pid].width + 'px';
     }
+  }
+
+  document.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    pendingPointerEvent = e;
+    if (dragRafId === null) {
+      dragRafId = requestAnimationFrame(processDragMove);
+    }
   });
 
-  document.addEventListener('mouseup', () => {
+  function endDrag() {
     if (!drag) return;
+    const finalId    = drag.id;
+    const finalWidth = state[finalId].width;
     drag.handle.classList.remove('active');
+    try { drag.handle.releasePointerCapture(drag.pointerId); } catch (_) {}
     $app.classList.remove('resizing');
     drag = null;
+    pendingPointerEvent = null;
+    if (dragRafId !== null) {
+      cancelAnimationFrame(dragRafId);
+      dragRafId = null;
+    }
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
-  });
+    emit('resize', { id: finalId, width: finalWidth });
+  }
+
+  document.addEventListener('pointerup',     endDrag);
+  document.addEventListener('pointercancel', endDrag);
+  // If the user alt-tabs or the browser steals focus, end the drag cleanly.
+  window.addEventListener('blur', endDrag);
 
   // ---------- Overlay-top sync ----------
-  // Hamburger overlays are position:fixed and need to start exactly at
-  // the bottom of the workspace header. The header is taller in hamburger
-  // mode (32px hamburger buttons vs ~21px h1 only), so we measure it.
+  // Hamburger overlays are position:fixed; they start exactly at the
+  // bottom edge of the workspace header. ResizeObserver fires only when
+  // the header's box actually changes — much cheaper than measuring on
+  // every window resize.
   function syncOverlayTop() {
     const headerEl = document.querySelector('.content-header');
     if (!headerEl) return;
@@ -1718,18 +1908,151 @@
     document.documentElement.style.setProperty('--overlay-top', bottom + 'px');
   }
 
-  // Re-fit on viewport resize
+  // Window resize → coalesce through rAF so a flurry of events results
+  // in at most one layout pass.
+  let resizeRafId = null;
   window.addEventListener('resize', () => {
-    enforceBreakpoint();
-    syncOverlayTop();
-    updateUI();
+    if (resizeRafId !== null) return;
+    resizeRafId = requestAnimationFrame(() => {
+      resizeRafId = null;
+      enforceBreakpoint();
+      updateUI();
+    });
   });
 
+  if (typeof ResizeObserver !== 'undefined') {
+    const headerEl = document.querySelector('.content-header');
+    if (headerEl) new ResizeObserver(syncOverlayTop).observe(headerEl);
+  } else {
+    // Fallback for very old browsers.
+    window.addEventListener('resize', syncOverlayTop);
+  }
+
+  // ---------- Keyboard ----------
+  // - Escape: close active overlay → then any open hamburger menu.
+  // - Tab inside overlay: focus-trap.
+  // - Cmd/Ctrl + 1..4: toggle panel by index (leftA, leftB, rightA, rightB).
+  // - Cmd/Ctrl + \\: toggle leftB (primary left, VS Code-style).
+  //   + Alt   → leftA   (secondary left)
+  //   + Shift → rightB  (primary right)
+  //   + Shift + Alt → rightA (secondary right)
+  // Shortcuts are suppressed while typing in form fields so they never
+  // hijack a literal backslash or number entry.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (activeOverlayId) { e.preventDefault(); closeOverlay(); return; }
+      const openMenu = document.querySelector('.hamburger-menu.open');
+      if (openMenu) {
+        e.preventDefault();
+        const side = openMenu.classList.contains('menu-left') ? 'left' : 'right';
+        closeHamburgerMenu();
+        menuBtnFor(side).focus();
+        return;
+      }
+    }
+    if (e.key === 'Tab') { trapTab(e); return; }
+
+    const mod = e.metaKey || e.ctrlKey;
+    if (!mod) return;
+    const target = document.activeElement;
+    if (target && target.matches && target.matches(
+      'input, textarea, select, [contenteditable="true"]'
+    )) return;
+
+    const orderedIds = ['leftA', 'leftB', 'rightA', 'rightB'];
+    if (!e.shiftKey && !e.altKey && /^[1-4]$/.test(e.key)) {
+      const id = orderedIds[parseInt(e.key, 10) - 1];
+      if (isActivePanel(id)) { e.preventDefault(); togglePanel(id); }
+      return;
+    }
+    if (e.key === '\\') {
+      let id;
+      if (e.shiftKey && e.altKey) id = 'rightA';
+      else if (e.shiftKey)         id = 'rightB';
+      else if (e.altKey)           id = 'leftA';
+      else                         id = 'leftB';
+      if (isActivePanel(id)) { e.preventDefault(); togglePanel(id); }
+    }
+  });
+
+  // ---------- ARIA wiring ----------
+  // Each panel becomes a labelled landmark (its title-text). The toggle
+  // button announces what it controls so screen readers read e.g.
+  // "Collapse Task list, button, expanded".
+  function wireAria() {
+    Object.keys(state).forEach(id => {
+      const el = panelEl(id);
+      if (!el) return;
+      // Ensure a stable id so aria-controls can point here.
+      if (!el.id) el.id = `panel-${id}`;
+      const titleEl = el.querySelector('.title-text');
+      if (titleEl) {
+        const labelId = `panel-title-${id}`;
+        titleEl.id = labelId;
+        el.setAttribute('aria-labelledby', labelId);
+      }
+      // Region role makes the panel a navigable landmark when not in
+      // overlay (dialog) mode.
+      el.setAttribute('role', 'region');
+      const btn = el.querySelector('[data-action="toggle"]');
+      if (btn) btn.setAttribute('aria-controls', el.id);
+    });
+  }
+
+  // ---------- DOM ⇄ config validation ----------
+  // Warn if HTML and PANELS config disagree — a friendlier failure mode
+  // than silently misbehaving when someone adds/removes a panel.
+  function validateDom() {
+    const inDom = new Set(Array.from(document.querySelectorAll('.panel[data-id]')).map(el => el.dataset.id));
+    const inConfig = new Set(Object.keys(PANELS));
+    const missingFromDom    = [...inConfig].filter(id => !inDom.has(id));
+    const missingFromConfig = [...inDom].filter(id => !inConfig.has(id));
+    if (missingFromDom.length || missingFromConfig.length) {
+      console.warn('[PanelFramework] DOM/config mismatch.', {
+        missingFromDom, missingFromConfig,
+      });
+    }
+    // Cross-check `data-side` against the config side.
+    inDom.forEach(id => {
+      const el = document.querySelector(`.panel[data-id="${id}"]`);
+      if (PANELS[id] && el.dataset.side !== PANELS[id].side) {
+        console.warn(`[PanelFramework] panel "${id}" data-side="${el.dataset.side}" but config side="${PANELS[id].side}".`);
+      }
+    });
+  }
+
   // ---------- Init ----------
+  validateDom();
+  wireAria();
   enforceBreakpoint();
   applyAll();
   syncOverlayTop();
   updateUI();
+
+  // ---------- Public API ----------
+  // Expose only intentional surface area. Internals stay hidden.
+  return {
+    open:    openPanel,
+    close:   closePanel,
+    toggle:  togglePanel,
+    setMode,
+    getMode: ()      => currentMode,
+    getBreakpoint: () => currentBp,
+    getState: () => ({
+      mode: currentMode,
+      breakpoint: currentBp,
+      activeOverlayId,
+      panels: Object.fromEntries(
+        Object.entries(state).map(([id, s]) => [id, { open: s.open, width: s.width }])
+      ),
+    }),
+    on, off,
+    // Read-only views of config (use Object.freeze to discourage mutation).
+    config: Object.freeze({
+      panels: Object.freeze({ ...PANELS }),
+      modes:  Object.freeze({ ...MODE_PANELS }),
+    }),
+  };
 })();
 </script>
 </body>
