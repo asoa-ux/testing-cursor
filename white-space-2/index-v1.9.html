@@ -1234,21 +1234,19 @@
       padding-right: 12px;
     }
 
-    /* Read-only fields use the large field width (same band as
-       .form-field.size-medium), never the full-bleed .size-full stretch.
-       Higher specificity than .form-field.size-* so filled read-only
-       (and empty read-only) tabs always cap width. Mixed tab uses rows.
-       “Implementation” and “Test (same width)” opt out so
-       size-small / size-medium / size-full behave like editable. */
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-field,
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .form-row.is-read-only .form-field {
+    /* Read-only width expansion (large band, same as .size-medium limits):
+       only for numbers/dates (and similar), not small text. Mark rows with
+       data-ro-readonly-width="large". Implementation and Test (same width)
+       keep editable size-* widths for all fields. */
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
       flex: 1 1 auto;
       min-width: calc(21rem + 24px + 8px);
       max-width: calc(35rem + 24px + 8px);
     }
 
-    .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .tab-content.is-read-only .form-field,
-    .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .form-row.is-read-only .form-field {
+    .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
       flex: 1 1 auto;
       min-width: calc(21rem + 24px + 8px);
       max-width: calc(35rem + 24px + 8px);
@@ -1959,14 +1957,9 @@
         min-width: 0 !important;
       }
       .multi-value-item {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) auto !important;
-        gap: 8px !important;
-        align-items: center;
+        display: block !important;
         position: relative;
-      }
-      .is-read-only .multi-value-item {
-        grid-template-columns: minmax(0, 1fr) !important;
+        width: 100% !important;
       }
       .multi-value-item .input-wrapper {
         flex: unset !important;
@@ -1977,8 +1970,19 @@
       .multi-value-item .form-input {
         width: 100% !important;
       }
+      .multi-value-item .actions {
+        position: absolute !important;
+        left: 100% !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        margin-left: 8px !important;
+      }
+      .multi-value-item:has(textarea.form-input) .actions {
+        top: 8px !important;
+        transform: none !important;
+      }
       .multi-value-list + .add-new-link {
-        padding-right: calc(24px + 8px) !important;
+        padding-right: 0 !important;
         justify-content: flex-end !important;
         text-align: right;
       }
@@ -2084,19 +2088,15 @@
       flex-direction: column;
       gap: 8px;
       width: 100%;
+      overflow: visible;
     }
 
-    /* Remove control sits outside the input (second column), not overlaid. */
+    /* Remove sits outside the bordered input: full-width track, button anchored
+       to the right edge of the row (does not participate in width shrink). */
     .multi-value-item {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-      align-items: center;
+      position: relative;
+      display: block;
       width: 100%;
-    }
-
-    .is-read-only .multi-value-item {
-      grid-template-columns: minmax(0, 1fr);
     }
 
     .multi-value-item .input-wrapper {
@@ -2111,14 +2111,6 @@
 
     .is-read-only .multi-value-item .actions {
       display: none;
-    }
-
-    .multi-value-item:has(textarea.form-input) {
-      align-items: start;
-    }
-
-    .multi-value-item:has(textarea.form-input) .actions {
-      margin-top: 8px;
     }
 
     /* LoV/code selects stay single-line and can truncate in small fields.
@@ -2140,10 +2132,25 @@
     }
 
     .multi-value-item .actions {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 8px;
       display: flex;
       gap: 4px;
       justify-content: flex-end;
       flex-shrink: 0;
+      z-index: 2;
+    }
+
+    .multi-value-item:has(textarea.form-input) .actions {
+      top: 8px;
+      transform: none;
+    }
+
+    .form-field:has(> .multi-value-list) {
+      overflow: visible;
     }
 
     /* Input with icon placeholder structure */
@@ -2331,11 +2338,6 @@
       width: 100%;
       box-sizing: border-box;
       text-align: right;
-    }
-
-    /* Line up with the right edge of the input column (24px control + 8px gap). */
-    .multi-value-list + .add-new-link {
-      padding-right: calc(24px + 8px);
     }
 
     .add-new-link:hover {
@@ -3186,7 +3188,7 @@
                   </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row" data-ro-readonly-width="large">
                   <span class="form-label">Number<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Numeric/code-like value. Single-line and may truncate when needed.</span></button></span>
                   <div class="form-field size-small">
                     <div class="input-with-icon">
@@ -3196,7 +3198,7 @@
                   </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row" data-ro-readonly-width="large">
                   <span class="form-label">Date<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Date value in dd/mm/yyyy format.</span></button></span>
                   <div class="form-field size-small">
                     <div class="input-with-trailing-icon">
@@ -3238,7 +3240,7 @@
                   </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row" data-ro-readonly-width="large">
                   <span class="form-label">Multi-value number LoV<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Controlled list of numeric/code values.</span></button></span>
                   <div class="form-field size-small">
                     <div class="multi-value-list">
