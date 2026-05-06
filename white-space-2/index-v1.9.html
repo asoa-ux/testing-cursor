@@ -1040,14 +1040,14 @@
       border: 1px solid #52BDEC !important;
     }
 
-    /* No placeholder in read-only unless “(No value)” is enabled — standalone
-       “no-value” variant or combined with “no-border”. */
-    .tab-content-area:not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
+    /* No placeholder in read-only unless “(No value)” is enabled. */
+    .tab-content-area:not([data-ro-variant="with-border"]):not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="none"] .is-read-only .form-input::placeholder {
       color: transparent;
       opacity: 0;
     }
 
+    .tab-content-area[data-ro-variant="with-border"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .is-read-only .form-input::placeholder {
@@ -1055,6 +1055,7 @@
       opacity: 1;
     }
 
+    .tab-content-area[data-ro-variant="with-border"] .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="no-value"] .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="no-border"] .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .form-static-value.ro-empty-placeholder {
@@ -1062,6 +1063,8 @@
     }
 
     /* Variant: no bottom border on read-only fields */
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input,
@@ -1071,6 +1074,8 @@
       border-bottom-style: solid !important;
     }
 
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:hover:not(:focus),
@@ -1080,6 +1085,8 @@
       border-bottom-style: solid !important;
     }
 
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
@@ -1090,6 +1097,8 @@
     /* “No border” / Implementation resting rules use !important and beat the
        generic .is-read-only :focus border shorthand on specificity — restore
        the full blue box (including bottom) on focus with matching specificity. */
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:focus,
@@ -1100,6 +1109,8 @@
       border-bottom-color: #52BDEC !important;
     }
 
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value:focus,
@@ -1118,38 +1129,69 @@
       color: rgba(0, 0, 0, 0.87);
     }
 
-    /* Implementation: single-line read-only text inputs truncate when they
-       exceed field width (e.g. Feature bullet 1). Focus still reveals value. */
+    .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value {
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    /* Single-line read-only text inputs: overflow ellipsis (JS also fits text
+       where needed). All experiment variants + Implementation + Test. */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus) {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="test"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="test"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus) {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* Variant: light gray fill */
-    .tab-content-area[data-ro-variant="light-bg"] .is-read-only .form-input,
-    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-input,
-    .tab-content-area[data-ro-variant="light-bg"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-static-value {
+    /* Option 2: no border + subtle background */
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value {
       background-color: #f6f6f6;
     }
 
-    .tab-content-area[data-ro-variant="light-bg"] .is-read-only .form-input:hover:not(:focus),
-    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-input:hover:not(:focus) {
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:hover:not(:focus) {
       background-color: #f6f6f6;
     }
 
-    .tab-content-area[data-ro-variant="light-bg"] .is-read-only .form-input:focus,
-    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-input:focus {
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:focus {
       background: #f5f5f5;
       border: 1px solid #52BDEC !important;
     }
 
-    .tab-content-area[data-ro-variant="light-bg"] .tab-content.is-read-only .form-static-value:focus,
-    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-static-value:focus {
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value:focus {
       background: #f5f5f5;
       border: 1px solid #52BDEC !important;
+    }
+
+    /* Option 3: separator between read-only multivalue items */
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .multi-value-item + .multi-value-item {
+      border-top: 1px solid #E5E7EB;
+      margin-top: 4px;
+      padding-top: 8px;
     }
 
     .is-read-only .input-trailing-icon,
@@ -2999,7 +3041,6 @@
               <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="light-bg">Option 4</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
             </div>
             <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
@@ -3842,10 +3883,15 @@
       });
     }
 
+    function isSingleLineTruncateVariant(variant) {
+      return variant === 'implementation' || variant === 'test' ||
+        variant === 'with-border' || variant === 'no-value' || variant === 'no-border';
+    }
+
     function syncImplementationReadOnlyTruncation(scope) {
       const area = document.querySelector('.tab-content-area');
       const variant = area ? area.getAttribute('data-ro-variant') : null;
-      const truncateEnabled = variant === 'implementation' || variant === 'test';
+      const truncateEnabled = isSingleLineTruncateVariant(variant);
       const root = scope || document;
       root.querySelectorAll('.tab-content input.form-input:not(.textarea), .form-row input.form-input:not(.textarea)').forEach(input => {
         if (!truncateEnabled) {
@@ -3857,13 +3903,14 @@
           return;
         }
         const active = document.activeElement === input;
+        if (active) {
+          input.dataset.roFullValue = input.value;
+          input.title = input.value;
+          return;
+        }
         const full = input.dataset.roFullValue != null ? input.dataset.roFullValue : input.value;
         input.dataset.roFullValue = full;
-        if (active) {
-          input.value = full;
-        } else {
-          input.value = fitReadOnlyInputText(input, full);
-        }
+        input.value = fitReadOnlyInputText(input, full);
         input.title = full;
       });
     }
@@ -4589,7 +4636,7 @@
     function refreshReadOnlyPlaceholders(variant) {
       const area = document.querySelector('.tab-content-area');
       const testPlaceholder = area ? area.getAttribute('data-ro-test-placeholder') : null;
-      const showNoValue = variant === 'no-value' || variant === 'no-border' || (variant === 'test' && testPlaceholder === 'show');
+      const showNoValue = variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || (variant === 'test' && testPlaceholder === 'show');
 
       document.querySelectorAll('.tab-content.is-read-only input.form-input[readonly], .tab-content.is-read-only textarea.form-input[readonly], .form-row.is-read-only input.form-input[readonly], .form-row.is-read-only textarea.form-input[readonly]').forEach(el => {
         if (showNoValue && !String(el.value || '').trim()) {
@@ -4623,10 +4670,9 @@
       const testPanel = document.getElementById('roVariantTestPanel');
       const variantMessages = {
         implementation: 'Current implementation baseline.',
-        'with-border': 'Border below read-only inputs as well + subtle color on read-only text',
-        'no-value': 'Border below read-only inputs as well + subtle color on read-only text + "(No value)" on empty fields',
-        'no-border': '"(No value)" on empty fields + read-only short fields become large size',
-        'light-bg': 'Light background on read-only fields',
+        'with-border': 'Subtle border, no background, (No value), same font color as editable.',
+        'no-value': 'No border, subtle background, (No value), same font color as editable.',
+        'no-border': 'No border, no background, (No value), same font color as editable, and separators between read-only multivalue fields.',
         test: 'Test mode: combine radio choices below to try different read-only behaviors.'
       };
 
@@ -4683,7 +4729,7 @@
       const area = document.querySelector('.tab-content-area');
       if (!area) return;
       const variant = area.getAttribute('data-ro-variant');
-      if (variant !== 'implementation' && variant !== 'test') return;
+      if (!isSingleLineTruncateVariant(variant)) return;
       if (input.dataset.roFullValue != null) {
         input.value = input.dataset.roFullValue;
       }
@@ -4695,7 +4741,7 @@
       const area = document.querySelector('.tab-content-area');
       if (!area) return;
       const variant = area.getAttribute('data-ro-variant');
-      if (variant !== 'implementation' && variant !== 'test') return;
+      if (!isSingleLineTruncateVariant(variant)) return;
       syncImplementationReadOnlyTruncation(input.closest('.form-row') || document);
     });
 
