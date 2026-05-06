@@ -2032,6 +2032,15 @@
         flex: 1 1 auto !important;
         min-width: 0 !important;
       }
+      .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item:only-child,
+      .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item:only-child {
+        display: block !important;
+      }
+      .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item:only-child::before,
+      .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item:only-child::before {
+        display: none !important;
+        content: none !important;
+      }
       .multi-value-list + .add-new-link {
         padding-right: 0 !important;
         justify-content: flex-end !important;
@@ -2238,6 +2247,18 @@
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item .input-wrapper {
       flex: 1 1 auto;
       min-width: 0;
+    }
+
+    /* One read-only value: no index; restore default row layout. */
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item:only-child,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item:only-child {
+      display: block;
+    }
+
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item:only-child::before,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item:only-child::before {
+      display: none;
+      content: none;
     }
 
     .form-field:has(> .multi-value-list) {
@@ -3177,7 +3198,7 @@
               <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without multi-value separators; subtle numbering on read-only rows only">Option 4</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without separators; read-only row numbers when 2+ items">Option 4</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
             </div>
             <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
@@ -4810,7 +4831,7 @@
         'with-border': 'Subtle border, no background, (No value), same font color as editable.',
         'no-value': 'No border, subtle background, (No value), same font color as editable.',
         'no-border': 'No border, no background, (No value), same font color as editable, and separators between read-only multivalue fields.',
-        'option-4': 'Like Option 3, but no separator between read-only multi-value rows; subtle 1-based numbering on each read-only row only.',
+        'option-4': 'Like Option 3, but no separator between read-only multi-value rows; subtle 1-based numbering on read-only rows when there are two or more values.',
         test: 'Test mode: combine radio choices below to try different read-only behaviors.'
       };
 
