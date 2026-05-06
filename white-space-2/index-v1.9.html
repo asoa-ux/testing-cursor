@@ -1959,13 +1959,28 @@
         min-width: 0 !important;
       }
       .multi-value-item {
-        display: flex !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: 8px !important;
+        align-items: center;
+        position: relative;
+      }
+      .is-read-only .multi-value-item {
+        grid-template-columns: minmax(0, 1fr) !important;
       }
       .multi-value-item .input-wrapper {
-        flex: 1 !important;
+        flex: unset !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
       }
       .multi-value-item .form-input {
         width: 100% !important;
+      }
+      .multi-value-list + .add-new-link {
+        padding-right: calc(24px + 8px) !important;
+        justify-content: flex-end !important;
+        text-align: right;
       }
     }
 
@@ -2071,19 +2086,39 @@
       width: 100%;
     }
 
+    /* Remove control sits outside the input (second column), not overlaid. */
     .multi-value-item {
       display: grid;
-      grid-template-columns: 1fr 24px;
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .is-read-only .multi-value-item {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .multi-value-item .input-wrapper {
       min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .multi-value-item .form-input {
       width: 100%;
+    }
+
+    .is-read-only .multi-value-item .actions {
+      display: none;
+    }
+
+    .multi-value-item:has(textarea.form-input) {
+      align-items: start;
+    }
+
+    .multi-value-item:has(textarea.form-input) .actions {
+      margin-top: 8px;
     }
 
     /* LoV/code selects stay single-line and can truncate in small fields.
@@ -2108,6 +2143,7 @@
       display: flex;
       gap: 4px;
       justify-content: flex-end;
+      flex-shrink: 0;
     }
 
     /* Input with icon placeholder structure */
@@ -2293,6 +2329,13 @@
       gap: 4px;
       margin-top: 8px;
       width: 100%;
+      box-sizing: border-box;
+      text-align: right;
+    }
+
+    /* Line up with the right edge of the input column (24px control + 8px gap). */
+    .multi-value-list + .add-new-link {
+      padding-right: calc(24px + 8px);
     }
 
     .add-new-link:hover {
@@ -3178,7 +3221,7 @@
                         <div class="input-wrapper">
                           <textarea class="form-input textarea" rows="1">This is a multi-value free-text entry used for description-level content.</textarea>
                         </div>
-                        <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                        <div class="actions">
                           <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                         </div>
                       </div>
@@ -3186,7 +3229,7 @@
                         <div class="input-wrapper">
                           <textarea class="form-input textarea" rows="1">Second multi-value text entry to compare behavior across states.</textarea>
                         </div>
-                        <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                        <div class="actions">
                           <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                         </div>
                       </div>
