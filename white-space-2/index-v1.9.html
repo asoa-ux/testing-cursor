@@ -1041,7 +1041,7 @@
     }
 
     /* No placeholder in read-only unless “(No value)” is enabled. */
-    .tab-content-area:not([data-ro-variant="with-border"]):not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
+    .tab-content-area:not([data-ro-variant="with-border"]):not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="option-4"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="none"] .is-read-only .form-input::placeholder {
       color: transparent;
       opacity: 0;
@@ -1050,6 +1050,7 @@
     .tab-content-area[data-ro-variant="with-border"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input::placeholder,
+    .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .is-read-only .form-input::placeholder {
       color: rgba(0, 0, 0, 0.38);
       opacity: 1;
@@ -1058,6 +1059,7 @@
     .tab-content-area[data-ro-variant="with-border"] .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="no-value"] .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="no-border"] .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-4"] .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .form-static-value.ro-empty-placeholder {
       color: rgba(0, 0, 0, 0.38);
     }
@@ -1067,6 +1069,8 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input {
       border-bottom-color: transparent !important;
@@ -1078,6 +1082,8 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:hover:not(:focus) {
       border-bottom-color: transparent !important;
@@ -1089,6 +1095,8 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value {
       border-bottom-color: transparent !important;
@@ -1101,6 +1109,8 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:focus {
       border: 1px solid #52BDEC !important;
@@ -1113,6 +1123,8 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value:focus {
       border: 1px solid #52BDEC !important;
@@ -1140,7 +1152,11 @@
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value {
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value {
       color: rgba(0, 0, 0, 0.87);
     }
 
@@ -1154,6 +1170,8 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="test"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="test"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus) {
       overflow: hidden;
@@ -1186,7 +1204,7 @@
       border: 1px solid #52BDEC !important;
     }
 
-    /* Option 3: separator between read-only multivalue items */
+    /* Option 3: separator between read-only multivalue items (Option 4 omits). */
     .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .multi-value-item + .multi-value-item,
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .multi-value-item + .multi-value-item {
       border-top: 1px solid #E5E7EB;
@@ -1981,6 +1999,39 @@
         top: 8px !important;
         transform: none !important;
       }
+      .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-list,
+      .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-list {
+        counter-reset: ro-mv-idx 0;
+      }
+      .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item,
+      .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+      .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item::before {
+        counter-increment: ro-mv-idx;
+        content: counter(ro-mv-idx);
+        flex: 0 0 1.5rem !important;
+        min-width: 1.5rem !important;
+        text-align: right;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.4;
+        font-variant-numeric: tabular-nums;
+        color: rgba(0, 0, 0, 0.60);
+        padding-top: 9px;
+        user-select: none;
+      }
+      .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item .input-wrapper,
+      .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item .input-wrapper {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
       .multi-value-list + .add-new-link {
         padding-right: 0 !important;
         justify-content: flex-end !important;
@@ -2147,6 +2198,46 @@
     .multi-value-item:has(textarea.form-input) .actions {
       top: 8px;
       transform: none;
+    }
+
+    /* Option 4 only: subtle 1-based index on read-only multi-value rows (must
+       follow base .multi-value-item { display: block } so flex layout wins). */
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-list,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-list {
+      counter-reset: ro-mv-idx 0;
+    }
+
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    /* Match first line of .form-input text: 1px top border + 8px padding (see .form-label). */
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item::before {
+      counter-increment: ro-mv-idx;
+      content: counter(ro-mv-idx);
+      flex: 0 0 1.5rem;
+      min-width: 1.5rem;
+      text-align: right;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.4;
+      font-variant-numeric: tabular-nums;
+      color: rgba(0, 0, 0, 0.60);
+      padding-top: 9px;
+      user-select: none;
+    }
+
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item .input-wrapper,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item .input-wrapper {
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     .form-field:has(> .multi-value-list) {
@@ -3086,6 +3177,7 @@
               <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without multi-value separators; subtle numbering on read-only rows only">Option 4</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
             </div>
             <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
@@ -3930,7 +4022,7 @@
 
     function isSingleLineTruncateVariant(variant) {
       return variant === 'implementation' || variant === 'test' ||
-        variant === 'with-border' || variant === 'no-value' || variant === 'no-border';
+        variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4';
     }
 
     function syncImplementationReadOnlyTruncation(scope) {
@@ -4677,11 +4769,11 @@
     }
 
     // Read-only experiment: “(No value)” on empty fields when the bar option is
-    // “no-value” or “no-border” (restores cleared placeholders when switching away).
+    // Variants that show “(No value)” on empty read-only fields (restores when switching away).
     function refreshReadOnlyPlaceholders(variant) {
       const area = document.querySelector('.tab-content-area');
       const testPlaceholder = area ? area.getAttribute('data-ro-test-placeholder') : null;
-      const showNoValue = variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || (variant === 'test' && testPlaceholder === 'show');
+      const showNoValue = variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4' || (variant === 'test' && testPlaceholder === 'show');
 
       document.querySelectorAll('.tab-content.is-read-only input.form-input[readonly], .tab-content.is-read-only textarea.form-input[readonly], .form-row.is-read-only input.form-input[readonly], .form-row.is-read-only textarea.form-input[readonly]').forEach(el => {
         if (showNoValue && !String(el.value || '').trim()) {
@@ -4718,6 +4810,7 @@
         'with-border': 'Subtle border, no background, (No value), same font color as editable.',
         'no-value': 'No border, subtle background, (No value), same font color as editable.',
         'no-border': 'No border, no background, (No value), same font color as editable, and separators between read-only multivalue fields.',
+        'option-4': 'Like Option 3, but no separator between read-only multi-value rows; subtle 1-based numbering on each read-only row only.',
         test: 'Test mode: combine radio choices below to try different read-only behaviors.'
       };
 
