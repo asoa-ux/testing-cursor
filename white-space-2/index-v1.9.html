@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <title>V1.9 - Info Panel Only on Attribute Tab</title>
   <style>
     /* CSS Variables */
@@ -28,7 +31,7 @@
       --left-panel-width: 384px;
       --middle-panel-width: 384px;
       --right-panel-width: 384px;
-      --collapsed-panel-width: 32px;
+      --collapsed-panel-width: 64px;
       --panel-min-width: 200px;
       --panel-max-width: 600px;
       --transition-speed: 0.25s;
@@ -42,7 +45,7 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       font-size: 13px;
       line-height: 1.4;
       color: var(--color-text);
@@ -633,6 +636,7 @@
       padding: 12px 20px;
       border-bottom: 1px solid var(--color-border);
       flex-shrink: 0;
+      display: none;
     }
 
     .tiles-scroll-wrapper {
@@ -907,8 +911,8 @@
     }
 
     .tab-info-panel.collapsed {
-      width: 32px;
-      min-width: 32px;
+      width: var(--collapsed-panel-width);
+      min-width: var(--collapsed-panel-width);
     }
 
     .tab-info-panel.collapsed .resize-handle {
@@ -1027,19 +1031,125 @@
     }
 
     /* Focus uses the same blue accent as editable fields so the affordance
-       reads consistently across states. */
+       reads consistently across states. Full box border on focus (overrides
+       “no bottom border” variants that use !important on resting state). */
     .is-read-only .form-input:focus {
       outline: none;
       background: #F5F5F5;
       color: rgba(0, 0, 0, 0.87);
-      border-color: #52BDEC;
+      border: 1px solid #52BDEC !important;
     }
 
-    /* No placeholder text in read-only fields — defense in depth alongside
-       the JS that strips the `placeholder` attribute. */
-    .is-read-only .form-input::placeholder {
+    /* No placeholder in read-only unless “(No value)” is enabled — standalone
+       “no-value” variant or combined with “no-border”. */
+    .tab-content-area:not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="none"] .is-read-only .form-input::placeholder {
       color: transparent;
       opacity: 0;
+    }
+
+    .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input::placeholder,
+    .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input::placeholder,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .is-read-only .form-input::placeholder {
+      color: rgba(0, 0, 0, 0.38);
+      opacity: 1;
+    }
+
+    .tab-content-area[data-ro-variant="no-value"] .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="no-border"] .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .form-static-value.ro-empty-placeholder {
+      color: rgba(0, 0, 0, 0.38);
+    }
+
+    /* Variant: no bottom border on read-only fields */
+    .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input {
+      border-bottom-color: transparent !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+    }
+
+    .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:hover:not(:focus) {
+      border-bottom-color: transparent !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+    }
+
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value {
+      border-bottom-color: transparent !important;
+    }
+
+    /* “No border” / Implementation resting rules use !important and beat the
+       generic .is-read-only :focus border shorthand on specificity — restore
+       the full blue box (including bottom) on focus with matching specificity. */
+    .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:focus {
+      border: 1px solid #52BDEC !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+      border-bottom-color: #52BDEC !important;
+    }
+
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value:focus {
+      border: 1px solid #52BDEC !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+      border-bottom-color: #52BDEC !important;
+    }
+
+    /* Implementation: primary text at 87% (read-only contexts only). */
+    .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value {
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    /* Implementation: single-line read-only text inputs truncate when they
+       exceed field width (e.g. Feature bullet 1). Focus still reveals value. */
+    .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Variant: light gray fill */
+    .tab-content-area[data-ro-variant="light-bg"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="light-bg"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-static-value {
+      background-color: #f6f6f6;
+    }
+
+    .tab-content-area[data-ro-variant="light-bg"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-input:hover:not(:focus) {
+      background-color: #f6f6f6;
+    }
+
+    .tab-content-area[data-ro-variant="light-bg"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-input:focus {
+      background: #f5f5f5;
+      border: 1px solid #52BDEC !important;
+    }
+
+    .tab-content-area[data-ro-variant="light-bg"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="light-bg"] .form-row.is-read-only .form-static-value:focus {
+      background: #f5f5f5;
+      border: 1px solid #52BDEC !important;
     }
 
     .is-read-only .input-trailing-icon,
@@ -1049,10 +1159,57 @@
       display: none !important;
     }
 
+    /* Read-only selects behave like static text fields: hide native chevron
+       and reclaim right-side padding used for dropdown affordance. */
+    .is-read-only select.form-input,
+    .form-row.is-read-only select.form-input {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: none !important;
+      padding-right: 12px;
+    }
+
+    /* Keep read-only select text
+       consistent with the active read-only variant color across all tabs. */
+    .is-read-only select.form-input[data-ro-readonly="true"],
+    .form-row.is-read-only select.form-input[data-ro-readonly="true"] {
+      color: inherit !important;
+      -webkit-text-fill-color: currentColor;
+      opacity: 1;
+      cursor: default;
+    }
+
+    /* Some LoV fields intentionally wrap in read-only (large pure-text LoV). */
+    .ro-select-proxy-wrap {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
     /* Once the trailing icon is hidden, reclaim the right padding so the
        value doesn't sit awkwardly far from the right edge. */
     .is-read-only .input-with-trailing-icon .form-input {
       padding-right: 12px;
+    }
+
+    /* Read-only fields use the large field width (same band as
+       .form-field.size-medium), never the full-bleed .size-full stretch.
+       Higher specificity than .form-field.size-* so filled read-only
+       (and empty read-only) tabs always cap width. Mixed tab uses rows.
+       “Implementation” and “Test (same width)” opt out so
+       size-small / size-medium / size-full behave like editable. */
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-field,
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .form-row.is-read-only .form-field {
+      flex: 1 1 auto;
+      min-width: calc(21rem + 24px + 8px);
+      max-width: calc(35rem + 24px + 8px);
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .tab-content.is-read-only .form-field,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .form-row.is-read-only .form-field {
+      flex: 1 1 auto;
+      min-width: calc(21rem + 24px + 8px);
+      max-width: calc(35rem + 24px + 8px);
     }
 
     /* Clickable tabs */
@@ -1444,6 +1601,122 @@
       overflow: hidden;
     }
 
+    /* Left column: tab panes only (experiment bar sits above product tabs). */
+    .tab-form-column {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tab-form-column .tab-panes-wrap {
+      min-height: 0;
+    }
+
+    .ro-variant-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-gray);
+      flex-shrink: 0;
+    }
+
+    .ro-variant-bar-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .ro-variant-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .ro-variant-btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-bg);
+      color: var(--color-text);
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.3;
+    }
+
+    .ro-variant-btn:hover {
+      background: var(--color-bg-hover);
+    }
+
+    .ro-variant-btn.active {
+      border-color: var(--color-primary);
+      background: var(--color-primary-light);
+      color: var(--color-primary-dark);
+    }
+
+    .ro-variant-message {
+      width: 100%;
+      margin-top: 2px;
+      padding: 8px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-bg);
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .ro-variant-test-panel {
+      width: 100%;
+      margin-top: 2px;
+      padding: 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-bg);
+      display: grid;
+      gap: 8px;
+    }
+
+    .ro-variant-test-panel[hidden] {
+      display: none !important;
+    }
+
+    .ro-test-row {
+      display: grid;
+      grid-template-columns: minmax(260px, auto) 1fr;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--color-text);
+    }
+
+    .ro-test-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+    }
+
+    .ro-test-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ro-test-options input[type="radio"] {
+      margin: 0;
+    }
+
     .tab-content {
       flex: 1;
       overflow-y: auto;
@@ -1481,8 +1754,10 @@
 
     .form-label {
       width: 240px;
-      padding-top: 8px;
+      /* Match input text start: .form-input has 1px top border + 8px padding */
+      padding-top: 9px;
       font-size: 14px;
+      line-height: 1.4;
       color: rgba(0, 0, 0, 0.60);
       flex-shrink: 0;
     }
@@ -1490,15 +1765,17 @@
     /* Inline info icon + tooltip after label text */
     .attr-info {
       position: relative;
+      top: -1px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 12px;
-      height: 12px;
+      box-sizing: border-box;
+      width: 20px;
+      height: 20px;
       margin: 0 0 0 4px;
       padding: 0;
-      vertical-align: -1px;
-      color: var(--color-text-muted);
+      vertical-align: middle;
+      color: rgba(0, 0, 0, 0.38);
       cursor: help;
       background: none;
       border: none;
@@ -1511,7 +1788,7 @@
 
     .attr-info:hover,
     .attr-info:focus-visible {
-      color: var(--color-primary);
+      color: rgba(0, 0, 0, 0.60);
       outline: none;
     }
 
@@ -1574,7 +1851,11 @@
 
     .form-field {
       flex: 1;
-      min-width: 16rem;
+      /* The @container query at 600px wraps labels above inputs once the
+         field would shrink under 21rem; this min-width matches that
+         threshold so the side-by-side mode never renders the input below
+         21rem (336px). */
+      min-width: 21rem;
     }
 
     /* Field size variants */
@@ -1586,14 +1867,14 @@
 
     .form-field.size-medium {
       flex: 1 1 auto;
-      min-width: calc(16rem + 24px + 8px);
+      min-width: calc(21rem + 24px + 8px);
       max-width: calc(35rem + 24px + 8px);
     }
 
     .form-field.size-full {
-      flex: 1 1 calc(16rem + 24px + 8px);
+      flex: 1 1 calc(21rem + 24px + 8px);
       max-width: none;
-      min-width: calc(16rem + 24px + 8px);
+      min-width: calc(21rem + 24px + 8px);
     }
 
     /* Responsive label positioning using container queries */
@@ -1618,6 +1899,9 @@
       .input-with-icon {
         display: flex !important;
         width: 100% !important;
+      }
+      .input-with-icon:has(textarea.form-input) {
+        align-items: flex-start !important;
       }
       .input-with-icon .form-input {
         flex: 1 !important;
@@ -1650,6 +1934,7 @@
       border-bottom-color: #D4D4D4;
       border-radius: 4px;
       font-size: 14px;
+      line-height: 1.4;
       font-family: inherit;
       color: rgba(0, 0, 0, 0.87);
       background: var(--color-bg);
@@ -1663,32 +1948,39 @@
       opacity: 1;
     }
 
+    /* Editable select with empty value should read like placeholder text. */
+    select.form-input:not(:disabled):has(option[value=""]:checked) {
+      color: rgba(0, 0, 0, 0.38);
+    }
+
     .form-input:hover {
       border-bottom-color: #737373;
     }
 
-    .form-input:focus {
-      outline: none;
-      border-color: #52BDEC;
-    }
-
+    .form-input:focus,
     .form-input:focus:hover {
-      border-color: #52BDEC;
+      outline: none;
+      border: 1px solid #52BDEC;
     }
 
-    /* Textareas auto-size to fit their content, capped at 7.5 rows.
-       Height is driven by JS (see autoGrowTextarea) so the textarea's
-       width stays purely parent-driven — using `field-sizing: content`
-       leaks the textarea's intrinsic content width into its grid/flex
-       parent and breaks consistent shrink-then-wrap across rows. */
+    /* Textareas auto-size to fit their content, capped at 7.5 visible rows.
+       Applies to every textarea.form-input (all tabs, editable and read-only).
+       Empty: match a single-line input — same line-height (1.4), padding,
+       borders; use 1.4em + 18px (not lh: textarea lh can read taller) and
+       rows="1" in HTML so UA doesn’t reserve two rows by default.
+       Filled: height driven by JS (autoGrowTextarea), clamped to max-height
+       so layout-affecting styles (borders, panel width, etc.) don’t show a
+       stray scrollbar when content still fits in 7.5 rows. */
     .form-input.textarea {
-      line-height: 1.5;
-      min-height: calc(1lh + 18px);
-      max-height: calc(7.5lh + 18px);
+      line-height: 1.4;
+      min-height: calc(1.4em + 18px);
+      max-height: calc(7.5 * 1.4em + 18px);
       min-width: 0;
       max-width: 100%;
       resize: none;
-      overflow-y: auto;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      vertical-align: top;
     }
 
     /* Read-only / static text values shown inside a form-field
@@ -1721,12 +2013,12 @@
       cursor: default;
     }
 
-    /* Same focus state as read-only inputs/textareas. */
+    /* Same focus state as read-only inputs/textareas — full border on focus. */
     .form-static-value:focus {
       outline: none;
       background: #F5F5F5;
       color: rgba(0, 0, 0, 0.87);
-      border-color: #52BDEC;
+      border: 1px solid #52BDEC !important;
     }
 
     /* Multi-value Fields */
@@ -1752,6 +2044,24 @@
       width: 100%;
     }
 
+    /* LoV/code selects stay single-line and can truncate in small fields.
+       Free-text inputs should not be globally truncated. */
+    .multi-value-item select.form-input.lov-select {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* If a read-only value is truncated, focusing it should reveal the full
+       value without changing field width/layout. */
+    .is-read-only .multi-value-item input.form-input:focus,
+    .form-row.is-read-only .multi-value-item input.form-input:focus,
+    .is-read-only .multi-value-item select.form-input:focus,
+    .form-row.is-read-only .multi-value-item select.form-input:focus {
+      text-overflow: clip;
+      overflow-x: auto;
+    }
+
     .multi-value-item .actions {
       display: flex;
       gap: 4px;
@@ -1765,10 +2075,18 @@
          intrinsic content width — without this, a long-content textarea
          would force the grid (and the form-field) wider than the row's
          min-width, breaking the consistent shrink-then-wrap behavior. */
-      grid-template-columns: minmax(0, 1fr) 24px;
-      gap: 8px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
       align-items: center;
       width: 100%;
+    }
+
+    /* Multi-line fields: top-align the icon with the first line; centering
+       in the grid row can interact badly with auto-grown textarea height and
+       produce a bogus vertical scrollbar on fields like the long marketing
+       description. */
+    .input-with-icon:has(textarea.form-input) {
+      align-items: start;
     }
 
     .input-with-icon .form-input {
@@ -1777,9 +2095,7 @@
     }
 
     .icon-placeholder {
-      width: 24px;
-      height: 24px;
-      visibility: hidden;
+      display: none;
     }
 
     /* Input with an icon overlaid inside its right edge (e.g. date picker
@@ -1793,6 +2109,75 @@
     .input-with-trailing-icon .form-input {
       padding-right: 36px;
       width: 100%;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="same"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="same"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="same"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="same"] .form-row.is-read-only .form-static-value {
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="subtle"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="subtle"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="subtle"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-color="subtle"] .form-row.is-read-only .form-static-value {
+      color: rgba(0, 0, 0, 0.60);
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="none"] .is-read-only .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="none"] .form-row.is-read-only .form-input:not(:focus) {
+      border-bottom-color: transparent !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="none"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="none"] .form-row.is-read-only .form-input:hover:not(:focus) {
+      border-bottom-color: transparent !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="none"] .tab-content.is-read-only .form-static-value:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="none"] .form-row.is-read-only .form-static-value:not(:focus) {
+      border-bottom-color: transparent !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="subtle"] .is-read-only .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="subtle"] .form-row.is-read-only .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="subtle"] .tab-content.is-read-only .form-static-value:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-border="subtle"] .form-row.is-read-only .form-static-value:not(:focus) {
+      border-bottom-color: #F5F5F5 !important;
+      border-bottom-width: 1px !important;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .form-row.is-read-only .form-static-value {
+      background-color: #f6f6f6;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="none"] .is-read-only .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="none"] .form-row.is-read-only .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="none"] .tab-content.is-read-only .form-static-value:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-bg="none"] .form-row.is-read-only .form-static-value:not(:focus) {
+      background: transparent;
+    }
+
+    /* In Test mode, focus always uses full 4-side blue border + gray fill. */
+    .tab-content-area[data-ro-variant="test"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="test"] .form-row.is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="test"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="test"] .form-row.is-read-only .form-static-value:focus {
+      background: #F5F5F5;
+      border: 1px solid #52BDEC !important;
+      border-bottom-width: 1px !important;
+      border-bottom-style: solid !important;
+      border-bottom-color: #52BDEC !important;
     }
 
     .input-trailing-icon {
@@ -2607,6 +2992,56 @@
             </div>
           </div>
 
+          <div class="ro-variant-bar" role="group" aria-label="Read-only appearance variants">
+            <span class="ro-variant-bar-label">Read-only look (experiment)</span>
+            <div class="ro-variant-options">
+              <button type="button" class="ro-variant-btn active" data-ro-variant="implementation" title="No border; primary text at 87% opacity; field widths follow size (small stays narrow)">Implementation</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="light-bg">Option 4</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
+            </div>
+            <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
+            <div class="ro-variant-test-panel" id="roVariantTestPanel" hidden>
+              <div class="ro-test-row">
+                <span>1. Width of read-only fields</span>
+                <div class="ro-test-options">
+                  <label><input type="radio" class="ro-test-check" name="ro-test-width" data-ro-test-group="width" data-ro-test-value="same" checked> same as editable</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-width" data-ro-test-group="width" data-ro-test-value="large"> large size</label>
+                </div>
+              </div>
+              <div class="ro-test-row">
+                <span>2. Color of read-only fields text</span>
+                <div class="ro-test-options">
+                  <label><input type="radio" class="ro-test-check" name="ro-test-color" data-ro-test-group="color" data-ro-test-value="same" checked> same as editable</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-color" data-ro-test-group="color" data-ro-test-value="subtle"> subtle color</label>
+                </div>
+              </div>
+              <div class="ro-test-row">
+                <span>3. Border of read-only fields</span>
+                <div class="ro-test-options">
+                  <label><input type="radio" class="ro-test-check" name="ro-test-border" data-ro-test-group="border" data-ro-test-value="none"> no border</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-border" data-ro-test-group="border" data-ro-test-value="subtle" checked> subtle border</label>
+                </div>
+              </div>
+              <div class="ro-test-row">
+                <span>4. Background of read-only fields</span>
+                <div class="ro-test-options">
+                  <label><input type="radio" class="ro-test-check" name="ro-test-bg" data-ro-test-group="bg" data-ro-test-value="none" checked> no background</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-bg" data-ro-test-group="bg" data-ro-test-value="subtle"> subtle background</label>
+                </div>
+              </div>
+              <div class="ro-test-row">
+                <span>5. Placeholder test on empty fields</span>
+                <div class="ro-test-options">
+                  <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="none"> no placeholder</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="show" checked> show (No value)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Product Tabs -->
           <div class="product-tabs-wrapper">
             <button class="tabs-nav-btn prev" id="tabsPrev" onclick="scrollTabs(-1)">
@@ -2617,9 +3052,9 @@
             <div class="product-tabs" id="productTabs">
               <div class="product-tab" onclick="switchTab('empty', true)" data-tab="empty">Empty</div>
               <div class="product-tab" onclick="switchTab('empty-ro', true)" data-tab="empty-ro">Empty (read-only)</div>
-              <div class="product-tab active" onclick="switchTab('filled', true)" data-tab="filled">Filled</div>
+              <div class="product-tab" onclick="switchTab('filled', true)" data-tab="filled">Filled</div>
               <div class="product-tab" onclick="switchTab('filled-ro', true)" data-tab="filled-ro">Filled (read-only)</div>
-              <div class="product-tab" onclick="switchTab('mixed', true)" data-tab="mixed">Mixed</div>
+              <div class="product-tab active" onclick="switchTab('mixed', true)" data-tab="mixed">Mixed</div>
             </div>
             <button class="tabs-nav-btn next" id="tabsNext" onclick="scrollTabs(1)">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2629,7 +3064,8 @@
           </div>
 
         <!-- Tab Content Area -->
-        <div class="tab-content-area">
+        <div class="tab-content-area" data-ro-variant="implementation">
+          <div class="tab-form-column">
           <!-- Attribute state tab panes (Empty / Empty RO / Filled / Filled RO / Mixed) -->
           <div class="tab-panes-wrap">
             <!-- Empty -->
@@ -2641,313 +3077,154 @@
               <div class="tab-content"></div>
             </div>
             <!-- Filled (source - cloned by JS into other state panes) -->
-            <div class="tab-pane active" id="tab-filled">
+            <div class="tab-pane" id="tab-filled">
               <div class="tab-content">
-              <!-- Marketing Descriptions -->
-            <div class="form-section">
-              <h3 class="form-section-title">Marketing descriptions</h3>
-              
-              <div class="form-row">
-                <span class="form-label">Description (long)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A detailed product description (typically several sentences) used on product detail pages and for SEO.</span></button></span>
-                <div class="form-field size-medium">
-                  <div class="input-with-icon">
-                    <textarea class="form-input textarea">Premium champagne crafted in Reims since 1760. Distinguished by its trademark crisp character and notes of citrus, white peach, and toasted brioche. Lanson's signature non-vintage cuvée preserves the freshness and acidity that connoisseurs cherish.</textarea>
-                    <span class="icon-placeholder"></span>
-                  </div>
-                </div>
-              </div>
+              <div class="form-section">
+                <h3 class="form-section-title">Content model test</h3>
 
-              <div class="form-row">
-                <span class="form-label">Description (short)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A brief 1–2 sentence summary used in listings, search results, and product previews.</span></button></span>
-                <div class="form-field size-medium">
-                  <div class="input-with-icon">
-                    <textarea class="form-input textarea">Lanson Black Label Brut — bright, citrusy, and elegant non-vintage champagne.</textarea>
-                    <span class="icon-placeholder"></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <span class="form-label">Feature bullet 1<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A key product feature or benefit displayed as a bullet point in marketing copy.</span></button></span>
-                <div class="form-field size-medium">
-                  <div class="input-with-icon">
-                    <input type="text" class="form-input" value="Notes of citrus and white peach">
-                    <span class="icon-placeholder"></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <span class="form-label">Feature bullet 2<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A key product feature or benefit displayed as a bullet point in marketing copy.</span></button></span>
-                <div class="form-field size-medium">
-                  <div class="input-with-icon">
-                    <input type="text" class="form-input" value="No malolactic fermentation preserves freshness">
-                    <span class="icon-placeholder"></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <span class="form-label">Feature bullet 3<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A key product feature or benefit displayed as a bullet point in marketing copy.</span></button></span>
-                <div class="form-field size-medium">
-                  <div class="input-with-icon">
-                    <input type="text" class="form-input" value="Aged a minimum of 3 years">
-                    <span class="icon-placeholder"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Multi-value Attribute (small) -->
-            <div class="form-row">
-              <span class="form-label">Multi-value attribute (small)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A list of single-line text values for this attribute. Use the “+ Add new” link to append items.</span></button></span>
-              <div class="form-field size-small">
-                <div class="multi-value-list">
-                  <div class="multi-value-item">
-                    <div class="input-wrapper">
-                      <input type="text" class="form-input" value="This is the content">
-                    </div>
-                    <div class="actions">
-                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                    </div>
-                  </div>
-                  <div class="multi-value-item">
-                    <div class="input-wrapper">
-                      <input type="text" class="form-input" value="This is the content">
-                    </div>
-                    <div class="actions">
-                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                    </div>
-                  </div>
-                  <div class="multi-value-item">
-                    <div class="input-wrapper">
-                      <input type="text" class="form-input" value="This is the content">
-                    </div>
-                    <div class="actions">
-                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <div class="form-row">
+                  <span class="form-label">Long description<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Long-form text. In editable mode it auto-grows up to 7.5 lines.</span></button></span>
+                  <div class="form-field size-medium">
+                    <div class="input-with-icon">
+                      <textarea class="form-input textarea" rows="1">Premium champagne crafted in Reims since 1760. Bright citrus, white peach, and toasted brioche notes. Signature non-vintage blend with persistent freshness and fine mousse.</textarea>
+                      <span class="icon-placeholder"></span>
                     </div>
                   </div>
                 </div>
-                <div class="add-new-link">+ Add new</div>
-              </div>
-            </div>
 
-            <!-- Multi-value Attribute (large) -->
-            <div class="form-row" style="margin-top: 20px;">
-              <span class="form-label">Multi-value attribute (large)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A list of multi-line text values for this attribute. Each entry supports paragraph-style content.</span></button></span>
-              <div class="form-field size-medium">
-                <div class="multi-value-list">
-                  <div class="multi-value-item">
-                    <div class="input-wrapper">
-                      <textarea class="form-input textarea">This is the content</textarea>
-                    </div>
-                    <div class="actions" style="align-self: flex-start; margin-top: 8px;">
-                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                    </div>
-                  </div>
-                  <div class="multi-value-item">
-                    <div class="input-wrapper">
-                      <textarea class="form-input textarea">This is the content</textarea>
-                    </div>
-                    <div class="actions" style="align-self: flex-start; margin-top: 8px;">
-                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                    </div>
-                  </div>
-                  <div class="multi-value-item">
-                    <div class="input-wrapper">
-                      <textarea class="form-input textarea">This is the content</textarea>
-                    </div>
-                    <div class="actions" style="align-self: flex-start; margin-top: 8px;">
-                      <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <div class="form-row" data-ro-text-type="pure-text">
+                  <span class="form-label">Short description (&lt;50 chars allowed)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Short text entry. Default small width when max length is under 50.</span></button></span>
+                  <div class="form-field size-small">
+                    <div class="input-with-icon">
+                      <input type="text" class="form-input" data-field-type="text-short" maxlength="50" value="Crisp brut with citrus notes">
+                      <span class="icon-placeholder"></span>
                     </div>
                   </div>
                 </div>
-                <div class="add-new-link">+ Add new</div>
-              </div>
-            </div>
 
-            <!-- Data Table -->
-            <div class="form-row" style="margin-top: 20px;">
-              <span class="form-label">Related items<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Other products linked to this item, such as accessories, variants, or alternatives.</span></button></span>
-              <div class="form-field size-full">
-                <div class="data-container">
-                  <div class="data-toolbar">
-                    <button class="data-toolbar-btn">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18M3 12h18M3 18h18"/>
-                      </svg>
-                      Sort
-                    </button>
-                    <button class="data-toolbar-btn">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                      </svg>
-                      Filter
-                    </button>
-                    <button class="data-toolbar-btn">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                      </svg>
-                      Add
-                    </button>
-                    <button class="data-toolbar-btn">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                      </svg>
-                      Delete
-                    </button>
-                    <div class="zoom-control">
-                      <input type="range" min="0" max="100" value="50">
-                      <span>Zoom level (0.5x)</span>
-                      +
+                <div class="form-row">
+                  <span class="form-label">Number<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Numeric/code-like value. Single-line and may truncate when needed.</span></button></span>
+                  <div class="form-field size-small">
+                    <div class="input-with-icon">
+                      <input type="text" class="form-input" value="1234567890123456789012345678901234567890123456789012345678901234567890">
+                      <span class="icon-placeholder"></span>
                     </div>
                   </div>
-                  <table class="data-table">
-                    <thead>
-                      <tr>
-                        <th style="width: 40px;"><input type="checkbox"></th>
-                        <th>Item name</th>
-                        <th>Category</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><input type="checkbox"></td>
-                        <td>Related product 1</td>
-                        <td>Accessories</td>
-                      </tr>
-                      <tr>
-                        <td><input type="checkbox"></td>
-                        <td>Related product 2</td>
-                        <td>Bundles</td>
-                      </tr>
-                      <tr>
-                        <td><input type="checkbox"></td>
-                        <td>Related product 3</td>
-                        <td>Accessories</td>
-                      </tr>
-                      <tr>
-                        <td><input type="checkbox"></td>
-                        <td>Related product 4</td>
-                        <td>Components</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="table-footer">4 items, 0 selected</div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Other Attributes -->
-            <div class="form-section" style="margin-top: 24px;">
-              <h3 class="form-section-title">Other attributes</h3>
-              
-              <div class="form-row">
-                <span class="form-label">Date<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A date value associated with this attribute (e.g., creation, expiry, or release date). Use dd/mm/yyyy.</span></button></span>
-                <div class="form-field size-small">
-                  <div class="input-with-trailing-icon">
-                    <input type="text" class="form-input" placeholder="dd/mm/yyyy" value="15/03/2026">
-                    <button type="button" class="input-trailing-icon" aria-label="Open calendar" aria-haspopup="dialog">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <span class="form-label">Data container<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">A nested set of attributes grouped together as a structured data table.</span></button></span>
-                <div class="form-field size-full">
-                  <div class="data-container">
-                    <div class="data-toolbar">
-                      <button class="data-toolbar-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M3 6h18M3 12h18M3 18h18"/>
+                <div class="form-row">
+                  <span class="form-label">Date<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Date value in dd/mm/yyyy format.</span></button></span>
+                  <div class="form-field size-small">
+                    <div class="input-with-trailing-icon">
+                      <input type="text" class="form-input" placeholder="dd/mm/yyyy" value="15/03/2026">
+                      <button type="button" class="input-trailing-icon" aria-label="Open calendar" aria-haspopup="dialog">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2"/>
+                          <line x1="3" y1="10" x2="21" y2="10"/>
+                          <line x1="8" y1="2" x2="8" y2="6"/>
+                          <line x1="16" y1="2" x2="16" y2="6"/>
                         </svg>
-                        Sort
                       </button>
-                      <button class="data-toolbar-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                        </svg>
-                        Filter
-                      </button>
-                      <button class="data-toolbar-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                        Add
-                      </button>
-                      <button class="data-toolbar-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        Delete
-                      </button>
-                      <div class="zoom-control">
-                        <input type="range" min="0" max="100" value="50">
-                        <span>Zoom level (0.5x)</span>
-                        +
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <span class="form-label">Multi-value text<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">List of free-text values. Editable entries auto-grow as needed.</span></button></span>
+                  <div class="form-field size-medium">
+                    <div class="multi-value-list">
+                      <div class="multi-value-item">
+                        <div class="input-wrapper">
+                          <textarea class="form-input textarea" rows="1">This is a multi-value free-text entry used for description-level content.</textarea>
+                        </div>
+                        <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                          <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+                      </div>
+                      <div class="multi-value-item">
+                        <div class="input-wrapper">
+                          <textarea class="form-input textarea" rows="1">Second multi-value text entry to compare behavior across states.</textarea>
+                        </div>
+                        <div class="actions" style="align-self: flex-start; margin-top: 8px;">
+                          <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
                       </div>
                     </div>
-                    <table class="data-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 40px;"><input type="checkbox"></th>
-                          <th>This is the header</th>
-                          <th>This is the header</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><input type="checkbox"></td>
-                          <td>This is content</td>
-                          <td>This is content</td>
-                        </tr>
-                        <tr>
-                          <td><input type="checkbox"></td>
-                          <td>This is content</td>
-                          <td>This is content</td>
-                        </tr>
-                        <tr>
-                          <td><input type="checkbox"></td>
-                          <td>This is content</td>
-                          <td>This is content</td>
-                        </tr>
-                        <tr>
-                          <td><input type="checkbox"></td>
-                          <td>This is content</td>
-                          <td>This is content</td>
-                        </tr>
-                        <tr>
-                          <td><input type="checkbox"></td>
-                          <td>This is content</td>
-                          <td>This is content</td>
-                        </tr>
-                        <tr>
-                          <td><input type="checkbox"></td>
-                          <td>This is content</td>
-                          <td>This is content</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <div class="table-footer">100 items, 0 selected</div>
+                    <div class="add-new-link">+ Add new</div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <span class="form-label">Multi-value number LoV<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Controlled list of numeric/code values.</span></button></span>
+                  <div class="form-field size-small">
+                    <div class="multi-value-list">
+                      <div class="multi-value-item">
+                        <div class="input-wrapper">
+                          <select class="form-input lov-select">
+                            <option value="">Select value</option>
+                            <option value="100000000000001" selected>100000000000001</option>
+                            <option value="100000000000257">100000000000257</option>
+                            <option value="100000000009999">100000000009999</option>
+                          </select>
+                        </div>
+                        <div class="actions">
+                          <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+                      </div>
+                      <div class="multi-value-item">
+                        <div class="input-wrapper">
+                          <select class="form-input lov-select">
+                            <option value="">Select value</option>
+                            <option value="100000000000001">100000000000001</option>
+                            <option value="100000000000257" selected>100000000000257</option>
+                            <option value="100000000009999">100000000009999</option>
+                          </select>
+                        </div>
+                        <div class="actions">
+                          <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="add-new-link">+ Add new</div>
+                  </div>
+                </div>
+
+                <div class="form-row" data-ro-wrap="true">
+                  <span class="form-label">Multi-value text LoV (large)<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="#fff"/><rect x="11" y="10" width="2" height="9" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">Controlled list of text LoV values. Editable stays single-line (ellipsis); read-only wraps for full readability.</span></button></span>
+                  <div class="form-field size-medium">
+                    <div class="multi-value-list">
+                      <div class="multi-value-item">
+                        <div class="input-wrapper">
+                          <select class="form-input lov-select" data-ro-wrap="true">
+                            <option value="">Select value</option>
+                            <option value="lov-text-a" selected>LOV descriptive text value for commercial policy and regional channel publication rules</option>
+                            <option value="lov-text-b">LOV descriptive text value for marketplace enrichment and downstream partner syndication payload</option>
+                            <option value="lov-text-c">LOV descriptive text value for catalog harmonization and SEO-safe narrative mapping profile</option>
+                          </select>
+                        </div>
+                        <div class="actions">
+                          <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+                      </div>
+                      <div class="multi-value-item">
+                        <div class="input-wrapper">
+                          <select class="form-input lov-select" data-ro-wrap="true">
+                            <option value="">Select value</option>
+                            <option value="lov-text-a">LOV descriptive text value for commercial policy and regional channel publication rules</option>
+                            <option value="lov-text-b" selected>LOV descriptive text value for marketplace enrichment and downstream partner syndication payload</option>
+                            <option value="lov-text-c">LOV descriptive text value for catalog harmonization and SEO-safe narrative mapping profile</option>
+                          </select>
+                        </div>
+                        <div class="actions">
+                          <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="add-new-link">+ Add new</div>
                   </div>
                 </div>
               </div>
-            </div>
 
-              <!-- Parent Field -->
-              <div class="form-row" style="margin-top: 24px;">
-                <span class="form-label">Parent<button type="button" class="attr-info" aria-label="About this attribute"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="#fff"/><rect x="11" y="10.5" width="2" height="7" rx="1" fill="#fff"/></svg><span class="attr-tooltip" role="tooltip">The parent product or master record this item is associated with.</span></button></span>
-                <div class="form-field size-medium">
-                  <span class="form-static-value" tabindex="0">Champagne Lanson Black Label brut - 750 ml (Master Product)</span>
-                </div>
-              </div>
               </div>
             </div><!-- end tab-pane#tab-filled -->
 
@@ -2956,10 +3233,11 @@
               <div class="tab-content"></div>
             </div>
             <!-- Mixed -->
-            <div class="tab-pane" id="tab-mixed">
+            <div class="tab-pane active" id="tab-mixed">
               <div class="tab-content"></div>
             </div>
           </div><!-- end .tab-panes-wrap -->
+          </div><!-- end .tab-form-column -->
 
           <!-- Shared Attribute Info Panel -->
           <aside class="tab-info-panel" id="tabInfoPanel" data-default-width="384">
@@ -3109,7 +3387,7 @@
     // Configuration
     const PANEL_MIN_WIDTH = 384;
     const PANEL_MAX_WIDTH = 600;
-    const COLLAPSED_WIDTH = 32;
+    const COLLAPSED_WIDTH = 64;
     // Tab info panel resize bounds (Attributes tab right-side panel).
     const TAB_INFO_PANEL_MIN_WIDTH = 384;
     // Form panel must keep this much room while the info panel grows.
@@ -3238,20 +3516,19 @@
     // ---- Multi-panel limit (max 3 open across both sides) ----
     // Panels are split into "left" (Browse, Tree) and "right" (Info, AI).
     // Opening a panel that would push the total above 3 evicts the
-    // oldest-opened panel on the OPPOSITE side. If no opposite-side
-    // panel is open, the oldest same-side panel is evicted.
+    // "first" (outermost-left / inner-right) panel on the OPPOSITE side
+    // — that is, Browse on the left and Info on the right. Tree and AI
+    // are the "primary" panels on each side and are kept until last.
+    // Same-priority ties fall back to oldest-opened first.
 
     const MAX_OPEN_PANELS = 3;
     const ALL_PANEL_IDS = ['panelLeft', 'panelMiddle', 'tabInfoPanel', 'aiPanel'];
-    // Eviction priority — lower number is closed first when we need
-    // to free a slot. Tree (task list) and AI are the "primary"
-    // panels on each side; Browse and Info are the "secondary" ones,
-    // so they yield first when the opposite side opens a new panel.
+    // Lower number = closed first when we need to free a slot.
     const PANEL_PRIORITY = {
-      panelLeft: 1,
-      tabInfoPanel: 1,
-      panelMiddle: 2,
-      aiPanel: 2,
+      panelLeft: 1,     // Browse — collapses first on the left
+      tabInfoPanel: 1,  // Info — collapses first on the right
+      panelMiddle: 2,   // Tree — kept open longer on the left
+      aiPanel: 2,       // AI — kept open longer on the right
     };
     let panelOpenCounter = 0;
 
@@ -3299,8 +3576,7 @@
       const oppositeSide = openingSide === 'left' ? 'right' : 'left';
 
       // Evict secondary panels (Browse, Info) before primary panels
-      // (Tree, AI). When two panels share a priority, fall back to
-      // oldest-opened first.
+      // (Tree, AI). Same priority → oldest-opened first.
       const byEvictionPriority = (a, b) => {
         const pa = PANEL_PRIORITY[a.id] || 0;
         const pb = PANEL_PRIORITY[b.id] || 0;
@@ -3335,27 +3611,66 @@
         // Hidden panes have scrollHeight 0 — recompute textarea heights
         // now that the pane is laid out.
         recomputeTextareaHeights(targetPane);
+        syncImplementationReadOnlyTruncation(targetPane);
+        syncTestReadOnlyInputProxy(targetPane);
       }
     }
 
-    // Auto-grow a single textarea to fit its content. CSS max-height caps
-    // growth at 7.5 rows; beyond that the textarea scrolls. Width is left
-    // entirely to the parent (no field-sizing) so all rows shrink/wrap
-    // consistently when the panel is resized.
+    // Auto-grow every textarea.form-input. CSS max-height caps growth at 7.5
+    // rows; beyond that the textarea scrolls. Inline height is capped to
+    // computed max-height; a short correction loop absorbs subpixel/border-box
+    // drift so .input-with-icon rows don’t show a stray bar before the cap.
+    // Scrollbars are explicitly hidden until content actually exceeds the cap.
     function autoGrowTextarea(ta) {
+      // Empty (or whitespace-only): drop inline height so CSS min-height
+      // matches single-line inputs; reset rows so UAs don’t keep a 2-row floor.
+      if (!String(ta.value || '').trim()) {
+        ta.style.height = '';
+        ta.style.overflowY = 'hidden';
+        ta.rows = 1;
+        return;
+      }
       ta.style.height = 'auto';
-      // +2 accounts for 1px top + 1px bottom borders under border-box.
-      ta.style.height = (ta.scrollHeight + 2) + 'px';
+      const cs = getComputedStyle(ta);
+      const maxHPx = parseFloat(cs.maxHeight);
+      const hasCap = !Number.isNaN(maxHPx) && maxHPx > 0;
+      let needed = ta.scrollHeight;
+      const fullNeeded = needed;
+      let target =
+        hasCap ? Math.min(needed, maxHPx) : needed;
+      ta.style.height = target + 'px';
+      /* If the grid/wrapper still reports overflow while we are below the CSS
+         max-height, grow up to the cap (handles subpixel / border-box drift on
+         fields like the long marketing description in .input-with-icon). */
+      let guard = 0;
+      while (
+        ta.scrollHeight > ta.clientHeight &&
+        hasCap &&
+        target < maxHPx - 0.5 &&
+        guard++ < 6
+      ) {
+        needed = ta.scrollHeight;
+        target = Math.min(needed, maxHPx);
+        ta.style.height = target + 'px';
+      }
+      const exceedsCap = hasCap && fullNeeded > maxHPx + 0.5;
+      ta.style.overflowY = exceedsCap ? 'auto' : 'hidden';
     }
 
     function bindTextareaAutoGrow(ta) {
       if (ta._autoGrowBound) return;
       ta._autoGrowBound = true;
-      ta.addEventListener('input', () => autoGrowTextarea(ta));
+      const grow = () => autoGrowTextarea(ta);
+      ta.addEventListener('input', grow);
+      /* Editable fields: refit when focused after layout/panel changes (hidden
+         panes may have measured 0; read-only tabs already go through the same
+         recompute paths). */
+      ta.addEventListener('focus', grow);
     }
 
     function initTextareaAutoGrow() {
-      document.querySelectorAll('textarea.form-input').forEach(ta => {
+      document.querySelectorAll('textarea.form-input:not(.test-editable-textarea-proxy)').forEach(ta => {
+        if (!ta.getAttribute('rows')) ta.setAttribute('rows', '1');
         bindTextareaAutoGrow(ta);
         autoGrowTextarea(ta);
       });
@@ -3365,9 +3680,203 @@
     // previously hidden tab pane).
     function recomputeTextareaHeights(scope) {
       const root = scope || document;
-      root.querySelectorAll('textarea.form-input').forEach(ta => {
+      root.querySelectorAll('textarea.form-input:not(.test-editable-textarea-proxy)').forEach(ta => {
         bindTextareaAutoGrow(ta);
         autoGrowTextarea(ta);
+      });
+    }
+
+    const roTruncCanvas = document.createElement('canvas');
+    const roTruncCtx = roTruncCanvas.getContext('2d');
+
+    function measureInputTextPx(input, text) {
+      if (!roTruncCtx) return text.length * 8;
+      const cs = getComputedStyle(input);
+      const font = cs.font && cs.font !== 'normal normal normal normal 16px / normal serif'
+        ? cs.font
+        : `${cs.fontStyle} ${cs.fontVariant} ${cs.fontWeight} ${cs.fontSize} / ${cs.lineHeight} ${cs.fontFamily}`;
+      roTruncCtx.font = font;
+      return roTruncCtx.measureText(text).width;
+    }
+
+    function fitReadOnlyInputText(input, fullText) {
+      const text = String(fullText || '');
+      if (!text) return text;
+      if (input.clientWidth < 40) return text;
+      const cs = getComputedStyle(input);
+      const left = parseFloat(cs.paddingLeft) || 0;
+      const right = parseFloat(cs.paddingRight) || 0;
+      const available = Math.max(0, input.clientWidth - left - right - 2);
+      if (available < 20) return text;
+      if (measureInputTextPx(input, text) <= available) return text;
+      const ell = '…';
+      let lo = 0;
+      let hi = text.length;
+      while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2);
+        const candidate = text.slice(0, mid) + ell;
+        if (measureInputTextPx(input, candidate) <= available) {
+          lo = mid;
+        } else {
+          hi = mid - 1;
+        }
+      }
+      return lo > 0 ? text.slice(0, lo) + ell : ell;
+    }
+
+    function ensureReadOnlyInputId(input) {
+      if (!input.id) {
+        input.id = 'ro-input-' + Math.random().toString(36).slice(2, 10);
+      }
+      return input.id;
+    }
+
+    function isLargeReadOnlyField(input) {
+      const field = input.closest('.form-field');
+      if (!field) return false;
+      return field.classList.contains('size-medium') || field.classList.contains('size-full');
+    }
+
+    function isPureTextReadOnlyField(input) {
+      if (input.getAttribute('data-ro-text-type') === 'pure-text') return true;
+      const row = input.closest('.form-row');
+      if (row && row.getAttribute('data-ro-text-type') === 'pure-text') return true;
+      const field = input.closest('.form-field');
+      if (field && field.getAttribute('data-ro-text-type') === 'pure-text') return true;
+      const label = row && row.querySelector('.form-label');
+      const labelText = label ? String(label.textContent || '').trim().toLowerCase() : '';
+      return labelText.startsWith('feature bullet') || labelText.startsWith('pure text field');
+    }
+
+    function syncTestReadOnlyInputProxy(scope) {
+      const area = document.querySelector('.tab-content-area');
+      const isTest = area && area.getAttribute('data-ro-variant') === 'test';
+      const showNoValue = isTest && area.getAttribute('data-ro-test-placeholder') === 'show';
+      const root = scope || document;
+
+      root.querySelectorAll('.tab-content.is-read-only input.form-input[readonly]:not(.textarea), .form-row.is-read-only input.form-input[readonly]:not(.textarea)').forEach(input => {
+        const id = ensureReadOnlyInputId(input);
+        let proxy = input.parentElement && input.parentElement.querySelector('.ro-input-proxy[data-ro-input-for="' + id + '"]');
+
+        const shouldWrapInTest = isTest && isLargeReadOnlyField(input) && isPureTextReadOnlyField(input);
+
+        if (!shouldWrapInTest) {
+          if (proxy) proxy.remove();
+          if (input.dataset.roInputProxied === 'true') {
+            input.style.display = '';
+            input.removeAttribute('aria-hidden');
+            input.removeAttribute('tabindex');
+            delete input.dataset.roInputProxied;
+          }
+          return;
+        }
+
+        const full = input.dataset.roFullValue != null ? input.dataset.roFullValue : input.value;
+        if (input.dataset.roFullValue != null) input.value = input.dataset.roFullValue;
+
+        if (!proxy) {
+          proxy = document.createElement('span');
+          proxy.className = 'form-static-value ro-input-proxy';
+          proxy.tabIndex = 0;
+          proxy.setAttribute('data-ro-input-for', id);
+          input.insertAdjacentElement('afterend', proxy);
+        }
+
+        if (!String(full || '').trim() && showNoValue) {
+          proxy.textContent = '(No value)';
+          proxy.classList.add('ro-empty-placeholder');
+        } else {
+          proxy.textContent = full;
+          proxy.classList.remove('ro-empty-placeholder');
+        }
+
+        input.style.display = 'none';
+        input.setAttribute('aria-hidden', 'true');
+        input.tabIndex = -1;
+        input.dataset.roInputProxied = 'true';
+      });
+    }
+
+    function syncTestEditableInputMultiline(scope) {
+      const area = document.querySelector('.tab-content-area');
+      const isTest = area && area.getAttribute('data-ro-variant') === 'test';
+      const root = scope || document;
+      root.querySelectorAll('.form-row[data-mixed-fixed="editable"][data-ro-text-type="pure-text"]:not(.is-read-only):not(.mixed-readonly-copy) input.form-input:not(.textarea)').forEach(input => {
+        const row = input.closest('.form-row');
+        const expandOnLoad = !!(row && row.getAttribute('data-test-expand-on-load') === 'true');
+        const id = ensureReadOnlyInputId(input);
+        let proxy = input.parentElement && input.parentElement.querySelector('.test-editable-textarea-proxy[data-test-input-for="' + id + '"]');
+
+        if (!isTest) {
+          if (proxy) proxy.remove();
+          if (input.dataset.testEditableProxied === 'true') {
+            input.style.display = '';
+            input.removeAttribute('aria-hidden');
+            input.removeAttribute('tabindex');
+            delete input.dataset.testEditableProxied;
+          }
+          return;
+        }
+
+        if (!proxy) {
+          proxy = document.createElement('textarea');
+          proxy.className = 'form-input textarea test-editable-textarea-proxy';
+          proxy.setAttribute('rows', '1');
+          proxy.setAttribute('data-test-input-for', id);
+          input.insertAdjacentElement('afterend', proxy);
+        }
+
+        proxy.value = input.value;
+        bindTextareaAutoGrow(proxy);
+        if (expandOnLoad || document.activeElement === proxy || proxy.dataset.testInteracted === 'true') {
+          autoGrowTextarea(proxy);
+        } else {
+          proxy.style.height = '';
+          proxy.rows = 1;
+        }
+
+        input.style.display = 'none';
+        input.setAttribute('aria-hidden', 'true');
+        input.tabIndex = -1;
+        input.dataset.testEditableProxied = 'true';
+      });
+    }
+
+    function syncImplementationReadOnlyTruncation(scope) {
+      const area = document.querySelector('.tab-content-area');
+      const variant = area ? area.getAttribute('data-ro-variant') : null;
+      const truncateEnabled = variant === 'implementation' || variant === 'test';
+      const root = scope || document;
+      root.querySelectorAll('.tab-content input.form-input:not(.textarea), .form-row input.form-input:not(.textarea)').forEach(input => {
+        if (!truncateEnabled) {
+          if (input.dataset.roFullValue != null) {
+            input.value = input.dataset.roFullValue;
+            delete input.dataset.roFullValue;
+          }
+          input.title = '';
+          return;
+        }
+        const active = document.activeElement === input;
+        const full = input.dataset.roFullValue != null ? input.dataset.roFullValue : input.value;
+        input.dataset.roFullValue = full;
+        if (active) {
+          input.value = full;
+        } else {
+          input.value = fitReadOnlyInputText(input, full);
+        }
+        input.title = full;
+      });
+    }
+
+    let textareaRecomputeRaf = null;
+    function scheduleRecomputeTextareaHeights(scope) {
+      if (textareaRecomputeRaf) return;
+      textareaRecomputeRaf = requestAnimationFrame(() => {
+        textareaRecomputeRaf = null;
+        recomputeTextareaHeights(scope);
+        syncImplementationReadOnlyTruncation(scope);
+        syncTestReadOnlyInputProxy(scope);
+        syncTestEditableInputMultiline(scope);
       });
     }
 
@@ -3579,6 +4088,9 @@
 
       // Sync width between AI panel and info panel
       syncPanelWidths(currentPanel, newWidth);
+
+      // Form width changes → textarea line wraps; keep 7.5-row cap accurate for all.
+      scheduleRecomputeTextareaHeights(document);
     }
     
     // Sync width - info panel is now at tab level, no sync needed
@@ -3608,6 +4120,8 @@
       
       currentHandle = null;
       currentPanel = null;
+
+      requestAnimationFrame(() => recomputeTextareaHeights(document));
       
       // Note: we deliberately do NOT run the narrow-mode cascade here.
       // Resizing a panel should never collapse another panel — the
@@ -3627,6 +4141,7 @@
           if (panel && !panel.classList.contains('collapsed')) {
             const defaultWidth = panel.dataset.defaultWidth;
             panel.style.width = (defaultWidth ? defaultWidth : '380') + 'px';
+            requestAnimationFrame(() => recomputeTextareaHeights(document));
           }
         });
       });
@@ -3739,6 +4254,7 @@
     function refreshLayoutAfterPanelChange() {
       requestAnimationFrame(() => {
         clampTabInfoPanelWidth();
+        recomputeTextareaHeights(document);
       });
     }
 
@@ -3777,6 +4293,64 @@
         });
         applyAttrState(targetContent, state);
       });
+      requestAnimationFrame(() => recomputeTextareaHeights(document));
+    }
+
+    function getPaneFormControls(pane) {
+      if (!pane) return [];
+      return Array.from(
+        pane.querySelectorAll('.tab-content input.form-input, .tab-content textarea.form-input, .tab-content select.form-input')
+      ).filter(el => !el.closest('.mixed-readonly-copy'));
+    }
+
+    function initAttrPaneControlSync() {
+      const panes = Array.from(document.querySelectorAll('.tab-pane'));
+      const sourcePane = document.getElementById('tab-filled');
+      if (!sourcePane) return;
+      const sourceControls = getPaneFormControls(sourcePane);
+      if (!sourceControls.length) return;
+
+      panes.forEach(pane => {
+        const controls = getPaneFormControls(pane);
+        controls.forEach((ctl, idx) => {
+          if (idx < sourceControls.length) {
+            ctl.setAttribute('data-sync-key', String(idx));
+          }
+        });
+      });
+
+      const syncHandler = e => {
+        const ctl = e.target;
+        if (!ctl || !ctl.matches || !ctl.matches('input.form-input, textarea.form-input, select.form-input')) return;
+        const key = ctl.getAttribute('data-sync-key');
+        if (!key) return;
+        const sourcePaneEl = ctl.closest('.tab-pane');
+        const value = ctl.value;
+
+        document.querySelectorAll('.tab-pane [data-sync-key="' + key + '"]').forEach(target => {
+          if (target === ctl) return;
+          const targetPane = target.closest('.tab-pane');
+          if (sourcePaneEl && targetPane && sourcePaneEl.id === targetPane.id) return;
+          if (target.matches('select.form-input')) {
+            target.value = value;
+          } else {
+            target.value = value;
+          }
+          if (target.tagName === 'TEXTAREA') {
+            bindTextareaAutoGrow(target);
+            autoGrowTextarea(target);
+          }
+        });
+
+        const area = document.querySelector('.tab-content-area');
+        const variant = area ? area.getAttribute('data-ro-variant') : null;
+        if (variant) refreshReadOnlyPlaceholders(variant);
+        syncImplementationReadOnlyTruncation(document);
+        syncTestReadOnlyInputProxy(document);
+      };
+
+      document.addEventListener('input', syncHandler);
+      document.addEventListener('change', syncHandler);
     }
 
     function applyAttrState(scope, state) {
@@ -3787,6 +4361,9 @@
       if (isEmpty) {
         scope.querySelectorAll('input.form-input').forEach(input => {
           input.value = '';
+        });
+        scope.querySelectorAll('select.form-input').forEach(select => {
+          select.value = '';
         });
         scope.querySelectorAll('textarea.form-input').forEach(textarea => {
           textarea.value = '';
@@ -3805,13 +4382,193 @@
       }
 
       if (isMixed) {
-        scope.querySelectorAll('.form-row').forEach((row, idx) => {
-          if (idx % 2 === 1) {
-            row.classList.add('is-read-only');
-            markReadOnlyInputs(row);
-          }
+        // Remove previously generated mixed read-only comparison rows so
+        // re-running state prep stays idempotent.
+        scope.querySelectorAll('.form-row.mixed-readonly-copy').forEach(row => row.remove());
+
+        const baseRows = Array.from(scope.querySelectorAll('.form-row')).filter(row => !row.classList.contains('mixed-readonly-copy'));
+        baseRows.forEach(row => {
+          // Keep the original row editable in Mixed for direct comparison.
+          row.classList.remove('is-read-only');
+          row.querySelectorAll('input.form-input, textarea.form-input').forEach(input => {
+            input.removeAttribute('readonly');
+            if (input.dataset && input.dataset.roFullValue != null) {
+              input.value = input.dataset.roFullValue;
+              delete input.dataset.roFullValue;
+            }
+          });
+          row.querySelectorAll('select.form-input').forEach(select => {
+            disableReadOnlySelectProxy(select);
+          });
+
+          // Add a read-only copy directly after each editable row.
+          const roRow = row.cloneNode(true);
+          roRow.classList.add('mixed-readonly-copy', 'is-read-only');
+          markReadOnlyInputs(roRow);
+          row.insertAdjacentElement('afterend', roRow);
         });
       }
+
+      enforceMultiValueListsInScope(scope);
+    }
+
+    function getMultiValueControl(item) {
+      return item.querySelector('input.form-input, textarea.form-input, select.form-input');
+    }
+
+    function isMultiValueControlEmpty(ctl) {
+      return !String(ctl && ctl.value != null ? ctl.value : '').trim();
+    }
+
+    /** At most one empty row per .multi-value-list; extra empty rows are removed. */
+    function enforceSingleEmptyInMultiValueList(list) {
+      if (!list) return;
+      const emptyItems = [...list.querySelectorAll('.multi-value-item')].filter(item => {
+        const ctl = getMultiValueControl(item);
+        return ctl && isMultiValueControlEmpty(ctl);
+      });
+      if (emptyItems.length <= 1) return;
+      for (let i = emptyItems.length - 1; i >= 1; i--) {
+        if (list.querySelectorAll('.multi-value-item').length <= 1) break;
+        emptyItems[i].remove();
+      }
+    }
+
+    function enforceMultiValueListsInScope(root) {
+      if (!root) return;
+      root.querySelectorAll('.multi-value-list').forEach(enforceSingleEmptyInMultiValueList);
+    }
+
+    function initMultiValueListBehavior() {
+      const onMultiValueControlChange = e => {
+        const ctl = e.target;
+        if (!ctl.matches || (!ctl.matches('input.form-input') && !ctl.matches('textarea.form-input') && !ctl.matches('select.form-input'))) return;
+        const list = ctl.closest('.multi-value-list');
+        if (!list || list.closest('.is-read-only')) return;
+        enforceSingleEmptyInMultiValueList(list);
+      };
+
+      document.addEventListener('input', onMultiValueControlChange);
+      document.addEventListener('change', onMultiValueControlChange);
+
+      document.addEventListener('click', e => {
+        const addLink = e.target.closest('.add-new-link');
+        if (addLink) {
+          if (addLink.closest('.is-read-only')) return;
+          const field = addLink.closest('.form-field');
+          const list = field && field.querySelector('.multi-value-list');
+          if (!list) return;
+          const hasEmpty = [...list.querySelectorAll('.multi-value-item')].some(item => {
+            const c = getMultiValueControl(item);
+            return c && isMultiValueControlEmpty(c);
+          });
+          if (hasEmpty) {
+            const firstEmpty = [...list.querySelectorAll('.multi-value-item')].find(item => {
+              const c = getMultiValueControl(item);
+              return c && isMultiValueControlEmpty(c);
+            });
+            const focusCtl = firstEmpty && getMultiValueControl(firstEmpty);
+            if (focusCtl) focusCtl.focus();
+            return;
+          }
+          const proto = list.querySelector('.multi-value-item:last-child');
+          if (!proto) return;
+          const row = proto.cloneNode(true);
+          const newCtl = getMultiValueControl(row);
+          if (newCtl) {
+            newCtl.value = '';
+            newCtl.removeAttribute('placeholder');
+            if (newCtl.tagName === 'TEXTAREA') {
+              newCtl.style.height = '';
+              newCtl.rows = 1;
+              bindTextareaAutoGrow(newCtl);
+              autoGrowTextarea(newCtl);
+            }
+          }
+          list.appendChild(row);
+          if (newCtl) newCtl.focus();
+          return;
+        }
+
+        const removeBtn = e.target.closest('.multi-value-item .action-btn');
+        if (!removeBtn) return;
+        const item = removeBtn.closest('.multi-value-item');
+        const list = item && item.closest('.multi-value-list');
+        if (!list || list.closest('.is-read-only')) return;
+        if (list.querySelectorAll('.multi-value-item').length <= 1) return;
+        item.remove();
+        enforceSingleEmptyInMultiValueList(list);
+      });
+    }
+
+    function ensureSelectId(select) {
+      if (!select.id) {
+        select.id = 'ro-select-' + Math.random().toString(36).slice(2, 10);
+      }
+      return select.id;
+    }
+
+    function getReadOnlySelectText(select) {
+      if (!select || String(select.value || '') === '') return '';
+      const opt = select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+      return opt ? String(opt.textContent || '').trim() : '';
+    }
+
+    function enableReadOnlySelectProxy(select) {
+      if (!select) return;
+      const id = ensureSelectId(select);
+      let proxy = select.parentElement && select.parentElement.querySelector('.ro-select-proxy[data-ro-select-for="' + id + '"]');
+      const wrapReadOnly = select.getAttribute('data-ro-wrap') === 'true' || !!(select.closest('.form-row') && select.closest('.form-row').getAttribute('data-ro-wrap') === 'true');
+      const shouldUseSpanProxy = wrapReadOnly;
+
+      if (proxy && shouldUseSpanProxy && proxy.tagName !== 'SPAN') {
+        proxy.remove();
+        proxy = null;
+      }
+      if (proxy && !shouldUseSpanProxy && proxy.tagName !== 'INPUT') {
+        proxy.remove();
+        proxy = null;
+      }
+
+      if (!proxy) {
+        if (shouldUseSpanProxy) {
+          proxy = document.createElement('span');
+          proxy.className = 'form-static-value ro-select-proxy ro-select-proxy-wrap';
+          proxy.tabIndex = 0;
+        } else {
+          proxy = document.createElement('input');
+          proxy.type = 'text';
+          proxy.className = 'form-input ro-select-proxy';
+          proxy.setAttribute('readonly', '');
+        }
+        proxy.setAttribute('data-ro-select-for', id);
+        select.insertAdjacentElement('afterend', proxy);
+      }
+      const txt = getReadOnlySelectText(select);
+      if (proxy.tagName === 'SPAN') {
+        proxy.textContent = txt;
+      } else {
+        proxy.value = txt;
+      }
+      select.setAttribute('data-ro-readonly', 'true');
+      select.setAttribute('data-ro-value', String(select.value || ''));
+      select.setAttribute('aria-readonly', 'true');
+      select.setAttribute('aria-hidden', 'true');
+      select.tabIndex = -1;
+      select.style.display = 'none';
+    }
+
+    function disableReadOnlySelectProxy(select) {
+      if (!select) return;
+      const id = ensureSelectId(select);
+      const proxy = select.parentElement && select.parentElement.querySelector('.ro-select-proxy[data-ro-select-for="' + id + '"]');
+      if (proxy) proxy.remove();
+      select.removeAttribute('data-ro-readonly');
+      select.removeAttribute('data-ro-value');
+      select.removeAttribute('aria-readonly');
+      select.removeAttribute('aria-hidden');
+      select.removeAttribute('tabindex');
+      select.style.display = '';
     }
 
     // Mark every input/textarea in `root` as read-only and strip its
@@ -3822,7 +4579,193 @@
         input.setAttribute('readonly', '');
         input.removeAttribute('placeholder');
       });
+      root.querySelectorAll('select.form-input').forEach(select => {
+        enableReadOnlySelectProxy(select);
+      });
     }
+
+    // Read-only experiment: “(No value)” on empty fields when the bar option is
+    // “no-value” or “no-border” (restores cleared placeholders when switching away).
+    function refreshReadOnlyPlaceholders(variant) {
+      const area = document.querySelector('.tab-content-area');
+      const testPlaceholder = area ? area.getAttribute('data-ro-test-placeholder') : null;
+      const showNoValue = variant === 'no-value' || variant === 'no-border' || (variant === 'test' && testPlaceholder === 'show');
+
+      document.querySelectorAll('.tab-content.is-read-only input.form-input[readonly], .tab-content.is-read-only textarea.form-input[readonly], .form-row.is-read-only input.form-input[readonly], .form-row.is-read-only textarea.form-input[readonly]').forEach(el => {
+        if (showNoValue && !String(el.value || '').trim()) {
+          el.setAttribute('placeholder', '(No value)');
+        } else {
+          el.removeAttribute('placeholder');
+        }
+      });
+
+      document.querySelectorAll('.tab-content.is-read-only .form-static-value, .form-row.is-read-only .form-static-value').forEach(el => {
+        const raw = String(el.textContent || '').trim();
+        const marked = el.classList.contains('ro-empty-placeholder');
+        if (showNoValue) {
+          if (!raw || marked) {
+            el.textContent = '(No value)';
+            el.classList.add('ro-empty-placeholder');
+          } else {
+            el.classList.remove('ro-empty-placeholder');
+          }
+        } else if (marked) {
+          el.textContent = '';
+          el.classList.remove('ro-empty-placeholder');
+        }
+      });
+    }
+
+    function initRoVariantBar() {
+      const area = document.querySelector('.tab-content-area');
+      if (!area) return;
+      const msg = document.getElementById('roVariantMessage');
+      const testPanel = document.getElementById('roVariantTestPanel');
+      const variantMessages = {
+        implementation: 'Current implementation baseline.',
+        'with-border': 'Border below read-only inputs as well + subtle color on read-only text',
+        'no-value': 'Border below read-only inputs as well + subtle color on read-only text + "(No value)" on empty fields',
+        'no-border': '"(No value)" on empty fields + read-only short fields become large size',
+        'light-bg': 'Light background on read-only fields',
+        test: 'Test mode: combine radio choices below to try different read-only behaviors.'
+      };
+
+      function getTestValue(group) {
+        const checked = document.querySelector('.ro-test-check[data-ro-test-group="' + group + '"]:checked');
+        return checked ? checked.getAttribute('data-ro-test-value') : null;
+      }
+
+      function applyTestConfig() {
+        area.setAttribute('data-ro-test-width', getTestValue('width') || 'same');
+        area.setAttribute('data-ro-test-color', getTestValue('color') || 'same');
+        area.setAttribute('data-ro-test-border', getTestValue('border') || 'none');
+        area.setAttribute('data-ro-test-bg', getTestValue('bg') || 'none');
+        area.setAttribute('data-ro-test-placeholder', getTestValue('placeholder') || 'none');
+      }
+
+      function applyVariant(v) {
+        area.setAttribute('data-ro-variant', v);
+        document.querySelectorAll('.ro-variant-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-ro-variant') === v);
+        });
+        if (msg) msg.textContent = variantMessages[v] || '';
+        if (testPanel) testPanel.hidden = v !== 'test';
+        if (v === 'test') applyTestConfig();
+        refreshReadOnlyPlaceholders(v);
+        scheduleRecomputeTextareaHeights(document);
+      }
+
+      document.querySelectorAll('.ro-variant-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const v = btn.getAttribute('data-ro-variant');
+          if (!v) return;
+          applyVariant(v);
+        });
+      });
+
+      document.querySelectorAll('.ro-test-check').forEach(input => {
+        input.addEventListener('change', () => {
+          applyTestConfig();
+          if (area.getAttribute('data-ro-variant') === 'test') {
+            refreshReadOnlyPlaceholders('test');
+            scheduleRecomputeTextareaHeights(document);
+          }
+        });
+      });
+
+      applyTestConfig();
+      applyVariant(area.getAttribute('data-ro-variant') || 'implementation');
+    }
+
+    document.addEventListener('focusin', e => {
+      const input = e.target;
+      if (!input || !input.matches || !input.matches('.tab-content input.form-input:not(.textarea), .form-row input.form-input:not(.textarea)')) return;
+      const area = document.querySelector('.tab-content-area');
+      if (!area) return;
+      const variant = area.getAttribute('data-ro-variant');
+      if (variant !== 'implementation' && variant !== 'test') return;
+      if (input.dataset.roFullValue != null) {
+        input.value = input.dataset.roFullValue;
+      }
+    });
+
+    document.addEventListener('focusout', e => {
+      const input = e.target;
+      if (!input || !input.matches || !input.matches('.tab-content input.form-input:not(.textarea), .form-row input.form-input:not(.textarea)')) return;
+      const area = document.querySelector('.tab-content-area');
+      if (!area) return;
+      const variant = area.getAttribute('data-ro-variant');
+      if (variant !== 'implementation' && variant !== 'test') return;
+      syncImplementationReadOnlyTruncation(input.closest('.form-row') || document);
+    });
+
+    document.addEventListener('focusin', e => {
+      const proxy = e.target;
+      if (!proxy || !proxy.matches || !proxy.matches('.ro-input-proxy[data-ro-input-for]')) return;
+      const id = proxy.getAttribute('data-ro-input-for');
+      if (!id) return;
+      const input = document.getElementById(id);
+      if (!input) return;
+      const full = input.dataset.roFullValue != null ? input.dataset.roFullValue : input.value;
+      proxy.textContent = full;
+      proxy.classList.remove('ro-empty-placeholder');
+    });
+
+    document.addEventListener('input', e => {
+      const proxy = e.target;
+      if (!proxy || !proxy.matches || !proxy.matches('.test-editable-textarea-proxy[data-test-input-for]')) return;
+      proxy.dataset.testInteracted = 'true';
+      const id = proxy.getAttribute('data-test-input-for');
+      if (!id) return;
+      const input = document.getElementById(id);
+      if (!input) return;
+      input.value = proxy.value;
+      bindTextareaAutoGrow(proxy);
+      autoGrowTextarea(proxy);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    // Enforce prototype rule: small text fields (non-numeric/date/LoV) are max 50 chars.
+    document.addEventListener('input', e => {
+      const input = e.target;
+      if (!input || !input.matches || !input.matches('input.form-input[data-field-type="text-short"]')) return;
+      if (input.value.length > 50) {
+        input.value = input.value.slice(0, 50);
+      }
+    });
+
+    document.addEventListener('focusin', e => {
+      const proxy = e.target;
+      if (!proxy || !proxy.matches || !proxy.matches('.test-editable-textarea-proxy[data-test-input-for]')) return;
+      proxy.dataset.testInteracted = 'true';
+      bindTextareaAutoGrow(proxy);
+      autoGrowTextarea(proxy);
+    });
+
+    // Read-only selects should be focusable for the common read-only focus
+    // state, but not interactive (value cannot be changed).
+    document.addEventListener('mousedown', e => {
+      const select = e.target.closest && e.target.closest('select.form-input[data-ro-readonly="true"]');
+      if (!select) return;
+      e.preventDefault();
+      select.focus();
+    });
+
+    document.addEventListener('keydown', e => {
+      const select = e.target;
+      if (!select || !select.matches || !select.matches('select.form-input[data-ro-readonly="true"]')) return;
+      if (e.key === 'Tab' || e.key === 'Shift') return;
+      e.preventDefault();
+    });
+
+    document.addEventListener('change', e => {
+      const select = e.target;
+      if (!select || !select.matches || !select.matches('select.form-input[data-ro-readonly="true"]')) return;
+      const locked = select.getAttribute('data-ro-value') || '';
+      if (select.value !== locked) {
+        select.value = locked;
+      }
+    });
 
     // Bind the last word of each form label to the trailing info icon so
     // the icon never ends up alone on a new line when the label wraps.
@@ -3857,9 +4800,12 @@
       initTabsNav();
       initTilesNav();
       buildAttrStatePanes();
+      initAttrPaneControlSync();
+      initRoVariantBar();
       bindAttrLabelTails();
       initAttrTooltips();
       initTextareaAutoGrow();
+      initMultiValueListBehavior();
 
       // Seed open-order for any panels that are visible at load so the
       // max-3 eviction rule has a deterministic order from the start.
@@ -3879,6 +4825,12 @@
       // its [min, container − form-min] bounds. We don't auto-collapse
       // any panels here — the user controls open/close explicitly.
       window.addEventListener('resize', clampTabInfoPanelWidth);
+
+      const debouncedRecomputeAllTextareas = debounce(() => {
+        recomputeTextareaHeights(document);
+        syncImplementationReadOnlyTruncation(document);
+      }, 150);
+      window.addEventListener('resize', debouncedRecomputeAllTextareas);
     });
   </script>
 
