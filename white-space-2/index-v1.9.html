@@ -1056,12 +1056,21 @@
       opacity: 1;
     }
 
-    .tab-content-area[data-ro-variant="with-border"] .form-static-value.ro-empty-placeholder,
-    .tab-content-area[data-ro-variant="no-value"] .form-static-value.ro-empty-placeholder,
-    .tab-content-area[data-ro-variant="no-border"] .form-static-value.ro-empty-placeholder,
-    .tab-content-area[data-ro-variant="option-4"] .form-static-value.ro-empty-placeholder,
-    .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .form-static-value.ro-empty-placeholder {
-      color: rgba(0, 0, 0, 0.38);
+    /* (No value) on read-only static / select proxies: placeholder tone; must
+       beat variant read-only .form-static-value { color: 0.87 } (higher chain + !important). */
+    .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="no-border"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .form-row.is-read-only .form-static-value.ro-empty-placeholder {
+      color: rgba(0, 0, 0, 0.38) !important;
     }
 
     /* Variant: no bottom border on read-only fields */
