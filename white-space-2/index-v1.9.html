@@ -21,6 +21,7 @@
       --color-bg: #fff;
       --color-bg-gray: #f5f5f5;
       --color-bg-hover: #fafafa;
+      --color-bg-light: rgba(96, 124, 138, 0.12); /* system light background */
       --color-selected: #e8f5f5;
       --color-link: #0066cc;
       --header-height: 48px;
@@ -40,7 +41,7 @@
       --test-divider-weight: 2px;
       --test-divider-dot-length: 2px;
       --test-divider-pattern-length: 8px; /* dot + gap */
-      --test-divider-gap: 16px; /* total vertical space inserted between rows */
+      --test-divider-gap: 8px; /* total vertical space inserted between rows */
     }
 
     /* Reset */
@@ -1285,23 +1286,23 @@
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value {
-      background-color: #f6f6f6;
+      background-color: var(--color-bg-light);
     }
 
     .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:hover:not(:focus) {
-      background-color: #f6f6f6;
+      background-color: var(--color-bg-light);
     }
 
     .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-input:focus {
-      background: #f5f5f5;
+      background: var(--color-bg-light);
       border: 1px solid #52BDEC !important;
     }
 
     .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="no-value"] .form-row.is-read-only .form-static-value:focus {
-      background: #f5f5f5;
+      background: var(--color-bg-light);
       border: 1px solid #52BDEC !important;
     }
 
@@ -1353,16 +1354,8 @@
       padding-right: 12px;
     }
 
-    /* Read-only width expansion (large band, same as .size-medium limits):
-       only for numbers/dates (and similar), not small text. Mark rows with
-       data-ro-readonly-width="large". Implementation, Option 6 (PDX), and Test (same width)
-       keep editable size-* widths for all fields. */
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-6-pdx"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-6-pdx"]):not([data-ro-variant="test"]) .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
-      flex: 1 1 auto;
-      min-width: calc(21rem + 24px + 8px);
-      max-width: calc(35rem + 24px + 8px);
-    }
+    /* Read-only width expansion is opt-in only in Test mode.
+       Other variants keep their regular size-small/size-medium/size-full widths. */
 
     .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
     .tab-content-area[data-ro-variant="test"][data-ro-test-width="large"] .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
@@ -2811,7 +2804,7 @@
     .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="test"][data-ro-test-bg="subtle"] .form-row.is-read-only .form-static-value {
-      background-color: #f6f6f6;
+      background-color: var(--color-bg-light);
     }
 
     .tab-content-area[data-ro-variant="test"][data-ro-test-bg="none"] .is-read-only .form-input:not(:focus),
@@ -2835,7 +2828,7 @@
     /* Test mode: optional divider line between read-only multi-value rows. */
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .tab-content.is-read-only .multi-value-list,
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .form-row.is-read-only .multi-value-list {
-      gap: 16px;
+      gap: 8px;
     }
 
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .tab-content.is-read-only .multi-value-item + .multi-value-item,
