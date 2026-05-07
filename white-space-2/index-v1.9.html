@@ -5218,6 +5218,11 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
+    /* Keep the icon hidden while preserving all AI panel logic. */
+    .ai-fab {
+      display: none !important;
+    }
+
     .ai-fab:hover {
       transform: scale(1.05);
       box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
