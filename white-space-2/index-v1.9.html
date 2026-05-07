@@ -2254,6 +2254,25 @@
         padding-top: 0 !important;
         margin-top: 10px !important;
       }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-item,
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-item {
+        display: block !important;
+      }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-item::before {
+        display: none !important;
+        content: none !important;
+      }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-input:not(:focus),
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-input:not(:focus),
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-static-value:not(:focus),
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-static-value:not(:focus),
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .ro-select-proxy:not(:focus),
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .ro-select-proxy:not(:focus) {
+        border-left-color: #D4D4D4 !important;
+        border-left-width: 1px !important;
+        border-left-style: solid !important;
+      }
       .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item .input-wrapper,
       .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item .input-wrapper {
         flex: 1 1 auto !important;
@@ -2620,6 +2639,28 @@
       border-radius: 999px;
       padding-top: 0;
       margin-top: 10px;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-item {
+      display: block;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-item::before {
+      display: none;
+      content: none;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-input:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-static-value:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .form-static-value:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .tab-content.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .ro-select-proxy:not(:focus),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="v-border"] .form-row.is-read-only .multi-value-list:has(.multi-value-item + .multi-value-item) .multi-value-item .ro-select-proxy:not(:focus) {
+      border-left-color: #D4D4D4;
+      border-left-width: 1px;
+      border-left-style: solid;
     }
 
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item .input-wrapper,
@@ -3453,6 +3494,7 @@
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="numeric" checked> 01, 02</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="dash"> -</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="bullet"> bullet</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="v-border"> vertical border</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="badge"> badge (16x16)</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="none"> none</label>
                 </div>
