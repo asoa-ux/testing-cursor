@@ -457,6 +457,47 @@
       transition: opacity var(--transition-speed) ease;
     }
 
+    /* Neutral placeholders used to de-emphasize side panels during
+       read-only option comparisons. */
+    .side-panel-placeholders {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .side-panel-placeholders.tight {
+      padding: 12px 16px;
+      gap: 8px;
+    }
+
+    .side-panel-placeholder-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .side-panel-placeholder-rect {
+      height: 12px;
+      border-radius: 4px;
+      background: #ececec;
+      flex: 0 0 auto;
+    }
+
+    .side-panel-placeholder-rect.h-8 { height: 8px; }
+    .side-panel-placeholder-rect.h-12 { height: 12px; }
+    .side-panel-placeholder-rect.h-16 { height: 16px; }
+    .side-panel-placeholder-rect.h-20 { height: 20px; }
+    .side-panel-placeholder-rect.h-24 { height: 24px; }
+    .side-panel-placeholder-rect.h-120 { height: 120px; }
+
+    .side-panel-placeholder-rect.w-100 { width: 100%; }
+    .side-panel-placeholder-rect.w-90 { width: 90%; }
+    .side-panel-placeholder-rect.w-80 { width: 80%; }
+    .side-panel-placeholder-rect.w-70 { width: 70%; }
+    .side-panel-placeholder-rect.w-60 { width: 60%; }
+    .side-panel-placeholder-rect.w-50 { width: 50%; }
+    .side-panel-placeholder-rect.w-40 { width: 40%; }
+
     /* Left Panel - Browse */
     .panel-left {
       width: var(--left-panel-width);
@@ -1060,6 +1101,8 @@
        beat variant read-only .form-static-value { color: 0.87 } (higher chain + !important). */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
@@ -1081,7 +1124,9 @@
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input,
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input {
       border-bottom-color: transparent !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
@@ -1094,7 +1139,9 @@
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:hover:not(:focus),
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:hover:not(:focus) {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-5-pdx"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input:hover:not(:focus) {
       border-bottom-color: transparent !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
@@ -1107,7 +1154,9 @@
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value {
       border-bottom-color: transparent !important;
     }
 
@@ -1121,7 +1170,9 @@
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:focus,
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:focus {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input:focus {
       border: 1px solid #52BDEC !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
@@ -1135,18 +1186,29 @@
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value:focus,
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value:focus {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value:focus {
       border: 1px solid #52BDEC !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
       border-bottom-color: #52BDEC !important;
     }
 
-    /* Implementation: primary text at 87% (read-only contexts only). */
+    /* Implementation / Option 5 (PDX): primary text at 87% (read-only contexts only). */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value {
+    .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value {
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    /* Option 5 (PDX): all attribute labels use the same primary tone as values. */
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-label {
       color: rgba(0, 0, 0, 0.87);
     }
 
@@ -1170,9 +1232,11 @@
     }
 
     /* Single-line read-only text inputs: overflow ellipsis (JS also fits text
-       where needed). All experiment variants + Implementation + Test. */
+       where needed). All experiment variants + Implementation + Option 5 (PDX) + Test. */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
@@ -1263,10 +1327,10 @@
 
     /* Read-only width expansion (large band, same as .size-medium limits):
        only for numbers/dates (and similar), not small text. Mark rows with
-       data-ro-readonly-width="large". Implementation and Test (same width)
+       data-ro-readonly-width="large". Implementation, Option 5 (PDX), and Test (same width)
        keep editable size-* widths for all fields. */
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="test"]) .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-5-pdx"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-5-pdx"]):not([data-ro-variant="test"]) .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
       flex: 1 1 auto;
       min-width: calc(21rem + 24px + 8px);
       max-width: calc(35rem + 24px + 8px);
@@ -2023,7 +2087,7 @@
       .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item::before,
       .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item::before {
         counter-increment: ro-mv-idx;
-        content: counter(ro-mv-idx);
+        content: counter(ro-mv-idx, decimal-leading-zero);
         flex: 0 0 1.5rem !important;
         min-width: 1.5rem !important;
         text-align: right;
@@ -2047,6 +2111,59 @@
       }
       .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item:only-child::before,
       .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item:only-child::before {
+        display: none !important;
+        content: none !important;
+      }
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-list,
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-list {
+        counter-reset: ro-test-mv-idx 0;
+      }
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item,
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item::before {
+        flex: 0 0 1.5rem !important;
+        min-width: 1.5rem !important;
+        text-align: right;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.4;
+        font-variant-numeric: tabular-nums;
+        color: rgba(0, 0, 0, 0.60);
+        padding-top: 9px;
+        user-select: none;
+      }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="numeric"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="numeric"] .form-row.is-read-only .multi-value-item::before {
+        counter-increment: ro-test-mv-idx;
+        content: counter(ro-test-mv-idx, decimal-leading-zero);
+      }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .form-row.is-read-only .multi-value-item::before {
+        content: "–";
+      }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .form-row.is-read-only .multi-value-item::before {
+        content: "•";
+      }
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item .input-wrapper,
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item .input-wrapper {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item:only-child,
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item:only-child {
+        display: block !important;
+      }
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item:only-child::before,
+      .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item:only-child::before {
         display: none !important;
         content: none !important;
       }
@@ -2218,8 +2335,9 @@
       transform: none;
     }
 
-    /* Option 4 only: subtle 1-based index on read-only multi-value rows (must
-       follow base .multi-value-item { display: block } so flex layout wins). */
+    /* Option 4 only: subtle zero-padded index (01, 02, …) on read-only
+       multi-value rows (must follow base .multi-value-item { display: block }
+       so flex layout wins). */
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-list,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-list {
       counter-reset: ro-mv-idx 0;
@@ -2238,7 +2356,7 @@
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item::before,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item::before {
       counter-increment: ro-mv-idx;
-      content: counter(ro-mv-idx);
+      content: counter(ro-mv-idx, decimal-leading-zero);
       flex: 0 0 1.5rem;
       min-width: 1.5rem;
       text-align: right;
@@ -2266,6 +2384,69 @@
 
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .multi-value-item:only-child::before,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .multi-value-item:only-child::before {
+      display: none;
+      content: none;
+    }
+
+    /* Test mode: try Option 4-style row markers with different symbols. */
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-list,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-list {
+      counter-reset: ro-test-mv-idx 0;
+    }
+
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item::before {
+      flex: 0 0 1.5rem;
+      min-width: 1.5rem;
+      text-align: right;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.4;
+      font-variant-numeric: tabular-nums;
+      color: rgba(0, 0, 0, 0.60);
+      padding-top: 9px;
+      user-select: none;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="numeric"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="numeric"] .form-row.is-read-only .multi-value-item::before {
+      counter-increment: ro-test-mv-idx;
+      content: counter(ro-test-mv-idx, decimal-leading-zero);
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .form-row.is-read-only .multi-value-item::before {
+      content: "–";
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .form-row.is-read-only .multi-value-item::before {
+      content: "•";
+    }
+
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item .input-wrapper,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item .input-wrapper {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item:only-child,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item:only-child {
+      display: block;
+    }
+
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item:only-child::before,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item:only-child::before {
       display: none;
       content: none;
     }
@@ -2878,43 +3059,16 @@
           </button>
         </div>
         <div class="panel-content">
-          <div class="tree-list">
-            <div class="tree-item">
-              <span class="tree-icon">▼</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item indent-1">
-              <span class="tree-icon">▼</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item indent-1">
-              <span class="tree-icon">▼</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item indent-1 selected">
-              <span class="tree-icon">▼</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item indent-2">
-              <span class="tree-icon">▶</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item">
-              <span class="tree-icon">▶</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item">
-              <span class="tree-icon">▶</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item">
-              <span class="tree-icon">▶</span>
-              <span>Tree item</span>
-            </div>
-            <div class="tree-item">
-              <span class="tree-icon">▶</span>
-              <span>Tree item</span>
-            </div>
+          <div class="side-panel-placeholders">
+            <div class="side-panel-placeholder-rect h-16 w-60"></div>
+            <div class="side-panel-placeholder-rect h-12 w-90"></div>
+            <div class="side-panel-placeholder-rect h-12 w-80"></div>
+            <div class="side-panel-placeholder-rect h-12 w-70"></div>
+            <div class="side-panel-placeholder-rect h-12 w-80"></div>
+            <div class="side-panel-placeholder-rect h-12 w-90"></div>
+            <div class="side-panel-placeholder-rect h-12 w-70"></div>
+            <div class="side-panel-placeholder-rect h-12 w-80"></div>
+            <div class="side-panel-placeholder-rect h-12 w-60"></div>
           </div>
         </div>
         <div class="resize-handle" data-panel="panelLeft"></div>
@@ -2922,176 +3076,32 @@
       </aside>
 
       <!-- Middle Panel - Tree Item -->
-      <aside class="panel panel-middle" id="panelMiddle">
+      <aside class="panel panel-middle collapsed" id="panelMiddle">
         <div class="panel-header">
           <span class="panel-header-title">Tree item</span>
-          <button class="panel-toggle toggle-right" onclick="togglePanel('panelMiddle')" title="Collapse panel">
+          <button class="panel-toggle toggle-right" onclick="togglePanel('panelMiddle')" title="Expand panel">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6"/>
+              <polyline points="9 18 15 12 9 6"/>
             </svg>
           </button>
         </div>
         <div class="panel-content">
-          <div class="folder-section">Current folder</div>
-          
-          <!-- Item cards -->
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="folder-section">Folder item</div>
-
-          <div class="item-card selected">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-            <span class="item-expand">∧</span>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
-          </div>
-
-          <div class="item-card">
-            <span class="item-star">☆</span>
-            <div class="item-thumbnail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="item-info">
-              <span class="item-label">Label</span>
-              <span class="item-primary">Primary info</span>
-              <span class="item-label">Label</span>
-              <span class="item-secondary">Secondary info</span>
-            </div>
+          <div class="side-panel-placeholders">
+            <div class="side-panel-placeholder-rect h-16 w-50"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-16 w-40"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
           </div>
         </div>
-        <div class="panel-footer">120 items, 0 selected</div>
+        <div class="panel-footer">
+          <div class="side-panel-placeholder-rect h-12 w-50"></div>
+        </div>
         <div class="resize-handle" data-panel="panelMiddle"></div>
         <span class="panel-collapsed-title">Tree item</span>
       </aside>
@@ -3207,7 +3217,8 @@
               <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without separators; read-only row numbers when 2+ items">Option 4</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without separators; read-only row labels 01, 02… when 2+ items">Option 4</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="option-5-pdx" title="Same read-only field treatment as Implementation; attribute labels use the same text color as values">Option 5 (PDX)</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
             </div>
             <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
@@ -3245,6 +3256,15 @@
                 <div class="ro-test-options">
                   <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="none"> no placeholder</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="show" checked> show (No value)</label>
+                </div>
+              </div>
+              <div class="ro-test-row">
+                <span>6. Multi-value row marker style</span>
+                <div class="ro-test-options">
+                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="numeric" checked> 01, 02</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="dash"> -</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="bullet"> bullet</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="none"> none</label>
                 </div>
               </div>
             </div>
@@ -3343,7 +3363,9 @@
                     <div class="multi-value-list">
                       <div class="multi-value-item">
                         <div class="input-wrapper">
-                          <textarea class="form-input textarea" rows="1">This is a multi-value free-text entry used for description-level content.</textarea>
+                          <textarea class="form-input textarea" rows="1">This is a multi-value free-text entry used for description-level content and readability checks in long-form scenarios.
+
+Second paragraph: it includes a separate thought so you can quickly see where one paragraph ends and another begins inside the same value.</textarea>
                         </div>
                         <div class="actions">
                           <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -3351,7 +3373,9 @@
                       </div>
                       <div class="multi-value-item">
                         <div class="input-wrapper">
-                          <textarea class="form-input textarea" rows="1">Second multi-value text entry to compare behavior across states.</textarea>
+                          <textarea class="form-input textarea" rows="1">Second multi-value text entry to compare behavior across states, especially in mixed and read-only experiments.
+
+Second paragraph: this line is intentionally separated to validate spacing, wrapping, and visual boundaries between values and between paragraphs.</textarea>
                         </div>
                         <div class="actions">
                           <button class="action-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -3448,11 +3472,11 @@
           </div><!-- end .tab-form-column -->
 
           <!-- Shared Attribute Info Panel -->
-          <aside class="tab-info-panel" id="tabInfoPanel" data-default-width="384">
+          <aside class="tab-info-panel collapsed" id="tabInfoPanel" data-default-width="384">
             <div class="resize-handle resize-handle-left" data-panel="tabInfoPanel"></div>
             <div class="tab-info-header">
               <span class="tab-info-title">Info</span>
-              <button class="tab-info-toggle" onclick="toggleTabInfoPanel()" title="Collapse">
+              <button class="tab-info-toggle" onclick="toggleTabInfoPanel()" title="Expand">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"/>
                 </svg>
@@ -3460,45 +3484,14 @@
             </div>
             <span class="panel-collapsed-title">Info</span>
             <div class="tab-info-content">
-              <!-- Image -->
-              <div class="image-placeholder" style="margin-bottom: 16px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <path d="M21 15l-5-5L5 21"/>
-                </svg>
-                <span>Product image</span>
-              </div>
-
-              <!-- Quick Info -->
-              <div class="info-section">
-                <h4 class="info-section-title">Quick info</h4>
-                <div class="info-field">
-                  <div class="info-field-label">SKU</div>
-                  <div class="info-field-value" style="font-family: monospace;">SKU-2026-CHMP-001</div>
-                </div>
-                <div class="info-field">
-                  <div class="info-field-label">Status</div>
-                  <div class="info-field-value">
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                      <span style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></span>
-                      Draft
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Validation -->
-              <div class="info-section">
-                <h4 class="info-section-title">Validation</h4>
-                <div class="info-field">
-                  <div class="info-field-label">Required fields</div>
-                  <div class="info-field-value">3 of 5 complete</div>
-                </div>
-                <div class="info-field">
-                  <div class="info-field-label">Errors</div>
-                  <div class="info-field-value" style="color: #dc2626;">2 validation errors</div>
-                </div>
+              <div class="side-panel-placeholders">
+                <div class="side-panel-placeholder-rect h-120 w-100"></div>
+                <div class="side-panel-placeholder-rect h-16 w-60"></div>
+                <div class="side-panel-placeholder-rect h-12 w-90"></div>
+                <div class="side-panel-placeholder-rect h-12 w-80"></div>
+                <div class="side-panel-placeholder-rect h-16 w-50"></div>
+                <div class="side-panel-placeholder-rect h-12 w-90"></div>
+                <div class="side-panel-placeholder-rect h-12 w-70"></div>
               </div>
             </div>
           </aside>
@@ -3531,59 +3524,22 @@
           </div>
         </div>
         <div class="ai-popover-content">
-          <div class="ai-messages">
-            <div class="ai-message assistant">
-              <div class="ai-message-avatar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-                </svg>
-              </div>
-              <div class="ai-message-bubble">
-                Hi! I'm your AI assistant. I can help you with product data, answer questions about attributes, or suggest improvements. What would you like help with?
-              </div>
-            </div>
-            <div class="ai-message user">
-              <div class="ai-message-avatar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-              <div class="ai-message-bubble">
-                Can you check the data quality for this product?
-              </div>
-            </div>
-            <div class="ai-message assistant">
-              <div class="ai-message-avatar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-                </svg>
-              </div>
-              <div class="ai-message-bubble">
-                I've analyzed the product data. Here's what I found:<br><br>
-                <strong>Issues detected:</strong><br>
-                • Missing marketing description (English)<br>
-                • Short title could be more descriptive<br>
-                • No alternate images provided<br><br>
-                <strong>Completeness score:</strong> 72%<br><br>
-                Would you like me to suggest improvements for any of these?
-              </div>
-            </div>
-          </div>
-          <div class="ai-suggestions">
-            <button class="ai-suggestion">Generate description</button>
-            <button class="ai-suggestion">Improve title</button>
-            <button class="ai-suggestion">Find similar products</button>
+          <div class="side-panel-placeholders">
+            <div class="side-panel-placeholder-rect h-16 w-70"></div>
+            <div class="side-panel-placeholder-rect h-12 w-100"></div>
+            <div class="side-panel-placeholder-rect h-12 w-90"></div>
+            <div class="side-panel-placeholder-rect h-12 w-80"></div>
+            <div class="side-panel-placeholder-rect h-16 w-60"></div>
+            <div class="side-panel-placeholder-rect h-12 w-100"></div>
+            <div class="side-panel-placeholder-rect h-12 w-90"></div>
+            <div class="side-panel-placeholder-rect h-12 w-80"></div>
           </div>
         </div>
         <div class="ai-popover-input">
-          <input type="text" placeholder="Ask me anything..." />
-          <button class="ai-send-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
+          <div class="side-panel-placeholder-row" style="width: 100%;">
+            <div class="side-panel-placeholder-rect h-24 w-100"></div>
+            <div class="side-panel-placeholder-rect h-24" style="width: 40px;"></div>
+          </div>
         </div>
         <div class="resize-handle resize-handle-left" data-panel="aiPanel"></div>
       </aside>
@@ -4051,7 +4007,7 @@
     }
 
     function isSingleLineTruncateVariant(variant) {
-      return variant === 'implementation' || variant === 'test' ||
+      return variant === 'implementation' || variant === 'option-5-pdx' || variant === 'test' ||
         variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4';
     }
 
@@ -4840,7 +4796,8 @@
         'with-border': 'Subtle border, no background, (No value), same font color as editable.',
         'no-value': 'No border, subtle background, (No value), same font color as editable.',
         'no-border': 'No border, no background, (No value), same font color as editable, and separators between read-only multivalue fields.',
-        'option-4': 'Like Option 3, but no separator between read-only multi-value rows; subtle 1-based numbering on read-only rows when there are two or more values.',
+        'option-4': 'Like Option 3, but no separator between read-only multi-value rows; subtle zero-padded labels (01, 02, …) on read-only rows when there are two or more values.',
+        'option-5-pdx': 'Same read-only field styling as Implementation; read-only attribute labels use the same primary text color as the values (not the default muted label tone).',
         test: 'Test mode: combine radio choices below to try different read-only behaviors.'
       };
 
@@ -4855,6 +4812,7 @@
         area.setAttribute('data-ro-test-border', getTestValue('border') || 'none');
         area.setAttribute('data-ro-test-bg', getTestValue('bg') || 'none');
         area.setAttribute('data-ro-test-placeholder', getTestValue('placeholder') || 'none');
+        area.setAttribute('data-ro-test-divider', getTestValue('divider') || 'numeric');
       }
 
       function applyVariant(v) {
@@ -5357,33 +5315,18 @@
       </div>
     </div>
     <div class="ai-popover-content">
-      <div class="ai-messages">
-        <div class="ai-message assistant">
-          <div class="ai-message-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-            </svg>
-          </div>
-          <div class="ai-message-bubble">
-            Hi! I'm your AI assistant. I can help you with product data, answer questions about attributes, or suggest improvements. What would you like help with?
-          </div>
-        </div>
-      </div>
-      <div class="ai-suggestions">
-        <button class="ai-suggestion">Check data quality</button>
-        <button class="ai-suggestion">Suggest descriptions</button>
-        <button class="ai-suggestion">Find missing attributes</button>
-        <button class="ai-suggestion">Compare products</button>
+      <div class="side-panel-placeholders tight">
+        <div class="side-panel-placeholder-rect h-16 w-70"></div>
+        <div class="side-panel-placeholder-rect h-12 w-100"></div>
+        <div class="side-panel-placeholder-rect h-12 w-90"></div>
+        <div class="side-panel-placeholder-rect h-12 w-80"></div>
       </div>
     </div>
     <div class="ai-popover-input">
-      <input type="text" placeholder="Ask me anything..." />
-      <button class="ai-send-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
+      <div class="side-panel-placeholder-row" style="width: 100%;">
+        <div class="side-panel-placeholder-rect h-24 w-100"></div>
+        <div class="side-panel-placeholder-rect h-24" style="width: 40px;"></div>
+      </div>
     </div>
   </div>
 
