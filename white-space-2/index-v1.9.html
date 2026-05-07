@@ -40,6 +40,7 @@
       --test-divider-weight: 2px;
       --test-divider-dot-length: 2px;
       --test-divider-pattern-length: 8px; /* dot + gap */
+      --test-divider-gap: 16px; /* total vertical space inserted between rows */
     }
 
     /* Reset */
@@ -1773,14 +1774,18 @@
     }
 
     .ro-variant-bar {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px 12px;
+      display: block;
       padding: 8px 20px;
       border-bottom: 1px solid var(--color-border);
       background: var(--color-bg-gray);
       flex-shrink: 0;
+    }
+
+    .ro-variant-bar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .ro-variant-bar-label {
@@ -1794,6 +1799,33 @@
       flex-wrap: wrap;
       gap: 6px;
       align-items: center;
+    }
+
+    .ro-variant-controls {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .ro-variant-bar.is-collapsed .ro-variant-controls {
+      display: none;
+    }
+
+    .ro-variant-collapse-btn {
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-text-secondary);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 1.3;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .ro-variant-collapse-btn:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text);
     }
 
     .ro-variant-btn {
@@ -2801,11 +2833,16 @@
     }
 
     /* Test mode: optional divider line between read-only multi-value rows. */
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .tab-content.is-read-only .multi-value-list,
+    .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .form-row.is-read-only .multi-value-list {
+      gap: 16px;
+    }
+
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .tab-content.is-read-only .multi-value-item + .multi-value-item,
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .form-row.is-read-only .multi-value-item + .multi-value-item {
       position: relative;
-      margin-top: 8px;
-      padding-top: 10px;
+      margin-top: 0;
+      padding-top: var(--test-divider-gap);
     }
 
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-field-divider="none"]) .tab-content.is-read-only .multi-value-item + .multi-value-item::before,
@@ -2847,6 +2884,11 @@
         var(--test-divider-color) 0 var(--test-divider-dot-length),
         transparent var(--test-divider-dot-length) var(--test-divider-pattern-length)
       );
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider-style="solid"] .tab-content.is-read-only .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider-style="solid"] .form-row.is-read-only .multi-value-item + .multi-value-item::before {
+      border-top-width: 1px;
     }
 
     /* In Test mode, focus always uses full 4-side blue border + gray fill. */
@@ -3505,86 +3547,91 @@
           </div>
 
           <div class="ro-variant-bar" role="group" aria-label="Read-only appearance variants">
-            <span class="ro-variant-bar-label">Read-only look (experiment)</span>
-            <div class="ro-variant-options">
-              <button type="button" class="ro-variant-btn active" data-ro-variant="implementation" title="No border; primary text at 87% opacity; field widths follow size (small stays narrow)">Implementation</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without separators; read-only row labels 01, 02… when 2+ items">Option 4</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="option-5" title="Like Option 4, but read-only multi-value rows use 16x16 badges">Option 5</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="option-6-pdx" title="Same read-only field treatment as Implementation; attribute labels use the same text color as values">Option 6 (PDX)</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
+            <div class="ro-variant-bar-top">
+              <span class="ro-variant-bar-label">Read-only look (experiment)</span>
+              <button type="button" class="ro-variant-collapse-btn" id="roVariantCollapseBtn" aria-expanded="true" aria-controls="roVariantControls">Hide controls</button>
             </div>
-            <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
-            <div class="ro-variant-test-panel" id="roVariantTestPanel" hidden>
-              <div class="ro-test-row">
-                <span>1. Width of read-only fields</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-width" data-ro-test-group="width" data-ro-test-value="same" checked> same as editable</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-width" data-ro-test-group="width" data-ro-test-value="large"> large size</label>
-                </div>
+            <div class="ro-variant-controls" id="roVariantControls">
+              <div class="ro-variant-options">
+                <button type="button" class="ro-variant-btn active" data-ro-variant="implementation" title="No border; primary text at 87% opacity; field widths follow size (small stays narrow)">Implementation</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="with-border">Option 1</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without separators; read-only row labels 01, 02… when 2+ items">Option 4</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="option-5" title="Like Option 4, but read-only multi-value rows use 16x16 badges">Option 5</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="option-6-pdx" title="Same read-only field treatment as Implementation; attribute labels use the same text color as values">Option 6 (PDX)</button>
+                <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
               </div>
-              <div class="ro-test-row">
-                <span>2. Color of read-only fields text</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-color" data-ro-test-group="color" data-ro-test-value="same" checked> same as editable</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-color" data-ro-test-group="color" data-ro-test-value="subtle"> subtle color</label>
+              <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
+              <div class="ro-variant-test-panel" id="roVariantTestPanel" hidden>
+                <div class="ro-test-row">
+                  <span>1. Width of read-only fields</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-width" data-ro-test-group="width" data-ro-test-value="same" checked> same as editable</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-width" data-ro-test-group="width" data-ro-test-value="large"> large size</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>3. Border of read-only fields</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-border" data-ro-test-group="border" data-ro-test-value="none" checked> no border</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-border" data-ro-test-group="border" data-ro-test-value="subtle"> subtle border</label>
+                <div class="ro-test-row">
+                  <span>2. Color of read-only fields text</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-color" data-ro-test-group="color" data-ro-test-value="same" checked> same as editable</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-color" data-ro-test-group="color" data-ro-test-value="subtle"> subtle color</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>4. Background of read-only fields</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-bg" data-ro-test-group="bg" data-ro-test-value="none" checked> no background</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-bg" data-ro-test-group="bg" data-ro-test-value="subtle"> subtle background</label>
+                <div class="ro-test-row">
+                  <span>3. Border of read-only fields</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-border" data-ro-test-group="border" data-ro-test-value="none" checked> no border</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-border" data-ro-test-group="border" data-ro-test-value="subtle"> subtle border</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>5. Placeholder test on empty fields</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="none"> no placeholder</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="show" checked> show (No value)</label>
+                <div class="ro-test-row">
+                  <span>4. Background of read-only fields</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-bg" data-ro-test-group="bg" data-ro-test-value="none" checked> no background</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-bg" data-ro-test-group="bg" data-ro-test-value="subtle"> subtle background</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>6. Multi-value row marker style</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="none" checked> none</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="numeric"> 01, 02</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="dash"> -</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="bullet"> bullet</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="v-border"> vertical border</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="badge"> badge (16x16)</label>
+                <div class="ro-test-row">
+                  <span>5. Placeholder test on empty fields</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="none"> no placeholder</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-placeholder" data-ro-test-group="placeholder" data-ro-test-value="show" checked> show (No value)</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>7. Multi-value text spacing</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-spacing" data-ro-test-group="spacing" data-ro-test-value="default" checked> default</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-spacing" data-ro-test-group="spacing" data-ro-test-value="line-plus-8"> line-height + 8px</label>
+                <div class="ro-test-row">
+                  <span>6. Multi-value row marker style</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="none" checked> none</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="numeric"> 01, 02</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="dash"> -</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="bullet"> bullet</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="v-border"> vertical border</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="badge"> badge (16x16)</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>8. Divider between fields</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="none" checked> none</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-64"> line 64px</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-input"> line as input</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-page"> line as page</label>
+                <div class="ro-test-row">
+                  <span>7. Multi-value text spacing</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-spacing" data-ro-test-group="spacing" data-ro-test-value="default" checked> default</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-spacing" data-ro-test-group="spacing" data-ro-test-value="line-plus-8"> line-height + 8px</label>
+                  </div>
                 </div>
-              </div>
-              <div class="ro-test-row">
-                <span>9. Divider style</span>
-                <div class="ro-test-options">
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider-style" data-ro-test-group="divider-style" data-ro-test-value="solid" checked> solid</label>
-                  <label><input type="radio" class="ro-test-check" name="ro-test-divider-style" data-ro-test-group="divider-style" data-ro-test-value="dotted"> dotted</label>
+                <div class="ro-test-row">
+                  <span>8. Divider between fields</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="none" checked> none</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-64"> line 64px</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-input"> line as input</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-page"> line as page</label>
+                  </div>
+                </div>
+                <div class="ro-test-row">
+                  <span>9. Divider style</span>
+                  <div class="ro-test-options">
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider-style" data-ro-test-group="divider-style" data-ro-test-value="solid" checked> solid</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-divider-style" data-ro-test-group="divider-style" data-ro-test-value="dotted"> dotted</label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -5109,8 +5156,11 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
     function initRoVariantBar() {
       const area = document.querySelector('.tab-content-area');
       if (!area) return;
+      const bar = document.querySelector('.ro-variant-bar');
       const msg = document.getElementById('roVariantMessage');
       const testPanel = document.getElementById('roVariantTestPanel');
+      const controls = document.getElementById('roVariantControls');
+      const collapseBtn = document.getElementById('roVariantCollapseBtn');
       const variantMessages = {
         implementation: 'Current implementation baseline.',
         'with-border': 'Subtle border, no background, (No value), same font color as editable.',
@@ -5121,6 +5171,15 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
         'option-6-pdx': 'Same read-only field styling as Implementation; read-only attribute labels use the same primary text color as the values (not the default muted label tone).',
         test: 'Test mode: combine radio choices below to try different read-only behaviors.'
       };
+
+      function setVariantBarCollapsed(collapsed) {
+        if (bar) bar.classList.toggle('is-collapsed', collapsed);
+        if (controls) controls.hidden = !!collapsed;
+        if (collapseBtn) {
+          collapseBtn.setAttribute('aria-expanded', String(!collapsed));
+          collapseBtn.textContent = collapsed ? 'Show controls' : 'Hide controls';
+        }
+      }
 
       function getTestValue(group) {
         const checked = document.querySelector('.ro-test-check[data-ro-test-group="' + group + '"]:checked');
@@ -5169,6 +5228,14 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
         });
       });
 
+      if (collapseBtn) {
+        collapseBtn.addEventListener('click', () => {
+          const nextCollapsed = !(bar && bar.classList.contains('is-collapsed'));
+          setVariantBarCollapsed(nextCollapsed);
+        });
+      }
+
+      setVariantBarCollapsed(false);
       applyTestConfig();
       applyVariant(area.getAttribute('data-ro-variant') || 'implementation');
     }
