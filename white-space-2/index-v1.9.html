@@ -1082,7 +1082,7 @@
     }
 
     /* No placeholder in read-only unless “(No value)” is enabled. */
-    .tab-content-area:not([data-ro-variant="with-border"]):not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="option-4"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
+    .tab-content-area:not([data-ro-variant="with-border"]):not([data-ro-variant="no-value"]):not([data-ro-variant="no-border"]):not([data-ro-variant="option-4"]):not([data-ro-variant="option-5"]):not([data-ro-variant="test"]) .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="none"] .is-read-only .form-input::placeholder {
       color: transparent;
       opacity: 0;
@@ -1092,6 +1092,7 @@
     .tab-content-area[data-ro-variant="no-value"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="no-border"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input::placeholder,
+    .tab-content-area[data-ro-variant="option-5"] .is-read-only .form-input::placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .is-read-only .form-input::placeholder {
       color: rgba(0, 0, 0, 0.38);
       opacity: 1;
@@ -1101,8 +1102,8 @@
        beat variant read-only .form-static-value { color: 0.87 } (higher chain + !important). */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
@@ -1111,6 +1112,8 @@
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .tab-content.is-read-only .form-static-value.ro-empty-placeholder,
     .tab-content-area[data-ro-variant="test"][data-ro-test-placeholder="show"] .form-row.is-read-only .form-static-value.ro-empty-placeholder {
       color: rgba(0, 0, 0, 0.38) !important;
@@ -1123,10 +1126,12 @@
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .is-read-only .form-input,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input {
+    .tab-content-area[data-ro-variant="option-6-pdx"] .is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-input {
       border-bottom-color: transparent !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
@@ -1138,10 +1143,12 @@
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-5"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:hover:not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:hover:not(:focus),
-    .tab-content-area[data-ro-variant="option-5-pdx"] .is-read-only .form-input:hover:not(:focus),
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input:hover:not(:focus) {
+    .tab-content-area[data-ro-variant="option-6-pdx"] .is-read-only .form-input:hover:not(:focus),
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-input:hover:not(:focus) {
       border-bottom-color: transparent !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
@@ -1153,10 +1160,12 @@
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value {
+    .tab-content-area[data-ro-variant="option-6-pdx"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-static-value {
       border-bottom-color: transparent !important;
     }
 
@@ -1169,10 +1178,12 @@
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="option-4"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-5"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="implementation"] .is-read-only .form-input:focus,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input:focus,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .is-read-only .form-input:focus,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input:focus {
+    .tab-content-area[data-ro-variant="option-6-pdx"] .is-read-only .form-input:focus,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-input:focus {
       border: 1px solid #52BDEC !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
@@ -1185,31 +1196,38 @@
     .tab-content-area[data-ro-variant="no-border"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value:focus,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value:focus,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value:focus,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value:focus {
+    .tab-content-area[data-ro-variant="option-6-pdx"] .tab-content.is-read-only .form-static-value:focus,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-static-value:focus {
       border: 1px solid #52BDEC !important;
       border-bottom-width: 1px !important;
       border-bottom-style: solid !important;
       border-bottom-color: #52BDEC !important;
     }
 
-    /* Implementation / Option 5 (PDX): primary text at 87% (read-only contexts only). */
+    /* Implementation / Option 6 (PDX): primary text at 87% (read-only contexts only). */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only .form-static-value,
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-input,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-input,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only .form-static-value {
+    .tab-content-area[data-ro-variant="option-6-pdx"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only .form-static-value {
       color: rgba(0, 0, 0, 0.87);
     }
 
-    /* Option 5 (PDX): all attribute labels use the same primary tone as values. */
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-label {
+    /* Option 6 (PDX): all attribute labels use the same primary tone as values. */
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-label {
       color: rgba(0, 0, 0, 0.87);
+    }
+
+    /* Option 5: keep labels on the lighter label tone. */
+    .tab-content-area[data-ro-variant="option-5"] .form-label {
+      color: rgba(0, 0, 0, 0.60);
     }
 
     .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only .form-input,
@@ -1227,16 +1245,20 @@
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-input,
     .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-input,
     .tab-content-area[data-ro-variant="option-4"] .tab-content.is-read-only .form-static-value,
-    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value {
+    .tab-content-area[data-ro-variant="option-4"] .form-row.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-input,
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .form-static-value,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .form-static-value {
       color: rgba(0, 0, 0, 0.87);
     }
 
     /* Single-line read-only text inputs: overflow ellipsis (JS also fits text
-       where needed). All experiment variants + Implementation + Option 5 (PDX) + Test. */
+       where needed). All experiment variants + Implementation + Option 6 (PDX) + Test. */
     .tab-content-area[data-ro-variant="implementation"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="implementation"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
-    .tab-content-area[data-ro-variant="option-5-pdx"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
-    .tab-content-area[data-ro-variant="option-5-pdx"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="option-6-pdx"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
+    .tab-content-area[data-ro-variant="option-6-pdx"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="with-border"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="with-border"] .form-row.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
     .tab-content-area[data-ro-variant="no-value"] .tab-content.is-read-only input.form-input[readonly]:not(.textarea):not(:focus),
@@ -1327,10 +1349,10 @@
 
     /* Read-only width expansion (large band, same as .size-medium limits):
        only for numbers/dates (and similar), not small text. Mark rows with
-       data-ro-readonly-width="large". Implementation, Option 5 (PDX), and Test (same width)
+       data-ro-readonly-width="large". Implementation, Option 6 (PDX), and Test (same width)
        keep editable size-* widths for all fields. */
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-5-pdx"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
-    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-5-pdx"]):not([data-ro-variant="test"]) .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-6-pdx"]):not([data-ro-variant="test"]) .tab-content.is-read-only .form-row[data-ro-readonly-width="large"] .form-field,
+    .tab-content-area:not([data-ro-variant="implementation"]):not([data-ro-variant="option-6-pdx"]):not([data-ro-variant="test"]) .form-row.is-read-only[data-ro-readonly-width="large"] .form-field {
       flex: 1 1 auto;
       min-width: calc(21rem + 24px + 8px);
       max-width: calc(35rem + 24px + 8px);
@@ -2114,6 +2136,56 @@
         display: none !important;
         content: none !important;
       }
+      .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-list,
+      .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-list {
+        counter-reset: ro-mv-badge-idx 0;
+      }
+      .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item,
+      .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+      .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item::before {
+        counter-increment: ro-mv-badge-idx;
+        content: counter(ro-mv-badge-idx);
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
+        flex: 0 0 16px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        line-height: 1 !important;
+        color: rgba(0, 0, 0, 0.87) !important;
+        background: #fff !important;
+        border: 1px solid #d4d4d4 !important;
+        border-radius: 999px !important;
+        padding-top: 0 !important;
+        margin-top: 11px !important;
+        user-select: none;
+      }
+      .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item .input-wrapper,
+      .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item .input-wrapper {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+      .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item:only-child,
+      .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item:only-child {
+        display: block !important;
+      }
+      .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item:only-child::before,
+      .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item:only-child::before {
+        display: none !important;
+        content: none !important;
+      }
       .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-list,
       .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-list {
         counter-reset: ro-test-mv-idx 0;
@@ -2148,10 +2220,39 @@
       .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .tab-content.is-read-only .multi-value-item::before,
       .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .form-row.is-read-only .multi-value-item::before {
         content: "–";
+        flex: 0 0 0.75rem !important;
+        min-width: 0.75rem !important;
+        text-align: center !important;
       }
       .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .tab-content.is-read-only .multi-value-item::before,
       .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .form-row.is-read-only .multi-value-item::before {
         content: "•";
+        flex: 0 0 0.75rem !important;
+        min-width: 0.75rem !important;
+        text-align: center !important;
+      }
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="badge"] .tab-content.is-read-only .multi-value-item::before,
+      .tab-content-area[data-ro-variant="test"][data-ro-test-divider="badge"] .form-row.is-read-only .multi-value-item::before {
+        counter-increment: ro-test-mv-idx;
+        content: counter(ro-test-mv-idx);
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
+        flex: 0 0 16px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        line-height: 1 !important;
+        color: rgba(0, 0, 0, 0.60) !important;
+        background: #fff !important;
+        border: 1px solid #d4d4d4 !important;
+        border-radius: 999px !important;
+        padding-top: 0 !important;
+        margin-top: 10px !important;
       }
       .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item .input-wrapper,
       .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-item .input-wrapper {
@@ -2176,7 +2277,7 @@
 
     .form-input {
       width: 100%;
-      padding: 8px 12px;
+      padding: 8px 8px;
       border: 1px solid transparent;
       border-bottom-color: #D4D4D4;
       border-radius: 4px;
@@ -2249,7 +2350,7 @@
       padding: 8px 12px;
       font-size: 14px;
       line-height: 1.4;
-      color: rgba(0, 0, 0, 0.60);
+      color: rgba(0, 0, 0, 0.87);
       background: transparent;
       border: 1px solid transparent;
       border-bottom-color: #F5F5F5;
@@ -2388,6 +2489,63 @@
       content: none;
     }
 
+    /* Option 5: Option 4 variant with numbered 16x16 badges. */
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-list,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-list {
+      counter-reset: ro-mv-badge-idx 0;
+    }
+
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item::before {
+      counter-increment: ro-mv-badge-idx;
+      content: counter(ro-mv-badge-idx);
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      max-width: 16px;
+      flex: 0 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+      color: rgba(0, 0, 0, 0.60);
+      background: #fff;
+      border: 1px solid #d4d4d4;
+      border-radius: 999px;
+      padding-top: 0;
+      margin-top: 11px;
+      user-select: none;
+    }
+
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item .input-wrapper,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item .input-wrapper {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item:only-child,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item:only-child {
+      display: block;
+    }
+
+    .tab-content-area[data-ro-variant="option-5"] .tab-content.is-read-only .multi-value-item:only-child::before,
+    .tab-content-area[data-ro-variant="option-5"] .form-row.is-read-only .multi-value-item:only-child::before {
+      display: none;
+      content: none;
+    }
+
     /* Test mode: try Option 4-style row markers with different symbols. */
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-list,
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .form-row.is-read-only .multi-value-list {
@@ -2427,11 +2585,41 @@
     .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .tab-content.is-read-only .multi-value-item::before,
     .tab-content-area[data-ro-variant="test"][data-ro-test-divider="dash"] .form-row.is-read-only .multi-value-item::before {
       content: "–";
+      flex: 0 0 0.75rem;
+      min-width: 0.75rem;
+      text-align: center;
     }
 
     .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .tab-content.is-read-only .multi-value-item::before,
     .tab-content-area[data-ro-variant="test"][data-ro-test-divider="bullet"] .form-row.is-read-only .multi-value-item::before {
       content: "•";
+      flex: 0 0 0.75rem;
+      min-width: 0.75rem;
+      text-align: center;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="badge"] .tab-content.is-read-only .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-divider="badge"] .form-row.is-read-only .multi-value-item::before {
+      counter-increment: ro-test-mv-idx;
+      content: counter(ro-test-mv-idx);
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      max-width: 16px;
+      flex: 0 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+      color: rgba(0, 0, 0, 0.60);
+      background: #fff;
+      border: 1px solid #d4d4d4;
+      border-radius: 999px;
+      padding-top: 0;
+      margin-top: 10px;
     }
 
     .tab-content-area[data-ro-variant="test"]:not([data-ro-test-divider="none"]) .tab-content.is-read-only .multi-value-item .input-wrapper,
@@ -3218,7 +3406,8 @@
               <button type="button" class="ro-variant-btn" data-ro-variant="no-value">Option 2</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="no-border">Option 3</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="option-4" title="Like Option 3 without separators; read-only row labels 01, 02… when 2+ items">Option 4</button>
-              <button type="button" class="ro-variant-btn" data-ro-variant="option-5-pdx" title="Same read-only field treatment as Implementation; attribute labels use the same text color as values">Option 5 (PDX)</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="option-5" title="Like Option 4, but read-only multi-value rows use 16x16 badges">Option 5</button>
+              <button type="button" class="ro-variant-btn" data-ro-variant="option-6-pdx" title="Same read-only field treatment as Implementation; attribute labels use the same text color as values">Option 6 (PDX)</button>
               <button type="button" class="ro-variant-btn" data-ro-variant="test">Test</button>
             </div>
             <div class="ro-variant-message" id="roVariantMessage" aria-live="polite"></div>
@@ -3264,6 +3453,7 @@
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="numeric" checked> 01, 02</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="dash"> -</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="bullet"> bullet</label>
+                  <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="badge"> badge (16x16)</label>
                   <label><input type="radio" class="ro-test-check" name="ro-test-divider" data-ro-test-group="divider" data-ro-test-value="none"> none</label>
                 </div>
               </div>
@@ -4007,8 +4197,8 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
     }
 
     function isSingleLineTruncateVariant(variant) {
-      return variant === 'implementation' || variant === 'option-5-pdx' || variant === 'test' ||
-        variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4';
+      return variant === 'implementation' || variant === 'option-6-pdx' || variant === 'test' ||
+        variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4' || variant === 'option-5';
     }
 
     function syncImplementationReadOnlyTruncation(scope) {
@@ -4759,7 +4949,7 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
     function refreshReadOnlyPlaceholders(variant) {
       const area = document.querySelector('.tab-content-area');
       const testPlaceholder = area ? area.getAttribute('data-ro-test-placeholder') : null;
-      const showNoValue = variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4' || (variant === 'test' && testPlaceholder === 'show');
+      const showNoValue = variant === 'with-border' || variant === 'no-value' || variant === 'no-border' || variant === 'option-4' || variant === 'option-5' || (variant === 'test' && testPlaceholder === 'show');
 
       document.querySelectorAll('.tab-content.is-read-only input.form-input[readonly], .tab-content.is-read-only textarea.form-input[readonly], .form-row.is-read-only input.form-input[readonly], .form-row.is-read-only textarea.form-input[readonly]').forEach(el => {
         if (showNoValue && !String(el.value || '').trim()) {
@@ -4797,7 +4987,8 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
         'no-value': 'No border, subtle background, (No value), same font color as editable.',
         'no-border': 'No border, no background, (No value), same font color as editable, and separators between read-only multivalue fields.',
         'option-4': 'Like Option 3, but no separator between read-only multi-value rows; subtle zero-padded labels (01, 02, …) on read-only rows when there are two or more values.',
-        'option-5-pdx': 'Same read-only field styling as Implementation; read-only attribute labels use the same primary text color as the values (not the default muted label tone).',
+        'option-5': 'Like Option 4, but read-only multi-value rows use compact 16x16 number badges.',
+        'option-6-pdx': 'Same read-only field styling as Implementation; read-only attribute labels use the same primary text color as the values (not the default muted label tone).',
         test: 'Test mode: combine radio choices below to try different read-only behaviors.'
       };
 
