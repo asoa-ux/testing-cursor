@@ -2872,7 +2872,10 @@
 
     .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-64"] .tab-content.is-read-only .multi-value-item + .multi-value-item::before,
     .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-64"] .form-row.is-read-only .multi-value-item + .multi-value-item::before {
-      width: 64px;
+      width: 16px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
     }
 
     .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-input"] .tab-content.is-read-only .multi-value-item + .multi-value-item::before,
@@ -3691,7 +3694,7 @@
                   <span>8. Divider between fields</span>
                   <div class="ro-test-options">
                     <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="none" checked> none</label>
-                    <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-64"> line 64px</label>
+                    <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-64"> line 16px</label>
                     <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-input"> line as input</label>
                     <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="line-page"> line as page</label>
                     <label><input type="radio" class="ro-test-check" name="ro-test-field-divider" data-ro-test-group="field-divider" data-ro-test-value="m-dash"> m dash</label>
@@ -5281,7 +5284,7 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
           area.setAttribute('data-ro-test-placeholder', 'show');
           area.setAttribute('data-ro-test-divider', 'none');
           area.setAttribute('data-ro-test-spacing', 'default');
-          area.setAttribute('data-ro-test-field-divider', 'm-dash');
+          area.setAttribute('data-ro-test-field-divider', 'line-64');
           area.setAttribute('data-ro-test-divider-style', 'solid');
         }
         document.querySelectorAll('.ro-variant-btn').forEach(b => {
