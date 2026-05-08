@@ -2890,6 +2890,61 @@
       width: auto;
     }
 
+    /* Proposal preset: 16px centered line only for multi-line-capable lists. */
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-item + .multi-value-item::before {
+      content: none;
+      border-top: none;
+      background: none;
+    }
+
+    /* In multiline-only divider mode, keep default editable spacing unless
+       a line is actually being rendered for multiline-capable lists. */
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list {
+      gap: 8px;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-item + .multi-value-item {
+      padding-top: 0;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(textarea.form-input) .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(textarea.form-input) .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(select.form-input[data-ro-wrap="true"]) .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(select.form-input[data-ro-wrap="true"]) .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(.ro-select-proxy-wrap) .multi-value-item + .multi-value-item::before,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(.ro-select-proxy-wrap) .multi-value-item + .multi-value-item::before {
+      content: "";
+      width: 16px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      top: 8px;
+      border-top-width: var(--test-divider-weight);
+      border-top-style: solid;
+      border-top-color: var(--test-divider-color);
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(textarea.form-input),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(textarea.form-input),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(select.form-input[data-ro-wrap="true"]),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(select.form-input[data-ro-wrap="true"]),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(.ro-select-proxy-wrap),
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(.ro-select-proxy-wrap) {
+      gap: 0;
+    }
+
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(textarea.form-input) .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(textarea.form-input) .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(select.form-input[data-ro-wrap="true"]) .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(select.form-input[data-ro-wrap="true"]) .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .tab-content.is-read-only .multi-value-list:has(.ro-select-proxy-wrap) .multi-value-item + .multi-value-item,
+    .tab-content-area[data-ro-variant="test"][data-ro-test-field-divider="line-16-multiline"] .form-row.is-read-only .multi-value-list:has(.ro-select-proxy-wrap) .multi-value-item + .multi-value-item {
+      padding-top: 16px;
+    }
+
     /* m-dash divider is shown only for multi-line-capable value lists. */
     .tab-content-area:is([data-ro-variant="test"], [data-ro-variant="proposal"])[data-ro-test-field-divider="m-dash"] .tab-content.is-read-only .multi-value-item + .multi-value-item,
     .tab-content-area:is([data-ro-variant="test"], [data-ro-variant="proposal"])[data-ro-test-field-divider="m-dash"] .form-row.is-read-only .multi-value-item + .multi-value-item {
@@ -5284,7 +5339,7 @@ Second paragraph: this line is intentionally separated to validate spacing, wrap
           area.setAttribute('data-ro-test-placeholder', 'show');
           area.setAttribute('data-ro-test-divider', 'none');
           area.setAttribute('data-ro-test-spacing', 'default');
-          area.setAttribute('data-ro-test-field-divider', 'line-64');
+          area.setAttribute('data-ro-test-field-divider', 'line-16-multiline');
           area.setAttribute('data-ro-test-divider-style', 'solid');
         }
         document.querySelectorAll('.ro-variant-btn').forEach(b => {
