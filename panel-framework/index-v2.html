@@ -93,6 +93,27 @@
     padding: 2px;
     margin-left: auto;
   }
+  .ai-chat-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, color 120ms;
+  }
+  .ai-chat-btn:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+  .ai-chat-btn.active {
+    background: #e0e7ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
+  }
   .mode-btn {
     padding: 4px 14px;
     border: none;
@@ -840,6 +861,7 @@
     <button class="mode-btn"        data-mode="bulk"    role="tab" aria-selected="false">Bulk</button>
     <button class="mode-btn active" data-mode="details" role="tab" aria-selected="true">Details</button>
   </div>
+  <button class="ai-chat-btn" id="aiChatBtn" aria-expanded="false" aria-controls="panel-rightB">Chat with AI</button>
 </div>
 
 <div class="app mode-details" id="app">
@@ -1135,6 +1157,7 @@ window.PanelFramework = (() => {
   const REM = 16;
   const PANEL_MIN     = 20 * REM;   // 320px
   const COLLAPSED_W   = 64;
+  const AI_PANEL_ID   = 'rightB';
 
   // ---------- Per-mode content minimums ----------
   // Details = form layout, fits comfortably in 21rem.
@@ -1256,11 +1279,14 @@ window.PanelFramework = (() => {
   const $hamburgerMenuLeft  = document.getElementById('hamburgerMenuLeft');
   const $hamburgerMenuRight = document.getElementById('hamburgerMenuRight');
   const $overlayBackdrop    = document.getElementById('overlayBackdrop');
+  const $aiChatBtn          = document.getElementById('aiChatBtn');
 
   let activeOverlayId = null; // panel currently shown as overlay in hamburger mode
   let currentBp       = null; // 'bp4' | 'bp3' | 'bp2' | 'bp1' | 'hamburger'
 
   const panelEl = (id) => document.querySelector(`.panel[data-id="${id}"]`);
+  const isAiPanel = (id) => id === AI_PANEL_ID;
+  const closedWidthFor = (id) => isAiPanel(id) ? 0 : COLLAPSED_W;
 
   // ---------- Event bus (public) ----------
   // Events emitted:
@@ -1307,6 +1333,7 @@ window.PanelFramework = (() => {
     // In hamburger mode, panels are only visible as overlays — the toggle
     // button is a "close overlay" action, so use an X instead of a chevron.
     if (currentBp === 'hamburger') return closeIcon();
+    if (isAiPanel(id)) return closeIcon();
 
     const { side } = PANELS[id];
     const open = state[id].open;
@@ -1327,16 +1354,32 @@ window.PanelFramework = (() => {
     if (!isOverlay) {
       el.classList.toggle('expanded',  s.open);
       el.classList.toggle('collapsed', !s.open);
-      el.style.width = (s.open ? s.width : COLLAPSED_W) + 'px';
+      el.style.width = (s.open ? s.width : closedWidthFor(id)) + 'px';
+      if (isAiPanel(id) && !s.open && currentBp !== 'hamburger') {
+        el.style.display = 'none';
+      } else {
+        el.style.display = '';
+      }
     }
 
     const btn = el.querySelector('[data-action="toggle"]');
     btn.innerHTML = toggleIconFor(id);
     const expanded = isOverlay || s.open;
-    const action = isOverlay ? 'Close' : (s.open ? 'Collapse' : 'Expand');
+    const action = isOverlay
+      ? 'Close'
+      : (isAiPanel(id) ? 'Close' : (s.open ? 'Collapse' : 'Expand'));
     btn.title = action;
     btn.setAttribute('aria-label', `${action} ${PANELS[id].title}`);
     btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  function updateAiChatButton() {
+    if (!$aiChatBtn) return;
+    const isOpen = currentBp === 'hamburger'
+      ? activeOverlayId === AI_PANEL_ID
+      : state[AI_PANEL_ID].open;
+    $aiChatBtn.classList.toggle('active', isOpen);
+    $aiChatBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
   function applyAll() {
@@ -1388,6 +1431,7 @@ window.PanelFramework = (() => {
       renderHamburgerMenu('left');
       renderHamburgerMenu('right');
     }
+    updateAiChatButton();
   }
 
   // ---------- Breakpoints ----------
@@ -1565,6 +1609,7 @@ window.PanelFramework = (() => {
 
   function renderHamburgerMenu(side) {
     const items = activePanels()
+      .filter(id => !isAiPanel(id))
       .filter(id => PANELS[id].side === side)
       .map(id => {
         const d = PANELS[id];
@@ -1630,12 +1675,14 @@ window.PanelFramework = (() => {
     el.classList.remove('collapsed');
     el.classList.add('expanded', 'overlay-active');
     el.style.width = ''; // CSS controls overlay width
+    el.style.display = '';
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     // applyPanel renders the close (X) icon when currentBp === 'hamburger'
     // and updates ARIA state. Single render path → no icon drift.
     applyPanel(id);
     $overlayBackdrop.classList.add('open');
+    updateAiChatButton();
 
     // Move focus to the close button — first interactive element a user
     // is likely to want, and it satisfies the dialog-pattern requirement
@@ -1657,6 +1704,7 @@ window.PanelFramework = (() => {
       activeOverlayId = null;
     }
     $overlayBackdrop.classList.remove('open');
+    updateAiChatButton();
 
     // Return focus to whatever opened the overlay (hamburger trigger or
     // menu item). Skip if it's no longer in the DOM or in the document.
@@ -1700,7 +1748,7 @@ window.PanelFramework = (() => {
     }
     let totalUsed = 0;
     for (const id of activePanels()) {
-      totalUsed += state[id].open ? state[id].width : COLLAPSED_W;
+      totalUsed += state[id].open ? state[id].width : closedWidthFor(id);
     }
     let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
     if (overflow <= 0) return;
@@ -1724,6 +1772,18 @@ window.PanelFramework = (() => {
     const modeBtn = e.target.closest('.mode-btn');
     if (modeBtn) {
       setMode(modeBtn.dataset.mode);
+      return;
+    }
+    const aiBtn = e.target.closest('#aiChatBtn');
+    if (aiBtn) {
+      e.stopPropagation();
+      if (currentBp === 'hamburger') {
+        if (activeOverlayId === AI_PANEL_ID) closeOverlay();
+        else openOverlay(AI_PANEL_ID);
+      } else {
+        togglePanel(AI_PANEL_ID);
+      }
+      updateAiChatButton();
       return;
     }
 
@@ -1820,7 +1880,7 @@ window.PanelFramework = (() => {
         startOtherWidths[pid] = state[pid].width;
         otherMinSum += PANEL_MIN;
       } else {
-        otherMinSum += COLLAPSED_W;
+        otherMinSum += closedWidthFor(pid);
       }
     }
     // Hard upper bound: when every other open panel is squeezed to its
@@ -1873,7 +1933,7 @@ window.PanelFramework = (() => {
     for (const pid of activePanels()) {
       totalUsed += pid === drag.id
         ? desired
-        : (state[pid].open ? state[pid].width : COLLAPSED_W);
+        : (state[pid].open ? state[pid].width : closedWidthFor(pid));
     }
     let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
 
