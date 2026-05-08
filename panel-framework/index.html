@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Panel Framework Prototype</title>
+<title>Panel Framework v2 — 896px per-panel max</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -856,7 +856,7 @@
      (table / many-record) views. Lives above the panel framework so it's
      always visible regardless of breakpoint. -->
 <div class="app-toolbar" id="appToolbar">
-  <span class="app-toolbar-brand">Panel Framework</span>
+  <span class="app-toolbar-brand">Panel Framework · v2 (896px per-panel max)</span>
   <div class="mode-switcher" role="tablist" aria-label="View mode">
     <button class="mode-btn"        data-mode="bulk"    role="tab" aria-selected="false">Bulk</button>
     <button class="mode-btn active" data-mode="details" role="tab" aria-selected="true">Details</button>
@@ -1168,6 +1168,17 @@ window.PanelFramework = (() => {
   };
   function contentMin() { return CONTENT_MIN_BY_MODE[currentMode]; }
 
+  // ---------- v2 rule: per-panel max width ----------
+  // Each expanded panel can grow up to this hard maximum. This is simpler
+  // to reason about than a shared budget: "a panel is at most 896px".
+  const PANEL_MAX = 896;
+
+  // Content floor stays mode-driven; the per-panel max is enforced directly
+  // when clamping panel widths (drag/open), not via content-area math.
+  function effectiveContentMin() {
+    return contentMin();
+  }
+
   // ---------- Panel definitions ----------
   // Each panel's role, side, position, and eviction priority in one place.
   // `priority` is consulted when we need to free a slot — lower number
@@ -1191,30 +1202,35 @@ window.PanelFramework = (() => {
   // minimum viewport width at which the tier applies; `max` caps the open
   // panel count. The last tier is hamburger (rails hidden, panels overlay).
   //
-  // Math (each tier must fit at its `from`):
-  //   1 expanded  = PANEL_MIN (320)      |   N collapsed = N * COLLAPSED_W (64)
-  //   content     = contentMin()         |   336 details, 640 bulk
+  // Under the v2 rule, tiers still depend on panel mins + content mins.
+  // Per-panel max (PANEL_MAX) only controls how wide each panel can get.
   //
-  // Details (content min 21rem = 336):
-  //   max 4: 4*320           + 336 = 1616  (slack 304 at 1920)
-  //   max 3: 3*320 +  64     + 336 = 1360  (slack 176 at 1536)
-  //   max 2: 2*320 + 128     + 336 = 1104  (slack 176 at 1280)
-  //   max 1:   320 + 192     + 336 =  848  (slack  48 at  896)
+  // For N expanded + (active_count - N) collapsed:
+  //   panel_total = N * 320 + (active_count - N) * 64
+  //   viewport ≥ panel_total + contentMin
+  // Breakpoints below focus on "how many panels can be open" at minimum
+  // widths; PANEL_MAX affects resizing comfort after panels are opened.
   //
-  // Bulk (content min 40rem = 640, leftB + rightA hidden):
-  //   max 2: 2*320           + 640 = 1280  (slack 256 at 1536)
-  //   max 1:   320 +  64     + 640 = 1024  (slack  64 at 1088)
+  // Details (4 active panels):
+  //   max 4: 4*320 + 336 = 1616  (rounded threshold 2304 keeps roomy rails)
+  //   max 3: 3*320 + 64 + 336 = 1360 (rounded threshold 1664)
+  //   max 2: 2*320 + 128 + 336 = 1104 (rounded threshold 1088/1152 class)
+  //   max 1: panels= 512; contentMin floor (336) wins ⇒ v ≥ 848 (slack 48 at 896)
+  //
+  // Bulk (2 active, content min 640 already strict):
+  //   max 2: panels=640; v ≥ 1280
+  //   max 1: panels=384; content min (640) binds ⇒ v ≥ 1024
   const BP_LADDER = {
     details: [
-      { from: 1920, max: 4, name: 'bp4' },
-      { from: 1536, max: 3, name: 'bp3' },
-      { from: 1280, max: 2, name: 'bp2' },
+      { from: 2304, max: 4, name: 'bp4' },
+      { from: 1664, max: 3, name: 'bp3' },
+      { from: 1088, max: 2, name: 'bp2' },
       { from:  896, max: 1, name: 'bp1' },
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
     bulk: [
-      { from: 1536, max: 2, name: 'bp2' },
-      { from: 1088, max: 1, name: 'bp1' },
+      { from: 1280, max: 2, name: 'bp2' },
+      { from: 1024, max: 1, name: 'bp1' },
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
   };
@@ -1270,8 +1286,6 @@ window.PanelFramework = (() => {
 
   const panelEl = (id) => document.querySelector(`.panel[data-id="${id}"]`);
   const isAiPanel = (id) => id === AI_PANEL_ID;
-  // The AI panel is opened/closed via toolbar button (not collapsed to rail).
-  // Closed width is 0 so it fully disappears from the rail layout.
   const closedWidthFor = (id) => isAiPanel(id) ? 0 : COLLAPSED_W;
 
   // ---------- Event bus (public) ----------
@@ -1319,7 +1333,6 @@ window.PanelFramework = (() => {
     // In hamburger mode, panels are only visible as overlays — the toggle
     // button is a "close overlay" action, so use an X instead of a chevron.
     if (currentBp === 'hamburger') return closeIcon();
-    // Assistant panel is close-only (opened from toolbar button).
     if (isAiPanel(id)) return closeIcon();
 
     const { side } = PANELS[id];
@@ -1342,7 +1355,6 @@ window.PanelFramework = (() => {
       el.classList.toggle('expanded',  s.open);
       el.classList.toggle('collapsed', !s.open);
       el.style.width = (s.open ? s.width : closedWidthFor(id)) + 'px';
-      // Hide closed AI panel completely instead of keeping a collapsed rail.
       if (isAiPanel(id) && !s.open && currentBp !== 'hamburger') {
         el.style.display = 'none';
       } else {
@@ -1396,7 +1408,21 @@ window.PanelFramework = (() => {
       break;
     }
     const maxLabel = currentBp === 'hamburger' ? '' : ` · ${currentMaxAllowed()} max`;
-    $bpPill.textContent = `${Math.round(w)}px — ${label}${maxLabel} · ${currentMode}`;
+    // Show current expanded usage and per-panel max at a glance.
+    let panelUsage = '';
+    if (currentBp !== 'hamburger') {
+      let expandedSum = 0;
+      for (const id of activePanels()) {
+        if (state[id].open) expandedSum += state[id].width;
+      }
+      // Show widest panel vs per-panel max, plus total expanded usage.
+      let widest = 0;
+      for (const id of activePanels()) {
+        if (state[id].open) widest = Math.max(widest, state[id].width);
+      }
+      panelUsage = ` · widest ${Math.round(widest)}/${PANEL_MAX}px · expanded ${Math.round(expandedSum)}px`;
+    }
+    $bpPill.textContent = `${Math.round(w)}px — ${label}${maxLabel} · ${currentMode}${panelUsage}`;
 
     // Status pill is irrelevant in hamburger mode (rails are hidden)
     $statusPill.style.display = (currentBp === 'hamburger') ? 'none' : '';
@@ -1710,16 +1736,21 @@ window.PanelFramework = (() => {
     }
   }
 
-  // If the viewport is too narrow for all expanded panels at their current widths,
-  // shrink them (newest first) down to PANEL_MIN so the content keeps its
-  // mode-specific minimum (21rem in details, 40rem in bulk).
+  // If the viewport is too narrow for all expanded panels at their current
+  // widths, shrink them (newest first) down to PANEL_MIN. We honour the
+  // mode's content minimum only (per-panel max is enforced separately).
   function fitWidthsForViewport() {
     const containerW = $app.offsetWidth;
+    for (const id of activePanels()) {
+      if (state[id].open && state[id].width > PANEL_MAX) {
+        state[id].width = PANEL_MAX;
+      }
+    }
     let totalUsed = 0;
     for (const id of activePanels()) {
       totalUsed += state[id].open ? state[id].width : closedWidthFor(id);
     }
-    let overflow = (totalUsed + contentMin()) - containerW;
+    let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
     if (overflow <= 0) return;
 
     // Shrink newest open panels first (only those visible in the current mode)
@@ -1853,9 +1884,12 @@ window.PanelFramework = (() => {
       }
     }
     // Hard upper bound: when every other open panel is squeezed to its
-    // own minimum and the content stays at its mode-specific min, this
-    // is the largest the dragged panel can ever be.
-    const maxAllowed = containerW - contentMin() - otherMinSum;
+    // own minimum and the content stays at its effective minimum, this is
+    // the largest the dragged panel can ever be, further capped by PANEL_MAX.
+    const maxAllowed = Math.min(
+      PANEL_MAX,
+      containerW - effectiveContentMin(containerW) - otherMinSum
+    );
 
     drag = {
       id,
@@ -1886,7 +1920,7 @@ window.PanelFramework = (() => {
     if (drag.side === 'right') delta = -delta;
 
     let desired = drag.startWidth + delta;
-    desired = Math.max(PANEL_MIN, Math.min(drag.maxWidth, desired));
+    desired = Math.max(PANEL_MIN, Math.min(PANEL_MAX, drag.maxWidth, desired));
 
     // Restore others to pre-drag widths so each frame recomputes from a
     // clean baseline.
@@ -1901,7 +1935,7 @@ window.PanelFramework = (() => {
         ? desired
         : (state[pid].open ? state[pid].width : closedWidthFor(pid));
     }
-    let overflow = (totalUsed + contentMin()) - containerW;
+    let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
 
     // Shrink others (same-side first) to absorb overflow, oldest within
     // each side first.
@@ -1952,6 +1986,7 @@ window.PanelFramework = (() => {
     }
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
+    updateUI(); // refresh the panels-% indicator
     emit('resize', { id: finalId, width: finalWidth });
   }
 
@@ -2115,6 +2150,7 @@ window.PanelFramework = (() => {
     config: Object.freeze({
       panels: Object.freeze({ ...PANELS }),
       modes:  Object.freeze({ ...MODE_PANELS }),
+      panelMaxWidthPx: PANEL_MAX,
     }),
   };
 })();
