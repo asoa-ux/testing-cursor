@@ -1,0 +1,11 @@
+{
+  "name": "conf-tool-v3",
+  "private": true,
+  "scripts": {
+    "audit:toolbar": "node scripts/audit-toolbar-rules.mjs",
+    "test:tooltips": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
