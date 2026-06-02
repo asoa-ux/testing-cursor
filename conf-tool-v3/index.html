@@ -151,6 +151,8 @@
 
     .toolbar__group { display: flex; align-items: stretch; }
 
+    #toolbar-filter-group[hidden] { display: none !important; }
+
     .toolbar__end {
       display: flex;
       align-items: stretch;
@@ -2155,7 +2157,7 @@
 
   <div class="app-body" data-toolbar-position="above">
     <nav class="toolbar" aria-label="Actions">
-      <div class="toolbar__group" id="toolbar-filter-group">
+      <div class="toolbar__group" id="toolbar-filter-group" hidden>
         <span class="toolbar__item-wrap">
           <button type="button" class="toolbar__item toolbar__item--filter" id="toolbar-filter-trigger" aria-haspopup="dialog" aria-expanded="false" aria-label="Filter">
             <span class="toolbar__item-iconrow toolbar__item-iconrow--filter">
@@ -2250,7 +2252,6 @@
               <h1 class="detail__title">All configuration groups</h1>
             </header>
             <hr class="detail__divider">
-            <p class="detail__note">Top-level order below. Configuration groups propagate to Work areas and Tabs setup.</p>
             <div class="order-section">
               <span class="order-section__label">Configuration groups order</span>
               <div class="order-panel">
@@ -2273,6 +2274,7 @@
             </header>
             <hr class="detail__divider">
             <section class="form-section">
+              <h2 class="form-section__heading">Basic information</h2>
               <div class="form-row">
                 <span class="form-row__label">Type</span>
                 <span class="form-row__value" id="config-group-type">Configuration group</span>
@@ -2281,18 +2283,8 @@
                 <label class="form-row__label" for="config-group-name"><span class="required">*</span> Name</label>
                 <input type="text" id="config-group-name" class="underline-input" autocomplete="off">
               </div>
-              <div class="form-row form-row--stacked">
-                <label class="form-row__label" for="config-group-default-ug">Default perspective user groups</label>
-                <div class="ug-picker" id="config-group-ug-picker">
-                  <div class="chip-field" id="config-group-ug-field">
-                    <input type="text" class="chip-field__input" id="config-group-ug-input" placeholder="Search" aria-label="Default perspective user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="config-group-ug-typeahead" aria-autocomplete="list">
-                    <span class="chip-field__search"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
-                  </div>
-                  <ul class="filter-sheet__typeahead-menu" id="config-group-ug-typeahead" role="listbox" hidden></ul>
-                </div>
-              </div>
             </section>
-            <section class="form-section" aria-labelledby="config-group-branding-heading">
+            <section class="form-section" aria-labelledby="config-group-branding-heading" hidden>
               <h2 class="form-section__heading" id="config-group-branding-heading">Branding</h2>
               <p class="form-section__hint" id="config-group-branding-hint">Override the default top bar logo and logo area background for this configuration group. Leave unset to use the application default.</p>
               <p class="form-section__hint" id="config-group-branding-hint-default" hidden>The Default configuration group always uses the application logo and cannot be customized.</p>
@@ -2485,7 +2477,7 @@
                   </div>
                   <ul class="filter-sheet__typeahead-menu" id="perspective-ug-typeahead" role="listbox" hidden></ul>
                 </div>
-                <p class="form-hint">Starts with the configuration group default; you can add or remove user groups.</p>
+                <p class="form-hint">Add or remove user groups that can see this perspective.</p>
               </div>
             </section>
 
@@ -2811,9 +2803,10 @@
     <div class="sidebar-layout-picker__row">
       <label class="sidebar-layout-picker__label" for="filter-layout-select">Filter UI</label>
       <select id="filter-layout-select" class="sidebar-layout-picker__select sidebar-layout-picker__select--global" aria-label="Filter UI layout">
+        <option value="no-filter" selected>No filter (PI 2026.3)</option>
         <option value="option-1">Option 1</option>
         <option value="option-2">Option 2</option>
-        <option value="option-3">Option 3</option>
+        <option value="option-3">Option 3 (preferred)</option>
         <option value="option-4">Option 4 — Smart search</option>
       </select>
     </div>
@@ -6754,7 +6747,7 @@
         }
       });
 
-      var sidebarFilterLayout = localStorage.getItem('sidebar-filter-layout') || 'option-1';
+      var sidebarFilterLayout = localStorage.getItem('sidebar-filter-layout') || 'no-filter';
       var toolbarPosition = localStorage.getItem('toolbar-position') || 'above';
       var waFilterPanelOpen = false;
 
@@ -6991,7 +6984,7 @@
           el.hidden = layout !== 'option-2';
         });
         document.querySelectorAll('.sidebar-chrome--option-3').forEach(function (el) {
-          el.hidden = layout !== 'option-3';
+          el.hidden = layout !== 'option-3' && layout !== 'no-filter';
         });
         document.querySelectorAll('.sidebar-chrome--option-4').forEach(function (el) {
           el.hidden = layout !== 'option-4';
@@ -8857,193 +8850,6 @@
           configGroupsExpanded: true,
           quickLinksExpanded: false
         };
-        var ugPickerHighlight = -1;
-        var ugPickerBlurTimer = null;
-
-        function getUserGroupSuggestions(query, selectedLabels) {
-          var q = query.trim().toLowerCase();
-          return FILTER_USER_GROUPS.filter(function (ug) {
-            if (selectedLabels.indexOf(ug.label) !== -1) return false;
-            if (!q) return true;
-            return ug.label.toLowerCase().indexOf(q) !== -1;
-          });
-        }
-
-        function renderConfigGroupUserGroups(group) {
-          var field = document.getElementById('config-group-ug-field');
-          var input = document.getElementById('config-group-ug-input');
-          if (!field || !input || !group) return;
-
-          var labels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
-          if (labels.length !== (group.defaultPerspectiveUserGroups || []).length) {
-            ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: labels });
-          }
-
-          field.querySelectorAll('.chip').forEach(function (chip) { chip.remove(); });
-          labels.forEach(function (label) {
-            var chip = document.createElement('span');
-            chip.className = 'chip';
-            chip.appendChild(document.createTextNode(label));
-            var rm = document.createElement('button');
-            rm.type = 'button';
-            rm.className = 'chip__remove';
-            rm.setAttribute('aria-label', 'Remove ' + label);
-            rm.textContent = '×';
-            rm.addEventListener('click', function () {
-              var g = ConfigurationStore.findGroup(group.id);
-              if (!g) return;
-              var next = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id).filter(function (x) {
-                return x !== label;
-              });
-              ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: next });
-              renderConfigGroupUserGroups(ConfigurationStore.findGroup(group.id));
-              markUnsaved();
-            });
-            chip.appendChild(rm);
-            field.insertBefore(chip, input);
-          });
-        }
-
-        function hideUgTypeahead() {
-          var menu = document.getElementById('config-group-ug-typeahead');
-          var input = document.getElementById('config-group-ug-input');
-          if (menu) menu.hidden = true;
-          if (input) input.setAttribute('aria-expanded', 'false');
-          ugPickerHighlight = -1;
-        }
-
-        function renderUgTypeahead() {
-          var menu = document.getElementById('config-group-ug-typeahead');
-          var input = document.getElementById('config-group-ug-input');
-          if (!menu || !input) return;
-          if (selected.type !== 'configuration-group') {
-            hideUgTypeahead();
-            return;
-          }
-
-          var group = ConfigurationStore.findGroup(selected.groupId);
-          if (!group) {
-            hideUgTypeahead();
-            return;
-          }
-
-          var selectedLabels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
-          var suggestions = getUserGroupSuggestions(input.value, selectedLabels);
-          menu.innerHTML = '';
-          if (!suggestions.length) {
-            hideUgTypeahead();
-            return;
-          }
-
-          if (ugPickerHighlight >= suggestions.length) {
-            ugPickerHighlight = suggestions.length - 1;
-          }
-
-          suggestions.forEach(function (ug, index) {
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'filter-sheet__typeahead-option' +
-              (index === ugPickerHighlight ? ' is-highlighted' : '');
-            btn.setAttribute('role', 'option');
-            btn.textContent = ug.label;
-            btn.addEventListener('mousedown', function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            btn.addEventListener('click', function (e) {
-              e.stopPropagation();
-              addUserGroupLabel(ug.label);
-            });
-            menu.appendChild(btn);
-          });
-
-          menu.hidden = false;
-          input.setAttribute('aria-expanded', 'true');
-        }
-
-        function addUserGroupLabel(label) {
-          if (selected.type !== 'configuration-group') return;
-          var group = ConfigurationStore.findGroup(selected.groupId);
-          if (!group || !FILTER_USER_GROUPS.some(function (ug) { return ug.label === label; })) return;
-
-          var labels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
-          if (labels.indexOf(label) !== -1) return;
-          labels.push(label);
-          ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: labels });
-
-          var input = document.getElementById('config-group-ug-input');
-          if (input) {
-            input.value = '';
-            input.focus();
-          }
-          ugPickerHighlight = -1;
-          renderConfigGroupUserGroups(ConfigurationStore.findGroup(group.id));
-          renderUgTypeahead();
-          markUnsaved();
-        }
-
-        function initUserGroupPicker() {
-          var input = document.getElementById('config-group-ug-input');
-          var menu = document.getElementById('config-group-ug-typeahead');
-          if (!input || !menu) return;
-
-          menu.addEventListener('mousedown', function (e) { e.stopPropagation(); });
-
-          input.addEventListener('input', function () {
-            ugPickerHighlight = -1;
-            renderUgTypeahead();
-          });
-
-          input.addEventListener('focus', function () {
-            if (ugPickerBlurTimer) {
-              clearTimeout(ugPickerBlurTimer);
-              ugPickerBlurTimer = null;
-            }
-            renderUgTypeahead();
-          });
-
-          input.addEventListener('blur', function () {
-            ugPickerBlurTimer = setTimeout(hideUgTypeahead, 150);
-          });
-
-          input.addEventListener('keydown', function (e) {
-            if (!menu || menu.hidden) {
-              if (e.key === 'Enter') e.preventDefault();
-              return;
-            }
-
-            var group = ConfigurationStore.findGroup(selected.groupId);
-            if (!group) return;
-            var suggestions = getUserGroupSuggestions(
-              input.value,
-              ConfigurationStore.getDefaultPerspectiveUserGroups(group.id)
-            );
-            if (!suggestions.length) {
-              if (e.key === 'Enter') e.preventDefault();
-              return;
-            }
-
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              ugPickerHighlight = (ugPickerHighlight + 1) % suggestions.length;
-              renderUgTypeahead();
-            } else if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              ugPickerHighlight = ugPickerHighlight <= 0
-                ? suggestions.length - 1
-                : ugPickerHighlight - 1;
-              renderUgTypeahead();
-            } else if (e.key === 'Enter') {
-              e.preventDefault();
-              var pick = ugPickerHighlight >= 0 ? ugPickerHighlight : 0;
-              addUserGroupLabel(suggestions[pick].label);
-            } else if (e.key === 'Escape') {
-              e.preventDefault();
-              input.value = '';
-              hideUgTypeahead();
-            }
-          });
-        }
 
         function showDetailView(view) {
           ['view-system-main', 'view-system-quick-links', 'view-config-groups-folder', 'view-config-group'].forEach(function (id) {
@@ -9078,10 +8884,6 @@
           var parent = group.parentId ? ConfigurationStore.findGroup(group.parentId) : null;
           document.getElementById('config-group-subtitle').textContent = 'Configuration group';
           document.getElementById('config-group-name').value = group.label;
-          hideUgTypeahead();
-          var ugInput = document.getElementById('config-group-ug-input');
-          if (ugInput) ugInput.value = '';
-          renderConfigGroupUserGroups(group);
           renderConfigGroupBranding(group);
           showDetailView('config-group');
           renderTree();
@@ -9420,7 +9222,6 @@
 
         function init() {
           document.getElementById('system-settings-tree').addEventListener('click', onTreeClick);
-          initUserGroupPicker();
           document.getElementById('system-default-context').addEventListener('change', function () {
             markUnsaved();
           });
@@ -9478,6 +9279,10 @@
         return tab === 'work-areas' || tab === 'tabs-setup';
       }
 
+      function isFilterToolbarHidden() {
+        return sidebarFilterLayout === 'no-filter';
+      }
+
       function isFilterToolbarAvailable() {
         return isEditorTreeTab() && sidebarFilterLayout === 'option-3';
       }
@@ -9486,13 +9291,24 @@
         if (!isEditorTreeTab()) {
           return 'Filtering is only available on Work areas and Tabs setup.';
         }
-        return 'Set Filter UI to option 3 to use the toolbar filter control.';
+        return 'Set Filter UI to Option 3 (preferred) to use the toolbar filter control.';
       }
 
       function updateToolbarFilterButton() {
         var group = document.getElementById('toolbar-filter-group');
         var btn = document.getElementById('toolbar-filter-trigger');
         if (!group || !btn) return;
+        if (isFilterToolbarHidden()) {
+          group.hidden = true;
+          btn.disabled = false;
+          btn.removeAttribute('aria-haspopup');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.classList.remove('is-open', 'is-active');
+          clearFilterTriggerOpenState(['toolbar-filter-trigger']);
+          var wrap = btn.closest('.toolbar__item-wrap');
+          if (wrap) wrap.removeAttribute('data-disabled-tip');
+          return;
+        }
         group.hidden = false;
         var available = isFilterToolbarAvailable();
         btn.disabled = !available;
@@ -12592,7 +12408,7 @@
 
       document.getElementById('toolbar-filter-trigger').addEventListener('click', function (e) {
         e.stopPropagation();
-        if (!isFilterToolbarAvailable()) return;
+        if (isFilterToolbarHidden() || !isFilterToolbarAvailable()) return;
         if (getEditorContext() === 'tabs-setup') TabsEditor.toggleFilterPanel();
         else if (getEditorContext() === 'work-areas') toggleWaFilterPanel();
       });
