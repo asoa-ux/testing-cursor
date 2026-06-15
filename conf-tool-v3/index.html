@@ -1418,6 +1418,30 @@
       background: var(--white);
     }
 
+    .tree__loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px 8px 36px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      list-style: none;
+    }
+
+    .tree-spinner {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--filter-user);
+      border-radius: 50%;
+      animation: tree-spin 0.65s linear infinite;
+    }
+
+    @keyframes tree-spin {
+      to { transform: rotate(360deg); }
+    }
+
     .detail {
       flex: 1;
       min-width: 0;
@@ -2815,6 +2839,13 @@
       <select id="toolbar-position-select" class="sidebar-layout-picker__select" aria-label="Toolbar position">
         <option value="above">Above</option>
         <option value="below">Below</option>
+      </select>
+    </div>
+    <div class="sidebar-layout-picker__row">
+      <label class="sidebar-layout-picker__label" for="wa-tree-loading-select">Work areas tree</label>
+      <select id="wa-tree-loading-select" class="sidebar-layout-picker__select" aria-label="Work areas tree loading mode">
+        <option value="eager" selected>Eager — full tree (default)</option>
+        <option value="lazy">Lazy browse + query filter</option>
       </select>
     </div>
   </div>
@@ -4306,6 +4337,291 @@
         treeFilters.perspectivePins = [];
       }
 
+      var waTreeLoadingMode = localStorage.getItem('wa-tree-loading-mode') || 'eager';
+      var waQueryResults = null;
+      var waFilterSearchLoading = false;
+      var waFilterSearchTimer = null;
+      var WA_LAZY_LOAD_MS = 1100;
+      var WA_FILTER_SEARCH_MS = 1400;
+
+      function waSpinnerHtml() {
+        return '<span class="tree-spinner" aria-hidden="true"></span>';
+      }
+
+      function waLoadingRowHtml(label) {
+        return '<li class="tree__loading" aria-busy="true">' + waSpinnerHtml() + label + '</li>';
+      }
+
+      function isWaLazyBrowseMode() {
+        return waTreeLoadingMode === 'lazy';
+      }
+
+      function isWaFilterQueryMode() {
+        return isWaLazyBrowseMode() && isFilterActive();
+      }
+
+      function resetWaLazyLoadFlags() {
+        walkWaGroups(treeData.children, function (group) {
+          group.childrenLoaded = hasSingleConfigurationGroup();
+          group._lazyLoading = false;
+          group.expanded = false;
+          (group.workAreas || []).forEach(function (wa) {
+            wa.perspectivesLoaded = false;
+            wa._lazyLoading = false;
+            wa.expanded = false;
+          });
+        });
+      }
+
+      function waLazyShowExpanded(node, contentLoaded) {
+        return !!(node.expanded && (contentLoaded || node._lazyLoading));
+      }
+
+      function clearWaAllFilters() {
+        if (waFilterSearchTimer) {
+          clearTimeout(waFilterSearchTimer);
+          waFilterSearchTimer = null;
+        }
+        waFilterSearchLoading = false;
+        treeFilters.search = '';
+        treeFilters.userGroups = [];
+        treeFilters.groups = [];
+        treeFilters.perspectiveTypes = [];
+        treeFilters.workAreaPins = [];
+        treeFilters.perspectivePins = [];
+        waQueryResults = null;
+        ['tree-search', 'tree-search-v2', 'tree-search-v3'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        if (waSmartFilter) waSmartFilter.syncFromFilters();
+        refreshUserGroupsFilterList();
+        refreshGroupsFilterList();
+      }
+
+      function searchWaConfiguration() {
+        var matches = [];
+        walkWaGroups(treeData.children, function (group) {
+          if (!groupIsInFilter(group)) return;
+          (group.workAreas || []).forEach(function (wa) {
+            if (!workAreaMatchesPins(group.id, wa.id)) return;
+            (wa.perspectives || []).forEach(function (p) {
+              if (!perspectiveMatchesFilters(p, group, wa)) return;
+              matches.push({
+                type: 'perspective',
+                groupId: group.id,
+                workAreaId: wa.id,
+                perspectiveId: p.id,
+                label: p.label,
+                pathLabel: getWaGroupPathLabel(group.id) + ' \u203a ' + wa.label
+              });
+            });
+          });
+        });
+        return {
+          totalPerspectives: countAllPerspectives(),
+          matchCount: matches.length,
+          matches: matches
+        };
+      }
+
+      function loadWaGroupChildren(group, done) {
+        if (group.childrenLoaded) {
+          done();
+          return;
+        }
+        group._lazyLoading = true;
+        group.expanded = true;
+        renderTree();
+        setTimeout(function () {
+          group.childrenLoaded = true;
+          group._lazyLoading = false;
+          done();
+        }, WA_LAZY_LOAD_MS);
+      }
+
+      function loadWaWorkAreaPerspectives(wa, done) {
+        if (wa.perspectivesLoaded) {
+          done();
+          return;
+        }
+        wa._lazyLoading = true;
+        wa.expanded = true;
+        renderTree();
+        setTimeout(function () {
+          wa.perspectivesLoaded = true;
+          wa._lazyLoading = false;
+          done();
+        }, WA_LAZY_LOAD_MS);
+      }
+
+      function applyWaTreeLoadingMode(mode) {
+        waTreeLoadingMode = mode === 'lazy' ? 'lazy' : 'eager';
+        localStorage.setItem('wa-tree-loading-mode', waTreeLoadingMode);
+        var sel = document.getElementById('wa-tree-loading-select');
+        if (sel) sel.value = waTreeLoadingMode;
+        if (isWaLazyBrowseMode()) {
+          resetWaLazyLoadFlags();
+        } else {
+          waQueryResults = null;
+        }
+        applyTreeFilters();
+      }
+
+      function renderWaSearchingTree() {
+        var tree = document.getElementById('config-tree');
+        if (!tree) return;
+        tree.setAttribute('aria-label', 'Work areas and perspectives');
+        var html = '<ul><li data-expanded="true">';
+        html += treeItemMarkup(
+          { type: 'root', id: 'root', label: treeData.label },
+          null,
+          null,
+          true,
+          true
+        );
+        html += '<ul class="tree-children">' + waLoadingRowHtml('Searching\u2026') + '</ul></li></ul>';
+        tree.innerHTML = html;
+      }
+
+      function renderWaPrunedFilterTree() {
+        var branches = '';
+        var filterOn = true;
+        var autoExpand = true;
+        var soleGroup = getSoleWaGroupNode();
+        if (soleGroup) {
+          soleGroup.workAreas.forEach(function (wa) {
+            branches += renderWorkAreaBranch(wa, soleGroup, filterOn, autoExpand);
+          });
+        } else {
+          treeData.children.forEach(function (group) {
+            branches += renderGroupBranch(group, filterOn, autoExpand);
+          });
+        }
+
+        var rootHasChildren = soleGroup
+          ? branches.length > 0
+          : treeData.children.some(function (g) { return groupHasVisibleContent(g); });
+        var rootExpanded = true;
+        var tree = document.getElementById('config-tree');
+        if (!tree) return;
+        tree.setAttribute('aria-label', 'Work areas and perspectives');
+        var html = '<ul>';
+        if (!branches) {
+          html += '<li class="tree__empty">No matching work areas or perspectives.</li>';
+        } else {
+          html += '<li data-expanded="true">';
+          html += treeItemMarkup(
+            { type: 'root', id: 'root', label: treeData.label },
+            null,
+            null,
+            rootExpanded,
+            rootHasChildren
+          );
+          html += '<ul class="tree-children">';
+          html += branches;
+          html += '</ul></li>';
+        }
+        html += '</ul>';
+        tree.innerHTML = html;
+        waTreeMultiSelect.syncDom('#config-tree');
+      }
+
+      function renderLazyWorkAreaBranch(wa, group) {
+        var hasChildMeta = wa.perspectives.length > 0;
+        var showExpanded = waLazyShowExpanded(wa, wa.perspectivesLoaded);
+        var html = '<li data-expanded="' + (showExpanded ? 'true' : 'false') + '">';
+        html += treeItemMarkup(
+          { type: 'work-area', id: wa.id, label: wa.label },
+          group.id,
+          null,
+          showExpanded,
+          hasChildMeta
+        );
+        html += '<ul class="tree-children' + (showExpanded ? '' : ' is-collapsed') + '">';
+        if (wa._lazyLoading) {
+          html += waLoadingRowHtml('Loading perspectives\u2026');
+        } else if (wa.perspectivesLoaded) {
+          wa.perspectives.forEach(function (p) {
+            html += '<li>' + treeItemMarkup(
+              { type: 'perspective', id: p.id, label: p.label },
+              group.id,
+              wa.id,
+              false
+            ) + '</li>';
+          });
+        }
+        html += '</ul></li>';
+        return html;
+      }
+
+      function renderLazyGroupBranch(group) {
+        var hasChildMeta = group.workAreas.length > 0 ||
+          (isMultiLevelGroups() && (group.groups || []).length > 0);
+        var showExpanded = waLazyShowExpanded(group, group.childrenLoaded);
+        var html = '<li data-expanded="' + (showExpanded ? 'true' : 'false') + '">';
+        html += treeItemMarkup(
+          { type: 'group', id: group.id, label: group.label },
+          group.id,
+          null,
+          showExpanded,
+          hasChildMeta
+        );
+        html += '<ul class="tree-children' + (showExpanded ? '' : ' is-collapsed') + '">';
+        if (group._lazyLoading) {
+          html += waLoadingRowHtml('Loading work areas\u2026');
+        } else if (group.childrenLoaded) {
+          if (isMultiLevelGroups()) {
+            (group.groups || []).forEach(function (sub) {
+              html += renderLazyGroupBranch(sub);
+            });
+          }
+          group.workAreas.forEach(function (wa) {
+            html += renderLazyWorkAreaBranch(wa, group);
+          });
+        }
+        html += '</ul></li>';
+        return html;
+      }
+
+      function renderLazyBrowseTree() {
+        var branches = '';
+        var soleGroup = getSoleWaGroupNode();
+        if (soleGroup) {
+          soleGroup.workAreas.forEach(function (wa) {
+            branches += renderLazyWorkAreaBranch(wa, soleGroup);
+          });
+        } else {
+          treeData.children.forEach(function (group) {
+            branches += renderLazyGroupBranch(group);
+          });
+        }
+
+        var rootHasChildren = soleGroup
+          ? soleGroup.workAreas.length > 0
+          : treeData.children.length > 0;
+        var rootExpanded = treeData.expanded;
+        var html = '<ul>';
+        html += '<li data-expanded="' + (rootExpanded ? 'true' : 'false') + '">';
+        html += treeItemMarkup(
+          { type: 'root', id: 'root', label: treeData.label },
+          null,
+          null,
+          rootExpanded,
+          rootHasChildren
+        );
+        html += '<ul class="tree-children' + (rootExpanded ? '' : ' is-collapsed') + '">';
+        html += branches;
+        html += '</ul></li>';
+        html += '</ul>';
+        var tree = document.getElementById('config-tree');
+        if (tree) {
+          tree.setAttribute('aria-label', 'Work areas and perspectives');
+          tree.innerHTML = html;
+        }
+        waTreeMultiSelect.syncDom('#config-tree');
+      }
+
       function waWorkAreaPinKey(groupId, workAreaId) {
         return groupId + ':' + workAreaId;
       }
@@ -4456,6 +4772,7 @@
       }
 
       function isWaSelectionVisible(sel) {
+        if (isWaFilterQueryMode() && waFilterSearchLoading) return true;
         if (!isFilterActive()) return true;
         if (sel.type === 'root') return true;
         if (sel.type === 'group') {
@@ -4571,6 +4888,31 @@
           var item = toggle.closest('.tree-item');
           var expanded = li.getAttribute('data-expanded') === 'true';
           expanded = !expanded;
+
+          if (isWaLazyBrowseMode() && !isWaFilterQueryMode()) {
+            var itemType = item.dataset.type;
+            if (itemType === 'group' && expanded) {
+              var lazyGroup = findGroup(item.dataset.id);
+              if (lazyGroup && !lazyGroup.childrenLoaded && !lazyGroup._lazyLoading) {
+                loadWaGroupChildren(lazyGroup, function () {
+                  renderTree();
+                  updateToolbarButtons();
+                });
+                return;
+              }
+            }
+            if (itemType === 'work-area' && expanded) {
+              var lazyWa = findWorkArea(item.dataset.groupId, item.dataset.id);
+              if (lazyWa && !lazyWa.perspectivesLoaded && !lazyWa._lazyLoading) {
+                loadWaWorkAreaPerspectives(lazyWa, function () {
+                  renderTree();
+                  updateToolbarButtons();
+                });
+                return;
+              }
+            }
+          }
+
           li.setAttribute('data-expanded', expanded ? 'true' : 'false');
           var children = li.querySelector(':scope > .tree-children');
           if (children) children.classList.toggle('is-collapsed', !expanded);
@@ -4662,6 +5004,25 @@
       }
 
       function updateSidebarFooter() {
+        if (isWaFilterQueryMode() && waFilterSearchLoading) {
+          document.getElementById('sidebar-footer').textContent = 'Searching\u2026';
+          return;
+        }
+        if (isWaFilterQueryMode() && waQueryResults) {
+          document.getElementById('sidebar-footer').textContent =
+            waQueryResults.matchCount + ' of ' + waQueryResults.totalPerspectives +
+            ' perspectives';
+          return;
+        }
+        if (isWaLazyBrowseMode() && !isFilterActive()) {
+          var lazyTotalG = isMultiLevelGroups()
+            ? countWaGroups(treeData.children)
+            : treeData.children.length;
+          document.getElementById('sidebar-footer').textContent =
+            lazyTotalG + ' configuration groups. ' + countAllPerspectives() + ' perspectives';
+          return;
+        }
+
         var totalP = countAllPerspectives();
         var visibleP = countVisiblePerspectives();
         var filteredCountActive =
@@ -4764,6 +5125,34 @@
       }
 
       function applyTreeFilters() {
+        if (waFilterSearchTimer) {
+          clearTimeout(waFilterSearchTimer);
+          waFilterSearchTimer = null;
+        }
+
+        if (isWaFilterQueryMode()) {
+          waFilterSearchLoading = true;
+          waQueryResults = null;
+          renderWaSearchingTree();
+          updateSidebarFooter();
+          updateFilterBadges();
+          updateToolbarButtons();
+
+          waFilterSearchTimer = setTimeout(function () {
+            waFilterSearchTimer = null;
+            waQueryResults = searchWaConfiguration();
+            waFilterSearchLoading = false;
+            renderWaPrunedFilterTree();
+            updateSidebarFooter();
+            updateFilterBadges();
+            updateToolbarButtons();
+            if (waFilterPanelOpen) waFilterSheet.render();
+          }, WA_FILTER_SEARCH_MS);
+          return;
+        }
+
+        waFilterSearchLoading = false;
+        waQueryResults = null;
         renderTree();
         updateSidebarFooter();
         updateFilterBadges();
@@ -5459,6 +5848,19 @@
       }
 
       function renderTree() {
+        if (isWaFilterQueryMode()) {
+          if (waFilterSearchLoading) {
+            renderWaSearchingTree();
+          } else if (waQueryResults) {
+            renderWaPrunedFilterTree();
+          }
+          return;
+        }
+        if (isWaLazyBrowseMode()) {
+          renderLazyBrowseTree();
+          return;
+        }
+
         var branches = '';
         var filterOn = isFilterActive();
         var autoExpand = shouldAutoExpandTree();
@@ -12423,6 +12825,10 @@
         applyToolbarPosition(this.value);
       });
 
+      document.getElementById('wa-tree-loading-select').addEventListener('change', function () {
+        applyWaTreeLoadingMode(this.value);
+      });
+
       document.getElementById('btn-filter-user-groups').addEventListener('click', function (e) {
         e.stopPropagation();
         toggleFilterPopover('user-groups-filter-popover', 'btn-filter-user-groups', 'btn-filter-user-groups');
@@ -12498,6 +12904,9 @@
       TabsEditor.init();
       SpecificViewsEditor.init();
       initTreeFilters();
+      if (isWaLazyBrowseMode()) resetWaLazyLoadFlags();
+      var waTreeLoadingSelect = document.getElementById('wa-tree-loading-select');
+      if (waTreeLoadingSelect) waTreeLoadingSelect.value = waTreeLoadingMode;
       refreshConfigurationGroupsFilterUi();
       applyTreeFilters();
       applySidebarFilterLayout(sidebarFilterLayout);
