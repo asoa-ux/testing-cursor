@@ -1115,6 +1115,26 @@
       accent-color: var(--accent);
     }
 
+    .filter-sheet__include-unassigned {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .filter-sheet__include-unassigned input {
+      width: 14px;
+      height: 14px;
+      margin: 2px 0 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: var(--filter-user);
+    }
+
     .filter-sheet__chip-field {
       max-width: none;
       margin-bottom: 8px;
@@ -3039,6 +3059,10 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="wa-filter-ug-typeahead" role="listbox" hidden></ul>
           </div>
+          <label class="filter-sheet__include-unassigned" for="wa-filter-ug-include-unassigned">
+            <input type="checkbox" id="wa-filter-ug-include-unassigned">
+            <span>Include perspectives without user group conditions</span>
+          </label>
         </div>
       </section>
     </div>
@@ -3098,6 +3122,10 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-ug-typeahead" role="listbox" hidden></ul>
           </div>
+          <label class="filter-sheet__include-unassigned" for="tabs-filter-ug-include-unassigned">
+            <input type="checkbox" id="tabs-filter-ug-include-unassigned">
+            <span>Include tabs without user group conditions</span>
+          </label>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="objectTypes" id="tabs-filter-ot-section">
@@ -3119,6 +3147,10 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-ot-typeahead" role="listbox" hidden></ul>
           </div>
+          <label class="filter-sheet__include-unassigned" for="tabs-filter-ot-include-unassigned">
+            <input type="checkbox" id="tabs-filter-ot-include-unassigned">
+            <span>Include tabs without object type conditions</span>
+          </label>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="workflows" id="tabs-filter-wf-section">
@@ -3140,9 +3172,13 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-wf-typeahead" role="listbox" hidden></ul>
           </div>
+          <label class="filter-sheet__include-unassigned" for="tabs-filter-wf-include-unassigned">
+            <input type="checkbox" id="tabs-filter-wf-include-unassigned">
+            <span>Include tabs without workflow conditions</span>
+          </label>
         </div>
       </section>
-      <section class="filter-sheet__section is-expanded is-hidden" data-filter-section="workflowStates" id="tabs-filter-ws-section">
+      <section class="filter-sheet__section is-expanded" data-filter-section="workflowStates" id="tabs-filter-ws-section">
         <button type="button" class="filter-sheet__section-head" aria-expanded="true">
           <span>Workflow state</span>
           <span class="filter-sheet__section-meta">
@@ -3161,6 +3197,10 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-ws-typeahead" role="listbox" hidden></ul>
           </div>
+          <label class="filter-sheet__include-unassigned" for="tabs-filter-ws-include-unassigned">
+            <input type="checkbox" id="tabs-filter-ws-include-unassigned">
+            <span>Include tabs without workflow state conditions</span>
+          </label>
         </div>
       </section>
     </div>
@@ -3362,7 +3402,7 @@
                   { id: 'p-default-pending', label: 'Pending approval', userGroups: ['Super users'] },
                   { id: 'p-default-buyer', label: 'Buyer work queue', userGroups: ['Buyer group'] },
                   { id: 'p-default-rejected', label: 'Rejected items', userGroups: ['Super users', 'Buyer group'] },
-                  { id: 'p-default-published', label: 'Published archive', userGroups: ['Super users'] }
+                  { id: 'p-default-published', label: 'Published archive', userGroups: [] }
                 ]
               },
               {
@@ -4326,7 +4366,8 @@
         groups: [],
         perspectiveTypes: [],
         workAreaPins: [],
-        perspectivePins: []
+        perspectivePins: [],
+        userGroupsIncludeUnassigned: false
       };
 
       function initTreeFilters() {
@@ -4335,6 +4376,7 @@
         treeFilters.perspectiveTypes = [];
         treeFilters.workAreaPins = [];
         treeFilters.perspectivePins = [];
+        treeFilters.userGroupsIncludeUnassigned = false;
       }
 
       var waTreeLoadingMode = localStorage.getItem('wa-tree-loading-mode') || 'eager';
@@ -4389,6 +4431,7 @@
         treeFilters.perspectiveTypes = [];
         treeFilters.workAreaPins = [];
         treeFilters.perspectivePins = [];
+        treeFilters.userGroupsIncludeUnassigned = false;
         waQueryResults = null;
         ['tree-search', 'tree-search-v2', 'tree-search-v3'].forEach(function (id) {
           var el = document.getElementById(id);
@@ -4661,6 +4704,7 @@
       function isFilterActive() {
         return treeFilters.search.trim() !== '' ||
           treeFilters.userGroups.length > 0 ||
+          treeFilters.userGroupsIncludeUnassigned ||
           treeFilters.groups.length > 0 ||
           isPerspectiveTypeFilterActive() ||
           isWaPinFilterActive();
@@ -4680,7 +4724,7 @@
       }
 
       function isUserGroupFilterActive() {
-        return treeFilters.userGroups.length > 0;
+        return treeFilters.userGroups.length > 0 || treeFilters.userGroupsIncludeUnassigned;
       }
 
       function isGroupFilterActive() {
@@ -4691,11 +4735,14 @@
       function perspectiveMatchesUserGroups(p) {
         if (!isUserGroupFilterActive()) return true;
         var labels = (p.userGroups || []);
-        if (!labels.length) return false;
-        return treeFilters.userGroups.some(function (ugId) {
+        if (!treeFilters.userGroups.length) {
+          return treeFilters.userGroupsIncludeUnassigned && !labels.length;
+        }
+        var explicit = treeFilters.userGroups.some(function (ugId) {
           var def = FILTER_USER_GROUPS.find(function (ug) { return ug.id === ugId; });
           return def && labels.indexOf(def.label) !== -1;
         });
+        return explicit || (treeFilters.userGroupsIncludeUnassigned && !labels.length);
       }
 
       function perspectiveMatchesPerspectiveType(p) {
@@ -6010,10 +6057,22 @@
         var ugSearchQuery = '';
         var chipFilters = cfg.chipFilters || [];
         var chipUiState = {};
+        var unassignedFields = (cfg.unassignedCheckboxes || []).slice();
         chipFilters.forEach(function (cf) {
           draft[cf.key] = [];
           baseline[cf.key] = [];
           chipUiState[cf.key] = { highlight: -1, blurTimer: null };
+          if (cf.unassignedStateKey) {
+            unassignedFields.push({
+              stateKey: cf.unassignedStateKey,
+              checkboxId: cf.unassignedCheckboxId,
+              summaryLabel: cf.unassignedSummaryLabel || 'Unassigned'
+            });
+          }
+        });
+        unassignedFields.forEach(function (field) {
+          draft[field.stateKey] = false;
+          baseline[field.stateKey] = false;
         });
 
         function syncBaselineFromFilters() {
@@ -6027,12 +6086,18 @@
           chipFilters.forEach(function (cf) {
             draft[cf.key] = cloneIdList(f[cf.key] || []);
           });
+          unassignedFields.forEach(function (field) {
+            draft[field.stateKey] = !!f[field.stateKey];
+          });
           baseline.userGroups = cloneIdList(draft.userGroups);
           baseline.groups = cloneIdList(draft.groups);
           baseline.types = cloneIdList(draft.types);
           baseline.perspectiveTypes = cloneIdList(draft.perspectiveTypes);
           chipFilters.forEach(function (cf) {
             baseline[cf.key] = cloneIdList(draft[cf.key]);
+          });
+          unassignedFields.forEach(function (field) {
+            baseline[field.stateKey] = draft[field.stateKey];
           });
         }
 
@@ -6046,6 +6111,10 @@
           for (var i = 0; i < chipFilters.length; i++) {
             var ck = chipFilters[i].key;
             if (!idListsEqual(draft[ck], baseline[ck])) return true;
+          }
+          for (var j = 0; j < unassignedFields.length; j++) {
+            var sk = unassignedFields[j].stateKey;
+            if (!!draft[sk] !== !!baseline[sk]) return true;
           }
           return false;
         }
@@ -6205,6 +6274,15 @@
               chips.push({ kind: cf.key, id: id, label: id });
             });
           });
+          unassignedFields.forEach(function (field) {
+            if (draft[field.stateKey]) {
+              chips.push({
+                kind: field.stateKey,
+                id: field.stateKey,
+                label: field.summaryLabel
+              });
+            }
+          });
           summary.innerHTML = '';
           if (!chips.length) {
             summary.hidden = true;
@@ -6226,7 +6304,9 @@
               else if (chip.kind === 'types') toggleId(draft.types, chip.id, false);
               else if (chip.kind === 'perspectiveTypes') toggleId(draft.perspectiveTypes, chip.id, false);
               else if (chip.kind === 'userGroups') toggleId(draft.userGroups, chip.id, false);
-              else {
+              else if (chip.kind.indexOf('IncludeUnassigned') !== -1) {
+                draft[chip.kind] = false;
+              } else {
                 toggleId(draft[chip.kind], chip.id, false);
                 chipFilters.forEach(function (cf) {
                   if (cf.key === chip.kind) runChipFilterOnChange(cf);
@@ -6562,6 +6642,13 @@
           }
         }
 
+        function renderUnassignedCheckboxes() {
+          unassignedFields.forEach(function (field) {
+            var cb = document.getElementById(field.checkboxId);
+            if (cb) cb.checked = !!draft[field.stateKey];
+          });
+        }
+
         function render() {
           renderGroupsFilterList();
           if (cfg.includeTypes) {
@@ -6579,6 +6666,7 @@
           }
           renderUserGroupsSection();
           renderChipFilterSections();
+          renderUnassignedCheckboxes();
           renderSummary();
           updateSectionClearButtons();
           updateApplyButton();
@@ -6589,6 +6677,9 @@
           draft.groups = [];
           draft.types = [];
           draft.perspectiveTypes = [];
+          unassignedFields.forEach(function (field) {
+            draft[field.stateKey] = false;
+          });
           chipFilters.forEach(function (cf) {
             draft[cf.key] = [];
             var dom = chipFilterDom(cf);
@@ -6613,6 +6704,9 @@
           chipFilters.forEach(function (cf) {
             payload[cf.key] = cloneIdList(draft[cf.key]);
           });
+          unassignedFields.forEach(function (field) {
+            payload[field.stateKey] = !!draft[field.stateKey];
+          });
           return payload;
         }
 
@@ -6625,6 +6719,9 @@
           baseline.perspectiveTypes = cloneIdList(draft.perspectiveTypes);
           chipFilters.forEach(function (cf) {
             baseline[cf.key] = cloneIdList(draft[cf.key]);
+          });
+          unassignedFields.forEach(function (field) {
+            baseline[field.stateKey] = !!draft[field.stateKey];
           });
           updateApplyButton();
         }
@@ -6862,6 +6959,15 @@
                 positionChipTypeaheadMenu(chipMenu, chipSearch, dom.field);
               });
             }
+          });
+
+          unassignedFields.forEach(function (field) {
+            var cb = document.getElementById(field.checkboxId);
+            if (!cb) return;
+            cb.addEventListener('change', function () {
+              draft[field.stateKey] = cb.checked;
+              render();
+            });
           });
         }
 
@@ -7167,6 +7273,13 @@
         prefix: 'wa',
         includeTypes: false,
         includePerspectiveTypes: true,
+        unassignedCheckboxes: [
+          {
+            stateKey: 'userGroupsIncludeUnassigned',
+            checkboxId: 'wa-filter-ug-include-unassigned',
+            summaryLabel: 'No user group conditions'
+          }
+        ],
         getFilters: function () { return treeFilters; },
         getGroupItems: function () {
           return getTopLevelGroupFilterItems();
@@ -7181,6 +7294,7 @@
           treeFilters.userGroups = d.userGroups.slice();
           treeFilters.groups = d.groups.slice();
           treeFilters.perspectiveTypes = (d.perspectiveTypes || []).slice();
+          treeFilters.userGroupsIncludeUnassigned = !!d.userGroupsIncludeUnassigned;
         },
         onApply: function () {
           closeWaFilterPanel();
@@ -7193,9 +7307,11 @@
 
       function getWaActiveFilterCount() {
         var groupCount = hasSingleConfigurationGroup() ? 0 : treeFilters.groups.length;
+        var unassignedCount = treeFilters.userGroupsIncludeUnassigned ? 1 : 0;
         return treeFilters.userGroups.length + groupCount +
           treeFilters.perspectiveTypes.length +
-          treeFilters.workAreaPins.length + treeFilters.perspectivePins.length;
+          treeFilters.workAreaPins.length + treeFilters.perspectivePins.length +
+          unassignedCount;
       }
 
       function getWaGroupFilterOptions() {
@@ -10421,7 +10537,11 @@
           objectTypes: [],
           workflows: [],
           workflowStates: [],
-          tabPins: []
+          tabPins: [],
+          userGroupsIncludeUnassigned: false,
+          objectTypesIncludeUnassigned: false,
+          workflowsIncludeUnassigned: false,
+          workflowStatesIncludeUnassigned: false
         };
 
         function cloneTabsTreeSel(sel) {
@@ -10580,16 +10700,20 @@
         function isFilterActive() {
           return filters.search.trim() !== '' ||
             filters.userGroups.length > 0 ||
+            filters.userGroupsIncludeUnassigned ||
             filters.groups.length > 0 ||
             filters.types.length > 0 ||
             filters.objectTypes.length > 0 ||
+            filters.objectTypesIncludeUnassigned ||
             filters.workflows.length > 0 ||
+            filters.workflowsIncludeUnassigned ||
             filters.workflowStates.length > 0 ||
+            filters.workflowStatesIncludeUnassigned ||
             isTabPinFilterActive();
         }
 
         function isUserGroupFilterActive() {
-          return filters.userGroups.length > 0;
+          return filters.userGroups.length > 0 || filters.userGroupsIncludeUnassigned;
         }
 
         function isGroupFilterActive() {
@@ -10620,15 +10744,15 @@
         }
 
         function isObjectTypeFilterActive() {
-          return filters.objectTypes.length > 0;
+          return filters.objectTypes.length > 0 || filters.objectTypesIncludeUnassigned;
         }
 
         function isWorkflowFilterActive() {
-          return filters.workflows.length > 0;
+          return filters.workflows.length > 0 || filters.workflowsIncludeUnassigned;
         }
 
         function isWorkflowStateFilterActive() {
-          return filters.workflowStates.length > 0;
+          return filters.workflowStates.length > 0 || filters.workflowStatesIncludeUnassigned;
         }
 
         function shouldAutoExpandTree() {
@@ -10691,39 +10815,50 @@
         function tabMatchesUserGroups(tab) {
           if (!isUserGroupFilterActive()) return true;
           var labels = tab.userGroups || [];
-          if (!labels.length) return false;
-          return filters.userGroups.some(function (ugId) {
+          if (!filters.userGroups.length) {
+            return filters.userGroupsIncludeUnassigned && !labels.length;
+          }
+          var explicit = filters.userGroups.some(function (ugId) {
             var def = FILTER_USER_GROUPS.find(function (ug) { return ug.id === ugId; });
             return def && labels.indexOf(def.label) !== -1;
           });
+          return explicit || (filters.userGroupsIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesObjectTypes(tab) {
           if (!isObjectTypeFilterActive()) return true;
           var labels = tab.objectTypes || [];
-          if (!labels.length) return false;
-          return filters.objectTypes.some(function (ot) {
+          if (!filters.objectTypes.length) {
+            return filters.objectTypesIncludeUnassigned && !labels.length;
+          }
+          var explicit = filters.objectTypes.some(function (ot) {
             return labels.indexOf(ot) !== -1;
           });
+          return explicit || (filters.objectTypesIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesWorkflows(tab) {
           if (!isWorkflowFilterActive()) return true;
           var labels = tab.workflows || [];
-          if (!labels.length) return false;
-          return filters.workflows.some(function (wf) {
+          if (!filters.workflows.length) {
+            return filters.workflowsIncludeUnassigned && !labels.length;
+          }
+          var explicit = filters.workflows.some(function (wf) {
             return labels.indexOf(wf) !== -1;
           });
+          return explicit || (filters.workflowsIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesWorkflowStates(tab) {
-          if (!isWorkflowFilterActive()) return true;
           if (!isWorkflowStateFilterActive()) return true;
           var labels = tab.workflowStates || [];
-          if (!labels.length) return false;
-          return filters.workflowStates.some(function (ws) {
+          if (!filters.workflowStates.length) {
+            return filters.workflowStatesIncludeUnassigned && !labels.length;
+          }
+          var explicit = filters.workflowStates.some(function (ws) {
             return labels.indexOf(ws) !== -1;
           });
+          return explicit || (filters.workflowStatesIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesFilters(tab, group) {
@@ -11037,6 +11172,13 @@
           popoverId: 'tabs-filter-panel-popover',
           prefix: 'tabs',
           includeTypes: true,
+          unassignedCheckboxes: [
+            {
+              stateKey: 'userGroupsIncludeUnassigned',
+              checkboxId: 'tabs-filter-ug-include-unassigned',
+              summaryLabel: 'No user group conditions'
+            }
+          ],
           getFilters: function () { return filters; },
           getGroupItems: function () {
             if (!isMultiLevelGroups()) return getTopLevelGroupFilterItems();
@@ -11054,21 +11196,30 @@
               title: 'Object type',
               slug: 'ot',
               visible: function () { return true; },
-              getCatalog: function () { return collectUniqueTabLabels('objectTypes'); }
+              getCatalog: function () { return collectUniqueTabLabels('objectTypes'); },
+              unassignedStateKey: 'objectTypesIncludeUnassigned',
+              unassignedCheckboxId: 'tabs-filter-ot-include-unassigned',
+              unassignedSummaryLabel: 'No object type conditions'
             },
             {
               key: 'workflows',
               title: 'Workflow',
               slug: 'wf',
               visible: function () { return true; },
-              getCatalog: function () { return collectUniqueTabLabels('workflows'); }
+              getCatalog: function () { return collectUniqueTabLabels('workflows'); },
+              unassignedStateKey: 'workflowsIncludeUnassigned',
+              unassignedCheckboxId: 'tabs-filter-wf-include-unassigned',
+              unassignedSummaryLabel: 'No workflow conditions'
             },
             {
               key: 'workflowStates',
               title: 'Workflow state',
               slug: 'ws',
-              visible: function (d) { return d.workflows.length > 0; },
-              getCatalog: function (d) { return collectWorkflowStatesForFilter(d.workflows); }
+              visible: function () { return true; },
+              getCatalog: function (d) { return collectWorkflowStatesForFilter(d.workflows); },
+              unassignedStateKey: 'workflowStatesIncludeUnassigned',
+              unassignedCheckboxId: 'tabs-filter-ws-include-unassigned',
+              unassignedSummaryLabel: 'No workflow state conditions'
             }
           ],
           applyDraft: function (d) {
@@ -11078,6 +11229,10 @@
             filters.objectTypes = (d.objectTypes || []).slice();
             filters.workflows = (d.workflows || []).slice();
             filters.workflowStates = (d.workflowStates || []).slice();
+            filters.userGroupsIncludeUnassigned = !!d.userGroupsIncludeUnassigned;
+            filters.objectTypesIncludeUnassigned = !!d.objectTypesIncludeUnassigned;
+            filters.workflowsIncludeUnassigned = !!d.workflowsIncludeUnassigned;
+            filters.workflowStatesIncludeUnassigned = !!d.workflowStatesIncludeUnassigned;
           },
           onApply: function () {
             closeFilterPanel();
@@ -11090,13 +11245,19 @@
 
         function getTabsActiveFilterCount() {
           var groupCount = hasSingleConfigurationGroup() ? 0 : filters.groups.length;
+          var unassignedCount =
+            (filters.userGroupsIncludeUnassigned ? 1 : 0) +
+            (filters.objectTypesIncludeUnassigned ? 1 : 0) +
+            (filters.workflowsIncludeUnassigned ? 1 : 0) +
+            (filters.workflowStatesIncludeUnassigned ? 1 : 0);
           return filters.userGroups.length +
             groupCount +
             filters.types.length +
             filters.objectTypes.length +
             filters.workflows.length +
             filters.workflowStates.length +
-            filters.tabPins.length;
+            filters.tabPins.length +
+            unassignedCount;
         }
 
         function updateTabsFilterTrigger() {
