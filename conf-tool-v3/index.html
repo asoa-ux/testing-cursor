@@ -1115,24 +1115,34 @@
       accent-color: var(--accent);
     }
 
-    .filter-sheet__include-unassigned {
+    .filter-sheet__condition-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .filter-sheet__condition-mode-option {
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      margin-top: 10px;
       font-size: 12px;
       line-height: 1.4;
       color: var(--text);
       cursor: pointer;
     }
 
-    .filter-sheet__include-unassigned input {
+    .filter-sheet__condition-mode-option input {
       width: 14px;
       height: 14px;
       margin: 2px 0 0;
       flex-shrink: 0;
       cursor: pointer;
       accent-color: var(--filter-user);
+    }
+
+    .filter-sheet__condition-specific[hidden] {
+      display: none !important;
     }
 
     .filter-sheet__chip-field {
@@ -3025,7 +3035,16 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__checks" id="wa-filter-groups-list"></div>
+          <div class="filter-sheet__ug-typeahead">
+            <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="wa-filter-groups-field">
+              <span class="filter-sheet__chips" id="wa-filter-groups-chips"></span>
+              <input type="text" class="chip-field__input" id="wa-filter-groups-search" placeholder="Type to search configuration groups" aria-label="Search configuration groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="wa-filter-groups-typeahead" aria-autocomplete="list">
+              <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
+                <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="filter-sheet__typeahead-menu" id="wa-filter-groups-typeahead" role="listbox" hidden></ul>
+          </div>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="perspectiveTypes">
@@ -3049,7 +3068,21 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
+          <div class="filter-sheet__condition-mode" id="wa-filter-ug-mode" role="radiogroup" aria-label="User groups filter mode">
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="wa-filter-ug-mode" value="off" checked>
+              <span>Not filtered</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="wa-filter-ug-mode" value="unassigned">
+              <span>No user group conditions</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="wa-filter-ug-mode" value="specific">
+              <span>Specific user groups</span>
+            </label>
+          </div>
+          <div class="filter-sheet__ug-typeahead filter-sheet__condition-specific" id="wa-filter-ug-specific" hidden>
             <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="wa-filter-ug-field">
               <span class="filter-sheet__chips" id="wa-filter-ug-chips"></span>
               <input type="text" class="chip-field__input" id="wa-filter-ug-search" placeholder="Type to search user groups" aria-label="Search user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="wa-filter-ug-typeahead" aria-autocomplete="list">
@@ -3059,10 +3092,6 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="wa-filter-ug-typeahead" role="listbox" hidden></ul>
           </div>
-          <label class="filter-sheet__include-unassigned" for="wa-filter-ug-include-unassigned">
-            <input type="checkbox" id="wa-filter-ug-include-unassigned">
-            <span>Include perspectives without user group conditions</span>
-          </label>
         </div>
       </section>
     </div>
@@ -3088,7 +3117,16 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__checks" id="tabs-filter-groups-list"></div>
+          <div class="filter-sheet__ug-typeahead">
+            <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="tabs-filter-groups-field">
+              <span class="filter-sheet__chips" id="tabs-filter-groups-chips"></span>
+              <input type="text" class="chip-field__input" id="tabs-filter-groups-search" placeholder="Type to search configuration groups" aria-label="Search configuration groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabs-filter-groups-typeahead" aria-autocomplete="list">
+              <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
+                <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="filter-sheet__typeahead-menu" id="tabs-filter-groups-typeahead" role="listbox" hidden></ul>
+          </div>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="types">
@@ -3112,7 +3150,21 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
+          <div class="filter-sheet__condition-mode" id="tabs-filter-ug-mode" role="radiogroup" aria-label="User groups filter mode">
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ug-mode" value="off" checked>
+              <span>Not filtered</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ug-mode" value="unassigned">
+              <span>No user group conditions</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ug-mode" value="specific">
+              <span>Specific user groups</span>
+            </label>
+          </div>
+          <div class="filter-sheet__ug-typeahead filter-sheet__condition-specific" id="tabs-filter-ug-specific" hidden>
             <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="tabs-filter-ug-field">
               <span class="filter-sheet__chips" id="tabs-filter-ug-chips"></span>
               <input type="text" class="chip-field__input" id="tabs-filter-ug-search" placeholder="Type to search user groups" aria-label="Search user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabs-filter-ug-typeahead" aria-autocomplete="list">
@@ -3122,10 +3174,6 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-ug-typeahead" role="listbox" hidden></ul>
           </div>
-          <label class="filter-sheet__include-unassigned" for="tabs-filter-ug-include-unassigned">
-            <input type="checkbox" id="tabs-filter-ug-include-unassigned">
-            <span>Include tabs without user group conditions</span>
-          </label>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="objectTypes" id="tabs-filter-ot-section">
@@ -3137,7 +3185,21 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
+          <div class="filter-sheet__condition-mode" id="tabs-filter-ot-mode" role="radiogroup" aria-label="Object type filter mode">
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ot-mode" value="off" checked>
+              <span>Not filtered</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ot-mode" value="unassigned">
+              <span>No object type conditions</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ot-mode" value="specific">
+              <span>Specific object types</span>
+            </label>
+          </div>
+          <div class="filter-sheet__ug-typeahead filter-sheet__condition-specific" id="tabs-filter-ot-specific" hidden>
             <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="tabs-filter-ot-field">
               <span class="filter-sheet__chips" id="tabs-filter-ot-chips"></span>
               <input type="text" class="chip-field__input" id="tabs-filter-ot-search" placeholder="Type to search object types" aria-label="Search object types" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabs-filter-ot-typeahead" aria-autocomplete="list">
@@ -3147,10 +3209,6 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-ot-typeahead" role="listbox" hidden></ul>
           </div>
-          <label class="filter-sheet__include-unassigned" for="tabs-filter-ot-include-unassigned">
-            <input type="checkbox" id="tabs-filter-ot-include-unassigned">
-            <span>Include tabs without object type conditions</span>
-          </label>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="workflows" id="tabs-filter-wf-section">
@@ -3162,7 +3220,21 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
+          <div class="filter-sheet__condition-mode" id="tabs-filter-wf-mode" role="radiogroup" aria-label="Workflow filter mode">
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-wf-mode" value="off" checked>
+              <span>Not filtered</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-wf-mode" value="unassigned">
+              <span>No workflow conditions</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-wf-mode" value="specific">
+              <span>Specific workflows</span>
+            </label>
+          </div>
+          <div class="filter-sheet__ug-typeahead filter-sheet__condition-specific" id="tabs-filter-wf-specific" hidden>
             <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="tabs-filter-wf-field">
               <span class="filter-sheet__chips" id="tabs-filter-wf-chips"></span>
               <input type="text" class="chip-field__input" id="tabs-filter-wf-search" placeholder="Type to search workflows" aria-label="Search workflows" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabs-filter-wf-typeahead" aria-autocomplete="list">
@@ -3172,10 +3244,6 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-wf-typeahead" role="listbox" hidden></ul>
           </div>
-          <label class="filter-sheet__include-unassigned" for="tabs-filter-wf-include-unassigned">
-            <input type="checkbox" id="tabs-filter-wf-include-unassigned">
-            <span>Include tabs without workflow conditions</span>
-          </label>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="workflowStates" id="tabs-filter-ws-section">
@@ -3187,7 +3255,21 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
+          <div class="filter-sheet__condition-mode" id="tabs-filter-ws-mode" role="radiogroup" aria-label="Workflow state filter mode">
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ws-mode" value="off" checked>
+              <span>Not filtered</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ws-mode" value="unassigned">
+              <span>No workflow state conditions</span>
+            </label>
+            <label class="filter-sheet__condition-mode-option">
+              <input type="radio" name="tabs-filter-ws-mode" value="specific">
+              <span>Specific workflow states</span>
+            </label>
+          </div>
+          <div class="filter-sheet__ug-typeahead filter-sheet__condition-specific" id="tabs-filter-ws-specific" hidden>
             <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="tabs-filter-ws-field">
               <span class="filter-sheet__chips" id="tabs-filter-ws-chips"></span>
               <input type="text" class="chip-field__input" id="tabs-filter-ws-search" placeholder="Type to search workflow states" aria-label="Search workflow states" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabs-filter-ws-typeahead" aria-autocomplete="list">
@@ -3197,10 +3279,6 @@
             </div>
             <ul class="filter-sheet__typeahead-menu" id="tabs-filter-ws-typeahead" role="listbox" hidden></ul>
           </div>
-          <label class="filter-sheet__include-unassigned" for="tabs-filter-ws-include-unassigned">
-            <input type="checkbox" id="tabs-filter-ws-include-unassigned">
-            <span>Include tabs without workflow state conditions</span>
-          </label>
         </div>
       </section>
     </div>
@@ -4360,6 +4438,18 @@
         return TAB_TYPE_SHEET_LABELS[typeId] || getTabTypeLabel(typeId).replace(/ tab page$/i, '');
       }
 
+      function isConditionModeActive(mode, values) {
+        if (mode === 'unassigned') return true;
+        if (mode === 'specific' && values && values.length > 0) return true;
+        return false;
+      }
+
+      function conditionFilterCount(mode, values) {
+        if (mode === 'unassigned') return 1;
+        if (mode === 'specific') return (values || []).length;
+        return 0;
+      }
+
       var treeFilters = {
         search: '',
         userGroups: [],
@@ -4367,7 +4457,7 @@
         perspectiveTypes: [],
         workAreaPins: [],
         perspectivePins: [],
-        userGroupsIncludeUnassigned: false
+        userGroupsMode: 'off'
       };
 
       function initTreeFilters() {
@@ -4376,7 +4466,7 @@
         treeFilters.perspectiveTypes = [];
         treeFilters.workAreaPins = [];
         treeFilters.perspectivePins = [];
-        treeFilters.userGroupsIncludeUnassigned = false;
+        treeFilters.userGroupsMode = 'off';
       }
 
       var waTreeLoadingMode = localStorage.getItem('wa-tree-loading-mode') || 'eager';
@@ -4431,7 +4521,7 @@
         treeFilters.perspectiveTypes = [];
         treeFilters.workAreaPins = [];
         treeFilters.perspectivePins = [];
-        treeFilters.userGroupsIncludeUnassigned = false;
+        treeFilters.userGroupsMode = 'off';
         waQueryResults = null;
         ['tree-search', 'tree-search-v2', 'tree-search-v3'].forEach(function (id) {
           var el = document.getElementById(id);
@@ -4703,8 +4793,7 @@
 
       function isFilterActive() {
         return treeFilters.search.trim() !== '' ||
-          treeFilters.userGroups.length > 0 ||
-          treeFilters.userGroupsIncludeUnassigned ||
+          isUserGroupFilterActive() ||
           treeFilters.groups.length > 0 ||
           isPerspectiveTypeFilterActive() ||
           isWaPinFilterActive();
@@ -4724,7 +4813,7 @@
       }
 
       function isUserGroupFilterActive() {
-        return treeFilters.userGroups.length > 0 || treeFilters.userGroupsIncludeUnassigned;
+        return isConditionModeActive(treeFilters.userGroupsMode, treeFilters.userGroups);
       }
 
       function isGroupFilterActive() {
@@ -4735,14 +4824,13 @@
       function perspectiveMatchesUserGroups(p) {
         if (!isUserGroupFilterActive()) return true;
         var labels = (p.userGroups || []);
-        if (!treeFilters.userGroups.length) {
-          return treeFilters.userGroupsIncludeUnassigned && !labels.length;
+        if (treeFilters.userGroupsMode === 'unassigned') {
+          return !labels.length;
         }
-        var explicit = treeFilters.userGroups.some(function (ugId) {
+        return treeFilters.userGroups.some(function (ugId) {
           var def = FILTER_USER_GROUPS.find(function (ug) { return ug.id === ugId; });
           return def && labels.indexOf(def.label) !== -1;
         });
-        return explicit || (treeFilters.userGroupsIncludeUnassigned && !labels.length);
       }
 
       function perspectiveMatchesPerspectiveType(p) {
@@ -6055,24 +6143,44 @@
         var draft = { userGroups: [], groups: [], types: [], perspectiveTypes: [] };
         var baseline = { userGroups: [], groups: [], types: [], perspectiveTypes: [] };
         var ugSearchQuery = '';
+        var groupsTypeaheadHighlight = -1;
+        var groupsTypeaheadBlurTimer = null;
         var chipFilters = cfg.chipFilters || [];
         var chipUiState = {};
-        var unassignedFields = (cfg.unassignedCheckboxes || []).slice();
+        var conditionModeFields = (cfg.conditionModes || []).map(function (field) {
+          var slug = field.slug;
+          return {
+            valuesKey: field.valuesKey,
+            modeKey: field.modeKey,
+            slug: slug,
+            modeGroupId: cfg.prefix + '-filter-' + slug + '-mode',
+            specificWrapId: cfg.prefix + '-filter-' + slug + '-specific',
+            radioName: cfg.prefix + '-filter-' + slug + '-mode',
+            summaryUnassigned: field.summaryUnassigned,
+            clearId: field.clearId || (cfg.prefix + '-filter-clear-' + slug)
+          };
+        });
         chipFilters.forEach(function (cf) {
           draft[cf.key] = [];
           baseline[cf.key] = [];
           chipUiState[cf.key] = { highlight: -1, blurTimer: null };
-          if (cf.unassignedStateKey) {
-            unassignedFields.push({
-              stateKey: cf.unassignedStateKey,
-              checkboxId: cf.unassignedCheckboxId,
-              summaryLabel: cf.unassignedSummaryLabel || 'Unassigned'
+          if (cf.modeKey) {
+            var slug = cf.slug || cf.key;
+            conditionModeFields.push({
+              valuesKey: cf.key,
+              modeKey: cf.modeKey,
+              slug: slug,
+              modeGroupId: cfg.prefix + '-filter-' + slug + '-mode',
+              specificWrapId: cfg.prefix + '-filter-' + slug + '-specific',
+              radioName: cfg.prefix + '-filter-' + slug + '-mode',
+              summaryUnassigned: cf.unassignedSummaryLabel,
+              clearId: cfg.prefix + '-filter-clear-' + slug
             });
           }
         });
-        unassignedFields.forEach(function (field) {
-          draft[field.stateKey] = false;
-          baseline[field.stateKey] = false;
+        conditionModeFields.forEach(function (field) {
+          draft[field.modeKey] = 'off';
+          baseline[field.modeKey] = 'off';
         });
 
         function syncBaselineFromFilters() {
@@ -6086,8 +6194,8 @@
           chipFilters.forEach(function (cf) {
             draft[cf.key] = cloneIdList(f[cf.key] || []);
           });
-          unassignedFields.forEach(function (field) {
-            draft[field.stateKey] = !!f[field.stateKey];
+          conditionModeFields.forEach(function (field) {
+            draft[field.modeKey] = f[field.modeKey] || 'off';
           });
           baseline.userGroups = cloneIdList(draft.userGroups);
           baseline.groups = cloneIdList(draft.groups);
@@ -6096,8 +6204,8 @@
           chipFilters.forEach(function (cf) {
             baseline[cf.key] = cloneIdList(draft[cf.key]);
           });
-          unassignedFields.forEach(function (field) {
-            baseline[field.stateKey] = draft[field.stateKey];
+          conditionModeFields.forEach(function (field) {
+            baseline[field.modeKey] = draft[field.modeKey];
           });
         }
 
@@ -6112,9 +6220,9 @@
             var ck = chipFilters[i].key;
             if (!idListsEqual(draft[ck], baseline[ck])) return true;
           }
-          for (var j = 0; j < unassignedFields.length; j++) {
-            var sk = unassignedFields[j].stateKey;
-            if (!!draft[sk] !== !!baseline[sk]) return true;
+          for (var j = 0; j < conditionModeFields.length; j++) {
+            var mk = conditionModeFields[j].modeKey;
+            if (draft[mk] !== baseline[mk]) return true;
           }
           return false;
         }
@@ -6187,6 +6295,60 @@
           return t ? t.label : id;
         }
 
+        function setConditionMode(field, mode) {
+          draft[field.modeKey] = mode;
+          if (mode !== 'specific') {
+            draft[field.valuesKey] = [];
+            if (field.valuesKey === 'userGroups') {
+              ugSearchQuery = '';
+              var ugSearch = document.getElementById(cfg.prefix + '-filter-ug-search');
+              if (ugSearch) ugSearch.value = '';
+              hideTypeahead();
+            } else {
+              var cf = chipFilters.find(function (x) { return x.key === field.valuesKey; });
+              if (cf) {
+                var dom = chipFilterDom(cf);
+                var chipSearch = document.getElementById(dom.search);
+                if (chipSearch) chipSearch.value = '';
+                hideChipTypeahead(cf);
+                runChipFilterOnChange(cf);
+              }
+            }
+          }
+          render();
+        }
+
+        function renderConditionModes() {
+          conditionModeFields.forEach(function (field) {
+            var group = document.getElementById(field.modeGroupId);
+            if (!group) return;
+            var mode = draft[field.modeKey] || 'off';
+            group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+              radio.checked = radio.value === mode;
+            });
+            var wrap = document.getElementById(field.specificWrapId);
+            if (wrap) wrap.hidden = mode !== 'specific';
+          });
+        }
+
+        function clearConditionModeField(field) {
+          draft[field.modeKey] = 'off';
+          draft[field.valuesKey] = [];
+          if (field.valuesKey === 'userGroups') {
+            ugSearchQuery = '';
+            var ugSearch = document.getElementById(cfg.prefix + '-filter-ug-search');
+            if (ugSearch) ugSearch.value = '';
+          } else {
+            var cf = chipFilters.find(function (x) { return x.key === field.valuesKey; });
+            if (cf) {
+              var dom = chipFilterDom(cf);
+              var chipSearch = document.getElementById(dom.search);
+              if (chipSearch) chipSearch.value = '';
+              runChipFilterOnChange(cf);
+            }
+          }
+        }
+
         function updateApplyButton() {
           var btn = document.getElementById(cfg.prefix + '-filter-apply');
           if (btn) btn.disabled = !isDirty();
@@ -6204,9 +6366,11 @@
             }
           }
           if (ugBtn) {
-            if (draft.userGroups.length) {
+            var ugMode = draft.userGroupsMode || 'off';
+            if (ugMode !== 'off') {
               ugBtn.hidden = false;
-              ugBtn.textContent = 'Clear (' + draft.userGroups.length + ')';
+              var ugCount = ugMode === 'specific' ? draft.userGroups.length : 0;
+              ugBtn.textContent = ugCount ? 'Clear (' + ugCount + ')' : 'Clear';
             } else {
               ugBtn.hidden = true;
             }
@@ -6237,10 +6401,11 @@
             var dom = chipFilterDom(cf);
             var btn = document.getElementById(dom.clear);
             if (!btn) return;
-            var n = (draft[cf.key] || []).length;
-            if (n) {
+            var mode = cf.modeKey ? (draft[cf.modeKey] || 'off') : 'specific';
+            if (mode !== 'off') {
               btn.hidden = false;
-              btn.textContent = 'Clear (' + n + ')';
+              var n = mode === 'specific' ? (draft[cf.key] || []).length : 0;
+              btn.textContent = n ? 'Clear (' + n + ')' : 'Clear';
             } else {
               btn.hidden = true;
             }
@@ -6266,20 +6431,32 @@
               chips.push({ kind: 'perspectiveTypes', id: id, label: labelForPerspectiveType(id) });
             });
           }
-          draft.userGroups.forEach(function (id) {
-            chips.push({ kind: 'userGroups', id: id, label: labelForUserGroup(id) });
-          });
-          chipFilters.forEach(function (cf) {
-            (draft[cf.key] || []).forEach(function (id) {
-              chips.push({ kind: cf.key, id: id, label: id });
+          if ((draft.userGroupsMode || 'off') === 'specific') {
+            draft.userGroups.forEach(function (id) {
+              chips.push({ kind: 'userGroups', id: id, label: labelForUserGroup(id) });
             });
-          });
-          unassignedFields.forEach(function (field) {
-            if (draft[field.stateKey]) {
+          } else if (draft.userGroupsMode === 'unassigned') {
+            chips.push({
+              kind: 'userGroupsMode',
+              id: 'unassigned',
+              label: 'No user group conditions',
+              modeKey: 'userGroupsMode',
+              valuesKey: 'userGroups'
+            });
+          }
+          chipFilters.forEach(function (cf) {
+            var mode = cf.modeKey ? (draft[cf.modeKey] || 'off') : 'specific';
+            if (mode === 'specific') {
+              (draft[cf.key] || []).forEach(function (id) {
+                chips.push({ kind: cf.key, id: id, label: id });
+              });
+            } else if (mode === 'unassigned' && cf.unassignedSummaryLabel) {
               chips.push({
-                kind: field.stateKey,
-                id: field.stateKey,
-                label: field.summaryLabel
+                kind: cf.modeKey,
+                id: 'unassigned',
+                label: cf.unassignedSummaryLabel,
+                modeKey: cf.modeKey,
+                valuesKey: cf.key
               });
             }
           });
@@ -6304,8 +6481,14 @@
               else if (chip.kind === 'types') toggleId(draft.types, chip.id, false);
               else if (chip.kind === 'perspectiveTypes') toggleId(draft.perspectiveTypes, chip.id, false);
               else if (chip.kind === 'userGroups') toggleId(draft.userGroups, chip.id, false);
-              else if (chip.kind.indexOf('IncludeUnassigned') !== -1) {
-                draft[chip.kind] = false;
+              else if (chip.modeKey) {
+                draft[chip.modeKey] = 'off';
+                draft[chip.valuesKey] = [];
+              } else if (chip.kind.indexOf('Mode') !== -1) {
+                draft[chip.kind] = 'off';
+                chipFilters.forEach(function (cf) {
+                  if (cf.modeKey === chip.kind) draft[cf.key] = [];
+                });
               } else {
                 toggleId(draft[chip.kind], chip.id, false);
                 chipFilters.forEach(function (cf) {
@@ -6372,8 +6555,8 @@
           document.body.appendChild(menu);
         }
 
-        function positionTypeaheadMenu(menu, search) {
-          var field = document.getElementById(cfg.prefix + '-filter-ug-field');
+        function positionTypeaheadMenu(menu, search, fieldId) {
+          var field = document.getElementById(fieldId || (cfg.prefix + '-filter-ug-field'));
           var anchor = field || search;
           var rect = anchor.getBoundingClientRect();
           var gap = 2;
@@ -6478,8 +6661,125 @@
         }
 
         function renderUserGroupsSection() {
-          renderUserGroupsChips();
-          renderTypeahead();
+          renderConditionModes();
+          if ((draft.userGroupsMode || 'off') === 'specific') {
+            renderUserGroupsChips();
+            renderTypeahead();
+          }
+        }
+
+        function getGroupSuggestions(query) {
+          var q = query.trim().toLowerCase();
+          if (!q) return [];
+          return getGroupItems().filter(function (item) {
+            if (draft.groups.indexOf(item.id) !== -1) return false;
+            return item.label.toLowerCase().indexOf(q) !== -1;
+          });
+        }
+
+        function addGroup(id) {
+          toggleId(draft.groups, id, true);
+          groupsTypeaheadHighlight = -1;
+          var search = document.getElementById(cfg.prefix + '-filter-groups-search');
+          if (search) {
+            search.value = '';
+            search.focus();
+          }
+          render();
+        }
+
+        function hideGroupsTypeahead() {
+          var menu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
+          var search = document.getElementById(cfg.prefix + '-filter-groups-search');
+          if (menu) menu.hidden = true;
+          if (search) search.setAttribute('aria-expanded', 'false');
+          groupsTypeaheadHighlight = -1;
+        }
+
+        function renderGroupsTypeahead() {
+          var menu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
+          var search = document.getElementById(cfg.prefix + '-filter-groups-search');
+          if (!menu || !search) return;
+
+          if (!search.value.trim()) {
+            hideGroupsTypeahead();
+            return;
+          }
+
+          var suggestions = getGroupSuggestions(search.value);
+          menu.innerHTML = '';
+          if (!suggestions.length) {
+            hideGroupsTypeahead();
+            return;
+          }
+
+          if (groupsTypeaheadHighlight >= suggestions.length) {
+            groupsTypeaheadHighlight = suggestions.length - 1;
+          }
+
+          suggestions.forEach(function (item, index) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'filter-sheet__typeahead-option' +
+              (index === groupsTypeaheadHighlight ? ' is-highlighted' : '');
+            btn.setAttribute('role', 'option');
+            btn.textContent = item.label;
+            btn.addEventListener('mousedown', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            btn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              if (groupsTypeaheadBlurTimer) {
+                clearTimeout(groupsTypeaheadBlurTimer);
+                groupsTypeaheadBlurTimer = null;
+              }
+              addGroup(item.id);
+            });
+            menu.appendChild(btn);
+          });
+
+          portalTypeaheadMenu(menu);
+          menu.hidden = false;
+          search.setAttribute('aria-expanded', 'true');
+          positionTypeaheadMenu(menu, search, cfg.prefix + '-filter-groups-field');
+        }
+
+        function renderGroupsChips() {
+          var chipsHost = document.getElementById(cfg.prefix + '-filter-groups-chips');
+          if (!chipsHost) return;
+
+          chipsHost.innerHTML = '';
+          draft.groups.forEach(function (id) {
+            var label = labelForGroup(id);
+            var chip = document.createElement('span');
+            chip.className = 'chip';
+            chip.appendChild(document.createTextNode(label));
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'chip__remove';
+            rm.setAttribute('aria-label', 'Remove ' + label);
+            rm.textContent = '×';
+            rm.addEventListener('click', function (e) {
+              e.stopPropagation();
+              toggleId(draft.groups, id, false);
+              render();
+            });
+            chip.appendChild(rm);
+            chipsHost.appendChild(chip);
+          });
+        }
+
+        function renderGroupsSection() {
+          var popover = document.getElementById(cfg.popoverId);
+          var section = popover && popover.querySelector('[data-filter-section="groups"]');
+          if (hasSingleConfigurationGroup()) {
+            if (section) section.classList.add('is-hidden');
+            return;
+          }
+          if (section) section.classList.remove('is-hidden');
+          renderGroupsChips();
+          renderGroupsTypeahead();
         }
 
         function getChipSuggestions(cf, query) {
@@ -6619,38 +6919,20 @@
             hideChipTypeahead(cf);
             return;
           }
-          renderChipChips(cf);
-          renderChipTypeahead(cf);
-        }
-
-        function renderChipFilterSections() {
-          chipFilters.forEach(renderChipFilterSection);
-        }
-
-        function renderGroupsFilterList() {
-          if (hasSingleConfigurationGroup()) return;
-          var listId = cfg.prefix + '-filter-groups-list';
-          if (isMultiLevelGroups() && cfg.getGroupNodes) {
-            buildGroupFilterChecklist(listId, cfg.getGroupNodes(), draft.groups, function (id, checked) {
-              toggleId(draft.groups, id, checked);
-              render();
-            }, 'filter-sheet__check');
-          } else {
-            renderChecks(listId, getGroupItems(), draft.groups, function (item) {
-              return item.label;
-            });
+          var mode = cf.modeKey ? (draft[cf.modeKey] || 'off') : 'specific';
+          if (mode === 'specific') {
+            renderChipChips(cf);
+            renderChipTypeahead(cf);
           }
         }
 
-        function renderUnassignedCheckboxes() {
-          unassignedFields.forEach(function (field) {
-            var cb = document.getElementById(field.checkboxId);
-            if (cb) cb.checked = !!draft[field.stateKey];
-          });
+        function renderChipFilterSections() {
+          renderConditionModes();
+          chipFilters.forEach(renderChipFilterSection);
         }
 
         function render() {
-          renderGroupsFilterList();
+          renderGroupsSection();
           if (cfg.includeTypes) {
             renderChecks(cfg.prefix + '-filter-types-list', TAB_TYPES, draft.types, function (item) {
               return getTabTypeSheetLabel(item.id);
@@ -6666,7 +6948,6 @@
           }
           renderUserGroupsSection();
           renderChipFilterSections();
-          renderUnassignedCheckboxes();
           renderSummary();
           updateSectionClearButtons();
           updateApplyButton();
@@ -6677,8 +6958,9 @@
           draft.groups = [];
           draft.types = [];
           draft.perspectiveTypes = [];
-          unassignedFields.forEach(function (field) {
-            draft[field.stateKey] = false;
+          conditionModeFields.forEach(function (field) {
+            draft[field.modeKey] = 'off';
+            draft[field.valuesKey] = [];
           });
           chipFilters.forEach(function (cf) {
             draft[cf.key] = [];
@@ -6691,6 +6973,9 @@
           ugSearchQuery = '';
           var search = document.getElementById(cfg.prefix + '-filter-ug-search');
           if (search) search.value = '';
+          var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
+          if (groupsSearch) groupsSearch.value = '';
+          hideGroupsTypeahead();
           render();
         }
 
@@ -6704,8 +6989,8 @@
           chipFilters.forEach(function (cf) {
             payload[cf.key] = cloneIdList(draft[cf.key]);
           });
-          unassignedFields.forEach(function (field) {
-            payload[field.stateKey] = !!draft[field.stateKey];
+          conditionModeFields.forEach(function (field) {
+            payload[field.modeKey] = draft[field.modeKey] || 'off';
           });
           return payload;
         }
@@ -6720,14 +7005,15 @@
           chipFilters.forEach(function (cf) {
             baseline[cf.key] = cloneIdList(draft[cf.key]);
           });
-          unassignedFields.forEach(function (field) {
-            baseline[field.stateKey] = !!draft[field.stateKey];
+          conditionModeFields.forEach(function (field) {
+            baseline[field.modeKey] = draft[field.modeKey];
           });
           updateApplyButton();
         }
 
         function hideAllTypeaheads() {
           hideTypeahead();
+          hideGroupsTypeahead();
           chipFilters.forEach(hideChipTypeahead);
         }
 
@@ -6776,6 +7062,8 @@
             gClear.addEventListener('click', function (e) {
               e.stopPropagation();
               draft.groups = [];
+              var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
+              if (groupsSearch) groupsSearch.value = '';
               render();
             });
           }
@@ -6783,9 +7071,8 @@
           if (ugClear) {
             ugClear.addEventListener('click', function (e) {
               e.stopPropagation();
-              draft.userGroups = [];
-              var search = document.getElementById(cfg.prefix + '-filter-ug-search');
-              if (search) search.value = '';
+              var ugField = conditionModeFields.find(function (f) { return f.valuesKey === 'userGroups'; });
+              if (ugField) clearConditionModeField(ugField);
               render();
             });
           }
@@ -6860,6 +7147,66 @@
             });
           }
 
+          var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
+          if (groupsSearch) {
+            groupsSearch.addEventListener('input', function () {
+              if (!groupsSearch.value.trim()) {
+                groupsTypeaheadHighlight = -1;
+                hideGroupsTypeahead();
+                return;
+              }
+              groupsTypeaheadHighlight = 0;
+              renderGroupsTypeahead();
+            });
+            groupsSearch.addEventListener('focus', function () {
+              if (groupsTypeaheadBlurTimer) {
+                clearTimeout(groupsTypeaheadBlurTimer);
+                groupsTypeaheadBlurTimer = null;
+              }
+              if (groupsSearch.value.trim()) renderGroupsTypeahead();
+            });
+            groupsSearch.addEventListener('blur', function () {
+              groupsTypeaheadBlurTimer = setTimeout(hideGroupsTypeahead, 150);
+            });
+            groupsSearch.addEventListener('keydown', function (e) {
+              var menu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
+              if (!menu || menu.hidden) return;
+              var suggestions = getGroupSuggestions(groupsSearch.value);
+              if (!suggestions.length) return;
+
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                groupsTypeaheadHighlight = (groupsTypeaheadHighlight + 1) % suggestions.length;
+                renderGroupsTypeahead();
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                groupsTypeaheadHighlight = groupsTypeaheadHighlight <= 0
+                  ? suggestions.length - 1
+                  : groupsTypeaheadHighlight - 1;
+                renderGroupsTypeahead();
+              } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var pick = groupsTypeaheadHighlight >= 0 ? groupsTypeaheadHighlight : 0;
+                addGroup(suggestions[pick].id);
+              } else if (e.key === 'Escape') {
+                e.preventDefault();
+                groupsSearch.value = '';
+                hideGroupsTypeahead();
+              }
+            });
+          }
+
+          var groupsTypeaheadMenu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
+          portalTypeaheadMenu(groupsTypeaheadMenu);
+          if (groupsTypeaheadMenu) {
+            groupsTypeaheadMenu.addEventListener('mousedown', function (e) {
+              e.stopPropagation();
+            });
+            groupsTypeaheadMenu.addEventListener('click', function (e) {
+              e.stopPropagation();
+            });
+          }
+
           var typeaheadMenu = document.getElementById(cfg.prefix + '-filter-ug-typeahead');
           var typeaheadSearch = document.getElementById(cfg.prefix + '-filter-ug-search');
           portalTypeaheadMenu(typeaheadMenu);
@@ -6872,8 +7219,14 @@
             });
           }
           function repositionTypeaheadIfOpen() {
-            if (!typeaheadMenu || typeaheadMenu.hidden || !typeaheadSearch) return;
-            positionTypeaheadMenu(typeaheadMenu, typeaheadSearch);
+            if (typeaheadMenu && !typeaheadMenu.hidden && typeaheadSearch) {
+              positionTypeaheadMenu(typeaheadMenu, typeaheadSearch);
+            }
+            var groupsMenu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
+            var groupsSearchEl = document.getElementById(cfg.prefix + '-filter-groups-search');
+            if (groupsMenu && !groupsMenu.hidden && groupsSearchEl) {
+              positionTypeaheadMenu(groupsMenu, groupsSearchEl, cfg.prefix + '-filter-groups-field');
+            }
           }
           var scrollHost = popover.querySelector('.filter-sheet__scroll');
           if (scrollHost) scrollHost.addEventListener('scroll', repositionTypeaheadIfOpen);
@@ -6885,10 +7238,9 @@
             if (clearBtn) {
               clearBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                draft[cf.key] = [];
-                var search = document.getElementById(dom.search);
-                if (search) search.value = '';
-                runChipFilterOnChange(cf);
+                var field = conditionModeFields.find(function (f) { return f.valuesKey === cf.key; });
+                if (field) clearConditionModeField(field);
+                else draft[cf.key] = [];
                 render();
               });
             }
@@ -6961,12 +7313,14 @@
             }
           });
 
-          unassignedFields.forEach(function (field) {
-            var cb = document.getElementById(field.checkboxId);
-            if (!cb) return;
-            cb.addEventListener('change', function () {
-              draft[field.stateKey] = cb.checked;
-              render();
+          conditionModeFields.forEach(function (field) {
+            var group = document.getElementById(field.modeGroupId);
+            if (!group) return;
+            group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+              radio.addEventListener('change', function () {
+                if (!radio.checked) return;
+                setConditionMode(field, radio.value);
+              });
             });
           });
         }
@@ -6979,6 +7333,9 @@
             ugSearchQuery = '';
             var search = document.getElementById(cfg.prefix + '-filter-ug-search');
             if (search) search.value = '';
+            var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
+            if (groupsSearch) groupsSearch.value = '';
+            hideGroupsTypeahead();
             chipFilters.forEach(function (cf) {
               var dom = chipFilterDom(cf);
               var chipSearch = document.getElementById(dom.search);
@@ -7273,11 +7630,12 @@
         prefix: 'wa',
         includeTypes: false,
         includePerspectiveTypes: true,
-        unassignedCheckboxes: [
+        conditionModes: [
           {
-            stateKey: 'userGroupsIncludeUnassigned',
-            checkboxId: 'wa-filter-ug-include-unassigned',
-            summaryLabel: 'No user group conditions'
+            valuesKey: 'userGroups',
+            modeKey: 'userGroupsMode',
+            slug: 'ug',
+            summaryUnassigned: 'No user group conditions'
           }
         ],
         getFilters: function () { return treeFilters; },
@@ -7294,7 +7652,7 @@
           treeFilters.userGroups = d.userGroups.slice();
           treeFilters.groups = d.groups.slice();
           treeFilters.perspectiveTypes = (d.perspectiveTypes || []).slice();
-          treeFilters.userGroupsIncludeUnassigned = !!d.userGroupsIncludeUnassigned;
+          treeFilters.userGroupsMode = d.userGroupsMode || 'off';
         },
         onApply: function () {
           closeWaFilterPanel();
@@ -7307,11 +7665,10 @@
 
       function getWaActiveFilterCount() {
         var groupCount = hasSingleConfigurationGroup() ? 0 : treeFilters.groups.length;
-        var unassignedCount = treeFilters.userGroupsIncludeUnassigned ? 1 : 0;
-        return treeFilters.userGroups.length + groupCount +
+        var ugCount = conditionFilterCount(treeFilters.userGroupsMode, treeFilters.userGroups);
+        return ugCount + groupCount +
           treeFilters.perspectiveTypes.length +
-          treeFilters.workAreaPins.length + treeFilters.perspectivePins.length +
-          unassignedCount;
+          treeFilters.workAreaPins.length + treeFilters.perspectivePins.length;
       }
 
       function getWaGroupFilterOptions() {
@@ -10538,10 +10895,10 @@
           workflows: [],
           workflowStates: [],
           tabPins: [],
-          userGroupsIncludeUnassigned: false,
-          objectTypesIncludeUnassigned: false,
-          workflowsIncludeUnassigned: false,
-          workflowStatesIncludeUnassigned: false
+          userGroupsMode: 'off',
+          objectTypesMode: 'off',
+          workflowsMode: 'off',
+          workflowStatesMode: 'off'
         };
 
         function cloneTabsTreeSel(sel) {
@@ -10699,21 +11056,17 @@
 
         function isFilterActive() {
           return filters.search.trim() !== '' ||
-            filters.userGroups.length > 0 ||
-            filters.userGroupsIncludeUnassigned ||
+            isUserGroupFilterActive() ||
             filters.groups.length > 0 ||
             filters.types.length > 0 ||
-            filters.objectTypes.length > 0 ||
-            filters.objectTypesIncludeUnassigned ||
-            filters.workflows.length > 0 ||
-            filters.workflowsIncludeUnassigned ||
-            filters.workflowStates.length > 0 ||
-            filters.workflowStatesIncludeUnassigned ||
+            isObjectTypeFilterActive() ||
+            isWorkflowFilterActive() ||
+            isWorkflowStateFilterActive() ||
             isTabPinFilterActive();
         }
 
         function isUserGroupFilterActive() {
-          return filters.userGroups.length > 0 || filters.userGroupsIncludeUnassigned;
+          return isConditionModeActive(filters.userGroupsMode, filters.userGroups);
         }
 
         function isGroupFilterActive() {
@@ -10744,15 +11097,15 @@
         }
 
         function isObjectTypeFilterActive() {
-          return filters.objectTypes.length > 0 || filters.objectTypesIncludeUnassigned;
+          return isConditionModeActive(filters.objectTypesMode, filters.objectTypes);
         }
 
         function isWorkflowFilterActive() {
-          return filters.workflows.length > 0 || filters.workflowsIncludeUnassigned;
+          return isConditionModeActive(filters.workflowsMode, filters.workflows);
         }
 
         function isWorkflowStateFilterActive() {
-          return filters.workflowStates.length > 0 || filters.workflowStatesIncludeUnassigned;
+          return isConditionModeActive(filters.workflowStatesMode, filters.workflowStates);
         }
 
         function shouldAutoExpandTree() {
@@ -10815,50 +11168,46 @@
         function tabMatchesUserGroups(tab) {
           if (!isUserGroupFilterActive()) return true;
           var labels = tab.userGroups || [];
-          if (!filters.userGroups.length) {
-            return filters.userGroupsIncludeUnassigned && !labels.length;
+          if (filters.userGroupsMode === 'unassigned') {
+            return !labels.length;
           }
-          var explicit = filters.userGroups.some(function (ugId) {
+          return filters.userGroups.some(function (ugId) {
             var def = FILTER_USER_GROUPS.find(function (ug) { return ug.id === ugId; });
             return def && labels.indexOf(def.label) !== -1;
           });
-          return explicit || (filters.userGroupsIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesObjectTypes(tab) {
           if (!isObjectTypeFilterActive()) return true;
           var labels = tab.objectTypes || [];
-          if (!filters.objectTypes.length) {
-            return filters.objectTypesIncludeUnassigned && !labels.length;
+          if (filters.objectTypesMode === 'unassigned') {
+            return !labels.length;
           }
-          var explicit = filters.objectTypes.some(function (ot) {
+          return filters.objectTypes.some(function (ot) {
             return labels.indexOf(ot) !== -1;
           });
-          return explicit || (filters.objectTypesIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesWorkflows(tab) {
           if (!isWorkflowFilterActive()) return true;
           var labels = tab.workflows || [];
-          if (!filters.workflows.length) {
-            return filters.workflowsIncludeUnassigned && !labels.length;
+          if (filters.workflowsMode === 'unassigned') {
+            return !labels.length;
           }
-          var explicit = filters.workflows.some(function (wf) {
+          return filters.workflows.some(function (wf) {
             return labels.indexOf(wf) !== -1;
           });
-          return explicit || (filters.workflowsIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesWorkflowStates(tab) {
           if (!isWorkflowStateFilterActive()) return true;
           var labels = tab.workflowStates || [];
-          if (!filters.workflowStates.length) {
-            return filters.workflowStatesIncludeUnassigned && !labels.length;
+          if (filters.workflowStatesMode === 'unassigned') {
+            return !labels.length;
           }
-          var explicit = filters.workflowStates.some(function (ws) {
+          return filters.workflowStates.some(function (ws) {
             return labels.indexOf(ws) !== -1;
           });
-          return explicit || (filters.workflowStatesIncludeUnassigned && !labels.length);
         }
 
         function tabMatchesFilters(tab, group) {
@@ -11172,11 +11521,12 @@
           popoverId: 'tabs-filter-panel-popover',
           prefix: 'tabs',
           includeTypes: true,
-          unassignedCheckboxes: [
+          conditionModes: [
             {
-              stateKey: 'userGroupsIncludeUnassigned',
-              checkboxId: 'tabs-filter-ug-include-unassigned',
-              summaryLabel: 'No user group conditions'
+              valuesKey: 'userGroups',
+              modeKey: 'userGroupsMode',
+              slug: 'ug',
+              summaryUnassigned: 'No user group conditions'
             }
           ],
           getFilters: function () { return filters; },
@@ -11195,30 +11545,27 @@
               key: 'objectTypes',
               title: 'Object type',
               slug: 'ot',
+              modeKey: 'objectTypesMode',
               visible: function () { return true; },
               getCatalog: function () { return collectUniqueTabLabels('objectTypes'); },
-              unassignedStateKey: 'objectTypesIncludeUnassigned',
-              unassignedCheckboxId: 'tabs-filter-ot-include-unassigned',
               unassignedSummaryLabel: 'No object type conditions'
             },
             {
               key: 'workflows',
               title: 'Workflow',
               slug: 'wf',
+              modeKey: 'workflowsMode',
               visible: function () { return true; },
               getCatalog: function () { return collectUniqueTabLabels('workflows'); },
-              unassignedStateKey: 'workflowsIncludeUnassigned',
-              unassignedCheckboxId: 'tabs-filter-wf-include-unassigned',
               unassignedSummaryLabel: 'No workflow conditions'
             },
             {
               key: 'workflowStates',
               title: 'Workflow state',
               slug: 'ws',
+              modeKey: 'workflowStatesMode',
               visible: function () { return true; },
               getCatalog: function (d) { return collectWorkflowStatesForFilter(d.workflows); },
-              unassignedStateKey: 'workflowStatesIncludeUnassigned',
-              unassignedCheckboxId: 'tabs-filter-ws-include-unassigned',
               unassignedSummaryLabel: 'No workflow state conditions'
             }
           ],
@@ -11229,10 +11576,10 @@
             filters.objectTypes = (d.objectTypes || []).slice();
             filters.workflows = (d.workflows || []).slice();
             filters.workflowStates = (d.workflowStates || []).slice();
-            filters.userGroupsIncludeUnassigned = !!d.userGroupsIncludeUnassigned;
-            filters.objectTypesIncludeUnassigned = !!d.objectTypesIncludeUnassigned;
-            filters.workflowsIncludeUnassigned = !!d.workflowsIncludeUnassigned;
-            filters.workflowStatesIncludeUnassigned = !!d.workflowStatesIncludeUnassigned;
+            filters.userGroupsMode = d.userGroupsMode || 'off';
+            filters.objectTypesMode = d.objectTypesMode || 'off';
+            filters.workflowsMode = d.workflowsMode || 'off';
+            filters.workflowStatesMode = d.workflowStatesMode || 'off';
           },
           onApply: function () {
             closeFilterPanel();
@@ -11245,19 +11592,15 @@
 
         function getTabsActiveFilterCount() {
           var groupCount = hasSingleConfigurationGroup() ? 0 : filters.groups.length;
-          var unassignedCount =
-            (filters.userGroupsIncludeUnassigned ? 1 : 0) +
-            (filters.objectTypesIncludeUnassigned ? 1 : 0) +
-            (filters.workflowsIncludeUnassigned ? 1 : 0) +
-            (filters.workflowStatesIncludeUnassigned ? 1 : 0);
-          return filters.userGroups.length +
+          var conditionCount =
+            conditionFilterCount(filters.userGroupsMode, filters.userGroups) +
+            conditionFilterCount(filters.objectTypesMode, filters.objectTypes) +
+            conditionFilterCount(filters.workflowsMode, filters.workflows) +
+            conditionFilterCount(filters.workflowStatesMode, filters.workflowStates);
+          return conditionCount +
             groupCount +
             filters.types.length +
-            filters.objectTypes.length +
-            filters.workflows.length +
-            filters.workflowStates.length +
-            filters.tabPins.length +
-            unassignedCount;
+            filters.tabPins.length;
         }
 
         function updateTabsFilterTrigger() {
