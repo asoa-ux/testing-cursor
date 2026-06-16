@@ -1145,6 +1145,17 @@
       display: none !important;
     }
 
+    .filter-sheet__group-select {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 12px;
+      line-height: 1.4;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: var(--white);
+      color: var(--text);
+    }
+
     .filter-sheet__chip-field {
       max-width: none;
       margin-bottom: 8px;
@@ -3035,16 +3046,9 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
-            <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="wa-filter-groups-field">
-              <span class="filter-sheet__chips" id="wa-filter-groups-chips"></span>
-              <input type="text" class="chip-field__input" id="wa-filter-groups-search" placeholder="Search" aria-label="Search configuration groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="wa-filter-groups-typeahead" aria-autocomplete="list">
-              <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
-                <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
-              </button>
-            </div>
-            <ul class="filter-sheet__typeahead-menu" id="wa-filter-groups-typeahead" role="listbox" hidden></ul>
-          </div>
+          <select class="filter-sheet__group-select" id="wa-filter-groups-select" aria-label="Configuration group">
+            <option value="">All configuration groups</option>
+          </select>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="perspectiveTypes">
@@ -3117,16 +3121,9 @@
           </span>
         </button>
         <div class="filter-sheet__section-body">
-          <div class="filter-sheet__ug-typeahead">
-            <div class="chip-field filter-sheet__chip-field chip-field--has-action" id="tabs-filter-groups-field">
-              <span class="filter-sheet__chips" id="tabs-filter-groups-chips"></span>
-              <input type="text" class="chip-field__input" id="tabs-filter-groups-search" placeholder="Search" aria-label="Search configuration groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabs-filter-groups-typeahead" aria-autocomplete="list">
-              <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
-                <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
-              </button>
-            </div>
-            <ul class="filter-sheet__typeahead-menu" id="tabs-filter-groups-typeahead" role="listbox" hidden></ul>
-          </div>
+          <select class="filter-sheet__group-select" id="tabs-filter-groups-select" aria-label="Configuration group">
+            <option value="">All configuration groups</option>
+          </select>
         </div>
       </section>
       <section class="filter-sheet__section is-expanded" data-filter-section="types">
@@ -4436,6 +4433,15 @@
 
       function getTabTypeSheetLabel(typeId) {
         return TAB_TYPE_SHEET_LABELS[typeId] || getTabTypeLabel(typeId).replace(/ tab page$/i, '');
+      }
+
+      function setSingleGroupFilter(groups, id) {
+        groups.length = 0;
+        if (id) groups.push(id);
+      }
+
+      function getSingleGroupFilter(groups) {
+        return groups.length ? groups[0] : '';
       }
 
       function isConditionModeActive(mode, values) {
@@ -6143,8 +6149,6 @@
         var draft = { userGroups: [], groups: [], types: [], perspectiveTypes: [] };
         var baseline = { userGroups: [], groups: [], types: [], perspectiveTypes: [] };
         var ugSearchQuery = '';
-        var groupsTypeaheadHighlight = -1;
-        var groupsTypeaheadBlurTimer = null;
         var chipFilters = cfg.chipFilters || [];
         var chipUiState = {};
         var conditionModeFields = (cfg.conditionModes || []).map(function (field) {
@@ -6186,7 +6190,7 @@
         function syncBaselineFromFilters() {
           var f = cfg.getFilters();
           draft.userGroups = cloneIdList(f.userGroups);
-          draft.groups = cloneIdList(f.groups);
+          draft.groups = f.groups.length ? [f.groups[0]] : [];
           draft.types = cfg.includeTypes ? cloneIdList(f.types) : [];
           draft.perspectiveTypes = cfg.includePerspectiveTypes
             ? cloneIdList(f.perspectiveTypes || [])
@@ -6360,7 +6364,7 @@
           if (gBtn) {
             if (draft.groups.length) {
               gBtn.hidden = false;
-              gBtn.textContent = 'Clear (' + draft.groups.length + ')';
+              gBtn.textContent = 'Clear';
             } else {
               gBtn.hidden = true;
             }
@@ -6477,7 +6481,7 @@
             rm.textContent = '×';
             rm.addEventListener('click', function (e) {
               e.stopPropagation();
-              if (chip.kind === 'groups') toggleId(draft.groups, chip.id, false);
+              if (chip.kind === 'groups') setSingleGroupFilter(draft.groups, '');
               else if (chip.kind === 'types') toggleId(draft.types, chip.id, false);
               else if (chip.kind === 'perspectiveTypes') toggleId(draft.perspectiveTypes, chip.id, false);
               else if (chip.kind === 'userGroups') toggleId(draft.userGroups, chip.id, false);
@@ -6668,109 +6672,7 @@
           }
         }
 
-        function getGroupSuggestions(query) {
-          var q = query.trim().toLowerCase();
-          if (!q) return [];
-          return getGroupItems().filter(function (item) {
-            if (draft.groups.indexOf(item.id) !== -1) return false;
-            return item.label.toLowerCase().indexOf(q) !== -1;
-          });
-        }
-
-        function addGroup(id) {
-          toggleId(draft.groups, id, true);
-          groupsTypeaheadHighlight = -1;
-          var search = document.getElementById(cfg.prefix + '-filter-groups-search');
-          if (search) {
-            search.value = '';
-            search.focus();
-          }
-          render();
-        }
-
-        function hideGroupsTypeahead() {
-          var menu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
-          var search = document.getElementById(cfg.prefix + '-filter-groups-search');
-          if (menu) menu.hidden = true;
-          if (search) search.setAttribute('aria-expanded', 'false');
-          groupsTypeaheadHighlight = -1;
-        }
-
-        function renderGroupsTypeahead() {
-          var menu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
-          var search = document.getElementById(cfg.prefix + '-filter-groups-search');
-          if (!menu || !search) return;
-
-          if (!search.value.trim()) {
-            hideGroupsTypeahead();
-            return;
-          }
-
-          var suggestions = getGroupSuggestions(search.value);
-          menu.innerHTML = '';
-          if (!suggestions.length) {
-            hideGroupsTypeahead();
-            return;
-          }
-
-          if (groupsTypeaheadHighlight >= suggestions.length) {
-            groupsTypeaheadHighlight = suggestions.length - 1;
-          }
-
-          suggestions.forEach(function (item, index) {
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'filter-sheet__typeahead-option' +
-              (index === groupsTypeaheadHighlight ? ' is-highlighted' : '');
-            btn.setAttribute('role', 'option');
-            btn.textContent = item.label;
-            btn.addEventListener('mousedown', function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            btn.addEventListener('click', function (e) {
-              e.stopPropagation();
-              if (groupsTypeaheadBlurTimer) {
-                clearTimeout(groupsTypeaheadBlurTimer);
-                groupsTypeaheadBlurTimer = null;
-              }
-              addGroup(item.id);
-            });
-            menu.appendChild(btn);
-          });
-
-          portalTypeaheadMenu(menu);
-          menu.hidden = false;
-          search.setAttribute('aria-expanded', 'true');
-          positionTypeaheadMenu(menu, search, cfg.prefix + '-filter-groups-field');
-        }
-
-        function renderGroupsChips() {
-          var chipsHost = document.getElementById(cfg.prefix + '-filter-groups-chips');
-          if (!chipsHost) return;
-
-          chipsHost.innerHTML = '';
-          draft.groups.forEach(function (id) {
-            var label = labelForGroup(id);
-            var chip = document.createElement('span');
-            chip.className = 'chip';
-            chip.appendChild(document.createTextNode(label));
-            var rm = document.createElement('button');
-            rm.type = 'button';
-            rm.className = 'chip__remove';
-            rm.setAttribute('aria-label', 'Remove ' + label);
-            rm.textContent = '×';
-            rm.addEventListener('click', function (e) {
-              e.stopPropagation();
-              toggleId(draft.groups, id, false);
-              render();
-            });
-            chip.appendChild(rm);
-            chipsHost.appendChild(chip);
-          });
-        }
-
-        function renderGroupsSection() {
+        function renderGroupsSelect() {
           var popover = document.getElementById(cfg.popoverId);
           var section = popover && popover.querySelector('[data-filter-section="groups"]');
           if (hasSingleConfigurationGroup()) {
@@ -6778,8 +6680,22 @@
             return;
           }
           if (section) section.classList.remove('is-hidden');
-          renderGroupsChips();
-          renderGroupsTypeahead();
+          var select = document.getElementById(cfg.prefix + '-filter-groups-select');
+          if (!select) return;
+          var selected = getSingleGroupFilter(draft.groups);
+          var items = getGroupItems();
+          select.innerHTML = '';
+          var empty = document.createElement('option');
+          empty.value = '';
+          empty.textContent = 'All configuration groups';
+          select.appendChild(empty);
+          items.forEach(function (item) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.label;
+            select.appendChild(opt);
+          });
+          select.value = items.some(function (item) { return item.id === selected; }) ? selected : '';
         }
 
         function getChipSuggestions(cf, query) {
@@ -6932,7 +6848,7 @@
         }
 
         function render() {
-          renderGroupsSection();
+          renderGroupsSelect();
           if (cfg.includeTypes) {
             renderChecks(cfg.prefix + '-filter-types-list', TAB_TYPES, draft.types, function (item) {
               return getTabTypeSheetLabel(item.id);
@@ -6973,9 +6889,6 @@
           ugSearchQuery = '';
           var search = document.getElementById(cfg.prefix + '-filter-ug-search');
           if (search) search.value = '';
-          var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
-          if (groupsSearch) groupsSearch.value = '';
-          hideGroupsTypeahead();
           render();
         }
 
@@ -7013,7 +6926,6 @@
 
         function hideAllTypeaheads() {
           hideTypeahead();
-          hideGroupsTypeahead();
           chipFilters.forEach(hideChipTypeahead);
         }
 
@@ -7061,9 +6973,7 @@
           if (gClear) {
             gClear.addEventListener('click', function (e) {
               e.stopPropagation();
-              draft.groups = [];
-              var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
-              if (groupsSearch) groupsSearch.value = '';
+              setSingleGroupFilter(draft.groups, '');
               render();
             });
           }
@@ -7147,63 +7057,11 @@
             });
           }
 
-          var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
-          if (groupsSearch) {
-            groupsSearch.addEventListener('input', function () {
-              if (!groupsSearch.value.trim()) {
-                groupsTypeaheadHighlight = -1;
-                hideGroupsTypeahead();
-                return;
-              }
-              groupsTypeaheadHighlight = 0;
-              renderGroupsTypeahead();
-            });
-            groupsSearch.addEventListener('focus', function () {
-              if (groupsTypeaheadBlurTimer) {
-                clearTimeout(groupsTypeaheadBlurTimer);
-                groupsTypeaheadBlurTimer = null;
-              }
-              if (groupsSearch.value.trim()) renderGroupsTypeahead();
-            });
-            groupsSearch.addEventListener('blur', function () {
-              groupsTypeaheadBlurTimer = setTimeout(hideGroupsTypeahead, 150);
-            });
-            groupsSearch.addEventListener('keydown', function (e) {
-              var menu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
-              if (!menu || menu.hidden) return;
-              var suggestions = getGroupSuggestions(groupsSearch.value);
-              if (!suggestions.length) return;
-
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                groupsTypeaheadHighlight = (groupsTypeaheadHighlight + 1) % suggestions.length;
-                renderGroupsTypeahead();
-              } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                groupsTypeaheadHighlight = groupsTypeaheadHighlight <= 0
-                  ? suggestions.length - 1
-                  : groupsTypeaheadHighlight - 1;
-                renderGroupsTypeahead();
-              } else if (e.key === 'Enter') {
-                e.preventDefault();
-                var pick = groupsTypeaheadHighlight >= 0 ? groupsTypeaheadHighlight : 0;
-                addGroup(suggestions[pick].id);
-              } else if (e.key === 'Escape') {
-                e.preventDefault();
-                groupsSearch.value = '';
-                hideGroupsTypeahead();
-              }
-            });
-          }
-
-          var groupsTypeaheadMenu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
-          portalTypeaheadMenu(groupsTypeaheadMenu);
-          if (groupsTypeaheadMenu) {
-            groupsTypeaheadMenu.addEventListener('mousedown', function (e) {
-              e.stopPropagation();
-            });
-            groupsTypeaheadMenu.addEventListener('click', function (e) {
-              e.stopPropagation();
+          var groupsSelect = document.getElementById(cfg.prefix + '-filter-groups-select');
+          if (groupsSelect) {
+            groupsSelect.addEventListener('change', function () {
+              setSingleGroupFilter(draft.groups, groupsSelect.value);
+              render();
             });
           }
 
@@ -7221,11 +7079,6 @@
           function repositionTypeaheadIfOpen() {
             if (typeaheadMenu && !typeaheadMenu.hidden && typeaheadSearch) {
               positionTypeaheadMenu(typeaheadMenu, typeaheadSearch);
-            }
-            var groupsMenu = document.getElementById(cfg.prefix + '-filter-groups-typeahead');
-            var groupsSearchEl = document.getElementById(cfg.prefix + '-filter-groups-search');
-            if (groupsMenu && !groupsMenu.hidden && groupsSearchEl) {
-              positionTypeaheadMenu(groupsMenu, groupsSearchEl, cfg.prefix + '-filter-groups-field');
             }
           }
           var scrollHost = popover.querySelector('.filter-sheet__scroll');
@@ -7333,9 +7186,6 @@
             ugSearchQuery = '';
             var search = document.getElementById(cfg.prefix + '-filter-ug-search');
             if (search) search.value = '';
-            var groupsSearch = document.getElementById(cfg.prefix + '-filter-groups-search');
-            if (groupsSearch) groupsSearch.value = '';
-            hideGroupsTypeahead();
             chipFilters.forEach(function (cf) {
               var dom = chipFilterDom(cf);
               var chipSearch = document.getElementById(dom.search);
@@ -7487,7 +7337,11 @@
         function addChip(item) {
           var f = cfg.getFilters();
           if (!f[item.kind]) f[item.kind] = [];
-          if (f[item.kind].indexOf(item.id) === -1) f[item.kind].push(item.id);
+          if (cfg.singleValueKinds && cfg.singleValueKinds.indexOf(item.kind) !== -1) {
+            setSingleGroupFilter(f[item.kind], item.id);
+          } else if (f[item.kind].indexOf(item.id) === -1) {
+            f[item.kind].push(item.id);
+          }
           input.value = '';
           if (cfg.setSearch) cfg.setSearch('');
           hidePanel();
@@ -7580,6 +7434,7 @@
       var waSmartFilter = createSmartFilter({
         rootId: 'wa-smart-filter',
         chipKinds: ['perspectiveTypes', 'groups', 'userGroups', 'workAreaPins', 'perspectivePins'],
+        singleValueKinds: ['groups'],
         getFilters: function () { return treeFilters; },
         setSearch: function (q) { treeFilters.search = q; },
         isFilterActive: isFilterActive,
@@ -7650,7 +7505,7 @@
         },
         applyDraft: function (d) {
           treeFilters.userGroups = d.userGroups.slice();
-          treeFilters.groups = d.groups.slice();
+          treeFilters.groups = d.groups.length ? [d.groups[0]] : [];
           treeFilters.perspectiveTypes = (d.perspectiveTypes || []).slice();
           treeFilters.userGroupsMode = d.userGroupsMode || 'off';
         },
@@ -11571,7 +11426,7 @@
           ],
           applyDraft: function (d) {
             filters.userGroups = d.userGroups.slice();
-            filters.groups = d.groups.slice();
+            filters.groups = d.groups.length ? [d.groups[0]] : [];
             filters.types = d.types.slice();
             filters.objectTypes = (d.objectTypes || []).slice();
             filters.workflows = (d.workflows || []).slice();
@@ -12935,6 +12790,7 @@
           tabsSmartFilter = createSmartFilter({
             rootId: 'tabs-smart-filter',
             chipKinds: ['types', 'groups', 'userGroups', 'objectTypes', 'workflows', 'workflowStates', 'tabPins'],
+            singleValueKinds: ['groups'],
             getFilters: function () { return filters; },
             setSearch: function (q) { filters.search = q; },
             isFilterActive: isFilterActive,
