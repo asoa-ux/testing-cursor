@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Links pop-over — prototype</title>
+  <style>
+    :root {
+      --text: #323130;
+      --text-secondary: #605e5c;
+      --text-muted: #8a8886;
+      --border: #e0e0e0;
+      --hover: #1976d2;
+      --hover-bg: #1976d2;
+      --surface: #ffffff;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+      --popover-max-width: 40rem;
+      --sim-vh: 640px;
+      --popover-offset-top: 48px;
+      --popover-offset-bottom: 16px;
+      --popover-max-height: min(28rem, 100%);
+      --row-height: 2.25rem;        /* one link row: 8+8 padding + 14px text */
+      --quick-label-height: 1.5rem; /* section label band */
+      --min-quick-rows: 2;
+      --min-promo-rows: 1;
+      --min-quick: calc(var(--quick-label-height) + var(--row-height) * var(--min-quick-rows));
+      --min-promo: calc(var(--row-height) * var(--min-promo-rows));
+      --tight-split-quick: 0.6;     /* when below combined minimums */
+      --font: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      background: #f5f5f5;
+    }
+
+    /* ── Demo chrome ─────────────────────────────────────────────── */
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 20px;
+      height: 56px;
+      background: #004d56;
+      color: #fff;
+    }
+
+    .demo-header__title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .demo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      padding: 16px 20px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .demo-controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .demo-controls input[type="range"] { width: 140px; }
+
+    .demo-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 20px;
+      padding: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .demo-main { grid-template-columns: 1fr; }
+    }
+
+    .demo-stage {
+      padding: 24px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    /* Simulated viewport — height slider drives --sim-vh */
+    .viewport-sim {
+      position: relative;
+      height: var(--sim-vh);
+      overflow: hidden;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .viewport-sim__label {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      z-index: 2;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .viewport-sim__header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      height: 48px;
+      padding: 0 12px;
+      background: #004d56;
+    }
+
+    .viewport-sim__anchor {
+      position: absolute;
+      top: var(--popover-offset-top);
+      right: 12px;
+      bottom: var(--popover-offset-bottom);
+      z-index: 3;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      min-height: 0;
+      pointer-events: none;
+    }
+
+    .viewport-sim__anchor .links-popover {
+      pointer-events: auto;
+      max-height: min(28rem, 100%);
+    }
+
+    .viewport-sim__bottom-inset {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      height: var(--popover-offset-bottom);
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(0, 77, 86, 0.06),
+        rgba(0, 77, 86, 0.06) 6px,
+        rgba(0, 77, 86, 0.12) 6px,
+        rgba(0, 77, 86, 0.12) 12px
+      );
+      border-top: 1px dashed #b0b0b0;
+      pointer-events: none;
+    }
+
+    .viewport-sim__bottom-inset-label {
+      position: absolute;
+      right: 10px;
+      bottom: calc(var(--popover-offset-bottom) / 2);
+      transform: translateY(50%);
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      pointer-events: none;
+    }
+
+    .viewport-sim--overflow {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .viewport-sim--overflow .viewport-sim__anchor {
+      bottom: auto;
+      max-height: none;
+    }
+
+    .viewport-sim--overflow .viewport-sim__bottom-inset,
+    .viewport-sim--overflow .viewport-sim__bottom-inset-label {
+      opacity: 0.35;
+    }
+
+    .viewport-sim--overflow .links-popover.is-overflowing {
+      outline: 2px dashed #c50f1f;
+      outline-offset: 2px;
+    }
+
+    .demo-notes {
+      padding: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .demo-notes h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .demo-notes h3 {
+      margin: 16px 0 6px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .demo-notes code {
+      font-size: 12px;
+      background: #f3f3f3;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .demo-notes pre {
+      margin: 8px 0;
+      padding: 10px 12px;
+      overflow-x: auto;
+      font-size: 11px;
+      line-height: 1.45;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    /* ── Trigger ─────────────────────────────────────────────────── */
+
+    .links-trigger-wrap {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .links-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.88);
+      cursor: pointer;
+    }
+
+    .links-trigger:hover,
+    .links-trigger[aria-expanded="true"] {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .links-trigger svg { width: 20px; height: 20px; }
+
+    /* ── Pop-over shell ──────────────────────────────────────────── */
+
+    .links-popover {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: fit-content;
+      max-width: var(--popover-max-width);
+      max-height: var(--popover-max-height);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .links-popover__caret {
+      position: absolute;
+      top: -7px;
+      right: 14px;
+      width: 12px;
+      height: 12px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      transform: rotate(45deg);
+      pointer-events: none;
+    }
+
+    /* ── Search ──────────────────────────────────────────────────── */
+
+    .links-popover__search {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .links-popover__search svg {
+      flex-shrink: 0;
+      display: block;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+    }
+
+    .links-popover__search input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      font: inherit;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .links-popover__search input::placeholder { color: var(--text-muted); }
+
+    /* ── Links area — hug content; flex-fill only when constrained ─ */
+
+    .links-popover__links {
+      flex: 0 0 auto;
+      overflow: visible;
+    }
+
+    .links-popover.is-constrained .links-popover__links {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .links-popover__body {
+      flex: 0 0 auto;
+      overflow-y: visible;
+    }
+
+    .links-popover.is-constrained .links-popover__body {
+      flex: 1 1 0;
+      min-height: 0;
+    }
+
+    .links-popover__body.is-scrollable {
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .links-popover__divider {
+      flex-shrink: 0;
+      margin: 0;
+      border: none;
+      border-top: 1px solid var(--border);
+      height: 0;
+    }
+
+    .links-popover__promo {
+      flex: 0 0 auto;
+      overflow-y: visible;
+      background: var(--surface);
+    }
+
+    .links-popover__promo.is-scrollable {
+      flex: 0 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .links-popover__promo .links-popover__list {
+      padding: 4px 0 6px;
+    }
+
+    .links-popover__section-label {
+      padding: 8px 12px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .links-popover__list {
+      margin: 0;
+      padding: 0 0 4px;
+      list-style: none;
+    }
+
+    /* ── Link rows ───────────────────────────────────────────────── */
+
+    .links-popover__item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 100%;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.35;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .links-popover__item:hover,
+    .links-popover__item:focus-visible {
+      background: var(--hover-bg);
+      color: #fff;
+      outline: none;
+    }
+
+    .links-popover__item:hover .links-popover__external,
+    .links-popover__item:focus-visible .links-popover__external {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Width: hug content up to 40rem, then truncate */
+    .links-popover__label {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .links-popover__external {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      color: var(--text-muted);
+    }
+
+    .links-popover__empty {
+      padding: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .is-hidden { display: none !important; }
+
+    /* Truncation tooltip — only when label overflows */
+    .links-popover__label-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .links-popover__tooltip {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 6px);
+      z-index: 10;
+      display: none;
+      max-width: min(24rem, 80vw);
+      padding: 6px 8px;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #fff;
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .links-popover__label-wrap.is-truncated:hover .links-popover__tooltip,
+    .links-popover__label-wrap.is-truncated:focus-within .links-popover__tooltip {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header class="demo-header">
+    <h1 class="demo-header__title">Links pop-over prototype</h1>
+    <div class="links-trigger-wrap">
+      <button
+        type="button"
+        class="links-trigger"
+        id="links-trigger"
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-controls="links-popover"
+        title="Links"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="demo-controls" aria-label="Prototype controls">
+    <label>
+      Viewport height
+      <input type="range" id="ctrl-viewport" min="320" max="900" value="640" />
+      <span id="ctrl-viewport-val">640px</span>
+    </label>
+    <label>
+      Quick links count
+      <input type="range" id="ctrl-quick-count" min="0" max="20" value="14" />
+      <span id="ctrl-quick-count-val">14</span>
+    </label>
+    <label>
+      Promotional links count
+      <input type="range" id="ctrl-promo-count" min="0" max="20" value="5" />
+      <span id="ctrl-promo-count-val">5</span>
+    </label>
+    <label>
+      Long label stress
+      <input type="checkbox" id="ctrl-long-labels" />
+    </label>
+    <label>
+      Bottom margin
+      <input type="range" id="ctrl-anchor-gap" min="8" max="120" value="16" />
+      <span id="ctrl-anchor-gap-val">16px</span>
+    </label>
+    <label title="Popover grows to full content height; clipped items need page scroll inside the viewport frame">
+      Overflow viewport
+      <input type="checkbox" id="ctrl-overflow-viewport" />
+    </label>
+  </div>
+
+  <div class="demo-main">
+    <section class="demo-stage" aria-label="Popover preview">
+      <p style="margin: 0 0 16px; color: var(--text-secondary); font-size: 13px;">
+        The dashed frame simulates the viewport. Toggle <strong>Overflow viewport</strong> to compare: constrained internal scroll vs. menu growing past the fold (scroll the frame to reach clipped items).
+      </p>
+
+      <div class="viewport-sim" id="viewport-sim">
+        <span class="viewport-sim__label" id="viewport-sim-label">Viewport 640px</span>
+        <div class="viewport-sim__header">
+          <button type="button" class="links-trigger" tabindex="-1" aria-hidden="true" title="Links trigger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="viewport-sim__bottom-inset" aria-hidden="true"></div>
+        <span class="viewport-sim__bottom-inset-label" id="bottom-inset-label">16px margin</span>
+        <div class="viewport-sim__anchor">
+          <div
+            class="links-popover"
+            id="links-popover"
+            role="dialog"
+            aria-label="Links"
+          >
+            <span class="links-popover__caret" aria-hidden="true"></span>
+
+            <div class="links-popover__search">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <circle cx="9" cy="9" r="5.5"/>
+                <path d="M16 16l-3-3"/>
+              </svg>
+              <input type="search" id="links-search" placeholder="Type to search" autocomplete="off" />
+            </div>
+
+            <div class="links-popover__links" id="links-viewport" tabindex="-1">
+              <div class="links-popover__body" id="links-body">
+                <div class="links-popover__section-label">Quick links</div>
+                <ul class="links-popover__list" id="quick-links-list" role="listbox" aria-label="Quick links"></ul>
+                <p class="links-popover__empty is-hidden" id="quick-links-empty">No results</p>
+              </div>
+
+              <hr class="links-popover__divider" id="links-divider" aria-hidden="true" />
+
+              <div class="links-popover__promo" id="promo-section">
+                <ul class="links-popover__list" id="promo-links-list" role="listbox" aria-label="Promotional links"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="viewport-sim__metrics" id="viewport-metrics" aria-live="polite"></p>
+    </section>
+
+    <aside class="demo-notes">
+      <h2>Behaviour spec</h2>
+      <p><strong>Width</strong> — <code>width: fit-content</code> hugs the longest visible label, capped at <code>max-width: 40rem</code>. Beyond that, labels truncate with ellipsis; hover shows a tooltip only when the label is actually truncated.</p>
+      <p><strong>Section order</strong> — Quick links (user-defined, labelled) come first and scroll in the middle region. Promotional links (system, no label) are pinned at the bottom — the block is always visible, and the list scrolls internally when height is tight.</p>
+
+      <h3>Height strategy (toggle)</h3>
+      <p><strong>Constrain</strong> (default) — pop-over max height = viewport − header − margin. Links scroll inside the menu; all items stay reachable.</p>
+      <p><strong>Overflow viewport</strong> — pop-over grows to content height (28rem cap only). Content below the fold is <em>clipped and unreachable</em> until the page scrolls. No internal link scroll — demonstrates why constrain mode exists.</p>
+
+      <h3>Height-responsive layout (constrain mode)</h3>
+      <p>Prefer <strong>one scrollbar</strong> when only one section overflows. When both overflow, use <strong>two independent scroll panes</strong> — the only way to keep every item reachable while promo stays pinned.</p>
+      <ul style="margin: 0; padding-left: 1.2rem;">
+        <li><strong>Quick-only</strong> — all promo visible; quick links scroll</li>
+        <li><strong>Promo-only</strong> — all quick links visible; promo scrolls</li>
+        <li><strong>Both</strong> — each section scrolls within its allocation (min. 2 quick rows + 1 promo row)</li>
+        <li><strong>None</strong> — everything fits</li>
+      </ul>
+      <pre>links-popover
+├─ search
+└─ links-viewport (flex column)
+   ├─ quick links    overflow-y: auto when needed
+   └─ promo          pinned; overflow-y: auto when needed</pre>
+      <p>“Promo always visible” means the promo <em>block</em> stays pinned at the bottom (not scrolled away with quick links), not that every promo row must fit without scrolling.</p>
+
+      <h3>Minimum visible space (when constrained)</h3>
+      <table style="width:100%; border-collapse:collapse; font-size:12px; margin:8px 0;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border); text-align:left;">
+            <th style="padding:4px 8px 4px 0;">Zone</th>
+            <th style="padding:4px 0;">Minimum</th>
+            <th style="padding:4px 0;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 8px 4px 0;">Search</td><td>full height</td><td>never shrinks; filter always available</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;">Quick links</td><td><code>2 rows + label</code> (~5.5rem)</td><td>primary user content; two rows signal more below</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;">Promo</td><td><code>1 row</code> (~2.25rem)</td><td>block always visible; one promo affordance minimum</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Allocation order</strong></p>
+      <ol style="margin: 0; padding-left: 1.2rem;">
+        <li>Everything fits → hug content, no scroll</li>
+        <li>Promo fits in budget → show all promo; quick links get the rest (≥ minimum)</li>
+        <li>Quick links fit in budget → show all quick; promo gets the rest (≥ minimum)</li>
+        <li>Neither fits → reserve both minimums, split any extra <strong>60% quick / 40% promo</strong></li>
+        <li>Budget below combined minimums → <strong>60 / 40</strong> split; both scroll; nothing clipped</li>
+      </ol>
+      <p>Quick links win on priority (user content); promo wins on visibility (always pinned, never zero).</p>
+
+      <h3>Priority when space is tight</h3>
+      <ol style="margin: 0; padding-left: 1.2rem;">
+        <li>Search bar — always visible</li>
+        <li>Reserve <code>min-quick</code> and <code>min-promo</code> when both sections exist</li>
+        <li>Give surplus space to quick links first, then promo</li>
+        <li>Enable scroll per section only when its content exceeds its allocation</li>
+      </ol>
+    </aside>
+  </div>
+
+  <script>
+    (function () {
+      var EXTERNAL_SVG = '<svg class="links-popover__external" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4h5v5"/><path d="M16 4l-7 7"/><path d="M14 12v3a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h3"/></svg>';
+
+      var QUICK_LINK_TEMPLATES = [
+        { label: 'Agent Foundry', external: false },
+        { label: 'Data quality report', external: false },
+        { label: 'Configuration', external: false },
+        { label: 'Profile: Internal Records', external: true },
+        { label: 'Attribute Management', external: false },
+        { label: 'Profiling', external: false },
+        { label: 'Admin UI', external: false },
+        { label: 'STEP Documentation', external: true },
+        { label: 'Stibo Systems Academy Training', external: true },
+        { label: 'Data Quality operations', external: true },
+        { label: 'Import mapping workspace', external: false },
+        { label: 'Supplier onboarding checklist', external: false },
+        { label: 'Regional catalogue preview', external: false },
+        { label: 'Workflow approvals dashboard', external: false },
+        { label: 'Legacy enrichment console', external: false },
+        { label: 'Custom perspective launcher', external: false },
+        { label: 'Bulk export scheduler', external: false },
+        { label: 'API credentials vault', external: false },
+        { label: 'Sandbox environment switcher', external: false },
+        { label: 'Release notes archive', external: true }
+      ];
+
+      var PROMO_LINKS = [
+        { label: 'NEW! 2025.3 Overview', external: true },
+        { label: 'Stibo Systems.com', external: true },
+        { label: 'Try the new AI enrichment beta', external: true },
+        { label: 'Webinar: Master data governance', external: true },
+        { label: 'Upgrade to STEP 2025.3', external: true },
+        { label: 'Customer success portal', external: true },
+        { label: 'Partner certification programme', external: true },
+        { label: 'Product roadmap highlights', external: true },
+        { label: 'Early access: Data model designer', external: true },
+        { label: 'Case study: Retail MDM at scale', external: true },
+        { label: 'STEP community forum', external: true },
+        { label: 'Quarterly business review toolkit', external: true },
+        { label: 'Security & compliance hub', external: true },
+        { label: 'Integration marketplace', external: true },
+        { label: 'Professional services catalogue', external: true },
+        { label: 'Sustainability data initiative', external: true },
+        { label: 'AI governance whitepaper', external: true },
+        { label: 'User conference 2026 — register', external: true }
+      ];
+
+      var MAX_LINK_COUNT = Math.max(QUICK_LINK_TEMPLATES.length, PROMO_LINKS.length);
+      var LONG_SUFFIX = ' — extended enterprise workspace title that should truncate at forty rem';
+
+      var quickList = document.getElementById('quick-links-list');
+      var promoList = document.getElementById('promo-links-list');
+      var emptyEl = document.getElementById('quick-links-empty');
+      var searchInput = document.getElementById('links-search');
+      var popover = document.getElementById('links-popover');
+      var linksViewport = document.getElementById('links-viewport');
+      var linksBody = document.getElementById('links-body');
+      var promoSection = document.getElementById('promo-section');
+      var linksDivider = document.getElementById('links-divider');
+      var trigger = document.getElementById('links-trigger');
+
+      var state = {
+        quickCount: 14,
+        promoCount: 5,
+        longLabels: false,
+        query: '',
+        simVh: 640,
+        bottomMargin: 16,
+        heightMode: 'constrain'
+      };
+
+      function buildQuickLinks(source, count) {
+        return source.slice(0, count).map(function (link, i) {
+          var label = link.label;
+          if (state.longLabels && i === 0) label += LONG_SUFFIX;
+          return { id: 'quick-' + i, label: label, external: link.external };
+        });
+      }
+
+      function buildPromoLinks(source, count) {
+        return source.slice(0, count).map(function (link, i) {
+          return { id: 'promo-' + i, label: link.label, external: link.external };
+        });
+      }
+
+      function renderRow(link) {
+        var li = document.createElement('li');
+        li.setAttribute('role', 'option');
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'links-popover__item';
+        btn.setAttribute('data-link-id', link.id);
+
+        var wrap = document.createElement('span');
+        wrap.className = 'links-popover__label-wrap';
+
+        var span = document.createElement('span');
+        span.className = 'links-popover__label';
+        span.textContent = link.label;
+
+        var tip = document.createElement('span');
+        tip.className = 'links-popover__tooltip';
+        tip.setAttribute('role', 'tooltip');
+        tip.textContent = link.label;
+
+        wrap.appendChild(span);
+        wrap.appendChild(tip);
+        btn.appendChild(wrap);
+        if (link.external) btn.insertAdjacentHTML('beforeend', EXTERNAL_SVG);
+        li.appendChild(btn);
+
+        requestAnimationFrame(function () {
+          if (span.scrollWidth > span.clientWidth) wrap.classList.add('is-truncated');
+        });
+
+        return li;
+      }
+
+      function filterLinks(links) {
+        var q = state.query.trim().toLowerCase();
+        if (!q) return links;
+        return links.filter(function (l) { return l.label.toLowerCase().includes(q); });
+      }
+
+      function render() {
+        var quickLinks = filterLinks(buildQuickLinks(QUICK_LINK_TEMPLATES, state.quickCount));
+        var promoLinks = filterLinks(buildPromoLinks(PROMO_LINKS, state.promoCount));
+
+        quickList.replaceChildren();
+        promoList.replaceChildren();
+
+        if (quickLinks.length === 0) {
+          emptyEl.classList.remove('is-hidden');
+        } else {
+          emptyEl.classList.add('is-hidden');
+          quickLinks.forEach(function (link) {
+            quickList.appendChild(renderRow(link));
+          });
+        }
+
+        promoLinks.forEach(function (link) {
+          promoList.appendChild(renderRow(link));
+        });
+
+        document.getElementById('promo-section').hidden = promoLinks.length === 0;
+        linksDivider.classList.toggle('is-hidden', promoLinks.length === 0);
+        scheduleLayout();
+      }
+
+      var MIN_QUICK = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--min-quick')) * 16 || 88;
+      var MIN_PROMO = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--min-promo')) * 16 || 36;
+      var TIGHT_SPLIT_QUICK = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tight-split-quick')) || 0.6;
+
+      function allocateBothSections(linksArea, promoH, quickH) {
+        if (promoH + MIN_QUICK <= linksArea) {
+          return { quickAlloc: linksArea - promoH, promoAlloc: promoH };
+        }
+        if (quickH + MIN_PROMO <= linksArea) {
+          return { quickAlloc: quickH, promoAlloc: linksArea - quickH };
+        }
+        if (MIN_QUICK + MIN_PROMO <= linksArea) {
+          var extra = linksArea - MIN_QUICK - MIN_PROMO;
+          var quickAlloc = MIN_QUICK + Math.round(extra * TIGHT_SPLIT_QUICK);
+          return { quickAlloc: quickAlloc, promoAlloc: linksArea - quickAlloc };
+        }
+        var quickAlloc = Math.max(1, Math.round(linksArea * TIGHT_SPLIT_QUICK));
+        return { quickAlloc: quickAlloc, promoAlloc: linksArea - quickAlloc };
+      }
+
+      function applySectionScroll(el, allocated, contentH) {
+        el.style.maxHeight = Math.max(0, allocated) + 'px';
+        var scrolls = contentH > allocated + 1;
+        el.classList.toggle('is-scrollable', scrolls);
+        return scrolls;
+      }
+
+      var HEADER_HEIGHT = 48;
+      var POPOVER_CAP = 28 * 16;
+
+      function hasQuickLinks() {
+        return quickList.children.length > 0;
+      }
+
+      function hasPromoLinks() {
+        return !promoSection.hidden && promoList.children.length > 0;
+      }
+
+      var layoutRaf1 = 0;
+      var layoutRaf2 = 0;
+      var anchorEl = document.querySelector('.viewport-sim__anchor');
+
+      function getAvailableHeight() {
+        return Math.max(0, state.simVh - HEADER_HEIGHT - state.bottomMargin);
+      }
+
+      function scheduleLayout() {
+        if (layoutRaf1) cancelAnimationFrame(layoutRaf1);
+        if (layoutRaf2) cancelAnimationFrame(layoutRaf2);
+        layoutRaf1 = requestAnimationFrame(function () {
+          layoutRaf1 = 0;
+          layoutRaf2 = requestAnimationFrame(function () {
+            layoutRaf2 = 0;
+            runLayout();
+          });
+        });
+      }
+
+      function resetLayoutConstraints() {
+        popover.classList.remove('is-constrained', 'is-overflowing');
+        popover.style.height = '';
+        popover.style.maxHeight = '';
+        linksViewport.style.maxHeight = '';
+        linksBody.style.maxHeight = '';
+        promoSection.style.maxHeight = '';
+        linksBody.classList.remove('is-scrollable');
+        promoSection.classList.remove('is-scrollable');
+      }
+
+      function applyOverflowMode() {
+        var viewportSim = document.getElementById('viewport-sim');
+        viewportSim.classList.toggle('viewport-sim--overflow', state.heightMode === 'overflow');
+      }
+
+      function runLayout() {
+        applyOverflowMode();
+        var available = getAvailableHeight();
+        var searchEl = popover.querySelector('.links-popover__search');
+
+        resetLayoutConstraints();
+
+        if (state.heightMode === 'overflow') {
+          popover.style.maxHeight = POPOVER_CAP + 'px';
+          popover.style.height = 'auto';
+          var natural = popover.scrollHeight;
+          popover.style.height = natural + 'px';
+          var popoverBottom = HEADER_HEIGHT + natural;
+          var clipLine = state.simVh;
+          var clippedPx = Math.max(0, popoverBottom - clipLine);
+          popover.classList.toggle('is-overflowing', clippedPx > 0);
+          updateMetrics(available, POPOVER_CAP, natural, 'overflow', false, false, clippedPx);
+          return;
+        }
+
+        var maxH = Math.min(POPOVER_CAP, available);
+        popover.style.maxHeight = maxH + 'px';
+
+        var natural = popover.scrollHeight;
+        var searchH = searchEl.offsetHeight;
+        var promoH = hasPromoLinks() ? promoSection.scrollHeight : 0;
+        var quickH = linksBody.scrollHeight;
+        var hasQuick = hasQuickLinks();
+        var hasPromo = hasPromoLinks();
+        var linksArea = Math.max(0, maxH - searchH);
+
+        if (maxH <= 0 || natural <= maxH) {
+          popover.style.height = 'auto';
+          updateMetrics(available, maxH, popover.scrollHeight, 'none', false, false, 0);
+          return;
+        }
+
+        popover.classList.add('is-constrained');
+        popover.style.height = maxH + 'px';
+        linksViewport.style.maxHeight = linksArea + 'px';
+
+        var scrollMode = 'none';
+        var quickScrolls = false;
+        var promoScrolls = false;
+
+        if (hasQuick && hasPromo) {
+          if (promoH + quickH <= linksArea + 1) {
+            scrollMode = 'none';
+          } else if (promoH <= linksArea && quickH > linksArea - promoH) {
+            scrollMode = 'quick-only';
+            promoSection.style.maxHeight = promoH + 'px';
+            quickScrolls = applySectionScroll(linksBody, linksArea - promoH, quickH);
+          } else if (quickH <= linksArea && promoH > linksArea - quickH) {
+            scrollMode = 'promo-only';
+            linksBody.style.maxHeight = quickH + 'px';
+            promoScrolls = applySectionScroll(promoSection, linksArea - quickH, promoH);
+          } else {
+            scrollMode = 'both';
+            var alloc = allocateBothSections(linksArea, promoH, quickH);
+            quickScrolls = applySectionScroll(linksBody, alloc.quickAlloc, quickH);
+            promoScrolls = applySectionScroll(promoSection, alloc.promoAlloc, promoH);
+          }
+        } else if (hasQuick && quickH > linksArea + 1) {
+          scrollMode = 'quick-only';
+          quickScrolls = applySectionScroll(linksBody, linksArea, quickH);
+        } else if (hasPromo && promoH > linksArea + 1) {
+          scrollMode = 'promo-only';
+          promoScrolls = applySectionScroll(promoSection, linksArea, promoH);
+        }
+
+        updateMetrics(available, maxH, maxH, scrollMode, quickScrolls, promoScrolls, 0);
+      }
+
+      function updateMetrics(available, maxH, popoverH, scrollMode, quickScrolls, promoScrolls, clippedPx) {
+        var cap = available < 28 * 16 ? 'viewport area' : '28rem cap';
+        var scrollNote;
+
+        if (scrollMode === 'overflow') {
+          scrollNote = clippedPx > 0
+            ? clippedPx + 'px clipped below fold — scroll viewport frame to reach'
+            : 'fits in viewport (no page scroll needed)';
+        } else {
+          var modeLabel = {
+            none: 'all links visible',
+            'quick-only': 'single scroll (quick links)',
+            'promo-only': 'single scroll (promo)',
+            both: 'dual scroll (all items reachable)'
+          };
+          scrollNote = modeLabel[scrollMode] || scrollMode;
+        }
+
+        document.getElementById('viewport-metrics').textContent =
+          'Available: ' + Math.round(available) + 'px · ' +
+          'Popover: ' + Math.round(popoverH) + 'px / ' + Math.round(maxH) + 'px max (' + cap + ') · ' +
+          scrollNote;
+      }
+
+      function updateHeightVars() {
+        document.documentElement.style.setProperty('--sim-vh', state.simVh + 'px');
+        document.documentElement.style.setProperty('--popover-offset-bottom', state.bottomMargin + 'px');
+        document.getElementById('viewport-sim-label').textContent = 'Viewport ' + state.simVh + 'px';
+        document.getElementById('bottom-inset-label').textContent = state.bottomMargin + 'px margin';
+        scheduleLayout();
+      }
+
+      if (window.ResizeObserver) {
+        var onResize = scheduleLayout;
+        if (anchorEl) new ResizeObserver(onResize).observe(anchorEl);
+        var viewportSim = document.getElementById('viewport-sim');
+        if (viewportSim) new ResizeObserver(onResize).observe(viewportSim);
+      }
+
+      searchInput.addEventListener('input', function () {
+        state.query = searchInput.value;
+        render();
+      });
+
+      document.getElementById('ctrl-quick-count').addEventListener('input', function (e) {
+        state.quickCount = Number(e.target.value);
+        document.getElementById('ctrl-quick-count-val').textContent = String(state.quickCount);
+        render();
+      });
+
+      document.getElementById('ctrl-promo-count').addEventListener('input', function (e) {
+        state.promoCount = Number(e.target.value);
+        document.getElementById('ctrl-promo-count-val').textContent = String(state.promoCount);
+        render();
+      });
+
+      document.getElementById('ctrl-long-labels').addEventListener('change', function (e) {
+        state.longLabels = e.target.checked;
+        render();
+      });
+
+      document.getElementById('ctrl-viewport').addEventListener('input', function (e) {
+        state.simVh = Number(e.target.value);
+        document.getElementById('ctrl-viewport-val').textContent = state.simVh + 'px';
+        updateHeightVars();
+      });
+
+      document.getElementById('ctrl-viewport').addEventListener('change', function (e) {
+        state.simVh = Number(e.target.value);
+        updateHeightVars();
+      });
+
+      document.getElementById('ctrl-anchor-gap').addEventListener('input', function (e) {
+        state.bottomMargin = Number(e.target.value);
+        document.getElementById('ctrl-anchor-gap-val').textContent = state.bottomMargin + 'px';
+        updateHeightVars();
+      });
+
+      document.getElementById('ctrl-anchor-gap').addEventListener('change', function (e) {
+        state.bottomMargin = Number(e.target.value);
+        updateHeightVars();
+      });
+
+      document.getElementById('ctrl-overflow-viewport').addEventListener('change', function (e) {
+        state.heightMode = e.target.checked ? 'overflow' : 'constrain';
+        scheduleLayout();
+      });
+
+      trigger.addEventListener('click', function () {
+        var open = trigger.getAttribute('aria-expanded') === 'true';
+        trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+
+      updateHeightVars();
+      document.getElementById('ctrl-quick-count').max = MAX_LINK_COUNT;
+      document.getElementById('ctrl-promo-count').max = MAX_LINK_COUNT;
+      render();
+    })();
+  </script>
+</body>
+</html>
