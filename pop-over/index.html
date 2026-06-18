@@ -187,9 +187,24 @@
       overflow-x: hidden;
     }
 
+    .viewport-sim--overflow .viewport-sim__anchor .links-popover {
+      max-height: 100%;
+      min-height: 100%;
+    }
+
     .viewport-sim--overflow .viewport-sim__anchor {
-      bottom: auto;
-      max-height: none;
+      align-items: stretch;
+    }
+
+    .viewport-sim--overflow .links-popover.is-overflow-mode:not(.is-constrained):not(.is-single-scroll) .links-popover__links {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .viewport-sim--overflow .links-popover.is-overflow-mode:not(.is-constrained):not(.is-single-scroll) .links-popover__body + .links-popover__divider:not(.is-hidden) {
+      margin-top: auto;
     }
 
     .viewport-sim--overflow .viewport-sim__bottom-inset,
@@ -286,6 +301,10 @@
       overflow: hidden;
     }
 
+    .links-popover.is-overflow-mode:not(.is-constrained) {
+      overflow: visible;
+    }
+
     .links-popover__caret {
       position: absolute;
       top: -7px;
@@ -335,6 +354,8 @@
 
     .links-popover__links {
       flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
       overflow: visible;
     }
 
@@ -344,6 +365,21 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+    }
+
+    .links-popover.is-single-scroll.is-constrained .links-popover__links {
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .links-popover.is-single-scroll.is-constrained .links-popover__body {
+      flex: 0 0 auto;
+      min-height: auto;
+    }
+
+    .links-popover.is-single-scroll.is-constrained .links-popover__promo {
+      flex: 0 0 auto;
+      min-height: auto;
     }
 
     .links-popover__body {
@@ -363,10 +399,13 @@
 
     .links-popover__divider {
       flex-shrink: 0;
+      display: block;
+      width: 100%;
+      height: 1px;
       margin: 0;
+      padding: 0;
       border: none;
-      border-top: 1px solid var(--border);
-      height: 0;
+      background-color: var(--border);
     }
 
     .links-popover__promo {
@@ -533,6 +572,10 @@
       <input type="range" id="ctrl-anchor-gap" min="8" max="120" value="16" />
       <span id="ctrl-anchor-gap-val">16px</span>
     </label>
+    <label title="One scrollbar for quick + promo; promo scrolls away with content">
+      Single scroll
+      <input type="checkbox" id="ctrl-single-scroll" />
+    </label>
     <label title="Popover grows to full content height; clipped items need page scroll inside the viewport frame">
       Overflow viewport
       <input type="checkbox" id="ctrl-overflow-viewport" />
@@ -542,7 +585,7 @@
   <div class="demo-main">
     <section class="demo-stage" aria-label="Popover preview">
       <p style="margin: 0 0 16px; color: var(--text-secondary); font-size: 13px;">
-        The dashed frame simulates the viewport. Toggle <strong>Overflow viewport</strong> to compare: constrained internal scroll vs. menu growing past the fold (scroll the frame to reach clipped items).
+        The dashed frame simulates the viewport. Toggle <strong>Overflow viewport</strong> or <strong>Single scroll</strong> to compare layout strategies.
       </p>
 
       <div class="viewport-sim" id="viewport-sim">
@@ -599,9 +642,13 @@
       <p><strong>Width</strong> — <code>width: fit-content</code> hugs the longest visible label, capped at <code>max-width: 40rem</code>. Beyond that, labels truncate with ellipsis; hover shows a tooltip only when the label is actually truncated.</p>
       <p><strong>Section order</strong> — Quick links (user-defined, labelled) come first and scroll in the middle region. Promotional links (system, no label) are pinned at the bottom — the block is always visible, and the list scrolls internally when height is tight.</p>
 
+      <h3>Scroll strategy (toggle)</h3>
+      <p><strong>Smart scroll</strong> (default) — promo pinned at the bottom; prefer one section scrollbar when possible, dual scroll when both sections overflow.</p>
+      <p><strong>Single scroll</strong> — one scrollbar on the links area; quick links and promo scroll together. Promo is not always visible — scroll to reach it.</p>
+
       <h3>Height strategy (toggle)</h3>
       <p><strong>Constrain</strong> (default) — pop-over max height = viewport − header − margin. Links scroll inside the menu; all items stay reachable.</p>
-      <p><strong>Overflow viewport</strong> — pop-over grows to content height (28rem cap only). Content below the fold is <em>clipped and unreachable</em> until the page scrolls. No internal link scroll — demonstrates why constrain mode exists.</p>
+      <p><strong>Overflow viewport</strong> — no <code>28rem</code> cap; pop-over fills the viewport slot. When content exceeds that slot, quick links scroll internally and promo stays pinned at the bottom (same split logic as constrain). Red outline when content would extend past the viewport.</p>
 
       <h3>Height-responsive layout (constrain mode)</h3>
       <p>Prefer <strong>one scrollbar</strong> when only one section overflows. When both overflow, use <strong>two independent scroll panes</strong> — the only way to keep every item reachable while promo stays pinned.</p>
@@ -722,7 +769,8 @@
         query: '',
         simVh: 640,
         bottomMargin: 16,
-        heightMode: 'constrain'
+        heightMode: 'constrain',
+        scrollStrategy: 'smart'
       };
 
       function buildQuickLinks(source, count) {
@@ -863,7 +911,7 @@
       }
 
       function resetLayoutConstraints() {
-        popover.classList.remove('is-constrained', 'is-overflowing');
+        popover.classList.remove('is-constrained', 'is-overflowing', 'is-overflow-mode', 'is-single-scroll');
         popover.style.height = '';
         popover.style.maxHeight = '';
         linksViewport.style.maxHeight = '';
@@ -871,6 +919,7 @@
         promoSection.style.maxHeight = '';
         linksBody.classList.remove('is-scrollable');
         promoSection.classList.remove('is-scrollable');
+        linksViewport.classList.remove('is-scrollable');
       }
 
       function applyOverflowMode() {
@@ -885,20 +934,16 @@
 
         resetLayoutConstraints();
 
-        if (state.heightMode === 'overflow') {
-          popover.style.maxHeight = POPOVER_CAP + 'px';
-          popover.style.height = 'auto';
-          var natural = popover.scrollHeight;
-          popover.style.height = natural + 'px';
-          var popoverBottom = HEADER_HEIGHT + natural;
-          var clipLine = state.simVh;
-          var clippedPx = Math.max(0, popoverBottom - clipLine);
-          popover.classList.toggle('is-overflowing', clippedPx > 0);
-          updateMetrics(available, POPOVER_CAP, natural, 'overflow', false, false, clippedPx);
-          return;
-        }
+        var maxH = state.heightMode === 'overflow'
+          ? available
+          : Math.min(POPOVER_CAP, available);
 
-        var maxH = Math.min(POPOVER_CAP, available);
+        if (state.heightMode === 'overflow') {
+          popover.classList.add('is-overflow-mode');
+        }
+        if (state.scrollStrategy === 'single') {
+          popover.classList.add('is-single-scroll');
+        }
         popover.style.maxHeight = maxH + 'px';
 
         var natural = popover.scrollHeight;
@@ -909,9 +954,12 @@
         var hasPromo = hasPromoLinks();
         var linksArea = Math.max(0, maxH - searchH);
 
+        var clippedPx = Math.max(0, natural - maxH);
+
         if (maxH <= 0 || natural <= maxH) {
           popover.style.height = 'auto';
-          updateMetrics(available, maxH, popover.scrollHeight, 'none', false, false, 0);
+          popover.classList.toggle('is-overflowing', state.heightMode === 'overflow' && clippedPx > 0);
+          updateMetrics(available, maxH, popover.scrollHeight, 'none', false, false, clippedPx);
           return;
         }
 
@@ -922,6 +970,17 @@
         var scrollMode = 'none';
         var quickScrolls = false;
         var promoScrolls = false;
+
+        if (state.scrollStrategy === 'single') {
+          var dividerH = hasPromo && !linksDivider.classList.contains('is-hidden') ? linksDivider.offsetHeight : 0;
+          var linksNatural = quickH + dividerH + promoH;
+          var singleScrolls = linksNatural > linksArea + 1;
+          linksViewport.classList.toggle('is-scrollable', singleScrolls);
+          scrollMode = singleScrolls ? 'single' : 'none';
+          popover.classList.toggle('is-overflowing', state.heightMode === 'overflow' && clippedPx > 0);
+          updateMetrics(available, maxH, maxH, scrollMode, false, false, clippedPx);
+          return;
+        }
 
         if (hasQuick && hasPromo) {
           if (promoH + quickH <= linksArea + 1) {
@@ -948,25 +1007,26 @@
           promoScrolls = applySectionScroll(promoSection, linksArea, promoH);
         }
 
-        updateMetrics(available, maxH, maxH, scrollMode, quickScrolls, promoScrolls, 0);
+        popover.classList.toggle('is-overflowing', state.heightMode === 'overflow' && clippedPx > 0);
+        updateMetrics(available, maxH, maxH, scrollMode, quickScrolls, promoScrolls, clippedPx);
       }
 
       function updateMetrics(available, maxH, popoverH, scrollMode, quickScrolls, promoScrolls, clippedPx) {
-        var cap = available < 28 * 16 ? 'viewport area' : '28rem cap';
-        var scrollNote;
-
-        if (scrollMode === 'overflow') {
-          scrollNote = clippedPx > 0
-            ? clippedPx + 'px clipped below fold — scroll viewport frame to reach'
-            : 'fits in viewport (no page scroll needed)';
-        } else {
-          var modeLabel = {
-            none: 'all links visible',
-            'quick-only': 'single scroll (quick links)',
-            'promo-only': 'single scroll (promo)',
-            both: 'dual scroll (all items reachable)'
-          };
-          scrollNote = modeLabel[scrollMode] || scrollMode;
+        var cap = state.heightMode === 'overflow'
+          ? 'viewport area (no 28rem cap)'
+          : (available < 28 * 16 ? 'viewport area' : '28rem cap');
+        var modeLabel = {
+          none: 'all links visible',
+          single: 'single scroll (quick + promo)',
+          'quick-only': 'single scroll (quick links)',
+          'promo-only': 'single scroll (promo)',
+          both: 'dual scroll (all items reachable)'
+        };
+        var scrollNote = modeLabel[scrollMode] || scrollMode;
+        if (state.heightMode === 'overflow' && clippedPx > 0 && state.scrollStrategy !== 'single') {
+          scrollNote += ' · promo pinned · ' + Math.round(clippedPx) + 'px beyond viewport';
+        } else if (state.heightMode === 'overflow' && clippedPx > 0 && state.scrollStrategy === 'single') {
+          scrollNote += ' · ' + Math.round(clippedPx) + 'px beyond viewport';
         }
 
         document.getElementById('viewport-metrics').textContent =
@@ -1032,6 +1092,11 @@
       document.getElementById('ctrl-anchor-gap').addEventListener('change', function (e) {
         state.bottomMargin = Number(e.target.value);
         updateHeightVars();
+      });
+
+      document.getElementById('ctrl-single-scroll').addEventListener('change', function (e) {
+        state.scrollStrategy = e.target.checked ? 'single' : 'smart';
+        scheduleLayout();
       });
 
       document.getElementById('ctrl-overflow-viewport').addEventListener('change', function (e) {
