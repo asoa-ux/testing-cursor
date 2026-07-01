@@ -154,7 +154,7 @@
     background: var(--surface);
     overflow: hidden;
     transition: width 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    min-width: 64px;
+    min-width: 48px;
   }
   .panel.left  { border-right: 1px solid var(--border); }
   .panel.right { border-left:  1px solid var(--border); }
@@ -212,25 +212,6 @@
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     margin-top: 10px;
-  }
-
-  .content-width-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-  .region-width {
-    font-size: 10.5px;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-muted);
-    line-height: 1;
-    white-space: nowrap;
-  }
-  .region-width-dim {
-    color: var(--text-muted);
-    opacity: 0.75;
   }
 
   .toggle-btn {
@@ -301,8 +282,8 @@
   /* ---------- Content area ---------- */
   .content {
     flex: 1;
-    /* Content area floor — 21rem (details and bulk). */
-    min-width: 21rem;
+    /* Content area floor — 24rem (same as open panel min). */
+    min-width: 24rem;
     display: flex;
     flex-direction: column;
     background: var(--bg);
@@ -310,7 +291,7 @@
     position: relative; /* anchors hamburger menu & overlay backdrop */
   }
   /* Content area floor when rails are visible (not hamburger). */
-  .app:not(.hamburger) .content { min-width: 21rem; }
+  .app:not(.hamburger) .content { min-width: 24rem; }
   .content-header {
     display: flex;
     align-items: center;
@@ -453,7 +434,7 @@
   /* ---------- Form ---------- */
   .form-grid {
     /* The form itself is the container for the responsive break.
-       Wrap threshold = 240 (label) + 24 (gutter) + 336 (21rem) = 600px. */
+       Wrap threshold = 240 (label) + 24 (gutter) + 384 (24rem) = 648px. */
     container-type: inline-size;
     container-name: formgrid;
     display: flex;
@@ -537,10 +518,10 @@
 
   .size-fixed    .form-input,
   .size-fixed    .form-select,
-  .size-fixed    .form-textarea  { width: 21rem; max-width: 100%; }
+  .size-fixed    .form-textarea  { width: 24rem; max-width: 100%; }
 
-  /* Stacked layout when there isn't 21rem of room for the input */
-  @container formgrid (max-width: 599px) {
+  /* Stacked layout when there isn't 24rem of room for the input */
+  @container formgrid (max-width: 647px) {
     .form-row {
       grid-template-columns: 1fr;
       row-gap: 6px;
@@ -548,8 +529,8 @@
     .form-label {
       padding-top: 0;
     }
-    /* In stacked mode the fixed-21rem input behaves like full-width
-       since the content area itself is at its 21rem minimum. */
+    /* In stacked mode the fixed-24rem input behaves like full-width
+       since the content area itself is at its 24rem minimum. */
     .size-fixed .form-input,
     .size-fixed .form-select,
     .size-fixed .form-textarea { width: 100%; }
@@ -1069,10 +1050,6 @@
       </button>
       <h1 class="content-title content-title-details" style="flex:1;">Product details</h1>
       <h1 class="content-title content-title-bulk"    style="flex:1;">Table</h1>
-      <span class="content-width-group" aria-hidden="true">
-        <span class="region-width" id="mainContentWidth" title="Main content width"></span>
-        <span class="region-width region-width-dim" id="workspaceWidth" title="Content area width"></span>
-      </span>
       <span class="status-pill" id="statusPill" aria-live="polite">0 / 3 panels open</span>
       <button class="hamburger-btn" id="hamburgerRightBtn" data-side="right"
               title="Show right panels" aria-label="Show right panels"
@@ -1088,7 +1065,7 @@
       <button class="details-tab-btn" data-tab="form-only" role="tab" aria-selected="false">Form only</button>
       <button class="details-tab-btn" data-tab="table" role="tab" aria-selected="false">Table</button>
       <button class="details-tab-btn" data-tab="panel-table" role="tab" aria-selected="false">Panel + Table</button>
-      <span class="details-tab-floor" id="detailsTabFloor" aria-hidden="true">floor 21rem</span>
+      <span class="details-tab-floor" id="detailsTabFloor" aria-hidden="true">floor 24rem</span>
     </div>
     <div class="hamburger-menu menu-left"  id="hamburgerMenuLeft"  role="menu" aria-label="Left panels"></div>
     <div class="hamburger-menu menu-right" id="hamburgerMenuRight" role="menu" aria-label="Right panels"></div>
@@ -1116,7 +1093,7 @@
               <label class="form-label" for="f-email">
                 Email address
                 <span class="size-tag">max 35rem</span>
-                <small>Grows up to 35rem, then stops; shrinks down to 21rem before wrapping.</small>
+                <small>Grows up to 35rem, then stops; shrinks down to 24rem before wrapping.</small>
               </label>
               <div class="form-control">
                 <input id="f-email" class="form-input" type="email" placeholder="ada@example.com" />
@@ -1137,8 +1114,8 @@
             <div class="form-row size-fixed">
               <label class="form-label" for="f-country">
                 Country
-                <span class="size-tag">21rem</span>
-                <small>Fixed 21rem wide; becomes full-width when the row wraps.</small>
+                <span class="size-tag">24rem</span>
+                <small>Fixed 24rem wide; becomes full-width when the row wraps.</small>
               </label>
               <div class="form-control">
                 <select id="f-country" class="form-select">
@@ -1154,7 +1131,7 @@
             <div class="form-row size-fixed">
               <label class="form-label" for="f-zip">
                 Postal code
-                <span class="size-tag">21rem</span>
+                <span class="size-tag">24rem</span>
               </label>
               <div class="form-control">
                 <input id="f-zip" class="form-input" type="text" placeholder="94103" />
@@ -1171,7 +1148,7 @@
       <div class="details-table-view">
         <div class="details-table-view-header">
           <div class="bulk-view-title">Line items</div>
-          <div class="bulk-view-meta">Table in main content · floor 21rem</div>
+          <div class="bulk-view-meta">Table in main content · floor 24rem</div>
         </div>
         <div class="details-table-view-scroll">
           <table class="data-table">
@@ -1415,13 +1392,12 @@
 <script>
 window.PanelFramework = (() => {
   const REM = 16;
-  const PANEL_MIN     = 20 * REM;   // 320px
-  const COLLAPSED_W   = 64;
+  const LAYOUT_MIN  = 24 * REM; // 384px — content area + open panels (one rule)
+  const PANEL_MIN   = LAYOUT_MIN;
+  const CONTENT_MIN = LAYOUT_MIN;
+  const COLLAPSED_W   = 48;
   const AI_PANEL_ID   = 'rightB';
 
-  // ---------- Per-mode content minimums ----------
-  // Content area floor — 21rem for details and bulk.
-  const CONTENT_MIN = 21 * REM; // 336px
 
   // ---------- Details tabs (product record layouts) ----------
   // Tabs only change what appears INSIDE the main content area.
@@ -1433,22 +1409,22 @@ window.PanelFramework = (() => {
   const DETAILS_TABS = {
     'form-panel-right': {
       title: 'Form + panel',
-      contentMinRem: 21,
+      contentMinRem: 24,
       workspacePanel: 'right',
     },
     'form-only': {
       title: 'Form only',
-      contentMinRem: 21,
+      contentMinRem: 24,
       workspacePanel: false,
     },
     'table': {
       title: 'Table',
-      contentMinRem: 21,
+      contentMinRem: 24,
       workspacePanel: false,
     },
     'panel-table': {
       title: 'Panel + Table',
-      contentMinRem: 21,
+      contentMinRem: 24,
       workspacePanel: 'left',
     },
   };
@@ -1497,25 +1473,25 @@ window.PanelFramework = (() => {
   //
   //   viewport ≥ shell_panel_total + contentMin
   //
-  // Details (4 slots, Panel inside content):
-  //   max 4: 3*320 + 64 + 336 = 1360  (threshold 1664 keeps roomy rails)
-  //   max 1 + Panel tab: 128 + 336 = 464  (threshold 896)
+  // Details (4 slots, Panel inside content; 24rem floor):
+  //   max 4/3: 3*384 + 384 = 1536  (threshold 1664)
+  //   max 2 form-only: 768 + 48 + 384 = 1200  (threshold 1280)
+  //   max 1 form-only: 384 + 96 + 384 = 864  (threshold 896)
   //
-  // Bulk (2 shell panels, content min 336):
-  //   max 2: 2*320 + 336 = 976  (rounded threshold 1088)
-  //   max 1: 320 + 64 + 336 = 720 (rounded threshold 896)
+  // Bulk (2 shell panels, 24rem content):
+  //   max 2: 768 + 384 = 1152  (threshold 1280)
+  //   max 1: 384 + 384 = 768  (threshold 896)
   //
-  // Details and bulk share 21rem content floor.
   const BP_LADDER = {
     detailsForm: [
       { from: 2304, max: 4, name: 'bp4' },
       { from: 1664, max: 3, name: 'bp3' },
-      { from: 1088, max: 2, name: 'bp2' },
+      { from: 1280, max: 2, name: 'bp2' },
       { from:  896, max: 1, name: 'bp1' },
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
     bulk: [
-      { from: 1088, max: 2, name: 'bp2' },
+      { from: 1280, max: 2, name: 'bp2' },
       { from:  896, max: 1, name: 'bp1' },
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
@@ -1585,27 +1561,33 @@ window.PanelFramework = (() => {
   }
 
   // Shell panels sit outside the middle column. The content-area Panel
-  // (rightA) lives inside .content — its width is part of the column, not
-  // an extra rail alongside the 21rem floor.
+  // (rightA) lives inside .content — its width is part of the column.
   function shellPanelsInLayout() {
     return layoutActivePanels().filter(id => !isContentAreaPanel(id));
   }
 
   function contentAreaWidthInLayout(contentPanelWidth) {
+    const floor = contentMin();
     if (contentPanelWidth !== undefined && isWorkspacePanelVisible()) {
-      const currentContent = ($content && $content.offsetWidth > 0)
-        ? $content.offsetWidth
-        : contentMin();
       const currentPanel = state[CONTENT_PANEL_ID].open
         ? state[CONTENT_PANEL_ID].width
         : 0;
-      return Math.max(contentMin(), currentContent - currentPanel + contentPanelWidth);
+      const liveContent = ($content && $content.offsetWidth > 0)
+        ? $content.offsetWidth
+        : floor;
+      return Math.max(floor, liveContent - currentPanel + contentPanelWidth);
+    }
+    if (isWorkspacePanelVisible() && state[CONTENT_PANEL_ID].open) {
+      const panelW = state[CONTENT_PANEL_ID].width;
+      const live = ($content && $content.offsetWidth > 0) ? $content.offsetWidth : 0;
+      if (live >= Math.max(floor, panelW)) return live;
+      return Math.max(floor, panelW);
     }
     if ($content) {
       const w = $content.offsetWidth;
-      if (w > 0) return w;
+      if (w > 0) return Math.max(floor, w);
     }
-    return contentMin();
+    return floor;
   }
 
   function totalLayoutWidthUsed({ shellWidths = {} } = {}) {
@@ -1660,8 +1642,6 @@ window.PanelFramework = (() => {
 
   const $app                = document.getElementById('app');
   const $content            = document.getElementById('content');
-  const $mainContentWidth   = document.getElementById('mainContentWidth');
-  const $workspaceWidth     = document.getElementById('workspaceWidth');
   const $statusPill         = document.getElementById('statusPill');
   const $hamburgerLeftBtn   = document.getElementById('hamburgerLeftBtn');
   const $hamburgerRightBtn  = document.getElementById('hamburgerRightBtn');
@@ -1676,7 +1656,7 @@ window.PanelFramework = (() => {
 
   const panelEl = (id) => document.querySelector(`.panel[data-id="${id}"]`);
   const isAiPanel = (id) => id === AI_PANEL_ID;
-  const closedWidthFor = (id) => isAiPanel(id) ? 0 : COLLAPSED_W;
+  const closedWidthFor = (id) => (isAiPanel(id) ? 0 : COLLAPSED_W);
 
   // ---------- Event bus (public) ----------
   // Events emitted:
@@ -1744,6 +1724,32 @@ window.PanelFramework = (() => {
     if (side === 'right') return chevronIcon(open ? 'right' : 'left');
   }
 
+  function panelInlineWidth(id) {
+    const s = state[id];
+    if (isAiPanel(id) && !s.open && currentBp !== 'hamburger') return 0;
+    return s.open ? s.width : closedWidthFor(id);
+  }
+
+  // Measured width of the horizontal layout (shell rails + content column).
+  function measureLiveLayoutWidth() {
+    let total = 0;
+    for (const pid of shellPanelsInLayout()) {
+      const el = panelEl(pid);
+      if (!el || el.style.display === 'none') continue;
+      total += el.offsetWidth;
+    }
+    if ($content) total += $content.offsetWidth;
+    return total;
+  }
+
+  function syncDragPanelWidths() {
+    for (const pid of layoutActivePanels()) {
+      const el = panelEl(pid);
+      if (!el || el.classList.contains('overlay-active')) continue;
+      el.style.width = panelInlineWidth(pid) + 'px';
+    }
+  }
+
   // ---------- Render ----------
   function updatePanelWidthLabel(el) {
     let widthEl = el.querySelector('.panel-width');
@@ -1771,21 +1777,8 @@ window.PanelFramework = (() => {
     });
   }
 
-  function updateContentWidthLabels() {
-    const bodyEl = document.querySelector('.content-body');
-    if ($mainContentWidth && bodyEl) {
-      const mainW = bodyEl.offsetWidth;
-      $mainContentWidth.textContent = mainW > 0 ? `main ${mainW}px` : '';
-    }
-    if ($workspaceWidth && $content) {
-      const wsW = $content.offsetWidth;
-      $workspaceWidth.textContent = wsW > 0 ? `content ${wsW}px` : '';
-    }
-  }
-
   function updateAllWidthLabels() {
     updateAllPanelWidthLabels();
-    updateContentWidthLabels();
   }
 
   function applyPanel(id) {
@@ -1796,7 +1789,7 @@ window.PanelFramework = (() => {
     if (!isOverlay) {
       el.classList.toggle('expanded',  s.open);
       el.classList.toggle('collapsed', !s.open);
-      el.style.width = (s.open ? s.width : closedWidthFor(id)) + 'px';
+      el.style.width = panelInlineWidth(id) + 'px';
       if (isAiPanel(id) && !s.open && currentBp !== 'hamburger') {
         el.style.display = 'none';
       } else {
@@ -1896,8 +1889,9 @@ window.PanelFramework = (() => {
 
   // Shrink panels first; if still overflowing, auto-close
   // lowest-priority panels so nothing is clipped — Assistant is last to go.
-  function resolveLayoutOverflow() {
+  function resolveLayoutOverflow(opts = {}) {
     if (currentBp === 'hamburger') return false;
+    const { protectId } = opts;
     let changed = false;
 
     fitWidthsForViewport();
@@ -1905,7 +1899,10 @@ window.PanelFramework = (() => {
     if (overflow <= 0) return changed;
 
     while (overflow > 0 && layoutOpenCount() > 0) {
-      const evictId = pickPanelToEvict(layoutOpenOrder());
+      const candidates = protectId
+        ? layoutOpenOrder().filter(pid => pid !== protectId)
+        : layoutOpenOrder();
+      const evictId = pickPanelToEvict(candidates);
       if (!evictId) break;
       closePanel(evictId, { silent: true, auto: true });
       changed = true;
@@ -2033,6 +2030,7 @@ window.PanelFramework = (() => {
       const oppositeIds = layoutOpenOrder().filter(pid => PANELS[pid].side === opposite);
       const evictId = pickPanelToEvict(oppositeIds) || pickPanelToEvict(layoutOpenOrder());
       if (evictId) closePanel(evictId, { silent: true, auto: true });
+      applyAll();
     }
 
     userClosed.delete(id);
@@ -2040,7 +2038,8 @@ window.PanelFramework = (() => {
 
     state[id].open = true;
     openOrder.push(id);
-    resolveLayoutOverflow();
+    applyAll();
+    fitWidthsForViewport();
     applyAll();
     updateUI();
     emit('open', { id });
@@ -2062,11 +2061,6 @@ window.PanelFramework = (() => {
     if (!silent) {
       applyPanel(id);
       updateUI();
-      if (restoreAutoClosedPanels()) {
-        resolveLayoutOverflow();
-        applyAll();
-        updateUI();
-      }
     }
     emit('close', { id, auto });
   }
@@ -2096,6 +2090,7 @@ window.PanelFramework = (() => {
     currentTab = tabId;
     syncLayoutClasses();
     applyTabWorkspacePanel();
+    applyAll();
     resolveLayoutOverflow();
     applyAll();
     updateUI();
@@ -2365,6 +2360,18 @@ window.PanelFramework = (() => {
       return;
     }
 
+    // Expanded shell panel: clicking the header (title, width) collapses too.
+    const expandedHeader = e.target.closest('.panel.expanded > .panel-header');
+    if (expandedHeader && currentBp !== 'hamburger' && !e.target.closest('[data-resize]')) {
+      const panel = expandedHeader.closest('.panel');
+      const id = panel?.dataset.id;
+      if (id && isActivePanel(id) && !isContentAreaPanel(id)) {
+        e.stopPropagation();
+        togglePanel(id);
+        return;
+      }
+    }
+
     const ctrlBtn = e.target.closest('[data-toggle-id]');
     if (ctrlBtn) {
       togglePanel(ctrlBtn.dataset.toggleId);
@@ -2415,14 +2422,26 @@ window.PanelFramework = (() => {
     // (e.g. Task list in bulk mode) don't contribute to the budget.
     const startOtherWidths = {};
     let reserved;
+    let maxAllowed;
     if (isContentAreaPanel(id)) {
       reserved = 0;
       for (const pid of shellPanelsInLayout()) {
-        startOtherWidths[pid] = state[pid].width;
+        if (isPanelInLayout(pid)) {
+          startOtherWidths[pid] = state[pid].width;
+        }
         reserved += panelWidthInLayout(pid);
       }
+      // Panel grows inside .content — cap by column width minus form floor.
+      const contentW = ($content && $content.offsetWidth > 0)
+        ? $content.offsetWidth
+        : contentMin();
+      maxAllowed = Math.min(
+        PANEL_MAX,
+        Math.max(PANEL_MIN, contentW - contentMin())
+      );
     } else {
-      reserved = contentAreaWidthInLayout();
+      // Shell panels trade width with the flex content column, not its live size.
+      reserved = contentMin();
       for (const pid of shellPanelsInLayout()) {
         if (pid === id) continue;
         if (isPanelInLayout(pid)) {
@@ -2432,12 +2451,8 @@ window.PanelFramework = (() => {
           reserved += closedWidthFor(pid);
         }
       }
+      maxAllowed = Math.min(PANEL_MAX, containerW - reserved);
     }
-    // Hard upper bound: other regions at minimum, further capped by PANEL_MAX.
-    const maxAllowed = Math.min(
-      PANEL_MAX,
-      containerW - reserved
-    );
 
     drag = {
       id,
@@ -2467,21 +2482,24 @@ window.PanelFramework = (() => {
     let delta = e.clientX - drag.startX;
     if (drag.side === 'right') delta = -delta;
 
-    let desired = drag.startWidth + delta;
-    desired = Math.max(PANEL_MIN, Math.min(PANEL_MAX, drag.maxWidth, desired));
-
-    // Restore others to pre-drag widths so each frame recomputes from a
-    // clean baseline.
     for (const pid in drag.startOtherWidths) {
       state[pid].width = drag.startOtherWidths[pid];
     }
 
-    const containerW = $app.offsetWidth;
-    const shellWidths = { [drag.id]: desired };
-    let overflow = totalLayoutWidthUsed({ shellWidths }) - containerW;
+    let desired = drag.startWidth + delta;
+    desired = Math.max(PANEL_MIN, Math.min(PANEL_MAX, drag.maxWidth, desired));
+    state[drag.id].width = desired;
+    syncDragPanelWidths();
 
-    // Shrink others (same-side first) to absorb overflow, oldest within
-    // each side first.
+    // Content-area Panel only splits space inside .content — column width unchanged.
+    if (isContentAreaPanel(drag.id)) {
+      updateAllWidthLabels();
+      return;
+    }
+
+    const containerW = $app.offsetWidth;
+    let overflow = measureLiveLayoutWidth() - containerW;
+
     if (overflow > 0) {
       const sameSide = layoutOpenOrder().filter(pid =>
         pid !== drag.id && panelLayoutSide(pid) === drag.side);
@@ -2495,15 +2513,16 @@ window.PanelFramework = (() => {
         state[oid].width -= reduce;
         overflow -= reduce;
       }
+      syncDragPanelWidths();
+      overflow = measureLiveLayoutWidth() - containerW;
     }
 
-    if (overflow > 0) desired = Math.max(PANEL_MIN, desired - overflow);
-    state[drag.id].width = desired;
-
-    panelEl(drag.id).style.width = desired + 'px';
-    for (const pid in drag.startOtherWidths) {
-      panelEl(pid).style.width = state[pid].width + 'px';
+    if (overflow > 0) {
+      desired = Math.max(PANEL_MIN, desired - overflow);
+      state[drag.id].width = desired;
+      syncDragPanelWidths();
     }
+
     updateAllWidthLabels();
   }
 
@@ -2517,6 +2536,7 @@ window.PanelFramework = (() => {
 
   function endDrag() {
     if (!drag) return;
+    if (pendingPointerEvent) processDragMove();
     const finalId    = drag.id;
     const finalWidth = state[finalId].width;
     drag.handle.classList.remove('active');
@@ -2530,7 +2550,8 @@ window.PanelFramework = (() => {
     }
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
-    updateUI(); // refresh the panels-% indicator
+    applyAll();
+    updateUI();
     emit('resize', { id: finalId, width: finalWidth });
   }
 
@@ -2699,6 +2720,7 @@ window.PanelFramework = (() => {
       modes:  Object.freeze({ ...MODE_PANELS }),
       tabs:   Object.freeze({ ...DETAILS_TABS }),
       panelMaxWidthPx: PANEL_MAX,
+      layoutMinPx: LAYOUT_MIN,
     }),
   };
 })();

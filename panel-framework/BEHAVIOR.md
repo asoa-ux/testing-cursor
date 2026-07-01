@@ -18,6 +18,8 @@ Shell panels are for navigation and context. The content area is where the real 
 **The rule everyone should remember:**  
 **Tabs only change the content area.** They never open, close, or shuffle Browse, Task list, or Assistant.
 
+**One size rule:** nothing important is narrower than **24rem (384px)** — the middle column and every open panel share that minimum.
+
 ---
 
 ## Shell vs content area
@@ -53,6 +55,32 @@ Same **Panel** component everywhere — only position and content change.
 
 **Hiding ≠ closing.** On Form only / Table, the Panel is hidden but remembers if it was open. Come back to a tab that uses it and it reappears — unless the user closed it themselves.
 
+**Collapse ≠ tab hide.** On a tab that uses the Panel, collapsing it leaves a **48px rail** inside the column (like shell panels). Switching to Form only / Table removes it from layout entirely.
+
+---
+
+## Open, collapse, and close
+
+| Panel | Collapsed | Closed |
+|-------|-----------|--------|
+| Browse, Task list, Panel | **48px rail** — click to expand | Same as collapsed (toggle) |
+| Assistant | — | **Fully hidden** — open via “Chat with AI” |
+
+Collapsed panels keep a narrow rail. The Assistant is the exception: closed means gone from the layout, not minimized.
+
+---
+
+## Resizing panels
+
+Drag the edge handle on an **open** panel to resize (not in hamburger / overlay mode).
+
+| Panel type | Behavior |
+|------------|----------|
+| **Shell** (Browse, Task list, Assistant) | Grows or shrinks at the expense of the content column. Other open panels may shrink down to 24rem if space is tight. |
+| **Panel** (in content area) | Splits space **inside** the middle column with the form or table — the column width stays the same. |
+
+Open panels resize between **24rem** (min) and **56rem** (max).
+
 ---
 
 ## What happens when…
@@ -62,7 +90,7 @@ Same **Panel** component everywhere — only position and content change.
 - **Browse, Task list, Assistant stay exactly as they were.**
 
 ### …the window gets narrower?
-- Open panels **shrink** first (down to 20rem each).
+- Open panels **shrink** first (down to 24rem each).
 - If still too tight, panels **close automatically** in a fixed order (see below).
 - Panels the **user** closed stay closed.
 - Panels the **system** closed may come back when the window widens again.
@@ -104,13 +132,14 @@ Task list and Assistant are kept longer than Browse and Panel.
 
 | What | rem | px |
 |------|-----|-----|
-| Panel min (open) | 20 | 320 |
+| **Layout min** (content area + open panels) | **24** | **384** |
 | Panel max (open) | 56 | 896 |
-| Collapsed rail | 4 | 64 |
+| Collapsed rail | 3 | 48 |
 | Assistant closed | — | 0 |
-| Content area min (Details & Bulk) | 21 | 336 |
 
-The **21rem floor applies to the whole middle column** (header + form/table + Panel when shown). The content-area Panel sits inside that column — layout math does not add its width on top of the floor.
+The **24rem floor applies to the whole middle column** (header + form/table + Panel when shown). The Panel sits inside that column — its width is not added on top of the column in layout math.
+
+The content-area Panel counts toward the “panels open” cap at each breakpoint, but only shell panels and the content floor count toward horizontal space outside the column.
 
 Tables **do not wrap** — columns stay on one line. If the table is wider than the content area, it **scrolls horizontally** inside the table container (not the whole page).
 
@@ -122,14 +151,14 @@ Tables **do not wrap** — columns stay on one line. If the table is wider than 
 |--------------|-----|-----------------|
 | ≥ 2304px | ≥ 144 | 4 |
 | ≥ 1664px | ≥ 104 | 3 |
-| ≥ 1088px | ≥ 68 | 2 |
+| ≥ 1280px | ≥ 80 | 2 |
 | ≥ 896px | ≥ 56 | 1 |
 
-**Bulk** (Phase 1: design for **896px and wider** — same floor as Details)
+**Bulk** (Phase 1: design for **896px and wider**)
 
 | Window width | rem | Max open panels |
 |--------------|-----|-----------------|
-| ≥ 1088px | ≥ 68 | 2 |
+| ≥ 1280px | ≥ 80 | 2 |
 | ≥ 896px | ≥ 56 | 1 |
 
 Below those widths → **Phase 2** (hamburger / overlays). Not part of Phase 1.
@@ -144,10 +173,10 @@ Narrow screens: hidden rails, panels as overlays. The prototype has experimental
 
 ## For developers (short)
 
-- Panel `open` state is global; tabs only toggle **visibility** and position of the content-area Panel.
-- Run layout eviction on **resize** and **open panel** — not on tab change.
-- Constants in rem; prototype uses 16px root.
-- API: `window.PanelFramework` — `setMode`, `setTab`, `open` / `close`, events `mode-change`, `tab-change`, `breakpoint-change`.
+- **Constants:** `LAYOUT_MIN` / `PANEL_MIN` / `CONTENT_MIN` = 24rem · `PANEL_MAX` = 56rem · `COLLAPSED_W` = 48px.
+- **State:** panel `open` is global; tabs only affect visibility and side of the content-area Panel (`rightA`).
+- **Eviction:** runs on window **resize**, not tab change.
+- **API:** `window.PanelFramework` — `setMode`, `setTab`, `open` / `close` / `toggle`, `getState`, `on` / `off`; events `mode-change`, `tab-change`, `breakpoint-change`, `open`, `close`, `resize`.
 
 ---
 
@@ -156,5 +185,7 @@ Narrow screens: hidden rails, panels as overlays. The prototype has experimental
 1. Switch all four Details tabs — shell panels don’t jump.  
 2. Form + panel ↔ Panel + Table — Panel stays open, moves side.  
 3. Form only ↔ Table — Panel hidden, then returns if not user-closed.  
-4. Narrow the window — panels close in order: Browse → Panel → Task list → Assistant.  
-5. Bulk at ~896px+ — table scrolls inside its container if needed; page does not scroll sideways.
+4. Collapse Browse or Panel — rail remains; expand again. Assistant closes fully; reopen via “Chat with AI”.  
+5. Resize an open shell panel and the content-area Panel.  
+6. Narrow the window — panels close in order: Browse → Panel → Task list → Assistant.  
+7. Bulk at ~896px+ — table scrolls inside its container if needed; page does not scroll sideways.
