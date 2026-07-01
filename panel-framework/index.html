@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Panel Framework v2 — 896px per-panel max</title>
+<title>Panel Framework v3 — 896px per-panel max</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -84,6 +84,11 @@
     font-weight: 600;
     color: var(--text);
     letter-spacing: 0.02em;
+  }
+  .app-toolbar-viewport {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
   }
   .mode-switcher {
     display: inline-flex;
@@ -1001,7 +1006,7 @@
      (table / many-record) views. Lives above the panel framework so it's
      always visible regardless of breakpoint. -->
 <div class="app-toolbar" id="appToolbar">
-  <span class="app-toolbar-brand">Panel Framework · v2 (896px per-panel max)</span>
+  <span class="app-toolbar-brand">Panel Framework · v3 (896px per-panel max) · <span id="viewportWidth" class="app-toolbar-viewport">—</span></span>
   <div class="mode-switcher" role="tablist" aria-label="View mode">
     <button class="mode-btn"        data-mode="bulk"    role="tab" aria-selected="false">Bulk</button>
     <button class="mode-btn active" data-mode="details" role="tab" aria-selected="true">Details</button>
@@ -1637,7 +1642,8 @@ window.PanelFramework = (() => {
   // Panels the user explicitly collapsed/closed — never auto-restore these.
   const userClosed = new Set();
   // Panels the system closed (breakpoint / eviction); restore when space returns.
-  // LIFO: last auto-closed reopens first.
+  // FIFO: first auto-closed reopens first (Browse was evicted first, so it
+  // should come back before panels that were closed later).
   let autoClosedStack = [];
 
   const $app                = document.getElementById('app');
@@ -1650,6 +1656,7 @@ window.PanelFramework = (() => {
   const $overlayBackdrop    = document.getElementById('overlayBackdrop');
   const $aiChatBtn          = document.getElementById('aiChatBtn');
   const $detailsTabFloor    = document.getElementById('detailsTabFloor');
+  const $viewportWidth      = document.getElementById('viewportWidth');
 
   let activeOverlayId = null; // panel currently shown as overlay in hamburger mode
   let currentBp       = null; // 'bp4' | 'bp3' | 'bp2' | 'bp1' | 'hamburger'
@@ -1822,6 +1829,11 @@ window.PanelFramework = (() => {
     Object.keys(state).forEach(applyPanel);
   }
 
+  function updateViewportWidthLabel() {
+    if (!$viewportWidth || !$app) return;
+    $viewportWidth.textContent = `${$app.offsetWidth}px`;
+  }
+
   function updateUI() {
     const openCount = layoutOpenCount();
     const max = currentMaxAllowed();
@@ -1836,6 +1848,7 @@ window.PanelFramework = (() => {
       renderHamburgerMenu('right');
     }
     updateAiChatButton();
+    updateViewportWidthLabel();
     updateAllWidthLabels();
   }
 
@@ -1950,11 +1963,14 @@ window.PanelFramework = (() => {
     if (currentBp === 'hamburger') return false;
     const max = maxExpandedAtWidth($app.offsetWidth, currentBp);
     let changed = false;
-    while (layoutOpenCount() < max && autoClosedStack.length > 0) {
-      const id = autoClosedStack.pop();
-      if (userClosed.has(id)) continue;
-      if (!isActivePanel(id)) continue;
-      if (state[id].open) continue;
+    let i = 0;
+    while (layoutOpenCount() < max && i < autoClosedStack.length) {
+      const id = autoClosedStack[i];
+      if (userClosed.has(id) || !isActivePanel(id) || state[id].open) {
+        i++;
+        continue;
+      }
+      autoClosedStack.splice(i, 1);
       state[id].open = true;
       openOrder.push(id);
       changed = true;
@@ -1988,14 +2004,15 @@ window.PanelFramework = (() => {
       // If we just left hamburger mode, restore panel widths from state
       if (wasHamburger) applyAll();
 
-      // Auto-collapse until under tier cap AND content floor fits physically.
+      // Auto-close until under tier cap AND content floor fits physically.
       const max = maxExpandedAtWidth(w, newBp);
       while (layoutOpenCount() > max) {
         const evictId = pickPanelToEvict(layoutOpenOrder());
         if (!evictId) break;
         closePanel(evictId, { silent: true, auto: true });
       }
-      // Re-open panels the system closed when a wider tier allows it again.
+      resolveLayoutOverflow();
+      // Re-open panels the system closed when a wider tier / viewport allows.
       restoreAutoClosedPanels();
       while (layoutOpenCount() > maxExpandedAtWidth(w, newBp)) {
         const evictId = pickPanelToEvict(layoutOpenOrder());
@@ -2003,6 +2020,7 @@ window.PanelFramework = (() => {
         closePanel(evictId, { silent: true, auto: true });
       }
       resolveLayoutOverflow();
+      restoreAutoClosedPanels();
       applyAll();
     }
   }
