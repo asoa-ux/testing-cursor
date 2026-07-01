@@ -301,7 +301,7 @@
   /* ---------- Content area ---------- */
   .content {
     flex: 1;
-    /* Mode-specific floors — details 21rem, bulk 40rem. */
+    /* Content area floor — 21rem (details and bulk). */
     min-width: 21rem;
     display: flex;
     flex-direction: column;
@@ -309,11 +309,8 @@
     overflow: hidden;
     position: relative; /* anchors hamburger menu & overlay backdrop */
   }
-  /* Bulk workspace floor — only when rails are visible (not hamburger). */
-  .app.mode-bulk:not(.hamburger) .content { min-width: 40rem; }
-  /* In hamburger mode the rails are hidden, so the content can shrink to
-     the viewport (details uses :not(.hamburger) for its 21rem floor). */
-  .app.hamburger .content { min-width: 0; }
+  /* Content area floor when rails are visible (not hamburger). */
+  .app:not(.hamburger) .content { min-width: 21rem; }
   .content-header {
     display: flex;
     align-items: center;
@@ -605,22 +602,11 @@
     flex: 1;
     min-width: 0;
   }
-  /* Details record table: fit the workspace width (wrap cells; no wide min). */
+  /* Details record table + bulk list — no cell wrapping (horizontal scroll instead). */
   .details-tab-content-table .data-table,
   .app.mode-bulk .bulk-view .data-table {
-    table-layout: fixed;
     width: 100%;
-  }
-  .details-tab-content-table .data-table thead th,
-  .details-tab-content-table .data-table tbody td,
-  .app.mode-bulk .bulk-view .data-table thead th,
-  .app.mode-bulk .bulk-view .data-table tbody td {
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-  .details-tab-content-table .data-table .col-name,
-  .app.mode-bulk .bulk-view .data-table .col-name {
-    min-width: 0;
+    min-width: max-content;
   }
   .app.mode-bulk .bulk-view .data-table .name-cell,
   .app.mode-bulk .bulk-view .data-table .owner-cell {
@@ -644,7 +630,7 @@
   .app.mode-bulk .bulk-view-scroll {
     flex: 1;
     min-width: 0;
-    overflow-x: hidden;
+    overflow-x: auto;
   }
 
   /* Workspace Info panel (rightA) — right on Form+panel, left on Panel+Table */
@@ -686,8 +672,8 @@
     min-width: 0;
   }
 
-  /* Details workspace floor — only when rails are visible (not hamburger). */
-  .app.mode-details:not(.hamburger) .content { min-width: 21rem; }
+  /* Details content area floor — see .app:not(.hamburger) .content above */
+  .app.hamburger .content { min-width: 0; }
 
   /* ---------- Details tab bar ---------- */
   .details-tab-bar {
@@ -764,8 +750,10 @@
   .details-table-view-scroll {
     min-width: 0;
   }
-  .details-tab-content-table .details-table-view-scroll {
-    overflow-x: hidden;
+  /* Details / bulk tables: fit container width; scroll horizontally when columns need more room. */
+  .details-tab-content-table .details-table-view-scroll,
+  .app.mode-bulk .bulk-view-scroll {
+    overflow-x: auto;
   }
 
   .data-table {
@@ -916,20 +904,6 @@
 
   .icon { width: 16px; height: 16px; }
 
-  /* ---------- Breakpoint indicator ---------- */
-  .bp-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    background: #f3e8ff;
-    color: #6b21a8;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 500;
-    font-family: "SF Mono", Menlo, monospace;
-  }
-
   /* ---------- Hamburger mode ---------- */
   .hamburger-btn {
     display: none; /* hidden unless hamburger mode is active */
@@ -1064,7 +1038,7 @@
     </div>
     <div class="panel-body">
       <p style="margin-bottom:10px;"><strong>Browse</strong> · High-level navigation</p>
-      <p>Top-level structure of the workspace — projects, sections, files. The starting point for finding what you want to work on.</p>
+      <p>Top-level structure of the product — projects, sections, files. The starting point for finding what you want to work on.</p>
     </div>
     <div class="resize-handle" data-resize></div>
   </aside>
@@ -1097,9 +1071,8 @@
       <h1 class="content-title content-title-bulk"    style="flex:1;">Table</h1>
       <span class="content-width-group" aria-hidden="true">
         <span class="region-width" id="mainContentWidth" title="Main content width"></span>
-        <span class="region-width region-width-dim" id="workspaceWidth" title="Workspace column width"></span>
+        <span class="region-width region-width-dim" id="workspaceWidth" title="Content area width"></span>
       </span>
-      <span class="bp-pill" id="bpPill" aria-live="polite">—</span>
       <span class="status-pill" id="statusPill" aria-live="polite">0 / 3 panels open</span>
       <button class="hamburger-btn" id="hamburgerRightBtn" data-side="right"
               title="Show right panels" aria-label="Show right panels"
@@ -1447,9 +1420,8 @@ window.PanelFramework = (() => {
   const AI_PANEL_ID   = 'rightB';
 
   // ---------- Per-mode content minimums ----------
-  // Bulk = list table. Details = 21rem layout floor (all tabs).
-  const CONTENT_MIN_BULK = 40 * REM;   // 640px
-  const CONTENT_MIN_DETAILS_LAYOUT = 21 * REM; // 336px
+  // Content area floor — 21rem for details and bulk.
+  const CONTENT_MIN = 21 * REM; // 336px
 
   // ---------- Details tabs (product record layouts) ----------
   // Tabs only change what appears INSIDE the main content area.
@@ -1484,8 +1456,7 @@ window.PanelFramework = (() => {
   function tabConfig() { return DETAILS_TABS[currentTab]; }
 
   function contentMin() {
-    if (currentMode === 'bulk') return CONTENT_MIN_BULK;
-    return CONTENT_MIN_DETAILS_LAYOUT;
+    return CONTENT_MIN;
   }
 
   // ---------- v2 rule: per-panel max width ----------
@@ -1538,11 +1509,11 @@ window.PanelFramework = (() => {
   //   max 2: 2*320 + 128 + 336 = 1104 (rounded threshold 1088/1152 class)
   //   max 1: panels= 512; contentMin floor (336) wins ⇒ v ≥ 848 (slack 48 at 896)
   //
-  // Bulk (2 active, content min 640):
-  //   max 2: panels=640; v ≥ 1280
-  //   max 1: panels=384; content min (640) binds ⇒ v ≥ 1024
+  // Bulk (2 active, content min 336):
+  //   max 2: 2*320 + 336 = 976  (rounded threshold 1088)
+  //   max 1: 320 + 64 + 336 = 720 (rounded threshold 896)
   //
-  // Details tabs share one panel-count ladder and 21rem layout floor.
+  // Details and bulk share 21rem content floor.
   const BP_LADDER = {
     detailsForm: [
       { from: 2304, max: 4, name: 'bp4' },
@@ -1552,8 +1523,8 @@ window.PanelFramework = (() => {
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
     bulk: [
-      { from: 1280, max: 2, name: 'bp2' },
-      { from: 1024, max: 1, name: 'bp1' },
+      { from: 1088, max: 2, name: 'bp2' },
+      { from:  896, max: 1, name: 'bp1' },
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
   };
@@ -1658,7 +1629,6 @@ window.PanelFramework = (() => {
   const $mainContentWidth   = document.getElementById('mainContentWidth');
   const $workspaceWidth     = document.getElementById('workspaceWidth');
   const $statusPill         = document.getElementById('statusPill');
-  const $bpPill             = document.getElementById('bpPill');
   const $hamburgerLeftBtn   = document.getElementById('hamburgerLeftBtn');
   const $hamburgerRightBtn  = document.getElementById('hamburgerRightBtn');
   const $hamburgerMenuLeft  = document.getElementById('hamburgerMenuLeft');
@@ -1775,7 +1745,7 @@ window.PanelFramework = (() => {
     }
     if ($workspaceWidth && $content) {
       const wsW = $content.offsetWidth;
-      $workspaceWidth.textContent = wsW > 0 ? `ws ${wsW}px` : '';
+      $workspaceWidth.textContent = wsW > 0 ? `content ${wsW}px` : '';
     }
   }
 
@@ -1830,38 +1800,6 @@ window.PanelFramework = (() => {
     const max = currentMaxAllowed();
     $statusPill.textContent = `${openCount} / ${max} panels open`;
     $statusPill.classList.toggle('full', openCount >= max);
-
-    const w = $app.offsetWidth;
-    const ladder = getBpLadder();
-    let label = '—';
-    for (let i = 0; i < ladder.length; i++) {
-      const t = ladder[i];
-      if (t.name !== currentBp) continue;
-      if (t.hamburger) {
-        label = `< ${ladder[i - 1].from}px · hamburger`;
-      } else if (i === 0) {
-        label = `≥ ${t.from}px`;
-      } else {
-        label = `${t.from}–${ladder[i - 1].from - 1}px`;
-      }
-      break;
-    }
-    const maxLabel = currentBp === 'hamburger' ? '' : ` · ${currentMaxAllowed()} max`;
-    // Show current expanded usage and per-panel max at a glance.
-    let panelUsage = '';
-    if (currentBp !== 'hamburger') {
-      let expandedSum = 0;
-      for (const id of activePanels()) {
-        if (isPanelInLayout(id)) expandedSum += state[id].width;
-      }
-      // Show widest panel vs per-panel max, plus total expanded usage.
-      let widest = 0;
-      for (const id of activePanels()) {
-        if (isPanelInLayout(id)) widest = Math.max(widest, state[id].width);
-      }
-      panelUsage = ` · widest ${Math.round(widest)}/${PANEL_MAX}px · expanded ${Math.round(expandedSum)}px`;
-    }
-    $bpPill.textContent = `${Math.round(w)}px — ${label}${maxLabel} · ${currentMode}${currentMode === 'details' ? ` · ${tabConfig().title}` : ''}${panelUsage}`;
 
     // Status pill is irrelevant in hamburger mode (rails are hidden)
     $statusPill.style.display = (currentBp === 'hamburger') ? 'none' : '';

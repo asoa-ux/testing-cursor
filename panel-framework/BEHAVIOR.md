@@ -1,196 +1,158 @@
-# Panel Framework — behavior guide (Phase 1)
+# Panel Framework — Phase 1 guide
 
-Reference for UX and engineering. Describes **intended Phase 1** behavior aligned with the prototype in `index.html` (v2).  
-Assumes **1rem = 16px**.
-
-### Scope
-
-| Phase 1 (this doc) | Phase 2 (not in scope yet) |
-|--------------------|----------------------------|
-| Side **rails** visible; panels expand/collapse inline | **Hamburger mode** — rails hidden, panels as overlays |
-| Viewport **≥ 896px** (Details) / **≥ 1024px** (Bulk) | Layout below those widths |
-| Panel eviction, resize, tab layouts | Mobile / overlay navigation patterns |
-
-The prototype still contains hamburger code for experimentation; **do not design or test against it** for Phase 1 deliverables.
+*For UX and engineering. Prototype: `index.html`. 1rem = 16px.*
 
 ---
 
-## What this layout is for
+## Start here (30 seconds)
 
-A product shell with **optional side panels** around a **main workspace**. The workspace holds the primary task (form, table, etc.). Panels are for navigation, context, and tools — not replacements for the main content.
+The screen has **shell panels on the sides** and a **content area in the middle**.  
+Shell panels are for navigation and context. The content area is where the real work happens (form, table, etc.).
 
-Two top-level **modes**:
+```
+[ Browse ] [ Task list ]  │      CONTENT AREA       │  [ Assistant? ]
+        shell panels      │  form / table + Panel?  │   shell panel
+                          │  (changes with tab)    │
+```
 
-| Mode | Purpose | Panels available |
-|------|---------|------------------|
-| **Details** | Single record (edit / inspect) | Browse, Task list, Panel, Assistant |
+**The rule everyone should remember:**  
+**Tabs only change the content area.** They never open, close, or shuffle Browse, Task list, or Assistant.
+
+---
+
+## Shell vs content area
+
+| | What it is | What changes on tab switch |
+|---|------------|----------------------------|
+| **Shell panels** | Browse, Task list, Assistant | **Nothing** |
+| **Content area** | Main column: header + form/table + optional Panel | **Layout and content** |
+
+---
+
+## Two views
+
+| View | When | Shell panels |
+|------|------|--------------|
+| **Details** | One record | Browse, Task list, Assistant (+ Panel inside content area) |
 | **Bulk** | Many records (list) | Browse, Assistant only |
 
-Within **Details**, **tabs** change only what appears **inside the workspace** — not which shell panels exist.
+---
+
+## Details — four content area layouts (tabs)
+
+These are **layout presets** for the content area. Shell stays the same.
+
+| Tab | Content area shows | Panel |
+|-----|-------------------|-------|
+| Form + panel | Form | On the **right** (metadata) |
+| Form only | Form | Off |
+| Table | Table | Off |
+| Panel + Table | Table | On the **left** (hierarchy) |
+
+Same **Panel** component everywhere — only position and content change.
+
+**Hiding ≠ closing.** On Form only / Table, the Panel is hidden but remembers if it was open. Come back to a tab that uses it and it reappears — unless the user closed it themselves.
 
 ---
 
-## Shell vs workspace (important)
+## What happens when…
 
-**Shell panels** (always in Details mode):
+### …the user switches tabs?
+- Content area swaps (form ↔ table, Panel on/off/left/right).
+- **Browse, Task list, Assistant stay exactly as they were.**
 
-| Panel | Role |
-|-------|------|
-| **Browse** | Outer-left — high-level navigation |
-| **Task list** | Inner-left — items in current scope |
-| **Assistant** | Outer-right — AI / activity (toolbar button; hidden when closed) |
+### …the window gets narrower?
+- Open panels **shrink** first (down to 20rem each).
+- If still too tight, panels **close automatically** in a fixed order (see below).
+- Panels the **user** closed stay closed.
+- Panels the **system** closed may come back when the window widens again.
 
-**Workspace** (main column + optional **Panel**):
+### …the user opens another panel?
+- If the limit for that width is reached, something else closes first (same order as below).
+- Prefer closing a panel on the **opposite side** when possible.
 
-| Tab | Workspace content | Panel |
-|-----|-------------------|--------|
-| Form + panel | Form fields | **Panel** on the **right** (metadata) |
-| Form only | Form fields | Hidden |
-| Table | Table | Hidden |
-| Panel + Table | Table | **Panel** on the **left** (hierarchy) |
-
-The workspace **Panel** is the same component in both positions; only placement and content variant change.
-
-**Rule:** Switching Details tabs must **not** open, close, or reorder shell panels (Browse, Task list, Assistant). Tabs only swap workspace layout and show/hide/reposition the workspace Panel.
+### …the user is on Bulk?
+- Browse opens automatically.
+- Task list and content-area Panel are not available.
 
 ---
 
-## Size rules
+## When space runs out — who closes first?
 
-| Token | rem | px | Used for |
-|-------|-----|-----|----------|
-| Panel min (expanded) | 20rem | 320px | Minimum width when a panel is open |
-| Panel max (expanded) | 56rem | 896px | Hard cap per panel when resizing |
-| Collapsed rail | 4rem | 64px | Width of a collapsed panel rail (except Assistant) |
-| Assistant closed | — | 0px | No rail when Assistant is closed |
-| Details content floor | 21rem | 336px | Minimum workspace width |
-| Bulk content floor | 40rem | 640px | Minimum workspace width in Bulk |
+Fixed order (not “last opened” — that felt random in testing):
 
-**Tables** (Details Table tab and Bulk list) use `table-layout: fixed` and wrapping cells so they **fit the workspace** instead of forcing horizontal page scroll.
+1. Browse  
+2. Panel (in content area)  
+3. Task list  
+4. Assistant  
+
+Task list and Assistant are kept longer than Browse and Panel.
 
 ---
 
-## Breakpoints (viewport width)
+## Default on first load (Details)
 
-Breakpoints control **how many panels may be expanded at once**. Phase 1 assumes **rails stay visible** down to the lowest tier below.
-
-### Details mode (Phase 1: ≥ 896px / 56rem)
-
-| Tier | Viewport | rem (÷16) | Max expanded panels |
-|------|----------|-----------|---------------------|
-| bp4 | ≥ 2304px | ≥ 144rem | 4 |
-| bp3 | ≥ 1664px | ≥ 104rem | 3 |
-| bp2 | ≥ 1088px | ≥ 68rem | 2 |
-| bp1 | ≥ 896px | ≥ 56rem | 1 |
-
-Below 896px is **Phase 2** — not specified here.
-
-### Bulk mode (Phase 1: ≥ 1024px / 64rem)
-
-| Tier | Viewport | rem (÷16) | Max expanded panels |
-|------|----------|-----------|---------------------|
-| bp2 | ≥ 1280px | ≥ 80rem | 2 |
-| bp1 | ≥ 1024px | ≥ 64rem | 1 |
-
-Below 1024px is **Phase 2** — not specified here.
-
-### Physical fit (why panel count can drop further)
-
-Tier caps assume panels at **minimum width** plus the **content floor**. If `panels + content floor` still exceeds the viewport, the system closes more panels until things fit — so panels are not clipped.
-
-**Why thresholds are rounded above the pure math:** tiers are tuned for comfortable rails and resize room, not the absolute tightest fit.
+| Open | Collapsed |
+|------|-----------|
+| Task list, Panel | Browse, Assistant |
 
 ---
 
-## When space is tight: eviction order
+## Sizes & breakpoints (lookup)
 
-If the viewport shrinks or a new panel opens and there is not enough room, panels close automatically (**system close**). Order is **fixed**, not based on “last opened” (which felt random in testing).
+### Fixed sizes
 
-1. **Priority** — lower number closes first:  
-   - Priority 1: Browse, Panel  
-   - Priority 2: Task list, Assistant  
+| What | rem | px |
+|------|-----|-----|
+| Panel min (open) | 20 | 320 |
+| Panel max (open) | 56 | 896 |
+| Collapsed rail | 4 | 64 |
+| Assistant closed | — | 0 |
+| Content area min (Details & Bulk) | 21 | 336 |
 
-2. **Tie-break** (same priority):  
-   **Browse → Panel → Task list → Assistant**
+Tables **do not wrap** — columns stay on one line. If the table is wider than the content area, it **scrolls horizontally** inside the table container (not the whole page).
 
-**Opening a panel** when the cap is reached: prefer evicting from the **opposite side** first, then apply the order above.
+### How many panels can be open?
 
-**User-closed** panels are never auto-reopened. **System-closed** panels may restore when the viewport widens (last closed restores first).
+**Details** (Phase 1: design for **896px and wider**)
 
----
+| Window width | rem | Max open panels |
+|--------------|-----|-----------------|
+| ≥ 2304px | ≥ 144 | 4 |
+| ≥ 1664px | ≥ 104 | 3 |
+| ≥ 1088px | ≥ 68 | 2 |
+| ≥ 896px | ≥ 56 | 1 |
 
-## Tab switching — behavior and rationale
+**Bulk** (Phase 1: design for **896px and wider** — same floor as Details)
 
-### Intended behavior
+| Window width | rem | Max open panels |
+|--------------|-----|-----------------|
+| ≥ 1088px | ≥ 68 | 2 |
+| ≥ 896px | ≥ 56 | 1 |
 
-| Action | Shell panels | Workspace Panel |
-|--------|--------------|-----------------|
-| Tab change | **Unchanged** (open/closed state preserved) | Shown, hidden, or moved left/right per tab |
-| Viewport resize | May auto-close/restore per breakpoints | Same rules; visibility still tab-driven |
-
-**Defaults when entering a tab that uses the Panel** (Form + panel, Panel + Table): open Panel if the user did not close it and there is room. Mirrors the paired tab (e.g. Table tab ≈ Form only; Panel + Table ≈ Form + panel).
-
-### Problems we hit in the prototype (and fixes)
-
-**1. Unexpected panel jumps when switching tabs**  
-Early versions re-ran breakpoint logic on every tab change and sometimes **closed panels** (including shell panels) when the content floor changed (e.g. a 64rem table floor). That felt like tabs were “resetting” the layout.
-
-**Fix:** Tab switch only updates workspace CSS (content view, Panel position). **Breakpoint eviction runs on viewport resize**, not on tab change. Shell panel `open` state is global across Details tabs.
-
-**2. Workspace Panel disappearing vs “closed”**  
-On Form only / Table tabs the Panel is **hidden**, not user-closed. Its open state is **remembered** so returning to Form + panel or Panel + Table shows it again — unless the user explicitly closed it.
-
-**3. Different table floor per tab broke panel counts**  
-A larger table-only floor made the layout math reserve ~1024px for content, forcing **zero** panels at widths where panels should still be usable.
-
-**Fix:** All Details tabs share the **21rem layout floor** for panel budgeting. Tables flex and wrap inside the workspace.
+Below those widths → **Phase 2** (hamburger / overlays). Not part of Phase 1.
 
 ---
 
-## Panel + Table specifics
+## Phase 2 (ignore for now)
 
-- Workspace **Panel** sits **left** of the table (same component as Form + panel, different data: hierarchy).
-- Collapsed rail layout and chevrons follow **left panel** rules (not right-panel DOM defaults).
-- Header label: **“Panel”**.
+Narrow screens: hidden rails, panels as overlays. The prototype has experimental code for this — **don’t design or test against it yet.**
 
 ---
 
-## Bulk mode notes
+## For developers (short)
 
-- Task list and workspace Panel are **not available** (list context, not single-record).
-- Entering Bulk **auto-expands Browse**.
-- Same fluid table behavior as Details Table tab.
-
----
-
-## Defaults (Details, first load)
-
-- **Open:** Task list, Panel  
-- **Collapsed:** Browse, Assistant  
+- Panel `open` state is global; tabs only toggle **visibility** and position of the content-area Panel.
+- Run layout eviction on **resize** and **open panel** — not on tab change.
+- Constants in rem; prototype uses 16px root.
+- API: `window.PanelFramework` — `setMode`, `setTab`, `open` / `close`, events `mode-change`, `tab-change`, `breakpoint-change`.
 
 ---
 
-## For implementers
+## Smoke test (5 minutes)
 
-- **Single source of truth:** panel open state is per panel id; tab only affects **visibility** of workspace Panel (`rightA` in code).
-- **Do not** tie shell panel lifecycle to tab ids.
-- **Do** run breakpoint / eviction on `resize` and when opening a panel — not on tab `change` alone.
-- **Rem:** keep layout constants in rem; convert with root font size (prototype uses 16px).
-- Live prototype exposes `window.PanelFramework` (`setMode`, `setTab`, `open`/`close`, events: `mode-change`, `tab-change`, `breakpoint-change`).
-
----
-
-## Phase 2 — hamburger mode (out of scope)
-
-Deferred. Will cover viewports below 896px (Details) and 1024px (Bulk): hidden rails, overlay panels, full-width content. **Not part of Phase 1 UX or acceptance criteria.**
-
----
-
-## Quick test checklist (Phase 1)
-
-- [ ] Details: switch all four tabs — Browse / Task list / Assistant stay as you left them  
-- [ ] Form + panel ↔ Panel + Table — Panel stays open, moves left/right  
-- [ ] Form only ↔ Table — Panel hidden but returns when going back to a panel tab (if not user-closed)  
-- [ ] Resize between 896px and 2304px — eviction order: Browse → Panel → Task list → Assistant  
-- [ ] At bp1 (~896px Details): at most one expanded panel; workspace keeps 21rem floor  
-- [ ] Bulk at 1024px+ — table wraps; Browse can stay open per tier rules  
+1. Switch all four Details tabs — shell panels don’t jump.  
+2. Form + panel ↔ Panel + Table — Panel stays open, moves side.  
+3. Form only ↔ Table — Panel hidden, then returns if not user-closed.  
+4. Narrow the window — panels close in order: Browse → Panel → Task list → Assistant.  
+5. Bulk at ~896px+ — table scrolls inside its container if needed; page does not scroll sideways.
