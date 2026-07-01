@@ -1464,12 +1464,6 @@ window.PanelFramework = (() => {
   // to reason about than a shared budget: "a panel is at most 896px".
   const PANEL_MAX = 896;
 
-  // Content floor stays mode-driven; the per-panel max is enforced directly
-  // when clamping panel widths (drag/open), not via content-area math.
-  function effectiveContentMin() {
-    return contentMin();
-  }
-
   // ---------- Panel definitions ----------
   // Each panel's role, side, position, and eviction priority in one place.
   // `priority` is consulted when we need to free a slot — lower number
@@ -1497,19 +1491,17 @@ window.PanelFramework = (() => {
   // Under the v2 rule, tiers still depend on panel mins + content mins.
   // Per-panel max (PANEL_MAX) only controls how wide each panel can get.
   //
-  // For N expanded + (active_count - N) collapsed:
-  //   panel_total = N * 320 + (active_count - N) * 64
-  //   viewport ≥ panel_total + contentMin
-  // Breakpoints below focus on "how many panels can be open" at minimum
-  // widths; PANEL_MAX affects resizing comfort after panels are opened.
+  // Shell rails + middle column (.content). The content-area Panel (rightA)
+  // counts toward open-panel caps but its width lives inside the column —
+  // not shell_total + contentMin.
   //
-  // Details (4 active panels):
-  //   max 4: 4*320 + 336 = 1616  (rounded threshold 2304 keeps roomy rails)
-  //   max 3: 3*320 + 64 + 336 = 1360 (rounded threshold 1664)
-  //   max 2: 2*320 + 128 + 336 = 1104 (rounded threshold 1088/1152 class)
-  //   max 1: panels= 512; contentMin floor (336) wins ⇒ v ≥ 848 (slack 48 at 896)
+  //   viewport ≥ shell_panel_total + contentMin
   //
-  // Bulk (2 active, content min 336):
+  // Details (4 slots, Panel inside content):
+  //   max 4: 3*320 + 64 + 336 = 1360  (threshold 1664 keeps roomy rails)
+  //   max 1 + Panel tab: 128 + 336 = 464  (threshold 896)
+  //
+  // Bulk (2 shell panels, content min 336):
   //   max 2: 2*320 + 336 = 976  (rounded threshold 1088)
   //   max 1: 320 + 64 + 336 = 720 (rounded threshold 896)
   //
@@ -1580,10 +1572,52 @@ window.PanelFramework = (() => {
     return layoutOpenOrder().length;
   }
 
+  const CONTENT_PANEL_ID = 'rightA';
+
+  function isContentAreaPanel(id) {
+    return id === CONTENT_PANEL_ID;
+  }
+
   function panelWidthInLayout(id) {
     if (!isActivePanel(id)) return 0;
-    if (id === 'rightA' && !isWorkspacePanelVisible()) return 0;
+    if (isContentAreaPanel(id) && !isWorkspacePanelVisible()) return 0;
     return state[id].open ? state[id].width : closedWidthFor(id);
+  }
+
+  // Shell panels sit outside the middle column. The content-area Panel
+  // (rightA) lives inside .content — its width is part of the column, not
+  // an extra rail alongside the 21rem floor.
+  function shellPanelsInLayout() {
+    return layoutActivePanels().filter(id => !isContentAreaPanel(id));
+  }
+
+  function contentAreaWidthInLayout(contentPanelWidth) {
+    if (contentPanelWidth !== undefined && isWorkspacePanelVisible()) {
+      const currentContent = ($content && $content.offsetWidth > 0)
+        ? $content.offsetWidth
+        : contentMin();
+      const currentPanel = state[CONTENT_PANEL_ID].open
+        ? state[CONTENT_PANEL_ID].width
+        : 0;
+      return Math.max(contentMin(), currentContent - currentPanel + contentPanelWidth);
+    }
+    if ($content) {
+      const w = $content.offsetWidth;
+      if (w > 0) return w;
+    }
+    return contentMin();
+  }
+
+  function totalLayoutWidthUsed({ shellWidths = {} } = {}) {
+    let total = contentAreaWidthInLayout(shellWidths[CONTENT_PANEL_ID]);
+    for (const id of shellPanelsInLayout()) {
+      if (shellWidths[id] !== undefined) {
+        total += isPanelInLayout(id) ? shellWidths[id] : closedWidthFor(id);
+      } else {
+        total += panelWidthInLayout(id);
+      }
+    }
+    return total;
   }
 
   function syncLayoutClasses() {
@@ -1830,17 +1864,21 @@ window.PanelFramework = (() => {
     return activePanels().filter(id => id !== 'rightA' || isWorkspacePanelVisible());
   }
 
-  // Minimum width if exactly `expandedCount` panels are open at PANEL_MIN
-  // and the rest are collapsed rails (64px; Assistant closed = 0 width).
+  // Minimum viewport if exactly `expandedCount` panels are open at PANEL_MIN.
+  // Content-area Panel width is inside contentMin; only shell rails add outside.
   function minimumLayoutWidth(expandedCount) {
     const slots = layoutActivePanels();
+    const shellSlots = shellPanelsInLayout();
     const n = Math.max(0, Math.min(expandedCount, slots.length));
-    let collapsedRailW = 0;
-    const collapsedSlots = slots.length - n;
-    for (let i = 0; i < collapsedSlots; i++) {
-      collapsedRailW += COLLAPSED_W;
+    const hasContentPanel = slots.includes(CONTENT_PANEL_ID);
+    const nContentExpanded = hasContentPanel && n > 0 ? 1 : 0;
+    const nShellExpanded = Math.min(shellSlots.length, n - nContentExpanded);
+
+    let shellW = 0;
+    for (let i = 0; i < shellSlots.length; i++) {
+      shellW += i < nShellExpanded ? PANEL_MIN : closedWidthFor(shellSlots[i]);
     }
-    return n * PANEL_MIN + collapsedRailW + contentMin();
+    return shellW + contentMin();
   }
 
   // Tier cap may allow N panels, but content floor + panel mins may not fit N.
@@ -1853,12 +1891,7 @@ window.PanelFramework = (() => {
   }
 
   function measureLayoutOverflow() {
-    const containerW = $app.offsetWidth;
-    let totalUsed = 0;
-    for (const id of activePanels()) {
-      totalUsed += panelWidthInLayout(id);
-    }
-    return (totalUsed + contentMin()) - containerW;
+    return totalLayoutWidthUsed() - $app.offsetWidth;
   }
 
   // Shrink panels first; if still overflowing, auto-close
@@ -2248,17 +2281,12 @@ window.PanelFramework = (() => {
   // widths, shrink them (newest first) down to PANEL_MIN. We honour the
   // mode's content minimum only (per-panel max is enforced separately).
   function fitWidthsForViewport() {
-    const containerW = $app.offsetWidth;
     for (const id of activePanels()) {
       if (state[id].open && state[id].width > PANEL_MAX) {
         state[id].width = PANEL_MAX;
       }
     }
-    let totalUsed = 0;
-    for (const id of activePanels()) {
-      totalUsed += panelWidthInLayout(id);
-    }
-    let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
+    let overflow = measureLayoutOverflow();
     if (overflow <= 0) return;
 
     // Shrink newest open panels first (only those visible in the current mode)
@@ -2270,7 +2298,7 @@ window.PanelFramework = (() => {
       if (reducible <= 0) continue;
       const reduce = Math.min(reducible, overflow);
       state[id].width -= reduce;
-      overflow -= reduce;
+      overflow = measureLayoutOverflow();
     }
   }
 
@@ -2386,22 +2414,29 @@ window.PanelFramework = (() => {
     // re-shrink others (same-side first) to make room. Hidden panels
     // (e.g. Task list in bulk mode) don't contribute to the budget.
     const startOtherWidths = {};
-    let otherMinSum = 0;
-    for (const pid of activePanels()) {
-      if (pid === id) continue;
-      if (isPanelInLayout(pid)) {
+    let reserved;
+    if (isContentAreaPanel(id)) {
+      reserved = 0;
+      for (const pid of shellPanelsInLayout()) {
         startOtherWidths[pid] = state[pid].width;
-        otherMinSum += PANEL_MIN;
-      } else if (!state[pid].open) {
-        otherMinSum += closedWidthFor(pid);
+        reserved += panelWidthInLayout(pid);
+      }
+    } else {
+      reserved = contentAreaWidthInLayout();
+      for (const pid of shellPanelsInLayout()) {
+        if (pid === id) continue;
+        if (isPanelInLayout(pid)) {
+          startOtherWidths[pid] = state[pid].width;
+          reserved += PANEL_MIN;
+        } else if (!state[pid].open) {
+          reserved += closedWidthFor(pid);
+        }
       }
     }
-    // Hard upper bound: when every other open panel is squeezed to its
-    // own minimum and the content stays at its effective minimum, this is
-    // the largest the dragged panel can ever be, further capped by PANEL_MAX.
+    // Hard upper bound: other regions at minimum, further capped by PANEL_MAX.
     const maxAllowed = Math.min(
       PANEL_MAX,
-      containerW - effectiveContentMin(containerW) - otherMinSum
+      containerW - reserved
     );
 
     drag = {
@@ -2442,13 +2477,8 @@ window.PanelFramework = (() => {
     }
 
     const containerW = $app.offsetWidth;
-    let totalUsed = 0;
-    for (const pid of activePanels()) {
-      totalUsed += pid === drag.id
-        ? desired
-        : panelWidthInLayout(pid);
-    }
-    let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
+    const shellWidths = { [drag.id]: desired };
+    let overflow = totalLayoutWidthUsed({ shellWidths }) - containerW;
 
     // Shrink others (same-side first) to absorb overflow, oldest within
     // each side first.

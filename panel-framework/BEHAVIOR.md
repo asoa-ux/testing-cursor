@@ -110,6 +110,8 @@ Task list and Assistant are kept longer than Browse and Panel.
 | Assistant closed | — | 0 |
 | Content area min (Details & Bulk) | 21 | 336 |
 
+The **21rem floor applies to the whole middle column** (header + form/table + Panel when shown). The content-area Panel sits inside that column — layout math does not add its width on top of the floor.
+
 Tables **do not wrap** — columns stay on one line. If the table is wider than the content area, it **scrolls horizontally** inside the table container (not the whole page).
 
 ### How many panels can be open?
