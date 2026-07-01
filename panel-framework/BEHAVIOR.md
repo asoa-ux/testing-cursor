@@ -42,20 +42,22 @@ Shell panels are for navigation and context. The content area is where the real 
 
 ## Details — four content area layouts (tabs)
 
-These are **layout presets** for the content area. Shell stays the same.
+Each tab is a **different layout** for the content area — not the same layout with pieces turned off. Shell panels stay the same.
 
-| Tab | Content area shows | Panel |
-|-----|-------------------|-------|
-| Form + panel | Form | On the **right** (metadata) |
-| Form only | Form | Off |
-| Table | Table | Off |
-| Panel + Table | Table | On the **left** (hierarchy) |
+| Tab | Layout |
+|-----|--------|
+| **Form + panel** | Form + Panel on the **right** (metadata) |
+| **Form only** | Form only — no Panel in this layout |
+| **Table** | Table only — no Panel in this layout |
+| **Panel + Table** | Table + Panel on the **left** (hierarchy) |
 
-Same **Panel** component everywhere — only position and content change.
+Where a tab includes the Panel, it is the same component — only position and content change.
 
-**Hiding ≠ closing.** On Form only / Table, the Panel is hidden but remembers if it was open. Come back to a tab that uses it and it reappears — unless the user closed it themselves.
+**Switching tabs = switching layout.** Form only and Table are full-width content layouts; they do not include a Panel slot. Panel + Table and Form + panel do.
 
-**Collapse ≠ tab hide.** On a tab that uses the Panel, collapsing it leaves a **48px rail** inside the column (like shell panels). Switching to Form only / Table removes it from layout entirely.
+**Collapse (only on tabs that include the Panel).** The user can collapse the Panel to a **48px rail** inside the column. That is separate from changing tabs — it only applies when the current layout actually has a Panel.
+
+**State carries over.** If the user collapsed the Panel on Form + panel, then switched to Table and back, the Panel is still collapsed — because that layout includes it again and we remember its open/collapsed state. We do not “hide” a Panel on Table; it simply is not part of that layout.
 
 ---
 
@@ -86,7 +88,7 @@ Open panels resize between **24rem** (min) and **56rem** (max).
 ## What happens when…
 
 ### …the user switches tabs?
-- Content area swaps (form ↔ table, Panel on/off/left/right).
+- The content area **changes layout** (form ↔ table; Panel included or not; left vs right).
 - **Browse, Task list, Assistant stay exactly as they were.**
 
 ### …the window gets narrower?
@@ -137,9 +139,9 @@ Task list and Assistant are kept longer than Browse and Panel.
 | Collapsed rail | 3 | 48 |
 | Assistant closed | — | 0 |
 
-The **24rem floor applies to the whole middle column** (header + form/table + Panel when shown). The Panel sits inside that column — its width is not added on top of the column in layout math.
+The **24rem floor applies to the whole middle column** (header + whatever that tab’s layout contains). On tabs with a Panel, its width sits **inside** the column — not added on top.
 
-The content-area Panel counts toward the “panels open” cap at each breakpoint, but only shell panels and the content floor count toward horizontal space outside the column.
+At breakpoints, the Panel counts toward the “panels open” cap only on tabs whose layout includes it.
 
 Tables **do not wrap** — columns stay on one line. If the table is wider than the content area, it **scrolls horizontally** inside the table container (not the whole page).
 
@@ -174,7 +176,7 @@ Narrow screens: hidden rails, panels as overlays. The prototype has experimental
 ## For developers (short)
 
 - **Constants:** `LAYOUT_MIN` / `PANEL_MIN` / `CONTENT_MIN` = 24rem · `PANEL_MAX` = 56rem · `COLLAPSED_W` = 48px.
-- **State:** panel `open` is global; tabs only affect visibility and side of the content-area Panel (`rightA`).
+- **State:** panel `open` is global; tabs select which **layout** is active. The Panel only participates when the current tab’s layout includes it.
 - **Eviction:** runs on window **resize**, not tab change.
 - **API:** `window.PanelFramework` — `setMode`, `setTab`, `open` / `close` / `toggle`, `getState`, `on` / `off`; events `mode-change`, `tab-change`, `breakpoint-change`, `open`, `close`, `resize`.
 
@@ -182,9 +184,9 @@ Narrow screens: hidden rails, panels as overlays. The prototype has experimental
 
 ## Smoke test (5 minutes)
 
-1. Switch all four Details tabs — shell panels don’t jump.  
-2. Form + panel ↔ Panel + Table — Panel stays open, moves side.  
-3. Form only ↔ Table — Panel hidden, then returns if not user-closed.  
+1. Switch all four Details tabs — shell panels don’t jump; content area changes layout.  
+2. Form + panel ↔ Panel + Table — Panel moves side; still part of the layout.  
+3. Form only / Table — full-width layouts with no Panel. Return to Form + panel — Panel is back if the user hadn’t closed it.  
 4. Collapse Browse or Panel — rail remains; expand again. Assistant closes fully; reopen via “Chat with AI”.  
 5. Resize an open shell panel and the content-area Panel.  
 6. Narrow the window — panels close in order: Browse → Panel → Task list → Assistant.  
