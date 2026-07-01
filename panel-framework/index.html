@@ -200,6 +200,39 @@
     flex: 0 0 auto;
   }
 
+  .panel-width {
+    font-size: 10.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .panel.collapsed .panel-width {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    margin-top: 10px;
+  }
+
+  .content-width-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .region-width {
+    font-size: 10.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .region-width-dim {
+    color: var(--text-muted);
+    opacity: 0.75;
+  }
+
   .toggle-btn {
     display: inline-flex;
     align-items: center;
@@ -268,8 +301,7 @@
   /* ---------- Content area ---------- */
   .content {
     flex: 1;
-    /* Mode-specific floors — kept in sync with CONTENT_MIN_BY_MODE in JS:
-       details = 21rem (form layout), bulk = 40rem (table). */
+    /* Mode-specific floors — details 21rem, bulk 40rem. */
     min-width: 21rem;
     display: flex;
     flex-direction: column;
@@ -277,12 +309,10 @@
     overflow: hidden;
     position: relative; /* anchors hamburger menu & overlay backdrop */
   }
-  /* Bulk view shows a table — needs a wider floor than the form layout.
-     Order matters: this rule comes BEFORE the hamburger override, so the
-     hamburger rule (last, same specificity) still wins when both apply. */
-  .app.mode-bulk .content { min-width: 40rem; }
-  /* In hamburger mode the rails are hidden, so the content can be as
-     narrow as the viewport itself (e.g. small tablet portrait). */
+  /* Bulk workspace floor — only when rails are visible (not hamburger). */
+  .app.mode-bulk:not(.hamburger) .content { min-width: 40rem; }
+  /* In hamburger mode the rails are hidden, so the content can shrink to
+     the viewport (details uses :not(.hamburger) for its 21rem floor). */
   .app.hamburger .content { min-width: 0; }
   .content-header {
     display: flex;
@@ -545,19 +575,175 @@
   /* Default (.app.mode-details) shows the form + details title;
      .app.mode-bulk shows the table + bulk title. */
   .app.mode-details .bulk-view             { display: none; }
-  .app.mode-bulk    .details-view          { display: none; }
   .app.mode-details .content-title-bulk    { display: none; }
   .app.mode-bulk    .content-title-details { display: none; }
+  .app.mode-bulk    .details-tab-bar       { display: none; }
+  .app.mode-bulk    .details-tab-content   { display: none !important; }
 
-  /* ---------- Bulk view (dummy table) ---------- */
-  .bulk-view {
+  /* Details tab — main content (shell panels never change) */
+  .app.mode-details .details-tab-content { display: none; }
+  .app.mode-details.details-tab-form-panel-right .details-tab-content-form,
+  .app.mode-details.details-tab-form-only        .details-tab-content-form { display: block; }
+  .app.mode-details.details-tab-table            .details-tab-content-table,
+  .app.mode-details.details-tab-panel-table      .details-tab-content-table {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+  }
+  .app.mode-details.details-tab-table            .details-tab-content-table .details-table-view,
+  .app.mode-details.details-tab-panel-table      .details-tab-content-table .details-table-view {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .app.mode-details.details-tab-table            .details-tab-content-table .details-table-view-scroll,
+  .app.mode-details.details-tab-panel-table      .details-tab-content-table .details-table-view-scroll {
+    flex: 1;
+    min-width: 0;
+  }
+  /* Details record table: fit the workspace width (wrap cells; no wide min). */
+  .details-tab-content-table .data-table,
+  .app.mode-bulk .bulk-view .data-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .details-tab-content-table .data-table thead th,
+  .details-tab-content-table .data-table tbody td,
+  .app.mode-bulk .bulk-view .data-table thead th,
+  .app.mode-bulk .bulk-view .data-table tbody td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .details-tab-content-table .data-table .col-name,
+  .app.mode-bulk .bulk-view .data-table .col-name {
+    min-width: 0;
+  }
+  .app.mode-bulk .bulk-view .data-table .name-cell,
+  .app.mode-bulk .bulk-view .data-table .owner-cell {
+    min-width: 0;
+  }
+
+  /* Bulk list — same flex / width rules as details table tab */
+  .app.mode-bulk .content-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+  }
+  .app.mode-bulk .bulk-view {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .app.mode-bulk .bulk-view-scroll {
+    flex: 1;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  /* Workspace Info panel (rightA) — right on Form+panel, left on Panel+Table */
+  .app.mode-details:not(.workspace-panel-right):not(.workspace-panel-left) .center-row > .panel[data-id="rightA"] {
+    display: none !important;
+  }
+  .app.workspace-panel-left .center-row > .panel[data-id="rightA"] {
+    order: -1;
+    border-left: none;
+    border-right: 1px solid var(--border);
+  }
+  .app.workspace-panel-left .panel[data-id="rightA"] .resize-handle {
+    left: auto;
+    right: -7px;
+  }
+  /* Expanded: header reads like a left panel (title · width · toggle). */
+  .app.workspace-panel-left .panel[data-id="rightA"].expanded .panel-header {
+    flex-direction: row;
+  }
+  .app.workspace-panel-left .panel[data-id="rightA"].expanded .panel-title  { order: 0; }
+  .app.workspace-panel-left .panel[data-id="rightA"].expanded .panel-width  { order: 1; }
+  .app.workspace-panel-left .panel[data-id="rightA"].expanded .toggle-btn    { order: 2; }
+  /* Collapsed: left-rail stack (title · width · toggle), not right-rail DOM order. */
+  .app.workspace-panel-left .panel[data-id="rightA"].collapsed .panel-header {
+    flex-direction: column;
+  }
+  .app.workspace-panel-left .panel[data-id="rightA"].collapsed .panel-title  { order: 1; }
+  .app.workspace-panel-left .panel[data-id="rightA"].collapsed .panel-width  { order: 2; }
+  .app.workspace-panel-left .panel[data-id="rightA"].collapsed .toggle-btn    { order: 3; }
+
+  .info-panel-variant { display: none; }
+  .app.workspace-panel-right .info-panel-variant-metadata { display: block; }
+  .app.workspace-panel-left  .info-panel-variant-hierarchy { display: block; }
+
+  .app.mode-details .content-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  /* Details workspace floor — only when rails are visible (not hamburger). */
+  .app.mode-details:not(.hamburger) .content { min-width: 21rem; }
+
+  /* ---------- Details tab bar ---------- */
+  .details-tab-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 24px;
+    height: 40px;
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .details-tab-btn {
+    padding: 6px 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 120ms, color 120ms, border-color 120ms;
+  }
+  .details-tab-btn:hover {
+    color: var(--text);
+    background: var(--bg);
+  }
+  .details-tab-btn.active {
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+  }
+  .details-tab-floor {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: "SF Mono", Menlo, monospace;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Bulk / details table views ---------- */
+  .bulk-view,
+  .details-table-view {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
     box-shadow: var(--shadow);
     overflow: hidden;
   }
-  .bulk-view-header {
+  .bulk-view-header,
+  .details-table-view-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -574,8 +760,12 @@
     font-size: 12px;
     color: var(--text-muted);
   }
-  .bulk-view-scroll {
-    overflow-x: auto;
+  .bulk-view-scroll,
+  .details-table-view-scroll {
+    min-width: 0;
+  }
+  .details-tab-content-table .details-table-view-scroll {
+    overflow-x: hidden;
   }
 
   .data-table {
@@ -864,7 +1054,7 @@
   <button class="ai-chat-btn" id="aiChatBtn" aria-expanded="false" aria-controls="panel-rightB">Chat with AI</button>
 </div>
 
-<div class="app mode-details" id="app">
+<div class="app mode-details details-tab-form-panel-right workspace-panel-right" id="app">
 
   <!-- Outer left — high-level navigation (project, sections, files) -->
   <aside class="panel left collapsed" data-id="leftA" data-side="left">
@@ -905,6 +1095,10 @@
       </button>
       <h1 class="content-title content-title-details" style="flex:1;">Product details</h1>
       <h1 class="content-title content-title-bulk"    style="flex:1;">Table</h1>
+      <span class="content-width-group" aria-hidden="true">
+        <span class="region-width" id="mainContentWidth" title="Main content width"></span>
+        <span class="region-width region-width-dim" id="workspaceWidth" title="Workspace column width"></span>
+      </span>
       <span class="bp-pill" id="bpPill" aria-live="polite">—</span>
       <span class="status-pill" id="statusPill" aria-live="polite">0 / 3 panels open</span>
       <button class="hamburger-btn" id="hamburgerRightBtn" data-side="right"
@@ -916,14 +1110,21 @@
         </svg>
       </button>
     </div>
+    <div class="details-tab-bar" id="detailsTabBar" role="tablist" aria-label="Product detail tabs">
+      <button class="details-tab-btn active" data-tab="form-panel-right" role="tab" aria-selected="true">Form + panel</button>
+      <button class="details-tab-btn" data-tab="form-only" role="tab" aria-selected="false">Form only</button>
+      <button class="details-tab-btn" data-tab="table" role="tab" aria-selected="false">Table</button>
+      <button class="details-tab-btn" data-tab="panel-table" role="tab" aria-selected="false">Panel + Table</button>
+      <span class="details-tab-floor" id="detailsTabFloor" aria-hidden="true">floor 21rem</span>
+    </div>
     <div class="hamburger-menu menu-left"  id="hamburgerMenuLeft"  role="menu" aria-label="Left panels"></div>
     <div class="hamburger-menu menu-right" id="hamburgerMenuRight" role="menu" aria-label="Right panels"></div>
     <div class="panel-overlay-backdrop" id="overlayBackdrop"></div>
     <div class="center-row">
     <div class="content-body">
 
-      <!-- Details view: the form (visible when .app.mode-details). -->
-      <div class="details-view">
+      <!-- Tab: Form (+ optional workspace Info panel on form+panel tab) -->
+      <div class="details-tab-content details-tab-content-form">
         <div class="info-card">
           <form class="form-grid" onsubmit="event.preventDefault();">
 
@@ -990,6 +1191,80 @@
 
           </form>
         </div>
+      </div>
+
+      <!-- Tab: Table (same shell as Form only — table instead of form fields) -->
+      <div class="details-tab-content details-tab-content-table">
+      <div class="details-table-view">
+        <div class="details-table-view-header">
+          <div class="bulk-view-title">Line items</div>
+          <div class="bulk-view-meta">Table in main content · floor 21rem</div>
+        </div>
+        <div class="details-table-view-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-name">SKU</th>
+                <th>Description</th>
+                <th class="col-num">Qty</th>
+                <th class="col-num">Unit</th>
+                <th class="col-num">Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="name-text">SKU-1042</div></td>
+                <td>Wireless sensor module</td>
+                <td class="col-num">120</td>
+                <td class="col-num">$18.00</td>
+                <td class="col-num">$2,160</td>
+                <td><span class="row-status active">In stock</span></td>
+              </tr>
+              <tr>
+                <td><div class="name-text">SKU-2088</div></td>
+                <td>Power supply 24V</td>
+                <td class="col-num">45</td>
+                <td class="col-num">$42.50</td>
+                <td class="col-num">$1,912</td>
+                <td><span class="row-status active">In stock</span></td>
+              </tr>
+              <tr>
+                <td><div class="name-text">SKU-3301</div></td>
+                <td>Mounting bracket kit</td>
+                <td class="col-num">200</td>
+                <td class="col-num">$6.25</td>
+                <td class="col-num">$1,250</td>
+                <td><span class="row-status draft">Backorder</span></td>
+              </tr>
+              <tr>
+                <td><div class="name-text">SKU-4410</div></td>
+                <td>Ethernet gateway</td>
+                <td class="col-num">12</td>
+                <td class="col-num">$310.00</td>
+                <td class="col-num">$3,720</td>
+                <td><span class="row-status active">In stock</span></td>
+              </tr>
+              <tr>
+                <td><div class="name-text">SKU-5592</div></td>
+                <td>Calibration certificate</td>
+                <td class="col-num">1</td>
+                <td class="col-num">$89.00</td>
+                <td class="col-num">$89</td>
+                <td><span class="row-status archived">Discontinued</span></td>
+              </tr>
+              <tr>
+                <td><div class="name-text">SKU-6014</div></td>
+                <td>Field cable 10m</td>
+                <td class="col-num">80</td>
+                <td class="col-num">$14.00</td>
+                <td class="col-num">$1,120</td>
+                <td><span class="row-status active">In stock</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       </div>
 
       <!-- Bulk view: dummy table (visible when .app.mode-bulk). -->
@@ -1126,11 +1401,23 @@
       <aside class="panel right expanded" data-id="rightA" data-side="right">
         <div class="panel-header">
           <button class="toggle-btn" data-action="toggle" title="Expand"></button>
-          <div class="panel-title"><span class="title-text">Info panel</span></div>
+          <div class="panel-title"><span class="title-text">Panel</span></div>
         </div>
         <div class="panel-body">
-          <p style="margin-bottom:10px;"><strong>Info panel</strong> · Meta-data &amp; details</p>
-          <p>Attributes of the currently-selected item — settings, values, formatting. Updates in place as the selection changes.</p>
+          <div class="info-panel-variant info-panel-variant-metadata">
+            <p style="margin-bottom:10px;"><strong>Panel</strong> · Meta-data &amp; details</p>
+            <p>Attributes of the currently-selected item — settings, values, formatting. Updates in place as the selection changes.</p>
+          </div>
+          <div class="info-panel-variant info-panel-variant-hierarchy">
+            <p style="margin-bottom:10px;"><strong>Panel</strong> · Hierarchy</p>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:4px;font-size:12.5px;">
+              <li style="padding:6px 8px;border-radius:6px;background:#dbeafe;color:#1e40af;font-weight:500;">All components</li>
+              <li style="padding:6px 8px 6px 20px;">↳ Sensors</li>
+              <li style="padding:6px 8px 6px 20px;">↳ Power</li>
+              <li style="padding:6px 8px 6px 20px;">↳ Cables</li>
+              <li style="padding:6px 8px 6px 20px;">↳ Certificates</li>
+            </ul>
+          </div>
         </div>
         <div class="resize-handle" data-resize></div>
       </aside>
@@ -1160,13 +1447,46 @@ window.PanelFramework = (() => {
   const AI_PANEL_ID   = 'rightB';
 
   // ---------- Per-mode content minimums ----------
-  // Details = form layout, fits comfortably in 21rem.
-  // Bulk    = table layout, needs more horizontal room.
-  const CONTENT_MIN_BY_MODE = {
-    details: 21 * REM,   // 336px
-    bulk:    40 * REM,   // 640px
+  // Bulk = list table. Details = 21rem layout floor (all tabs).
+  const CONTENT_MIN_BULK = 40 * REM;   // 640px
+  const CONTENT_MIN_DETAILS_LAYOUT = 21 * REM; // 336px
+
+  // ---------- Details tabs (product record layouts) ----------
+  // Tabs only change what appears INSIDE the main content area.
+  // Shell panels (Browse, Task list, Assistant) are always available in Details.
+  //   form-panel-right — form + workspace Info column (right)
+  //   form-only        — form only
+  //   table            — table only
+  //   panel-table      — workspace Info column (left) + table
+  const DETAILS_TABS = {
+    'form-panel-right': {
+      title: 'Form + panel',
+      contentMinRem: 21,
+      workspacePanel: 'right',
+    },
+    'form-only': {
+      title: 'Form only',
+      contentMinRem: 21,
+      workspacePanel: false,
+    },
+    'table': {
+      title: 'Table',
+      contentMinRem: 21,
+      workspacePanel: false,
+    },
+    'panel-table': {
+      title: 'Panel + Table',
+      contentMinRem: 21,
+      workspacePanel: 'left',
+    },
   };
-  function contentMin() { return CONTENT_MIN_BY_MODE[currentMode]; }
+  let currentTab = 'form-panel-right';
+  function tabConfig() { return DETAILS_TABS[currentTab]; }
+
+  function contentMin() {
+    if (currentMode === 'bulk') return CONTENT_MIN_BULK;
+    return CONTENT_MIN_DETAILS_LAYOUT;
+  }
 
   // ---------- v2 rule: per-panel max width ----------
   // Each expanded panel can grow up to this hard maximum. This is simpler
@@ -1183,7 +1503,8 @@ window.PanelFramework = (() => {
   // Each panel's role, side, position, and eviction priority in one place.
   // `priority` is consulted when we need to free a slot — lower number
   // yields first. The "secondary" panel on each side has priority 1, the
-  // "primary" has 2. Ties fall back to oldest-opened.
+  // "primary" has 2. Ties at the same priority use EVICTION_SLOT_ORDER
+  // (Browse, then Info, then Task list, then Assistant).
   //
   // Roles:
   //   leftA  (outer-left)  — high-level navigation  (Browse)
@@ -1193,7 +1514,7 @@ window.PanelFramework = (() => {
   const PANELS = {
     leftA:  { title: 'Browse',     side: 'left',  position: 'outer', priority: 1, shortcut: '1' },
     leftB:  { title: 'Task list',  side: 'left',  position: 'inner', priority: 2, shortcut: '2' },
-    rightA: { title: 'Info panel', side: 'right', position: 'inner', priority: 1, shortcut: '3' },
+    rightA: { title: 'Panel', side: 'right', position: 'inner', priority: 1, shortcut: '3' },
     rightB: { title: 'Assistant',  side: 'right', position: 'outer', priority: 2, shortcut: '4' },
   };
 
@@ -1217,11 +1538,13 @@ window.PanelFramework = (() => {
   //   max 2: 2*320 + 128 + 336 = 1104 (rounded threshold 1088/1152 class)
   //   max 1: panels= 512; contentMin floor (336) wins ⇒ v ≥ 848 (slack 48 at 896)
   //
-  // Bulk (2 active, content min 640 already strict):
+  // Bulk (2 active, content min 640):
   //   max 2: panels=640; v ≥ 1280
   //   max 1: panels=384; content min (640) binds ⇒ v ≥ 1024
+  //
+  // Details tabs share one panel-count ladder and 21rem layout floor.
   const BP_LADDER = {
-    details: [
+    detailsForm: [
       { from: 2304, max: 4, name: 'bp4' },
       { from: 1664, max: 3, name: 'bp3' },
       { from: 1088, max: 2, name: 'bp2' },
@@ -1234,12 +1557,16 @@ window.PanelFramework = (() => {
       { from:    0, max: 0, name: 'hamburger', hamburger: true },
     ],
   };
+  function getBpLadder() {
+    if (currentMode === 'bulk') return BP_LADDER.bulk;
+    return BP_LADDER.detailsForm;
+  }
   function tierForWidth(w) {
-    const ladder = BP_LADDER[currentMode];
+    const ladder = getBpLadder();
     return ladder.find(t => w >= t.from) || ladder[ladder.length - 1];
   }
   function tierByName(name) {
-    return BP_LADDER[currentMode].find(t => t.name === name);
+    return getBpLadder().find(t => t.name === name);
   }
 
   // ---------- View modes ----------
@@ -1258,6 +1585,56 @@ window.PanelFramework = (() => {
   function activePanels()      { return MODE_PANELS[currentMode]; }
   function isActivePanel(id)   { return activePanels().includes(id); }
 
+  function tabUsesWorkspacePanel(tab) {
+    return tab.workspacePanel === 'left' || tab.workspacePanel === 'right';
+  }
+
+  // Workspace Info stays in panel state when a tab hides it; only layout math
+  // and eviction treat it as absent. Shell panels are never touched on tab switch.
+  function isWorkspacePanelVisible() {
+    return currentMode === 'details' && tabUsesWorkspacePanel(tabConfig());
+  }
+
+  function isPanelInLayout(id) {
+    if (!state[id].open || !isActivePanel(id)) return false;
+    if (id === 'rightA' && !isWorkspacePanelVisible()) return false;
+    return true;
+  }
+
+  function layoutOpenOrder() {
+    return openOrder.filter(isPanelInLayout);
+  }
+
+  function layoutOpenCount() {
+    return layoutOpenOrder().length;
+  }
+
+  function panelWidthInLayout(id) {
+    if (!isActivePanel(id)) return 0;
+    if (id === 'rightA' && !isWorkspacePanelVisible()) return 0;
+    return state[id].open ? state[id].width : closedWidthFor(id);
+  }
+
+  function syncLayoutClasses() {
+    const tab = tabConfig();
+    const wp = currentMode === 'details' ? tab.workspacePanel : false;
+    $app.classList.toggle('workspace-panel-right', wp === 'right');
+    $app.classList.toggle('workspace-panel-left', wp === 'left');
+    for (const id of Object.keys(DETAILS_TABS)) {
+      $app.classList.toggle(`details-tab-${id}`, currentMode === 'details' && currentTab === id);
+    }
+    if ($detailsTabFloor) {
+      $detailsTabFloor.textContent = currentMode === 'details'
+        ? `floor ${tab.contentMinRem}rem`
+        : '';
+    }
+    document.querySelectorAll('.details-tab-btn').forEach(btn => {
+      const isActive = currentMode === 'details' && btn.dataset.tab === currentTab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
+
   // Panel runtime state — default details layout has Task list (inner-left)
   // and Info panel (inner-right) open. Browse and Assistant are collapsed.
   const state = {
@@ -1270,8 +1647,16 @@ window.PanelFramework = (() => {
   // Order panels were opened, oldest first.
   let openOrder = ['leftB', 'rightA'];
 
+  // Panels the user explicitly collapsed/closed — never auto-restore these.
+  const userClosed = new Set();
+  // Panels the system closed (breakpoint / eviction); restore when space returns.
+  // LIFO: last auto-closed reopens first.
+  let autoClosedStack = [];
+
   const $app                = document.getElementById('app');
   const $content            = document.getElementById('content');
+  const $mainContentWidth   = document.getElementById('mainContentWidth');
+  const $workspaceWidth     = document.getElementById('workspaceWidth');
   const $statusPill         = document.getElementById('statusPill');
   const $bpPill             = document.getElementById('bpPill');
   const $hamburgerLeftBtn   = document.getElementById('hamburgerLeftBtn');
@@ -1280,6 +1665,7 @@ window.PanelFramework = (() => {
   const $hamburgerMenuRight = document.getElementById('hamburgerMenuRight');
   const $overlayBackdrop    = document.getElementById('overlayBackdrop');
   const $aiChatBtn          = document.getElementById('aiChatBtn');
+  const $detailsTabFloor    = document.getElementById('detailsTabFloor');
 
   let activeOverlayId = null; // panel currently shown as overlay in hamburger mode
   let currentBp       = null; // 'bp4' | 'bp3' | 'bp2' | 'bp1' | 'hamburger'
@@ -1293,6 +1679,7 @@ window.PanelFramework = (() => {
   //   'open'              { id }
   //   'close'             { id }
   //   'mode-change'       { mode, previousMode }
+  //   'tab-change'        { tab, previousTab }
   //   'breakpoint-change' { bp, previousBp, viewportWidth }
   //   'resize'            { id, width }
   // Listeners get any thrown errors caught and logged so one bad
@@ -1329,13 +1716,21 @@ window.PanelFramework = (() => {
     return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
   }
 
+  // Chevron direction follows where the panel sits in the layout (left vs right).
+  function panelLayoutSide(id) {
+    if (id === 'rightA' && isWorkspacePanelVisible() && tabConfig().workspacePanel === 'left') {
+      return 'left';
+    }
+    return PANELS[id].side;
+  }
+
   function toggleIconFor(id) {
     // In hamburger mode, panels are only visible as overlays — the toggle
     // button is a "close overlay" action, so use an X instead of a chevron.
     if (currentBp === 'hamburger') return closeIcon();
     if (isAiPanel(id)) return closeIcon();
 
-    const { side } = PANELS[id];
+    const side = panelLayoutSide(id);
     const open = state[id].open;
     // Open + left  -> chevron points left  (collapse outward)
     // Open + right -> chevron points right
@@ -1346,6 +1741,49 @@ window.PanelFramework = (() => {
   }
 
   // ---------- Render ----------
+  function updatePanelWidthLabel(el) {
+    let widthEl = el.querySelector('.panel-width');
+    if (!widthEl) {
+      widthEl = document.createElement('span');
+      widthEl.className = 'panel-width';
+      widthEl.setAttribute('aria-hidden', 'true');
+      el.querySelector('.panel-header').insertBefore(
+        widthEl,
+        el.querySelector('[data-action="toggle"]')
+      );
+    }
+    if (el.style.display === 'none') {
+      widthEl.textContent = '';
+      return;
+    }
+    const w = el.offsetWidth;
+    widthEl.textContent = w > 0 ? `${w}px` : '';
+  }
+
+  function updateAllPanelWidthLabels() {
+    Object.keys(PANELS).forEach(id => {
+      const el = panelEl(id);
+      if (el) updatePanelWidthLabel(el);
+    });
+  }
+
+  function updateContentWidthLabels() {
+    const bodyEl = document.querySelector('.content-body');
+    if ($mainContentWidth && bodyEl) {
+      const mainW = bodyEl.offsetWidth;
+      $mainContentWidth.textContent = mainW > 0 ? `main ${mainW}px` : '';
+    }
+    if ($workspaceWidth && $content) {
+      const wsW = $content.offsetWidth;
+      $workspaceWidth.textContent = wsW > 0 ? `ws ${wsW}px` : '';
+    }
+  }
+
+  function updateAllWidthLabels() {
+    updateAllPanelWidthLabels();
+    updateContentWidthLabels();
+  }
+
   function applyPanel(id) {
     const el = panelEl(id);
     const s = state[id];
@@ -1371,6 +1809,7 @@ window.PanelFramework = (() => {
     btn.title = action;
     btn.setAttribute('aria-label', `${action} ${PANELS[id].title}`);
     btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    updatePanelWidthLabel(el);
   }
 
   function updateAiChatButton() {
@@ -1387,13 +1826,13 @@ window.PanelFramework = (() => {
   }
 
   function updateUI() {
-    const openCount = Object.values(state).filter(s => s.open).length;
+    const openCount = layoutOpenCount();
     const max = currentMaxAllowed();
     $statusPill.textContent = `${openCount} / ${max} panels open`;
     $statusPill.classList.toggle('full', openCount >= max);
 
     const w = $app.offsetWidth;
-    const ladder = BP_LADDER[currentMode];
+    const ladder = getBpLadder();
     let label = '—';
     for (let i = 0; i < ladder.length; i++) {
       const t = ladder[i];
@@ -1413,16 +1852,16 @@ window.PanelFramework = (() => {
     if (currentBp !== 'hamburger') {
       let expandedSum = 0;
       for (const id of activePanels()) {
-        if (state[id].open) expandedSum += state[id].width;
+        if (isPanelInLayout(id)) expandedSum += state[id].width;
       }
       // Show widest panel vs per-panel max, plus total expanded usage.
       let widest = 0;
       for (const id of activePanels()) {
-        if (state[id].open) widest = Math.max(widest, state[id].width);
+        if (isPanelInLayout(id)) widest = Math.max(widest, state[id].width);
       }
       panelUsage = ` · widest ${Math.round(widest)}/${PANEL_MAX}px · expanded ${Math.round(expandedSum)}px`;
     }
-    $bpPill.textContent = `${Math.round(w)}px — ${label}${maxLabel} · ${currentMode}${panelUsage}`;
+    $bpPill.textContent = `${Math.round(w)}px — ${label}${maxLabel} · ${currentMode}${currentMode === 'details' ? ` · ${tabConfig().title}` : ''}${panelUsage}`;
 
     // Status pill is irrelevant in hamburger mode (rails are hidden)
     $statusPill.style.display = (currentBp === 'hamburger') ? 'none' : '';
@@ -1432,6 +1871,7 @@ window.PanelFramework = (() => {
       renderHamburgerMenu('right');
     }
     updateAiChatButton();
+    updateAllWidthLabels();
   }
 
   // ---------- Breakpoints ----------
@@ -1447,16 +1887,111 @@ window.PanelFramework = (() => {
     return Math.min(baseMax, activePanels().length);
   }
 
-  function currentMaxAllowed() {
-    return getMaxExpanded(currentBp);
+  // Panels that participate in the horizontal layout (excludes tab-hidden Info).
+  function layoutActivePanels() {
+    return activePanels().filter(id => id !== 'rightA' || isWorkspacePanelVisible());
   }
 
-  // Comparator: lower priority number first. Ties broken by oldest-opened.
+  // Minimum width if exactly `expandedCount` panels are open at PANEL_MIN
+  // and the rest are collapsed rails (64px; Assistant closed = 0 width).
+  function minimumLayoutWidth(expandedCount) {
+    const slots = layoutActivePanels();
+    const n = Math.max(0, Math.min(expandedCount, slots.length));
+    let collapsedRailW = 0;
+    const collapsedSlots = slots.length - n;
+    for (let i = 0; i < collapsedSlots; i++) {
+      collapsedRailW += COLLAPSED_W;
+    }
+    return n * PANEL_MIN + collapsedRailW + contentMin();
+  }
+
+  // Tier cap may allow N panels, but content floor + panel mins may not fit N.
+  function maxExpandedAtWidth(w, bp) {
+    const tierCap = getMaxExpanded(bp);
+    for (let n = tierCap; n >= 0; n--) {
+      if (minimumLayoutWidth(n) <= w) return n;
+    }
+    return 0;
+  }
+
+  function measureLayoutOverflow() {
+    const containerW = $app.offsetWidth;
+    let totalUsed = 0;
+    for (const id of activePanels()) {
+      totalUsed += panelWidthInLayout(id);
+    }
+    return (totalUsed + contentMin()) - containerW;
+  }
+
+  // Shrink panels first; if still overflowing, auto-close
+  // lowest-priority panels so nothing is clipped — Assistant is last to go.
+  function resolveLayoutOverflow() {
+    if (currentBp === 'hamburger') return false;
+    let changed = false;
+
+    fitWidthsForViewport();
+    let overflow = measureLayoutOverflow();
+    if (overflow <= 0) return changed;
+
+    while (overflow > 0 && layoutOpenCount() > 0) {
+      const evictId = pickPanelToEvict(layoutOpenOrder());
+      if (!evictId) break;
+      closePanel(evictId, { silent: true, auto: true });
+      changed = true;
+      overflow = measureLayoutOverflow();
+    }
+
+    if (changed) {
+      fitWidthsForViewport();
+      applyAll();
+    }
+    return changed;
+  }
+
+  function currentMaxAllowed() {
+    if (currentBp === 'hamburger') return 0;
+    return maxExpandedAtWidth($app.offsetWidth, currentBp);
+  }
+
+  // Comparator: lower priority number yields first. Ties use a fixed slot
+  // order (never openOrder — that felt random as panels were opened/closed).
+  //   1. Browse → 2. Info → 3. Task list → 4. Assistant
+  const EVICTION_SLOT_ORDER = ['leftA', 'rightA', 'leftB', 'rightB'];
+
   function byEvictionPriority(aId, bId) {
     const pa = PANELS[aId].priority || 0;
     const pb = PANELS[bId].priority || 0;
     if (pa !== pb) return pa - pb;
-    return openOrder.indexOf(aId) - openOrder.indexOf(bId);
+    return EVICTION_SLOT_ORDER.indexOf(aId) - EVICTION_SLOT_ORDER.indexOf(bId);
+  }
+
+  function pickPanelToEvict(candidates) {
+    if (!candidates.length) return null;
+    return [...candidates].sort(byEvictionPriority)[0];
+  }
+
+  function parseCloseOpts(opts) {
+    if (opts === true) return { silent: true, auto: false };
+    if (opts && typeof opts === 'object') {
+      return { silent: !!opts.silent, auto: !!opts.auto };
+    }
+    return { silent: false, auto: false };
+  }
+
+  function restoreAutoClosedPanels() {
+    if (currentBp === 'hamburger') return false;
+    const max = maxExpandedAtWidth($app.offsetWidth, currentBp);
+    let changed = false;
+    while (layoutOpenCount() < max && autoClosedStack.length > 0) {
+      const id = autoClosedStack.pop();
+      if (userClosed.has(id)) continue;
+      if (!isActivePanel(id)) continue;
+      if (state[id].open) continue;
+      state[id].open = true;
+      openOrder.push(id);
+      changed = true;
+    }
+    return changed;
   }
 
   function enforceBreakpoint() {
@@ -1485,15 +2020,21 @@ window.PanelFramework = (() => {
       // If we just left hamburger mode, restore panel widths from state
       if (wasHamburger) applyAll();
 
-      // Auto-collapse the lowest-priority panels until we're under the
-      // new max (Browse & Info panel yield first; ties go to oldest).
-      const max = getMaxExpanded(newBp);
-      while (openOrder.length > max) {
-        const sorted = [...openOrder].sort(byEvictionPriority);
-        closePanel(sorted[0], /*silent*/ true);
+      // Auto-collapse until under tier cap AND content floor fits physically.
+      const max = maxExpandedAtWidth(w, newBp);
+      while (layoutOpenCount() > max) {
+        const evictId = pickPanelToEvict(layoutOpenOrder());
+        if (!evictId) break;
+        closePanel(evictId, { silent: true, auto: true });
       }
-      // Refit remaining widths
-      fitWidthsForViewport();
+      // Re-open panels the system closed when a wider tier allows it again.
+      restoreAutoClosedPanels();
+      while (layoutOpenCount() > maxExpandedAtWidth(w, newBp)) {
+        const evictId = pickPanelToEvict(layoutOpenOrder());
+        if (!evictId) break;
+        closePanel(evictId, { silent: true, auto: true });
+      }
+      resolveLayoutOverflow();
       applyAll();
     }
   }
@@ -1510,7 +2051,7 @@ window.PanelFramework = (() => {
     }
 
     const max = currentMaxAllowed();
-    const openCount = openOrder.length;
+    const openCount = layoutOpenCount();
 
     if (openCount >= max) {
       // Prefer to evict the lowest-priority panel on the OPPOSITE side.
@@ -1518,29 +2059,45 @@ window.PanelFramework = (() => {
       // panel overall. Ties break to oldest-opened first.
       const newSide = PANELS[id].side;
       const opposite = newSide === 'left' ? 'right' : 'left';
-      const oppositeIds = openOrder.filter(pid => PANELS[pid].side === opposite);
-      oppositeIds.sort(byEvictionPriority);
-      const evictId = oppositeIds[0] || [...openOrder].sort(byEvictionPriority)[0];
-      if (evictId) closePanel(evictId, /*silent*/ true);
+      const oppositeIds = layoutOpenOrder().filter(pid => PANELS[pid].side === opposite);
+      const evictId = pickPanelToEvict(oppositeIds) || pickPanelToEvict(layoutOpenOrder());
+      if (evictId) closePanel(evictId, { silent: true, auto: true });
     }
+
+    userClosed.delete(id);
+    autoClosedStack = autoClosedStack.filter(pid => pid !== id);
 
     state[id].open = true;
     openOrder.push(id);
-    fitWidthsForViewport();
+    resolveLayoutOverflow();
     applyAll();
     updateUI();
     emit('open', { id });
   }
 
-  function closePanel(id, silent = false) {
+  function closePanel(id, opts) {
+    const { silent, auto } = parseCloseOpts(opts);
     if (!state[id].open) return;
+
+    if (auto) {
+      if (!autoClosedStack.includes(id)) autoClosedStack.push(id);
+    } else if (!silent) {
+      userClosed.add(id);
+      autoClosedStack = autoClosedStack.filter(pid => pid !== id);
+    }
+
     state[id].open = false;
     openOrder = openOrder.filter(pid => pid !== id);
     if (!silent) {
       applyPanel(id);
       updateUI();
+      if (restoreAutoClosedPanels()) {
+        resolveLayoutOverflow();
+        applyAll();
+        updateUI();
+      }
     }
-    emit('close', { id });
+    emit('close', { id, auto });
   }
 
   function togglePanel(id) {
@@ -1551,7 +2108,29 @@ window.PanelFramework = (() => {
     }
   }
 
-  // ---------- Mode switching (Details / Bulk) ----------
+  // Tab switch: visibility only for workspace Info (CSS). Shell panels stay put.
+  // Breakpoint eviction runs on viewport resize only, not on tab change.
+  function applyTabWorkspacePanel() {
+    if (currentMode !== 'details' || currentBp === 'hamburger') return;
+    const needsInfo = tabUsesWorkspacePanel(tabConfig());
+    if (needsInfo && !state.rightA.open && !userClosed.has('rightA')
+        && layoutOpenCount() < currentMaxAllowed()) {
+      openPanel('rightA');
+    }
+  }
+
+  function setTab(tabId) {
+    if (currentMode !== 'details' || !DETAILS_TABS[tabId] || tabId === currentTab) return;
+    const previousTab = currentTab;
+    currentTab = tabId;
+    syncLayoutClasses();
+    applyTabWorkspacePanel();
+    resolveLayoutOverflow();
+    applyAll();
+    updateUI();
+    emit('tab-change', { tab: tabId, previousTab });
+  }
+
   function setMode(mode) {
     if (mode === currentMode || !MODE_PANELS[mode]) return;
     const previousMode = currentMode;
@@ -1560,34 +2139,25 @@ window.PanelFramework = (() => {
     //    when switching into Bulk). Silent — we'll re-render once at end.
     for (const id of Object.keys(state)) {
       if (!MODE_PANELS[mode].includes(id) && state[id].open) {
-        closePanel(id, /*silent*/ true);
+        closePanel(id, { silent: true });
       }
     }
 
     currentMode = mode;
     $app.classList.toggle('mode-bulk',    mode === 'bulk');
     $app.classList.toggle('mode-details', mode === 'details');
+    syncLayoutClasses();
 
     // 2. Re-evaluate the breakpoint — getMaxExpanded depends on the active
     //    panel count, so the cap may have changed.
     enforceBreakpoint();
 
-    // 3. Per-mode defaults (skipped in hamburger — there's no rail to
-    //    place panels on; the user opens panels via the menu instead).
+    // 3. Per-mode / per-tab defaults (skipped in hamburger).
     if (currentBp !== 'hamburger') {
       if (mode === 'bulk') {
-        // Bulk: auto-expand the outer-left (Browse) panel.
         openPanel('leftA');
       } else if (mode === 'details') {
-        // Details: Browse collapsed, Task list + Info panel open. Close
-        // leftA first so opening leftB doesn't have to evict it.
-        if (state.leftA.open) closePanel('leftA', /*silent*/ true);
-        openPanel('leftB');
-        // Info panel only auto-opens if there's room — at narrow widths
-        // (bp1, max=1) Task list is the primary default.
-        if (!state.rightA.open && openOrder.length < currentMaxAllowed()) {
-          openPanel('rightA');
-        }
+        applyTabWorkspacePanel();
       }
     }
 
@@ -1748,13 +2318,13 @@ window.PanelFramework = (() => {
     }
     let totalUsed = 0;
     for (const id of activePanels()) {
-      totalUsed += state[id].open ? state[id].width : closedWidthFor(id);
+      totalUsed += panelWidthInLayout(id);
     }
     let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
     if (overflow <= 0) return;
 
     // Shrink newest open panels first (only those visible in the current mode)
-    const openIdsNewestFirst = [...openOrder].reverse();
+    const openIdsNewestFirst = [...layoutOpenOrder()].reverse();
     for (const id of openIdsNewestFirst) {
       if (overflow <= 0) break;
       if (!isActivePanel(id)) continue;
@@ -1772,6 +2342,11 @@ window.PanelFramework = (() => {
     const modeBtn = e.target.closest('.mode-btn');
     if (modeBtn) {
       setMode(modeBtn.dataset.mode);
+      return;
+    }
+    const tabBtn = e.target.closest('.details-tab-btn');
+    if (tabBtn) {
+      setTab(tabBtn.dataset.tab);
       return;
     }
     const aiBtn = e.target.closest('#aiChatBtn');
@@ -1876,10 +2451,10 @@ window.PanelFramework = (() => {
     let otherMinSum = 0;
     for (const pid of activePanels()) {
       if (pid === id) continue;
-      if (state[pid].open) {
+      if (isPanelInLayout(pid)) {
         startOtherWidths[pid] = state[pid].width;
         otherMinSum += PANEL_MIN;
-      } else {
+      } else if (!state[pid].open) {
         otherMinSum += closedWidthFor(pid);
       }
     }
@@ -1893,7 +2468,7 @@ window.PanelFramework = (() => {
 
     drag = {
       id,
-      side:       PANELS[id].side,
+      side:       panelLayoutSide(id),
       startX:     e.clientX,
       startWidth: state[id].width,
       maxWidth:   Math.max(PANEL_MIN, maxAllowed),
@@ -1933,17 +2508,17 @@ window.PanelFramework = (() => {
     for (const pid of activePanels()) {
       totalUsed += pid === drag.id
         ? desired
-        : (state[pid].open ? state[pid].width : closedWidthFor(pid));
+        : panelWidthInLayout(pid);
     }
     let overflow = (totalUsed + effectiveContentMin(containerW)) - containerW;
 
     // Shrink others (same-side first) to absorb overflow, oldest within
     // each side first.
     if (overflow > 0) {
-      const sameSide = openOrder.filter(pid =>
-        pid !== drag.id && PANELS[pid].side === drag.side);
-      const otherSide = openOrder.filter(pid =>
-        pid !== drag.id && PANELS[pid].side !== drag.side);
+      const sameSide = layoutOpenOrder().filter(pid =>
+        pid !== drag.id && panelLayoutSide(pid) === drag.side);
+      const otherSide = layoutOpenOrder().filter(pid =>
+        pid !== drag.id && panelLayoutSide(pid) !== drag.side);
       for (const oid of [...sameSide, ...otherSide]) {
         if (overflow <= 0) break;
         const reducible = state[oid].width - PANEL_MIN;
@@ -1961,6 +2536,7 @@ window.PanelFramework = (() => {
     for (const pid in drag.startOtherWidths) {
       panelEl(pid).style.width = state[pid].width + 'px';
     }
+    updateAllWidthLabels();
   }
 
   document.addEventListener('pointermove', (e) => {
@@ -2123,6 +2699,7 @@ window.PanelFramework = (() => {
   // ---------- Init ----------
   validateDom();
   wireAria();
+  syncLayoutClasses();
   enforceBreakpoint();
   applyAll();
   syncOverlayTop();
@@ -2135,10 +2712,13 @@ window.PanelFramework = (() => {
     close:   closePanel,
     toggle:  togglePanel,
     setMode,
+    setTab,
     getMode: ()      => currentMode,
+    getTab:  ()      => currentTab,
     getBreakpoint: () => currentBp,
     getState: () => ({
       mode: currentMode,
+      tab: currentMode === 'details' ? currentTab : null,
       breakpoint: currentBp,
       activeOverlayId,
       panels: Object.fromEntries(
@@ -2146,10 +2726,10 @@ window.PanelFramework = (() => {
       ),
     }),
     on, off,
-    // Read-only views of config (use Object.freeze to discourage mutation).
     config: Object.freeze({
       panels: Object.freeze({ ...PANELS }),
       modes:  Object.freeze({ ...MODE_PANELS }),
+      tabs:   Object.freeze({ ...DETAILS_TABS }),
       panelMaxWidthPx: PANEL_MAX,
     }),
   };
