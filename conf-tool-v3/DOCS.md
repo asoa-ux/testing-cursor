@@ -4,6 +4,7 @@ Use these together to keep toolbar rules consistent and catch regressions.
 
 | Doc | Purpose |
 |-----|---------|
+| [DESIGN.md](./DESIGN.md) | Visual system for agents — colors, typography, components (matches `index.html`) |
 | [TOOLTIP-BLUEPRINT.md](./TOOLTIP-BLUEPRINT.md) | Exact disabled-tip strings and **no-tooltip** rules per app tab/selection |
 | [ACTION-STATE-STRATEGY.md](./ACTION-STATE-STRATEGY.md) | Enablement flow, audit checklist, testing levels, debug order |
 | [ISSUES-REGISTER.md](./ISSUES-REGISTER.md) | Known gaps, fixed regressions, triage steps |

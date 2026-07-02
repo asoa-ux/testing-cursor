@@ -115,7 +115,7 @@ test.describe('Toolbar actions and tooltips (v3)', () => {
     await switchAppTab(page, 'specific-views');
     const config = page
       .locator('#specific-views-tree .tree-item[data-type="sv-config"]')
-      .filter({ hasText: 'Table for shoes and shirts' })
+      .filter({ hasText: 'Table 2' })
       .first();
     await expect(config).toBeVisible({ timeout: 5000 });
     await config.click();

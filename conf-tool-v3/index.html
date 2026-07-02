@@ -1200,6 +1200,49 @@
       background: #f3f3f3;
     }
 
+    .filter-sheet__typeahead-option.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .filter-sheet__typeahead-option.is-disabled:hover,
+    .filter-sheet__typeahead-option.is-disabled.is-highlighted {
+      background: transparent;
+    }
+
+    .catalog-disabled-tip {
+      position: fixed;
+      z-index: 2000;
+      width: max-content;
+      max-width: 280px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--white);
+      text-align: left;
+      white-space: normal;
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .catalog-disabled-tip.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
+    .catalog-disabled-tip[hidden] { display: none !important; }
+
     .filter-sheet__footer {
       display: flex;
       align-items: center;
@@ -1364,7 +1407,11 @@
       font-size: 13px;
     }
 
-    .tree ul { list-style: none; }
+    .sidebar__panel > .tree:first-child {
+      padding-top: 8px;
+    }
+
+    .tree ul { list-style: none; margin: 0; padding: 0; }
     .tree-children { padding-left: 16px; }
     .tree-children.is-collapsed { display: none; }
 
@@ -1520,6 +1567,102 @@
       line-height: 1.5;
       margin-bottom: 16px;
       max-width: 640px;
+    }
+
+    .form-section__validation {
+      margin-top: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      border-radius: 2px;
+      max-width: 480px;
+    }
+
+    .form-section__validation[hidden] { display: none !important; }
+
+    .form-section__validation--warning {
+      background: #fffbf5;
+      border: 1px solid #ede0d4;
+      color: #444;
+    }
+
+    .form-section__validation--error {
+      background: #fef6f6;
+      border: 1px solid #f1bbbc;
+      color: #442726;
+    }
+
+    .form-section__validation-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .form-section__validation-list li + li { margin-top: 4px; }
+
+    .browse-ug-error {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      background: #fef6f6;
+      border: 1px solid #f1bbbc;
+      border-radius: 2px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #442726;
+    }
+
+    .browse-ug-error[hidden] { display: none !important; }
+
+    .browse-ug-error__icon {
+      color: #c50f1f;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .tree-item--error {
+      box-shadow: inset 3px 0 0 #c50f1f;
+    }
+
+    .tree-item[data-error-tip] {
+      position: relative;
+    }
+
+    .tree-item[data-error-tip]::after {
+      content: attr(data-error-tip);
+      position: absolute;
+      left: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: max-content;
+      max-width: 220px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--text);
+      text-align: left;
+      white-space: normal;
+      background: var(--white);
+      border: 1px solid #d2d0ce;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 20;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .tree-item[data-error-tip]:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
     }
 
     .config-info-banner {
@@ -2037,6 +2180,272 @@
 
     .modal__btn--primary:hover { background: #106ebe; }
 
+    .modal__btn--primary:disabled {
+      background: #c8c6c4;
+      cursor: not-allowed;
+    }
+
+    .modal__submit-wrap {
+      display: inline-flex;
+      position: relative;
+    }
+
+    .modal__submit-wrap[data-disabled-tip] .modal__btn:disabled {
+      pointer-events: none;
+    }
+
+    .modal__submit-wrap[data-disabled-tip]::after {
+      content: attr(data-disabled-tip);
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      top: auto;
+      transform: none;
+      width: max-content;
+      max-width: 280px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--white);
+      text-align: left;
+      white-space: normal;
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1100;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .modal__submit-wrap[data-disabled-tip]:hover::after,
+    .modal__submit-wrap[data-disabled-tip]:focus-within::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
+    .modal__field-hint {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+      margin: 8px 0 0;
+    }
+
+    .modal__field-message {
+      margin-top: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      border-radius: 2px;
+      background: #fdf6f0;
+      border: 1px solid #ede0d4;
+      color: #444;
+    }
+
+    .modal__field-message.is-error {
+      background: #fef6f6;
+      border-color: #f1bbbc;
+      color: #442726;
+    }
+
+    .modal__field-message[hidden] { display: none !important; }
+
+    .modal__field-message-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .modal__field-message-list li + li { margin-top: 4px; }
+
+    .modal__condition-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .modal__condition-mode-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .modal__condition-mode-option input {
+      width: 14px;
+      height: 14px;
+      margin: 2px 0 0;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+    }
+
+    .modal__condition-mode-option.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .modal__condition-mode-option.is-disabled input {
+      cursor: not-allowed;
+    }
+
+    .modal__condition-mode-option[data-disabled-tip] {
+      position: relative;
+    }
+
+    .modal__condition-mode-option[data-disabled-tip]::after {
+      content: attr(data-disabled-tip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
+      top: auto;
+      transform: none;
+      width: max-content;
+      max-width: 280px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--white);
+      text-align: left;
+      white-space: normal;
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1100;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .modal__condition-mode-option[data-disabled-tip]:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
+    .modal__ug-specific[hidden] { display: none !important; }
+
+    .modal__ug-specific {
+      margin-left: 22px;
+      width: calc(100% - 22px);
+    }
+
+    .modal__ug-specific .ug-picker {
+      max-width: none;
+    }
+
+    .modal__chip-field {
+      max-width: none;
+      padding-right: 56px;
+    }
+
+    .modal__chips {
+      display: contents;
+    }
+
+    .form-row__condition-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .form-row__condition-mode-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .form-row__condition-mode-option input {
+      width: 14px;
+      height: 14px;
+      margin: 2px 0 0;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+    }
+
+    .form-row__condition-mode-option.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .form-row__condition-mode-option.is-disabled input {
+      cursor: not-allowed;
+    }
+
+    .form-row__condition-mode-option[data-disabled-tip] {
+      position: relative;
+    }
+
+    .form-row__condition-mode-option[data-disabled-tip]::after {
+      content: attr(data-disabled-tip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
+      top: auto;
+      transform: none;
+      width: max-content;
+      max-width: 280px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--white);
+      text-align: left;
+      white-space: normal;
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1100;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .form-row__condition-mode-option[data-disabled-tip]:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
+    .form-row > .form-row__condition-mode {
+      grid-column: 2;
+    }
+
+    .form-row__ug-specific {
+      margin-left: 22px;
+      width: calc(100% - 22px);
+    }
+
+    .form-row__ug-specific .ug-picker {
+      max-width: none;
+    }
+
+    .form-row__ug-specific[hidden] { display: none !important; }
+
     .modal__btn--danger {
       color: var(--white);
       background: var(--required);
@@ -2180,6 +2589,7 @@
       .detail { padding: 16px; }
       .order-section,
       .form-row { grid-template-columns: 1fr; gap: 8px; }
+      .form-row > .form-row__condition-mode { grid-column: 1; }
       .order-section__label { padding-top: 0; }
       .app-header__lang { display: none; }
     }
@@ -2820,16 +3230,47 @@
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Conditions for display</h2>
-              <p class="form-section__hint">Only one browse table configuration is allowed per object type.</p>
+              <p class="form-section__hint">You must specify 1 or more object types and user groups for this table to be displayed.</p>
               <div class="form-row">
-                <label class="form-row__label" for="sv-browse-object-type"><span class="required">*</span> Object type</label>
-                <div class="select-field">
-                  <select id="sv-browse-object-type" aria-label="Object type">
-                    <option value="" disabled selected>Select object type</option>
-                  </select>
-                  <span class="select-field__chevron"><i class="ph ph-caret-down icon icon--12" aria-hidden="true"></i></span>
+                <span class="form-row__label"><span class="required">*</span> Object types</span>
+                <div class="ug-picker">
+                  <div class="chip-field chip-field--has-action" id="sv-browse-object-types-field">
+                    <span class="filter-sheet__chips" id="sv-browse-object-types-chips"></span>
+                    <input type="text" class="chip-field__input" id="sv-browse-object-types-input" placeholder="Search" aria-label="Search object types" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sv-browse-object-types-typeahead" aria-autocomplete="list">
+                    <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
+                      <i class="ph ph-table icon icon--16" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <ul class="filter-sheet__typeahead-menu" id="sv-browse-object-types-typeahead" role="listbox" hidden></ul>
                 </div>
               </div>
+              <div class="form-row">
+                <span class="form-row__label"><span class="required">*</span> User groups</span>
+                <div class="form-row__condition-mode" id="sv-browse-ug-mode" role="radiogroup" aria-label="User groups scope">
+                  <label class="form-row__condition-mode-option">
+                    <input type="radio" name="sv-browse-ug-mode" value="all">
+                    <span>All user groups</span>
+                  </label>
+                  <label class="form-row__condition-mode-option">
+                    <input type="radio" name="sv-browse-ug-mode" value="specific">
+                    <span>Specific user groups</span>
+                  </label>
+                  <div class="form-row__ug-specific" id="sv-browse-ug-specific" hidden>
+                    <div class="browse-ug-error" id="sv-browse-ug-error" hidden role="alert"></div>
+                    <div class="ug-picker">
+                      <div class="chip-field chip-field--has-action" id="sv-browse-user-groups-field">
+                        <span class="filter-sheet__chips" id="sv-browse-user-groups-chips"></span>
+                        <input type="text" class="chip-field__input" id="sv-browse-user-groups-input" placeholder="Search" aria-label="Search user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sv-browse-user-groups-typeahead" aria-autocomplete="list">
+                        <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
+                          <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                      <ul class="filter-sheet__typeahead-menu" id="sv-browse-user-groups-typeahead" role="listbox" hidden></ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-section__validation" id="sv-browse-validation-message" hidden role="status"></div>
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Table settings</h2>
@@ -2908,19 +3349,54 @@
             <span class="select-field__chevron"><i class="ph ph-caret-down icon icon--12" aria-hidden="true"></i></span>
           </div>
         </div>
-        <div class="modal__field is-hidden" id="add-field-sv-object-type">
-          <label class="modal__label" for="add-input-sv-object-type"><span class="required">*</span> Object type</label>
-          <div class="select-field modal__select-field">
-            <select id="add-input-sv-object-type">
-              <option value="" disabled selected>Select object type</option>
-            </select>
-            <span class="select-field__chevron"><i class="ph ph-caret-down icon icon--12" aria-hidden="true"></i></span>
+        <div class="modal__field is-hidden" id="add-field-sv-browse">
+          <div class="modal__field">
+            <label class="modal__label" for="add-sv-object-types-input"><span class="required">*</span> Object types</label>
+            <div class="ug-picker">
+              <div class="chip-field chip-field--has-action modal__chip-field" id="add-sv-object-types-field">
+                <span class="modal__chips" id="add-sv-object-types-chips"></span>
+                <input type="text" class="chip-field__input" id="add-sv-object-types-input" placeholder="Search" aria-label="Search object types" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="add-sv-object-types-typeahead" aria-autocomplete="list">
+                <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
+                  <i class="ph ph-table icon icon--16" aria-hidden="true"></i>
+                </button>
+              </div>
+              <ul class="filter-sheet__typeahead-menu" id="add-sv-object-types-typeahead" role="listbox" hidden></ul>
+            </div>
           </div>
+          <div class="modal__field">
+            <span class="modal__label"><span class="required">*</span> User groups</span>
+            <div class="modal__condition-mode" id="add-sv-ug-mode" role="radiogroup" aria-label="User groups scope">
+              <label class="modal__condition-mode-option">
+                <input type="radio" name="add-sv-ug-mode" value="all">
+                <span>All user groups</span>
+              </label>
+              <label class="modal__condition-mode-option">
+                <input type="radio" name="add-sv-ug-mode" value="specific">
+                <span>Specific user groups</span>
+              </label>
+              <div class="modal__ug-specific" id="add-sv-ug-specific" hidden>
+                <div class="browse-ug-error" id="add-sv-ug-error" hidden role="alert"></div>
+                <div class="ug-picker">
+                  <div class="chip-field chip-field--has-action modal__chip-field" id="add-sv-user-groups-field">
+                    <span class="modal__chips" id="add-sv-user-groups-chips"></span>
+                    <input type="text" class="chip-field__input" id="add-sv-user-groups-input" placeholder="Search" aria-label="Search user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="add-sv-user-groups-typeahead" aria-autocomplete="list">
+                    <button type="button" class="chip-field__action" tabindex="-1" aria-hidden="true">
+                      <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <ul class="filter-sheet__typeahead-menu" id="add-sv-user-groups-typeahead" role="listbox" hidden></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal__field-message is-error" id="add-sv-browse-message" hidden role="status" aria-live="polite"></div>
         </div>
       </form>
       <div class="modal__footer">
         <button type="button" class="modal__btn" id="add-modal-cancel">Cancel</button>
-        <button type="submit" class="modal__btn modal__btn--primary" form="add-modal-form" id="add-modal-submit">Add</button>
+        <span class="modal__submit-wrap" id="add-modal-submit-wrap">
+          <button type="submit" class="modal__btn modal__btn--primary" form="add-modal-form" id="add-modal-submit">Add</button>
+        </span>
       </div>
     </div>
   </div>
@@ -3309,6 +3785,7 @@
   </div>
 
   <div class="toast-stack" id="toast-stack" aria-live="polite" aria-relevant="additions"></div>
+  <div class="catalog-disabled-tip" id="catalog-disabled-tip" role="tooltip" hidden></div>
 
   <script>
     (function () {
@@ -9234,8 +9711,16 @@
 
       function updateSaveButton() {
         var canSave = hasUnsavedChanges;
+        var saveTip = 'No unsaved changes to save.';
+        if (hasUnsavedChanges && getEditorContext() === 'specific-views') {
+          var svSaveTip = SpecificViewsEditor.getSaveDisabledTip();
+          if (svSaveTip) {
+            canSave = false;
+            saveTip = svSaveTip;
+          }
+        }
         document.getElementById('btn-save').disabled = !canSave;
-        syncToolbarButtonTip('btn-save', canSave, 'No unsaved changes to save.');
+        syncToolbarButtonTip('btn-save', canSave, saveTip);
       }
 
       function markUnsaved() {
@@ -9244,6 +9729,13 @@
       }
 
       function markSaved() {
+        if (hasUnsavedChanges && getEditorContext() === 'specific-views') {
+          var svSaveTip = SpecificViewsEditor.getSaveDisabledTip();
+          if (svSaveTip) {
+            showToast(svSaveTip, 'error');
+            return;
+          }
+        }
         ConfigurationStore.commitAllPendingBranding();
         hasUnsavedChanges = false;
         updateSaveButton();
@@ -9338,12 +9830,14 @@
         var titleEl = document.getElementById('add-modal-title');
         var labelName = document.getElementById('add-label-name');
         var typeField = document.getElementById('add-field-tab-type');
-        var svObjectField = document.getElementById('add-field-sv-object-type');
+        var svBrowseField = document.getElementById('add-field-sv-browse');
         var nameInput = document.getElementById('add-input-name');
+        var submitBtn = document.getElementById('add-modal-submit');
         var isTabs = getEditorContext() === 'tabs-setup';
         typeField.classList.add('is-hidden');
-        svObjectField.classList.add('is-hidden');
-        document.getElementById('add-input-sv-object-type').required = false;
+        if (svBrowseField) svBrowseField.classList.add('is-hidden');
+        submitBtn.textContent = 'Add';
+        submitBtn.disabled = false;
 
         if (mode === 'configuration-group') {
           titleEl.textContent = 'Add configuration group';
@@ -9364,18 +9858,19 @@
           nameInput.value = '';
           if (isTabs) TabsEditor.populateAddTabTypeSelect('');
         } else if (mode === 'browse-table') {
-          titleEl.textContent = 'Add browse table';
           labelName.textContent = 'Configuration name';
-          svObjectField.classList.remove('is-hidden');
-          document.getElementById('add-input-sv-object-type').required = true;
-          nameInput.value = '';
+          if (svBrowseField) svBrowseField.classList.remove('is-hidden');
+          submitBtn.textContent = 'Create';
           if (getEditorContext() === 'specific-views') {
-            SpecificViewsEditor.populateAddObjectTypeSelect();
+            titleEl.textContent = SpecificViewsEditor.getBrowseModalTitle();
+            SpecificViewsEditor.prepareBrowseAddModal();
+          } else {
+            titleEl.textContent = 'New browse table';
+            nameInput.value = 'Browse table';
           }
         } else if (mode === 'reference-table') {
           titleEl.textContent = 'Add reference table';
           labelName.textContent = 'Configuration name';
-          document.getElementById('add-input-sv-object-type').required = false;
           nameInput.value = '';
         }
 
@@ -9385,6 +9880,15 @@
 
       function closeAddModal() {
         document.getElementById('add-modal-overlay').classList.remove('is-open');
+        document.getElementById('add-modal-submit').textContent = 'Add';
+        document.getElementById('add-modal-submit').disabled = false;
+        var submitWrap = document.getElementById('add-modal-submit-wrap');
+        if (submitWrap) submitWrap.removeAttribute('data-disabled-tip');
+        var browseMessage = document.getElementById('add-sv-browse-message');
+        if (browseMessage) {
+          browseMessage.hidden = true;
+          browseMessage.innerHTML = '';
+        }
         if (getEditorContext() === 'tabs-setup') TabsEditor.closeAddModalRef();
         else if (getEditorContext() === 'specific-views') SpecificViewsEditor.closeAddModalRef();
         else addModalMode = null;
@@ -9407,7 +9911,7 @@
         }
         if (getEditorContext() === 'specific-views') {
           if (!SpecificViewsEditor.getAddModalMode()) return;
-          SpecificViewsEditor.submitAddHandler(name);
+          if (!SpecificViewsEditor.submitAddHandler(name)) return;
           closeAddModal();
           return;
         }
@@ -10131,22 +10635,28 @@
             expanded: true,
             configs: [
               {
-                id: 'bt-browse',
-                configurationName: 'Browse table',
-                objectType: 'Unicorn Family',
-                columns: ['ID', 'Name', 'Object type', 'Completeness', 'Primary image']
+                id: 'bt-table-1',
+                configurationName: 'Table 1',
+                objectTypes: ['Product', 'Asset'],
+                userGroupsMode: 'specific',
+                userGroups: ['data-stewards'],
+                columns: ['ID', 'Name', 'Object type', 'Status', 'Modified']
               },
               {
-                id: 'bt-shoes',
-                configurationName: 'Table for shoes and shirts',
-                objectType: 'Product',
-                columns: ['ID', 'Name', 'Object type', 'Product type']
+                id: 'bt-table-2',
+                configurationName: 'Table 2',
+                objectTypes: ['Product'],
+                userGroupsMode: 'specific',
+                userGroups: ['enrichment-group'],
+                columns: ['ID', 'Name', 'Product type', 'Completeness', 'Status']
               },
               {
-                id: 'bt-collections',
-                configurationName: 'Tablecollections view',
-                objectType: 'Category',
-                columns: ['ID', 'Name', 'Object type']
+                id: 'bt-table-3',
+                configurationName: 'Table 3',
+                objectTypes: ['Product'],
+                userGroupsMode: 'all',
+                userGroups: [],
+                columns: ['ID', 'Name', 'Object type', 'Product type', 'Primary image']
               }
             ]
           },
@@ -10171,6 +10681,770 @@
         ];
 
         var addModalMode = null;
+        var browseModalPreset = null;
+        var addBrowseDraft = {
+          objectTypes: [],
+          userGroupsMode: null,
+          userGroups: []
+        };
+        var addBrowseOtHighlight = -1;
+        var addBrowseUgHighlight = -1;
+        var addBrowseModalShownConflicts = null;
+        var svBrowseOtHighlight = -1;
+        var svBrowseUgHighlight = -1;
+        var browseUgErrorShownByConfigId = {};
+        var addBrowseUgErrorShown = false;
+
+        function normalizeBrowseConfig(config) {
+          if (!config) return;
+          if (!config.objectTypes) {
+            config.objectTypes = config.objectType ? [config.objectType] : [];
+            delete config.objectType;
+          }
+          if (config.userGroupsMode === undefined) {
+            config.userGroupsMode = (!config.userGroups || !config.userGroups.length) ? 'all' : 'specific';
+          }
+          if (!config.userGroups) config.userGroups = [];
+        }
+
+        function normalizeAllBrowseConfigs() {
+          var cat = findCategory('browse-table');
+          if (!cat) return;
+          cat.configs.forEach(normalizeBrowseConfig);
+        }
+
+        function getBrowseUserGroupLabel(id) {
+          var ug = FILTER_USER_GROUPS.find(function (x) { return x.id === id; });
+          return ug ? ug.label : id;
+        }
+
+        function getBrowseConfigSlots(config) {
+          if (!config.objectTypes) {
+            config.objectTypes = config.objectType ? [config.objectType] : [];
+            delete config.objectType;
+          }
+          if (config.userGroupsMode !== 'all' && config.userGroupsMode !== 'specific') return [];
+          if (!config.userGroups) config.userGroups = [];
+          var slots = [];
+          (config.objectTypes || []).forEach(function (objectType) {
+            if (config.userGroupsMode === 'all') {
+              slots.push({ objectType: objectType, scope: '__all__' });
+              return;
+            }
+            (config.userGroups || []).forEach(function (ugId) {
+              slots.push({ objectType: objectType, scope: ugId });
+            });
+          });
+          return slots;
+        }
+
+        function findBrowseSlotOccupant(objectType, scope, excludeConfigId) {
+          var cat = findCategory('browse-table');
+          if (!cat) return null;
+          for (var i = 0; i < cat.configs.length; i++) {
+            var other = cat.configs[i];
+            if (other.id === excludeConfigId) continue;
+            normalizeBrowseConfig(other);
+            var slots = getBrowseConfigSlots(other);
+            for (var j = 0; j < slots.length; j++) {
+              if (slots[j].objectType === objectType && slots[j].scope === scope) {
+                return other;
+              }
+            }
+          }
+          return null;
+        }
+
+        function formatBrowseSlotConflictTip(slot, tableName) {
+          var tableRef = tableName || 'another table';
+          if (slot.scope === '__all__') {
+            return 'All user groups is already being used for ' + slot.objectType + ' in ' + tableRef + '.';
+          }
+          return 'This user group is already being used for the same object type in ' + tableRef + '.';
+        }
+
+        function formatBrowseObjectTypeConflictTip(slot, tableName) {
+          var tableRef = tableName || 'another table';
+          if (slot.scope === '__all__') {
+            return 'This object type is already being used for all user groups in ' + tableRef + '.';
+          }
+          return 'This object type is already being used for the same user group in ' + tableRef + '.';
+        }
+
+        function getBrowseAllModeBlockedTips(config, excludeConfigId) {
+          if (!config.objectTypes || !config.objectTypes.length) return [];
+          var tips = [];
+          var seen = {};
+          config.objectTypes.forEach(function (objectType) {
+            var occupant = findBrowseSlotOccupant(objectType, '__all__', excludeConfigId);
+            if (!occupant) return;
+            var key = objectType + '\0' + occupant.id;
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push(formatBrowseSlotConflictTip(
+              { objectType: objectType, scope: '__all__' },
+              occupant.configurationName
+            ));
+          });
+          return tips;
+        }
+
+        function getBrowseUserGroupBlockedTip(config, ugId, excludeConfigId) {
+          if (config.userGroupsMode !== 'specific') return '';
+          if (!config.objectTypes || !config.objectTypes.length) return '';
+          var tips = [];
+          var seenTables = {};
+          config.objectTypes.forEach(function (objectType) {
+            var occupant = findBrowseSlotOccupant(objectType, ugId, excludeConfigId);
+            if (!occupant || seenTables[occupant.id]) return;
+            seenTables[occupant.id] = true;
+            tips.push(formatBrowseSlotConflictTip(
+              { objectType: objectType, scope: ugId },
+              occupant.configurationName
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseObjectTypeBlockedTip(config, objectType, excludeConfigId) {
+          if (config.userGroupsMode !== 'all' && config.userGroupsMode !== 'specific') return '';
+          var tips = [];
+          var seen = {};
+          if (config.userGroupsMode === 'all') {
+            var allOccupant = findBrowseSlotOccupant(objectType, '__all__', excludeConfigId);
+            if (allOccupant) {
+              return formatBrowseObjectTypeConflictTip(
+                { objectType: objectType, scope: '__all__' },
+                allOccupant.configurationName
+              );
+            }
+            return '';
+          }
+          if (!config.userGroups || !config.userGroups.length) return '';
+          config.userGroups.forEach(function (ugId) {
+            var occupant = findBrowseSlotOccupant(objectType, ugId, excludeConfigId);
+            if (!occupant) return;
+            var key = ugId + '\0' + occupant.id;
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push(formatBrowseObjectTypeConflictTip(
+              { objectType: objectType, scope: ugId },
+              occupant.configurationName
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function findBrowseConfigConflicts(config, excludeConfigId) {
+          var cat = findCategory('browse-table');
+          if (!cat) return [];
+          var conflicts = [];
+          var seen = {};
+          getBrowseConfigSlots(config).forEach(function (slot) {
+            cat.configs.forEach(function (other) {
+              if (other.id === excludeConfigId) return;
+              getBrowseConfigSlots(other).forEach(function (otherSlot) {
+                if (otherSlot.objectType !== slot.objectType || otherSlot.scope !== slot.scope) return;
+                var key = slot.objectType + '\0' + slot.scope;
+                if (seen[key]) return;
+                seen[key] = true;
+                conflicts.push({ slot: slot, otherName: other.configurationName });
+              });
+            });
+          });
+          return conflicts;
+        }
+
+        function getBrowseConflictMessage(config, excludeConfigId) {
+          var conflicts = findBrowseConfigConflicts(config, excludeConfigId);
+          if (!conflicts.length) return '';
+          var c = conflicts[0];
+          return formatBrowseSlotConflictTip(c.slot, c.otherName);
+        }
+
+        function getAddBrowseModalBlockers(draftConfig) {
+          var blockers = [];
+          if (!draftConfig.configurationName || !String(draftConfig.configurationName).trim()) {
+            blockers.push('Enter a configuration name.');
+          }
+          if (!draftConfig.objectTypes || !draftConfig.objectTypes.length) {
+            blockers.push('Add at least one object type.');
+          }
+          if (draftConfig.userGroupsMode !== 'all' && draftConfig.userGroupsMode !== 'specific') {
+            blockers.push('Choose All user groups or specific user groups.');
+          } else if (draftConfig.userGroupsMode === 'specific' &&
+              (!draftConfig.userGroups || !draftConfig.userGroups.length)) {
+            blockers.push(getBrowseUserGroupRequiredMessage());
+          }
+          if (isBrowseConfigComplete(draftConfig)) {
+            findBrowseConfigConflicts(draftConfig, null).forEach(function (c) {
+              blockers.push(formatBrowseSlotConflictTip(c.slot, c.otherName));
+            });
+          }
+          return blockers;
+        }
+
+        function getAddBrowseModalConflictBlockers(draftConfig) {
+          if (!isBrowseConfigComplete(draftConfig)) return [];
+          return findBrowseConfigConflicts(draftConfig, null).map(function (c) {
+            return formatBrowseSlotConflictTip(c.slot, c.otherName);
+          });
+        }
+
+        function renderAddBrowseModalMessage(conflictBlockers) {
+          var messageEl = document.getElementById('add-sv-browse-message');
+          if (!messageEl) return;
+          if (!conflictBlockers.length) {
+            messageEl.hidden = true;
+            messageEl.innerHTML = '';
+            messageEl.classList.remove('is-error');
+            return;
+          }
+          messageEl.classList.add('is-error');
+          if (conflictBlockers.length === 1) {
+            messageEl.textContent = conflictBlockers[0];
+          } else {
+            messageEl.innerHTML = '<ul class="modal__field-message-list">' +
+              conflictBlockers.map(function (b) {
+                return '<li>' + escapeHtml(b) + '</li>';
+              }).join('') +
+              '</ul>';
+          }
+          messageEl.hidden = false;
+        }
+
+        function getBrowseUserGroupRequiredMessage() {
+          return 'You must select at least one user group.';
+        }
+
+        function needsBrowseUserGroupSelection(config) {
+          return config.userGroupsMode === 'specific' &&
+            (!config.userGroups || !config.userGroups.length);
+        }
+
+        function focusBrowseUserGroupsInput(inputId) {
+          var input = document.getElementById(inputId || 'sv-browse-user-groups-input');
+          if (!input || input.closest('[hidden]')) return;
+          setTimeout(function () { input.focus(); }, 0);
+        }
+
+        function clearBrowseUgRequiredError(configId) {
+          if (configId) delete browseUgErrorShownByConfigId[configId];
+        }
+
+        function clearAddBrowseUgRequiredError() {
+          addBrowseUgErrorShown = false;
+        }
+
+        function shouldShowBrowseUgRequiredError(config) {
+          return config && config.id &&
+            needsBrowseUserGroupSelection(config) &&
+            !!browseUgErrorShownByConfigId[config.id];
+        }
+
+        function shouldShowAddBrowseUgRequiredError() {
+          return needsBrowseUserGroupSelection(draftBrowseConfigFromAddModal()) && addBrowseUgErrorShown;
+        }
+
+        function renderBrowseUgRequiredError(config, elementId, isShown) {
+          var el = document.getElementById(elementId || 'sv-browse-ug-error');
+          if (!el) return;
+          var show = typeof isShown === 'boolean'
+            ? isShown
+            : shouldShowBrowseUgRequiredError(config);
+          if (!show) {
+            el.hidden = true;
+            el.innerHTML = '';
+            return;
+          }
+          el.innerHTML =
+            '<i class="ph ph-warning-circle icon icon--16 browse-ug-error__icon" aria-hidden="true"></i>' +
+            '<span>' + escapeHtml(getBrowseUserGroupRequiredMessage()) + '</span>';
+          el.hidden = false;
+        }
+
+        function onBrowseUserGroupsInputBlur(config, isAddModal) {
+          setTimeout(function () {
+            var current = isAddModal ? draftBrowseConfigFromAddModal() : getActiveBrowseConfig();
+            if (!current || !needsBrowseUserGroupSelection(current)) return;
+            if (isAddModal) {
+              addBrowseUgErrorShown = true;
+              renderBrowseUgRequiredError(current, 'add-sv-ug-error', true);
+              return;
+            }
+            if (!current.id) return;
+            browseUgErrorShownByConfigId[current.id] = true;
+            renderBrowseUgRequiredError(current);
+            renderTree();
+          }, 0);
+        }
+
+        function isBrowseConfigComplete(config) {
+          return getBrowseConfigIncompleteReasons(config).length === 0;
+        }
+
+        function getBrowseConfigIncompleteReasons(config) {
+          var reasons = [];
+          if (!config.configurationName || !String(config.configurationName).trim()) {
+            reasons.push('Enter a configuration name.');
+          }
+          if (!config.objectTypes || !config.objectTypes.length) {
+            reasons.push('Add at least one object type.');
+          }
+          if (config.userGroupsMode !== 'all' && config.userGroupsMode !== 'specific') {
+            reasons.push('Choose All user groups or specific user groups.');
+          } else if (config.userGroupsMode === 'specific' &&
+              (!config.userGroups || !config.userGroups.length)) {
+            reasons.push(getBrowseUserGroupRequiredMessage());
+          }
+          return reasons;
+        }
+
+        function getAllBrowseTableSaveBlockers() {
+          var cat = findCategory('browse-table');
+          if (!cat) return [];
+          var blockers = [];
+          cat.configs.forEach(function (config) {
+            getBrowseConfigIncompleteReasons(config).forEach(function (reason) {
+              blockers.push('“' + config.configurationName + '”: ' + reason);
+            });
+            findBrowseConfigConflicts(config, config.id).forEach(function (c) {
+              blockers.push(
+                '“' + config.configurationName + '”: ' + formatBrowseSlotConflictTip(c.slot, c.otherName)
+              );
+            });
+          });
+          return blockers;
+        }
+
+        function getSaveDisabledTip() {
+          var blockers = getAllBrowseTableSaveBlockers();
+          if (!blockers.length) return null;
+          if (blockers.length === 1) return blockers[0];
+          return 'Complete required fields on browse tables before saving.';
+        }
+
+        function renderBrowseDetailValidation(config) {
+          var messageEl = document.getElementById('sv-browse-validation-message');
+          if (!messageEl || !config) return;
+          var conflicts = findBrowseConfigConflicts(config, config.id).map(function (c) {
+            return formatBrowseSlotConflictTip(c.slot, c.otherName);
+          });
+          if (!conflicts.length) {
+            messageEl.hidden = true;
+            messageEl.innerHTML = '';
+            messageEl.className = 'form-section__validation';
+            return;
+          }
+          messageEl.className = 'form-section__validation form-section__validation--error';
+          if (conflicts.length === 1) {
+            messageEl.textContent = conflicts[0];
+          } else {
+            messageEl.innerHTML = '<ul class="form-section__validation-list">' +
+              conflicts.map(function (m) { return '<li>' + escapeHtml(m) + '</li>'; }).join('') +
+              '</ul>';
+          }
+          messageEl.hidden = false;
+        }
+
+        function renderStringChips(chipsHost, values, onRemove) {
+          if (!chipsHost) return;
+          chipsHost.innerHTML = '';
+          (values || []).forEach(function (value) {
+            var chip = document.createElement('span');
+            chip.className = 'chip';
+            chip.appendChild(document.createTextNode(value));
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'chip__remove';
+            rm.setAttribute('aria-label', 'Remove ' + value);
+            rm.textContent = '×';
+            rm.addEventListener('click', function (e) {
+              e.stopPropagation();
+              onRemove(value);
+            });
+            chip.appendChild(rm);
+            chipsHost.appendChild(chip);
+          });
+        }
+
+        function renderIdChips(chipsHost, ids, labelFor, onRemove) {
+          if (!chipsHost) return;
+          chipsHost.innerHTML = '';
+          (ids || []).forEach(function (id) {
+            var label = labelFor(id);
+            var chip = document.createElement('span');
+            chip.className = 'chip';
+            chip.appendChild(document.createTextNode(label));
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'chip__remove';
+            rm.setAttribute('aria-label', 'Remove ' + label);
+            rm.textContent = '×';
+            rm.addEventListener('click', function (e) {
+              e.stopPropagation();
+              onRemove(id);
+            });
+            chip.appendChild(rm);
+            chipsHost.appendChild(chip);
+          });
+        }
+
+        function hideCatalogDisabledTip() {
+          if (catalogDisabledTipTimer) {
+            clearTimeout(catalogDisabledTipTimer);
+            catalogDisabledTipTimer = null;
+          }
+          var tip = document.getElementById('catalog-disabled-tip');
+          if (!tip) return;
+          tip.classList.remove('is-visible');
+          tip.hidden = true;
+        }
+
+        var catalogDisabledTipTimer = null;
+
+        function showCatalogDisabledTip(text, target) {
+          hideCatalogDisabledTip();
+          if (!text || !target) return;
+          catalogDisabledTipTimer = setTimeout(function () {
+            catalogDisabledTipTimer = null;
+            var tip = document.getElementById('catalog-disabled-tip');
+            if (!tip) return;
+            tip.textContent = text;
+            tip.hidden = false;
+            tip.classList.remove('is-visible');
+            var margin = 8;
+            var targetRect = target.getBoundingClientRect();
+            tip.style.left = (targetRect.right + margin) + 'px';
+            tip.style.top = targetRect.top + 'px';
+            var tipRect = tip.getBoundingClientRect();
+            if (tipRect.right > window.innerWidth - margin) {
+              tip.style.left = Math.max(margin, targetRect.left - tipRect.width - margin) + 'px';
+              tipRect = tip.getBoundingClientRect();
+            }
+            if (tipRect.bottom > window.innerHeight - margin) {
+              tip.style.top = Math.max(margin, window.innerHeight - tipRect.height - margin) + 'px';
+            }
+            tip.classList.add('is-visible');
+          }, 500);
+        }
+
+        function bindCatalogTypeaheadTipScroll(menu) {
+          if (!menu || menu._catalogTipScrollBound) return;
+          menu._catalogTipScrollBound = true;
+          menu.addEventListener('scroll', hideCatalogDisabledTip);
+        }
+
+        function renderCatalogTypeahead(menu, input, suggestions, highlight, onPick, onHighlight, onBlockedPick) {
+          if (!menu || !input) return;
+          menu.innerHTML = '';
+          if (!suggestions.length) {
+            menu.hidden = true;
+            input.setAttribute('aria-expanded', 'false');
+            return;
+          }
+          if (highlight >= suggestions.length) highlight = suggestions.length - 1;
+          suggestions.forEach(function (item, index) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'filter-sheet__typeahead-option' +
+              (index === highlight ? ' is-highlighted' : '') +
+              (item.disabled ? ' is-disabled' : '');
+            btn.setAttribute('role', 'option');
+            btn.setAttribute('aria-disabled', item.disabled ? 'true' : 'false');
+            btn.textContent = item.label;
+            if (item.disabled && item.disabledTip) {
+              btn.setAttribute('data-disabled-tip', item.disabledTip);
+              btn.addEventListener('mouseenter', function () {
+                showCatalogDisabledTip(item.disabledTip, btn);
+              });
+              btn.addEventListener('mouseleave', hideCatalogDisabledTip);
+            }
+            btn.addEventListener('mousedown', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            btn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              if (item.disabled) {
+                if (onBlockedPick && item.disabledTip) onBlockedPick(item);
+                return;
+              }
+              onPick(item);
+            });
+            menu.appendChild(btn);
+          });
+          bindCatalogTypeaheadTipScroll(menu);
+          menu.hidden = false;
+          input.setAttribute('aria-expanded', 'true');
+          if (typeof onHighlight === 'function') onHighlight(highlight);
+        }
+
+        function firstPickableSuggestionIndex(suggestions) {
+          for (var i = 0; i < suggestions.length; i++) {
+            if (!suggestions[i].disabled) return i;
+          }
+          return suggestions.length ? 0 : -1;
+        }
+
+        function stepPickableSuggestionIndex(suggestions, current, delta) {
+          if (!suggestions.length) return -1;
+          var len = suggestions.length;
+          var idx = current;
+          for (var n = 0; n < len; n++) {
+            idx = (idx + delta + len) % len;
+            if (!suggestions[idx].disabled) return idx;
+          }
+          return current;
+        }
+
+        function hideCatalogTypeahead(menu, input) {
+          hideCatalogDisabledTip();
+          if (menu) menu.hidden = true;
+          if (input) input.setAttribute('aria-expanded', 'false');
+        }
+
+        function getObjectTypeSuggestions(query, selected, config, excludeConfigId) {
+          var q = query.trim().toLowerCase();
+          return OBJECT_TYPE_CATALOG.filter(function (ot) {
+            if (selected.indexOf(ot) !== -1) return false;
+            if (!q) return true;
+            return ot.toLowerCase().indexOf(q) !== -1;
+          }).map(function (ot) {
+            var disabledTip = config
+              ? getBrowseObjectTypeBlockedTip(config, ot, excludeConfigId)
+              : '';
+            return {
+              id: ot,
+              label: ot,
+              disabled: !!disabledTip,
+              disabledTip: disabledTip || undefined
+            };
+          });
+        }
+
+        function getBrowseUserGroupSuggestions(query, selectedIds, config, excludeConfigId) {
+          var q = query.trim().toLowerCase();
+          return FILTER_USER_GROUPS.filter(function (ug) {
+            if (selectedIds.indexOf(ug.id) !== -1) return false;
+            if (!q) return true;
+            return ug.label.toLowerCase().indexOf(q) !== -1;
+          }).map(function (ug) {
+            var disabledTip = config
+              ? getBrowseUserGroupBlockedTip(config, ug.id, excludeConfigId)
+              : '';
+            return {
+              id: ug.id,
+              label: ug.label,
+              disabled: !!disabledTip,
+              disabledTip: disabledTip || undefined
+            };
+          });
+        }
+
+        function draftBrowseConfigFromAddModal() {
+          return {
+            objectTypes: addBrowseDraft.objectTypes.slice(),
+            userGroupsMode: addBrowseDraft.userGroupsMode,
+            userGroups: addBrowseDraft.userGroups.slice()
+          };
+        }
+
+        function getAddBrowseAllBlockedTips() {
+          if (!addBrowseDraft.objectTypes.length) return [];
+          return getBrowseAllModeBlockedTips({
+            objectTypes: addBrowseDraft.objectTypes.slice(),
+            userGroupsMode: 'all',
+            userGroups: []
+          }, null);
+        }
+
+        function showAddBrowseBlockedPick(item) {
+          if (!item || !item.disabledTip) return;
+          addBrowseModalShownConflicts = [item.disabledTip];
+          renderAddBrowseModalMessage(addBrowseModalShownConflicts);
+        }
+
+        function showAddBrowseConflictMessages(messages) {
+          addBrowseModalShownConflicts = messages.slice();
+          renderAddBrowseModalMessage(addBrowseModalShownConflicts);
+        }
+
+        function clearAddBrowseConflictMessages() {
+          addBrowseModalShownConflicts = null;
+        }
+
+        function syncAddBrowseModalConflictMessage(draftConfig) {
+          var conflictBlockers = getAddBrowseModalConflictBlockers(draftConfig);
+          if (conflictBlockers.length) {
+            addBrowseModalShownConflicts = null;
+            renderAddBrowseModalMessage(conflictBlockers);
+            return;
+          }
+          if (addBrowseModalShownConflicts && addBrowseModalShownConflicts.length) {
+            renderAddBrowseModalMessage(addBrowseModalShownConflicts);
+            return;
+          }
+          renderAddBrowseModalMessage([]);
+        }
+
+        function renderAddBrowseModal() {
+          renderStringChips(
+            document.getElementById('add-sv-object-types-chips'),
+            addBrowseDraft.objectTypes,
+            function (value) {
+              addBrowseDraft.objectTypes = addBrowseDraft.objectTypes.filter(function (x) { return x !== value; });
+              renderAddBrowseModal();
+              syncAddBrowseModalSubmit();
+            }
+          );
+          renderIdChips(
+            document.getElementById('add-sv-user-groups-chips'),
+            addBrowseDraft.userGroups,
+            getBrowseUserGroupLabel,
+            function (id) {
+              addBrowseDraft.userGroups = addBrowseDraft.userGroups.filter(function (x) { return x !== id; });
+              if (addBrowseDraft.userGroups.length) clearAddBrowseUgRequiredError();
+              renderAddBrowseModal();
+              syncAddBrowseModalSubmit();
+            }
+          );
+          var allBlockedTips = getAddBrowseAllBlockedTips();
+          document.querySelectorAll('#add-sv-ug-mode input[type="radio"]').forEach(function (radio) {
+            if (radio.value === 'all') {
+              radio.disabled = allBlockedTips.length > 0;
+              var allLabel = radio.closest('.modal__condition-mode-option');
+              if (allLabel) {
+                allLabel.classList.toggle('is-disabled', allBlockedTips.length > 0);
+                if (allBlockedTips.length) {
+                  allLabel.setAttribute('data-disabled-tip', allBlockedTips.join(' '));
+                } else {
+                  allLabel.removeAttribute('data-disabled-tip');
+                }
+              }
+            } else {
+              radio.disabled = false;
+            }
+            radio.checked = addBrowseDraft.userGroupsMode === radio.value;
+          });
+          var ugSpecific = document.getElementById('add-sv-ug-specific');
+          if (ugSpecific) ugSpecific.hidden = addBrowseDraft.userGroupsMode !== 'specific';
+          renderBrowseUgRequiredError(
+            draftBrowseConfigFromAddModal(),
+            'add-sv-ug-error',
+            shouldShowAddBrowseUgRequiredError()
+          );
+        }
+
+        function resetAddBrowseModal() {
+          addBrowseDraft = {
+            objectTypes: [],
+            userGroupsMode: null,
+            userGroups: []
+          };
+          addBrowseOtHighlight = -1;
+          addBrowseUgHighlight = -1;
+          clearAddBrowseConflictMessages();
+          clearAddBrowseUgRequiredError();
+          var otInput = document.getElementById('add-sv-object-types-input');
+          var ugInput = document.getElementById('add-sv-user-groups-input');
+          if (otInput) otInput.value = '';
+          if (ugInput) ugInput.value = '';
+          hideCatalogTypeahead(
+            document.getElementById('add-sv-object-types-typeahead'),
+            otInput
+          );
+          hideCatalogTypeahead(
+            document.getElementById('add-sv-user-groups-typeahead'),
+            ugInput
+          );
+          renderAddBrowseModal();
+          syncAddBrowseModalSubmit();
+        }
+
+        function syncAddBrowseModalSubmit() {
+          if (getEditorContext() !== 'specific-views' || addModalMode !== 'browse-table') return;
+          var submit = document.getElementById('add-modal-submit');
+          var submitWrap = document.getElementById('add-modal-submit-wrap');
+          if (!submit) return;
+          var draftConfig = {
+            configurationName: document.getElementById('add-input-name').value.trim(),
+            objectTypes: addBrowseDraft.objectTypes.slice(),
+            userGroupsMode: addBrowseDraft.userGroupsMode,
+            userGroups: addBrowseDraft.userGroups.slice()
+          };
+          var blockers = getAddBrowseModalBlockers(draftConfig);
+          submit.disabled = blockers.length > 0;
+          syncAddBrowseModalConflictMessage(draftConfig);
+          if (submitWrap) {
+            if (blockers.length) {
+              submitWrap.setAttribute('data-disabled-tip', blockers.join(' '));
+            } else {
+              submitWrap.removeAttribute('data-disabled-tip');
+            }
+          }
+        }
+
+        function renderBrowseUserGroupsUi(config) {
+          normalizeBrowseConfig(config);
+          var allBlockedTips = getBrowseAllModeBlockedTips(config, config.id);
+          var allDisabled = allBlockedTips.length > 0 && config.userGroupsMode !== 'all';
+          document.querySelectorAll('#sv-browse-ug-mode input[type="radio"]').forEach(function (radio) {
+            if (radio.value === 'all') {
+              radio.disabled = allDisabled;
+              var allLabel = radio.closest('.form-row__condition-mode-option');
+              if (allLabel) {
+                allLabel.classList.toggle('is-disabled', allDisabled);
+                if (allDisabled) {
+                  allLabel.setAttribute('data-disabled-tip', allBlockedTips.join(' '));
+                } else {
+                  allLabel.removeAttribute('data-disabled-tip');
+                }
+              }
+            }
+            radio.checked = radio.value === config.userGroupsMode;
+          });
+          var ugSpecific = document.getElementById('sv-browse-ug-specific');
+          if (ugSpecific) ugSpecific.hidden = config.userGroupsMode !== 'specific';
+          renderIdChips(
+            document.getElementById('sv-browse-user-groups-chips'),
+            config.userGroups,
+            getBrowseUserGroupLabel,
+            function (id) {
+              config.userGroups = config.userGroups.filter(function (x) { return x !== id; });
+              if (config.userGroups.length) clearBrowseUgRequiredError(config.id);
+              renderBrowseUserGroupsUi(config);
+              markUnsaved();
+            }
+          );
+          renderBrowseUgRequiredError(config);
+          renderBrowseDetailValidation(config);
+          renderTree();
+        }
+
+        function renderBrowseObjectTypesUi(config) {
+          normalizeBrowseConfig(config);
+          renderStringChips(
+            document.getElementById('sv-browse-object-types-chips'),
+            config.objectTypes,
+            function (value) {
+              config.objectTypes = config.objectTypes.filter(function (x) { return x !== value; });
+              renderBrowseObjectTypesUi(config);
+              markUnsaved();
+            }
+          );
+          renderBrowseUserGroupsUi(config);
+        }
+
+        function validateBrowseConfigState(config, excludeConfigId) {
+          if (!isBrowseConfigComplete(config)) return true;
+          var message = getBrowseConflictMessage(config, excludeConfigId);
+          if (message) {
+            showToast(message, 'error');
+            return false;
+          }
+          return true;
+        }
 
         function findCategory(categoryId) {
           return categories.find(function (c) { return c.id === categoryId; });
@@ -10180,36 +11454,6 @@
           var cat = findCategory(categoryId);
           if (!cat) return null;
           return cat.configs.find(function (c) { return c.id === configId; }) || null;
-        }
-
-        function getUsedBrowseObjectTypes(excludeConfigId) {
-          var cat = findCategory('browse-table');
-          if (!cat) return [];
-          return cat.configs
-            .filter(function (c) {
-              return c.objectType && c.id !== excludeConfigId;
-            })
-            .map(function (c) { return c.objectType; });
-        }
-
-        function isBrowseObjectTypeAvailable(objectType, excludeConfigId) {
-          if (!objectType) return false;
-          return getUsedBrowseObjectTypes(excludeConfigId).indexOf(objectType) === -1;
-        }
-
-        function populateObjectTypeSelect(selectEl, selectedValue, excludeConfigId) {
-          if (!selectEl) return;
-          var used = getUsedBrowseObjectTypes(excludeConfigId);
-          selectEl.innerHTML = '<option value="" disabled' +
-            (selectedValue ? '' : ' selected') + '>Select object type</option>';
-          OBJECT_TYPE_CATALOG.forEach(function (ot) {
-            var opt = document.createElement('option');
-            opt.value = ot;
-            opt.textContent = ot;
-            if (used.indexOf(ot) !== -1 && ot !== selectedValue) opt.disabled = true;
-            if (selectedValue === ot) opt.selected = true;
-            selectEl.appendChild(opt);
-          });
         }
 
         function svShowDetailView(view) {
@@ -10260,14 +11504,11 @@
         function renderBrowseTableView(categoryId, configId) {
           var config = findConfig(categoryId, configId);
           if (!config) return;
+          normalizeBrowseConfig(config);
           document.getElementById('sv-browse-title').textContent = config.configurationName;
           document.getElementById('sv-browse-subtitle').textContent = 'Browse table';
           document.getElementById('sv-browse-config-name').value = config.configurationName;
-          populateObjectTypeSelect(
-            document.getElementById('sv-browse-object-type'),
-            config.objectType || '',
-            config.id
-          );
+          renderBrowseObjectTypesUi(config);
           renderColumnsField(document.getElementById('sv-browse-columns'), config);
           svShowDetailView('sv-browse-table');
         }
@@ -10289,7 +11530,7 @@
             cat.kind === 'browse-table' ? 'Browse table' : 'Reference table';
           document.getElementById('sv-category-description').textContent =
             cat.kind === 'browse-table'
-              ? 'Select a browse table configuration in the sidebar, or use Add to create one. Each object type can only have one browse table.'
+              ? 'Select a browse table configuration in the sidebar, or use Add to create one. Each object type and user group combination can only be configured once; specific user groups take precedence over All.'
               : 'Select a reference table configuration in the sidebar, or use Add to create one.';
           svShowDetailView('sv-category');
         }
@@ -10313,7 +11554,13 @@
                   selected.categoryId === cat.id &&
                   selected.configId === cfg.id ? ' is-selected' : '';
                 var icon = cat.kind === 'browse-table' ? ICONS.browseTable : ICONS.referenceTable;
-                html += '<li><div class="tree-item' + cfgSel + '" data-type="sv-config" data-category-id="' + cat.id + '" data-id="' + cfg.id + '">' +
+                var needsUgError = cat.kind === 'browse-table' && shouldShowBrowseUgRequiredError(cfg);
+                var errorClass = needsUgError ? ' tree-item--error' : '';
+                var errorTip = needsUgError
+                  ? ' data-error-tip="' + escapeHtml(getBrowseUserGroupRequiredMessage()) + '"'
+                  : '';
+                html += '<li><div class="tree-item' + cfgSel + errorClass + '"' + errorTip +
+                  ' data-type="sv-config" data-category-id="' + cat.id + '" data-id="' + cfg.id + '">' +
                   '<span class="tree-item__toggle is-hidden"></span>' +
                   '<span class="tree-item__icon">' + icon + '</span>' +
                   '<span class="tree-item__label">' + escapeHtml(cfg.configurationName) + '</span></div></li>';
@@ -10322,12 +11569,12 @@
             }
             html += '</li>';
           });
-          document.getElementById('specific-views-tree').innerHTML = html;
+          document.getElementById('specific-views-tree').innerHTML = '<ul>' + html + '</ul>';
         }
 
         function ensureSelection() {
           if (selected.type === 'sv-config' || selected.type === 'sv-category') return;
-          selected = { type: 'sv-config', categoryId: 'browse-table', configId: 'bt-browse' };
+          selected = { type: 'sv-config', categoryId: 'browse-table', configId: 'bt-table-1' };
         }
 
         function updateDetail() {
@@ -10400,24 +11647,32 @@
         }
 
         function duplicateHere() {
-          if (!canDuplicate()) return;
+          if (!canDuplicate()) return false;
           var cat = findCategory(selected.categoryId);
           var src = findConfig(selected.categoryId, selected.configId);
-          if (!cat || !src) return;
+          if (!cat || !src) return false;
+          if (cat.kind === 'browse-table') {
+            browseModalPreset = {
+              kind: 'duplicate',
+              name: src.configurationName + ' (copy)',
+              objectTypes: (src.objectTypes || []).slice(),
+              columns: (src.columns || []).slice()
+            };
+            setAddModalMode('browse-table');
+            return 'browse-modal';
+          }
           var clone = {
             id: slugId(src.configurationName + ' copy'),
             configurationName: src.configurationName + ' (copy)',
             columns: (src.columns || []).slice()
           };
-          if (cat.kind === 'browse-table') {
-            clone.objectType = '';
-          }
           cat.configs.push(clone);
           cat.expanded = true;
           selected = { type: 'sv-config', categoryId: cat.id, configId: clone.id };
           markUnsaved();
           updateDetail();
-          showToast('Configuration duplicated — set a unique object type before saving', 'info');
+          showToast('Configuration duplicated', 'success');
+          return true;
         }
 
         function openRemoveModal() {
@@ -10450,38 +11705,79 @@
 
         function closeAddModalRef() {
           addModalMode = null;
+          browseModalPreset = null;
+        }
+
+        function getBrowseModalTitle() {
+          return browseModalPreset && browseModalPreset.kind === 'duplicate'
+            ? 'Duplicate browse table'
+            : 'New browse table';
+        }
+
+        function prepareBrowseAddModal() {
+          resetAddBrowseModal();
+          var nameInput = document.getElementById('add-input-name');
+          if (browseModalPreset && browseModalPreset.kind === 'duplicate') {
+            if (nameInput) nameInput.value = browseModalPreset.name;
+            if (browseModalPreset.objectTypes && browseModalPreset.objectTypes.length) {
+              addBrowseDraft.objectTypes = browseModalPreset.objectTypes.slice();
+              renderAddBrowseModal();
+            }
+          } else if (nameInput) {
+            nameInput.value = 'Browse table';
+          }
+          syncAddBrowseModalSubmit();
         }
 
         function populateAddObjectTypeSelect() {
-          populateObjectTypeSelect(document.getElementById('add-input-sv-object-type'), '', null);
+          prepareBrowseAddModal();
         }
 
         function submitAddHandler(name) {
-          if (!addModalMode) return;
+          if (!addModalMode) return false;
           var catId = addModalMode === 'browse-table' ? 'browse-table' : 'reference-table';
           var cat = findCategory(catId);
-          if (!cat) return;
+          if (!cat) return false;
 
           if (addModalMode === 'browse-table') {
-            var objectType = document.getElementById('add-input-sv-object-type').value;
-            if (!objectType) {
-              showToast('Select an object type', 'error');
-              return;
+            var draftConfig = {
+              configurationName: name,
+              objectTypes: addBrowseDraft.objectTypes.slice(),
+              userGroupsMode: addBrowseDraft.userGroupsMode,
+              userGroups: addBrowseDraft.userGroups.slice()
+            };
+            if (!isBrowseConfigComplete(draftConfig)) {
+              showToast('Complete all required fields', 'error');
+              return false;
             }
-            if (!isBrowseObjectTypeAvailable(objectType, null)) {
-              showToast('A browse table already exists for this object type', 'error');
-              return;
+            var conflict = getBrowseConflictMessage(draftConfig, null);
+            if (conflict) {
+              showToast(conflict, 'error');
+              return false;
             }
+            var isDuplicate = browseModalPreset && browseModalPreset.kind === 'duplicate';
+            var columns = ['ID', 'Name', 'Object type'];
+            if (isDuplicate && browseModalPreset.columns.length) {
+              columns = browseModalPreset.columns.slice();
+            }
+            browseModalPreset = null;
             var newCfg = {
               id: slugId(name),
               configurationName: name,
-              objectType: objectType,
-              columns: ['ID', 'Name', 'Object type']
+              objectTypes: draftConfig.objectTypes.slice(),
+              userGroupsMode: draftConfig.userGroupsMode,
+              userGroups: draftConfig.userGroups.slice(),
+              columns: columns
             };
             cat.configs.push(newCfg);
             cat.expanded = true;
             selected = { type: 'sv-config', categoryId: cat.id, configId: newCfg.id };
-            showToast('Browse table "' + name + '" added', 'success');
+            showToast(
+              isDuplicate
+                ? 'Browse table "' + name + '" duplicated'
+                : 'Browse table "' + name + '" added',
+              'success'
+            );
           } else {
             var refCfg = {
               id: slugId(name),
@@ -10495,6 +11791,7 @@
           }
           markUnsaved();
           updateDetail();
+          return true;
         }
 
         function updateToolbarButtons() {
@@ -10525,7 +11822,76 @@
           syncToolbarButtonTip('btn-move', false, null);
         }
 
+        function getActiveBrowseConfig() {
+          if (selected.type !== 'sv-config') return null;
+          var cat = findCategory(selected.categoryId);
+          if (!cat || cat.kind !== 'browse-table') return null;
+          return findConfig(selected.categoryId, selected.configId);
+        }
+
+        function bindBrowseTypeahead(input, menu, getSuggestions, highlightRef, onPick, afterChange, onBlockedPick) {
+          if (!input || !menu) return;
+          function pickItem(item) {
+            onPick(item);
+            if (afterChange) afterChange();
+          }
+          function renderSuggestions() {
+            var suggestions = getSuggestions(input.value);
+            if (!input.value.trim()) {
+              hideCatalogTypeahead(menu, input);
+              highlightRef.val = -1;
+              return;
+            }
+            if (highlightRef.val < 0 || highlightRef.val >= suggestions.length ||
+                suggestions[highlightRef.val].disabled) {
+              highlightRef.val = firstPickableSuggestionIndex(suggestions);
+            }
+            renderCatalogTypeahead(menu, input, suggestions, highlightRef.val, pickItem, function (h) {
+              highlightRef.val = h;
+            }, onBlockedPick);
+          }
+          input.addEventListener('input', renderSuggestions);
+          input.addEventListener('focus', function () {
+            if (!input.value.trim()) return;
+            renderSuggestions();
+          });
+          input.addEventListener('blur', function () {
+            setTimeout(function () { hideCatalogTypeahead(menu, input); }, 150);
+          });
+          input.addEventListener('keydown', function (e) {
+            if (!menu || menu.hidden) return;
+            var suggestions = getSuggestions(input.value);
+            if (!suggestions.length) return;
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              highlightRef.val = stepPickableSuggestionIndex(suggestions, highlightRef.val, 1);
+              renderCatalogTypeahead(menu, input, suggestions, highlightRef.val, pickItem, function (h) {
+                highlightRef.val = h;
+              }, onBlockedPick);
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              highlightRef.val = stepPickableSuggestionIndex(suggestions, highlightRef.val, -1);
+              renderCatalogTypeahead(menu, input, suggestions, highlightRef.val, pickItem, function (h) {
+                highlightRef.val = h;
+              }, onBlockedPick);
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              var pick = highlightRef.val >= 0 ? highlightRef.val : firstPickableSuggestionIndex(suggestions);
+              if (pick < 0 || suggestions[pick].disabled) {
+                if (pick >= 0 && onBlockedPick) onBlockedPick(suggestions[pick]);
+                return;
+              }
+              pickItem(suggestions[pick]);
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              input.value = '';
+              hideCatalogTypeahead(menu, input);
+            }
+          });
+        }
+
         function init() {
+          normalizeAllBrowseConfigs();
           document.getElementById('specific-views-tree').addEventListener('click', function (e) {
             var toggle = e.target.closest('.tree-item__toggle');
             if (toggle && !toggle.classList.contains('is-hidden')) {
@@ -10567,23 +11933,195 @@
             if (!cfg) return;
             cfg.configurationName = this.value;
             document.getElementById('sv-browse-title').textContent = cfg.configurationName;
+            renderBrowseDetailValidation(cfg);
             markUnsaved();
             renderTree();
           });
 
-          document.getElementById('sv-browse-object-type').addEventListener('change', function () {
-            if (selected.type !== 'sv-config') return;
-            var cfg = findConfig(selected.categoryId, selected.configId);
-            if (!cfg) return;
-            var next = this.value;
-            if (!next) return;
-            if (!isBrowseObjectTypeAvailable(next, cfg.id)) {
-              showToast('A browse table already exists for this object type', 'error');
-              populateObjectTypeSelect(this, cfg.objectType || '', cfg.id);
-              return;
+          document.querySelectorAll('#sv-browse-ug-mode input[type="radio"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+              if (!radio.checked || radio.disabled) return;
+              var cfg = getActiveBrowseConfig();
+              if (!cfg) return;
+              var prevMode = cfg.userGroupsMode;
+              var prevGroups = cfg.userGroups.slice();
+              cfg.userGroupsMode = radio.value;
+              if (cfg.userGroupsMode === 'all') {
+                cfg.userGroups = [];
+                clearBrowseUgRequiredError(cfg.id);
+              } else {
+                clearBrowseUgRequiredError(cfg.id);
+              }
+              if (!validateBrowseConfigState(cfg, cfg.id)) {
+                cfg.userGroupsMode = prevMode;
+                cfg.userGroups = prevGroups;
+              }
+              renderBrowseUserGroupsUi(cfg);
+              if (cfg.userGroupsMode === 'specific') {
+                focusBrowseUserGroupsInput('sv-browse-user-groups-input');
+              }
+              markUnsaved();
+            });
+          });
+
+          bindBrowseTypeahead(
+            document.getElementById('sv-browse-object-types-input'),
+            document.getElementById('sv-browse-object-types-typeahead'),
+            function (query) {
+              var cfg = getActiveBrowseConfig();
+              return getObjectTypeSuggestions(
+                query,
+                cfg ? cfg.objectTypes : [],
+                cfg,
+                cfg ? cfg.id : null
+              );
+            },
+            { get val() { return svBrowseOtHighlight; }, set val(v) { svBrowseOtHighlight = v; } },
+            function (item) {
+              var cfg = getActiveBrowseConfig();
+              if (!cfg || item.disabled || cfg.objectTypes.indexOf(item.id) !== -1) return;
+              cfg.objectTypes.push(item.id);
+              if (!validateBrowseConfigState(cfg, cfg.id)) {
+                cfg.objectTypes.pop();
+                return;
+              }
+              document.getElementById('sv-browse-object-types-input').value = '';
+              hideCatalogTypeahead(
+                document.getElementById('sv-browse-object-types-typeahead'),
+                document.getElementById('sv-browse-object-types-input')
+              );
+              renderBrowseObjectTypesUi(cfg);
+              markUnsaved();
             }
-            cfg.objectType = next;
-            markUnsaved();
+          );
+
+          bindBrowseTypeahead(
+            document.getElementById('sv-browse-user-groups-input'),
+            document.getElementById('sv-browse-user-groups-typeahead'),
+            function (query) {
+              var cfg = getActiveBrowseConfig();
+              return getBrowseUserGroupSuggestions(
+                query,
+                cfg ? cfg.userGroups : [],
+                cfg,
+                cfg ? cfg.id : null
+              );
+            },
+            { get val() { return svBrowseUgHighlight; }, set val(v) { svBrowseUgHighlight = v; } },
+            function (item) {
+              var cfg = getActiveBrowseConfig();
+              if (!cfg || item.disabled || cfg.userGroups.indexOf(item.id) !== -1) return;
+              cfg.userGroups.push(item.id);
+              clearBrowseUgRequiredError(cfg.id);
+              if (!validateBrowseConfigState(cfg, cfg.id)) {
+                cfg.userGroups.pop();
+                return;
+              }
+              document.getElementById('sv-browse-user-groups-input').value = '';
+              hideCatalogTypeahead(
+                document.getElementById('sv-browse-user-groups-typeahead'),
+                document.getElementById('sv-browse-user-groups-input')
+              );
+              renderBrowseUserGroupsUi(cfg);
+              markUnsaved();
+            }
+          );
+
+          document.getElementById('sv-browse-user-groups-input').addEventListener('blur', function () {
+            var cfg = getActiveBrowseConfig();
+            if (!cfg) return;
+            onBrowseUserGroupsInputBlur(cfg, false);
+          });
+
+          document.querySelectorAll('#add-sv-ug-mode input[type="radio"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+              if (!radio.checked) return;
+              var prevMode = addBrowseDraft.userGroupsMode;
+              if (radio.value === 'all') {
+                var allTips = getAddBrowseAllBlockedTips();
+                if (allTips.length) {
+                  document.querySelectorAll('#add-sv-ug-mode input[type="radio"]').forEach(function (r) {
+                    r.checked = prevMode === r.value;
+                  });
+                  showAddBrowseConflictMessages(allTips);
+                  return;
+                }
+              }
+              clearAddBrowseConflictMessages();
+              clearAddBrowseUgRequiredError();
+              addBrowseDraft.userGroupsMode = radio.value;
+              if (addBrowseDraft.userGroupsMode === 'all') addBrowseDraft.userGroups = [];
+              renderAddBrowseModal();
+              if (addBrowseDraft.userGroupsMode === 'specific') {
+                focusBrowseUserGroupsInput('add-sv-user-groups-input');
+              }
+              syncAddBrowseModalSubmit();
+            });
+          });
+
+          document.getElementById('add-input-name').addEventListener('input', function () {
+            syncAddBrowseModalSubmit();
+          });
+
+          bindBrowseTypeahead(
+            document.getElementById('add-sv-object-types-input'),
+            document.getElementById('add-sv-object-types-typeahead'),
+            function (query) {
+              return getObjectTypeSuggestions(
+                query,
+                addBrowseDraft.objectTypes,
+                draftBrowseConfigFromAddModal(),
+                null
+              );
+            },
+            { get val() { return addBrowseOtHighlight; }, set val(v) { addBrowseOtHighlight = v; } },
+            function (item) {
+              if (item.disabled || addBrowseDraft.objectTypes.indexOf(item.id) !== -1) return;
+              clearAddBrowseConflictMessages();
+              addBrowseDraft.objectTypes.push(item.id);
+              document.getElementById('add-sv-object-types-input').value = '';
+              hideCatalogTypeahead(
+                document.getElementById('add-sv-object-types-typeahead'),
+                document.getElementById('add-sv-object-types-input')
+              );
+              renderAddBrowseModal();
+              syncAddBrowseModalSubmit();
+            },
+            function () { syncAddBrowseModalSubmit(); },
+            showAddBrowseBlockedPick
+          );
+
+          bindBrowseTypeahead(
+            document.getElementById('add-sv-user-groups-input'),
+            document.getElementById('add-sv-user-groups-typeahead'),
+            function (query) {
+              return getBrowseUserGroupSuggestions(
+                query,
+                addBrowseDraft.userGroups,
+                draftBrowseConfigFromAddModal(),
+                null
+              );
+            },
+            { get val() { return addBrowseUgHighlight; }, set val(v) { addBrowseUgHighlight = v; } },
+            function (item) {
+              if (item.disabled || addBrowseDraft.userGroups.indexOf(item.id) !== -1) return;
+              clearAddBrowseConflictMessages();
+              clearAddBrowseUgRequiredError();
+              addBrowseDraft.userGroups.push(item.id);
+              document.getElementById('add-sv-user-groups-input').value = '';
+              hideCatalogTypeahead(
+                document.getElementById('add-sv-user-groups-typeahead'),
+                document.getElementById('add-sv-user-groups-input')
+              );
+              renderAddBrowseModal();
+              syncAddBrowseModalSubmit();
+            },
+            function () { syncAddBrowseModalSubmit(); },
+            showAddBrowseBlockedPick
+          );
+
+          document.getElementById('add-sv-user-groups-input').addEventListener('blur', function () {
+            onBrowseUserGroupsInputBlur(draftBrowseConfigFromAddModal(), true);
           });
 
           document.getElementById('sv-reference-config-name').addEventListener('input', function () {
@@ -10616,11 +12154,14 @@
           setAddModalMode: setAddModalMode,
           getAddModalMode: getAddModalMode,
           closeAddModalRef: closeAddModalRef,
+          getBrowseModalTitle: getBrowseModalTitle,
+          prepareBrowseAddModal: prepareBrowseAddModal,
           populateAddObjectTypeSelect: populateAddObjectTypeSelect,
           submitAddHandler: submitAddHandler,
           openRemoveModal: openRemoveModal,
           confirmRemove: confirmRemove,
-          duplicateHere: duplicateHere
+          duplicateHere: duplicateHere,
+          getSaveDisabledTip: getSaveDisabledTip
         };
       })();
 
@@ -12958,14 +14499,19 @@
 
       document.getElementById('btn-duplicate').addEventListener('click', function (e) {
         if (getEditorContext() === 'tabs-setup') TabsEditor.onDuplicateClick(e);
-        else if (getEditorContext() === 'specific-views') SpecificViewsEditor.duplicateHere();
-        else onDuplicateClick(e);
+        else if (getEditorContext() === 'specific-views') {
+          if (SpecificViewsEditor.duplicateHere() === 'browse-modal') {
+            openAddModalForMode('browse-table');
+          }
+        } else onDuplicateClick(e);
       });
       document.getElementById('btn-duplicate-here').addEventListener('click', function () {
         if (getEditorContext() === 'tabs-setup') {
           TabsEditor.duplicateHere();
         } else if (getEditorContext() === 'specific-views') {
-          SpecificViewsEditor.duplicateHere();
+          if (SpecificViewsEditor.duplicateHere() === 'browse-modal') {
+            openAddModalForMode('browse-table');
+          }
         } else {
           duplicateHere();
         }
