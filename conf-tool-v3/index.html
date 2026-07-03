@@ -11545,7 +11545,6 @@
               '<div class="tree-item' + catSel + '" data-type="sv-category" data-id="' + cat.id + '">' +
               '<button type="button" class="tree-item__toggle" aria-label="' + (expanded ? 'Collapse' : 'Expand') + '">' +
               (expanded ? ICONS.chevronDown : ICONS.chevronRight) + '</button>' +
-              '<span class="tree-item__icon">' + (cat.kind === 'browse-table' ? ICONS.browseTable : ICONS.referenceTable) + '</span>' +
               '<span class="tree-item__label">' + escapeHtml(cat.label) + '</span></div>';
             if (hasChildren) {
               html += '<ul class="tree-children' + (expanded ? '' : ' is-collapsed') + '">';
@@ -11553,7 +11552,6 @@
                 var cfgSel = selected.type === 'sv-config' &&
                   selected.categoryId === cat.id &&
                   selected.configId === cfg.id ? ' is-selected' : '';
-                var icon = cat.kind === 'browse-table' ? ICONS.browseTable : ICONS.referenceTable;
                 var needsUgError = cat.kind === 'browse-table' && shouldShowBrowseUgRequiredError(cfg);
                 var errorClass = needsUgError ? ' tree-item--error' : '';
                 var errorTip = needsUgError
@@ -11562,7 +11560,6 @@
                 html += '<li><div class="tree-item' + cfgSel + errorClass + '"' + errorTip +
                   ' data-type="sv-config" data-category-id="' + cat.id + '" data-id="' + cfg.id + '">' +
                   '<span class="tree-item__toggle is-hidden"></span>' +
-                  '<span class="tree-item__icon">' + icon + '</span>' +
                   '<span class="tree-item__label">' + escapeHtml(cfg.configurationName) + '</span></div></li>';
               });
               html += '</ul>';
