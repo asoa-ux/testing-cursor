@@ -25,6 +25,10 @@
       --filter-active-bg: #f0e6f3;
       --filter-active-border: #e8d4ef;
       --toolbar-disabled-tip-delay: 500ms;
+      --disabled-tip-bg: #323130;
+      --disabled-tip-color: #ffffff;
+      --disabled-tip-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      --disabled-tip-max-width: 280px;
     }
 
     html, body {
@@ -192,6 +196,22 @@
       pointer-events: none;
     }
 
+    .catalog-disabled-tip,
+    .toolbar__item-wrap[data-disabled-tip]::after,
+    .modal__submit-wrap[data-disabled-tip]::after,
+    .modal__condition-mode-option > span[data-disabled-tip]::after,
+    .form-row__condition-mode-option > span[data-disabled-tip]::after {
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--disabled-tip-color);
+      background: var(--disabled-tip-bg);
+      border-radius: 4px;
+      box-shadow: var(--disabled-tip-shadow);
+      pointer-events: none;
+    }
+
     .toolbar__item-wrap[data-disabled-tip]::after {
       content: attr(data-disabled-tip);
       position: absolute;
@@ -200,19 +220,10 @@
       bottom: auto;
       transform: translateX(-50%);
       width: max-content;
-      max-width: 260px;
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--white);
+      max-width: var(--disabled-tip-max-width);
       text-align: center;
-      background: #323130;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       opacity: 0;
       visibility: hidden;
-      pointer-events: none;
       z-index: 1100;
       transition:
         opacity 0.12s ease 0s,
@@ -1214,18 +1225,9 @@
       position: fixed;
       z-index: 2000;
       width: max-content;
-      max-width: 280px;
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--white);
+      max-width: var(--disabled-tip-max-width);
       text-align: left;
       white-space: normal;
-      background: #323130;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      pointer-events: none;
       opacity: 0;
       visibility: hidden;
       transition:
@@ -1598,72 +1600,6 @@
     }
 
     .form-section__validation-list li + li { margin-top: 4px; }
-
-    .browse-ug-error {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 8px;
-      padding: 8px 10px;
-      background: #fef6f6;
-      border: 1px solid #f1bbbc;
-      border-radius: 2px;
-      font-size: 12px;
-      line-height: 1.45;
-      color: #442726;
-    }
-
-    .browse-ug-error[hidden] { display: none !important; }
-
-    .browse-ug-error__icon {
-      color: #c50f1f;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .tree-item--error {
-      box-shadow: inset 3px 0 0 #c50f1f;
-    }
-
-    .tree-item[data-error-tip] {
-      position: relative;
-    }
-
-    .tree-item[data-error-tip]::after {
-      content: attr(data-error-tip);
-      position: absolute;
-      left: calc(100% + 8px);
-      top: 50%;
-      transform: translateY(-50%);
-      width: max-content;
-      max-width: 220px;
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--text);
-      text-align: left;
-      white-space: normal;
-      background: var(--white);
-      border: 1px solid #d2d0ce;
-      border-radius: 4px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      z-index: 20;
-      transition:
-        opacity 0.12s ease 0s,
-        visibility 0s linear 0.12s;
-    }
-
-    .tree-item[data-error-tip]:hover::after {
-      opacity: 1;
-      visibility: visible;
-      transition:
-        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
-        visibility 0s linear var(--toolbar-disabled-tip-delay);
-    }
 
     .config-info-banner {
       display: flex;
@@ -2202,20 +2138,11 @@
       top: auto;
       transform: none;
       width: max-content;
-      max-width: 280px;
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--white);
+      max-width: var(--disabled-tip-max-width);
       text-align: left;
       white-space: normal;
-      background: #323130;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       opacity: 0;
       visibility: hidden;
-      pointer-events: none;
       z-index: 1100;
       transition:
         opacity 0.12s ease 0s,
@@ -2290,19 +2217,23 @@
     }
 
     .modal__condition-mode-option.is-disabled {
-      opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    .modal__condition-mode-option.is-disabled > span {
+      color: var(--text-secondary);
     }
 
     .modal__condition-mode-option.is-disabled input {
       cursor: not-allowed;
+      opacity: 0.55;
     }
 
-    .modal__condition-mode-option[data-disabled-tip] {
+    .modal__condition-mode-option > span[data-disabled-tip] {
       position: relative;
     }
 
-    .modal__condition-mode-option[data-disabled-tip]::after {
+    .modal__condition-mode-option > span[data-disabled-tip]::after {
       content: attr(data-disabled-tip);
       position: absolute;
       left: 0;
@@ -2310,27 +2241,19 @@
       top: auto;
       transform: none;
       width: max-content;
-      max-width: 280px;
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--white);
+      max-width: var(--disabled-tip-max-width);
       text-align: left;
       white-space: normal;
-      background: #323130;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      color: var(--disabled-tip-color);
       opacity: 0;
       visibility: hidden;
-      pointer-events: none;
       z-index: 1100;
       transition:
         opacity 0.12s ease 0s,
         visibility 0s linear 0.12s;
     }
 
-    .modal__condition-mode-option[data-disabled-tip]:hover::after {
+    .modal__condition-mode-option.is-disabled:hover > span[data-disabled-tip]::after {
       opacity: 1;
       visibility: visible;
       transition:
@@ -2383,19 +2306,23 @@
     }
 
     .form-row__condition-mode-option.is-disabled {
-      opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    .form-row__condition-mode-option.is-disabled > span {
+      color: var(--text-secondary);
     }
 
     .form-row__condition-mode-option.is-disabled input {
       cursor: not-allowed;
+      opacity: 0.55;
     }
 
-    .form-row__condition-mode-option[data-disabled-tip] {
+    .form-row__condition-mode-option > span[data-disabled-tip] {
       position: relative;
     }
 
-    .form-row__condition-mode-option[data-disabled-tip]::after {
+    .form-row__condition-mode-option > span[data-disabled-tip]::after {
       content: attr(data-disabled-tip);
       position: absolute;
       left: 0;
@@ -2403,27 +2330,19 @@
       top: auto;
       transform: none;
       width: max-content;
-      max-width: 280px;
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--white);
+      max-width: var(--disabled-tip-max-width);
       text-align: left;
       white-space: normal;
-      background: #323130;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      color: var(--disabled-tip-color);
       opacity: 0;
       visibility: hidden;
-      pointer-events: none;
       z-index: 1100;
       transition:
         opacity 0.12s ease 0s,
         visibility 0s linear 0.12s;
     }
 
-    .form-row__condition-mode-option[data-disabled-tip]:hover::after {
+    .form-row__condition-mode-option.is-disabled:hover > span[data-disabled-tip]::after {
       opacity: 1;
       visibility: visible;
       transition:
@@ -3256,7 +3175,6 @@
                     <span>Specific user groups</span>
                   </label>
                   <div class="form-row__ug-specific" id="sv-browse-ug-specific" hidden>
-                    <div class="browse-ug-error" id="sv-browse-ug-error" hidden role="alert"></div>
                     <div class="ug-picker">
                       <div class="chip-field chip-field--has-action" id="sv-browse-user-groups-field">
                         <span class="filter-sheet__chips" id="sv-browse-user-groups-chips"></span>
@@ -3375,7 +3293,6 @@
                 <span>Specific user groups</span>
               </label>
               <div class="modal__ug-specific" id="add-sv-ug-specific" hidden>
-                <div class="browse-ug-error" id="add-sv-ug-error" hidden role="alert"></div>
                 <div class="ug-picker">
                   <div class="chip-field chip-field--has-action modal__chip-field" id="add-sv-user-groups-field">
                     <span class="modal__chips" id="add-sv-user-groups-chips"></span>
@@ -10692,8 +10609,6 @@
         var addBrowseModalShownConflicts = null;
         var svBrowseOtHighlight = -1;
         var svBrowseUgHighlight = -1;
-        var browseUgErrorShownByConfigId = {};
-        var addBrowseUgErrorShown = false;
 
         function normalizeBrowseConfig(config) {
           if (!config) return;
@@ -10928,54 +10843,40 @@
           setTimeout(function () { input.focus(); }, 0);
         }
 
-        function clearBrowseUgRequiredError(configId) {
-          if (configId) delete browseUgErrorShownByConfigId[configId];
-        }
-
-        function clearAddBrowseUgRequiredError() {
-          addBrowseUgErrorShown = false;
-        }
-
-        function shouldShowBrowseUgRequiredError(config) {
-          return config && config.id &&
-            needsBrowseUserGroupSelection(config) &&
-            !!browseUgErrorShownByConfigId[config.id];
-        }
-
-        function shouldShowAddBrowseUgRequiredError() {
-          return needsBrowseUserGroupSelection(draftBrowseConfigFromAddModal()) && addBrowseUgErrorShown;
-        }
-
-        function renderBrowseUgRequiredError(config, elementId, isShown) {
-          var el = document.getElementById(elementId || 'sv-browse-ug-error');
-          if (!el) return;
-          var show = typeof isShown === 'boolean'
-            ? isShown
-            : shouldShowBrowseUgRequiredError(config);
-          if (!show) {
-            el.hidden = true;
-            el.innerHTML = '';
-            return;
+        function revertBrowseUserGroupsToAllIfEmpty(config, excludeConfigId) {
+          if (!config || !needsBrowseUserGroupSelection(config)) return false;
+          var prevMode = config.userGroupsMode;
+          var prevGroups = (config.userGroups || []).slice();
+          config.userGroupsMode = 'all';
+          config.userGroups = [];
+          if (!validateBrowseConfigState(config, excludeConfigId)) {
+            config.userGroupsMode = prevMode;
+            config.userGroups = prevGroups;
+            return false;
           }
-          el.innerHTML =
-            '<i class="ph ph-warning-circle icon icon--16 browse-ug-error__icon" aria-hidden="true"></i>' +
-            '<span>' + escapeHtml(getBrowseUserGroupRequiredMessage()) + '</span>';
-          el.hidden = false;
+          return true;
         }
 
-        function onBrowseUserGroupsInputBlur(config, isAddModal) {
+        function onBrowseUserGroupsInputBlur(isAddModal) {
           setTimeout(function () {
-            var current = isAddModal ? draftBrowseConfigFromAddModal() : getActiveBrowseConfig();
-            if (!current || !needsBrowseUserGroupSelection(current)) return;
             if (isAddModal) {
-              addBrowseUgErrorShown = true;
-              renderBrowseUgRequiredError(current, 'add-sv-ug-error', true);
+              if (!needsBrowseUserGroupSelection(draftBrowseConfigFromAddModal())) return;
+              var prevMode = addBrowseDraft.userGroupsMode;
+              var prevGroups = addBrowseDraft.userGroups.slice();
+              addBrowseDraft.userGroupsMode = 'all';
+              addBrowseDraft.userGroups = [];
+              if (!validateBrowseConfigState(draftBrowseConfigFromAddModal(), null)) {
+                addBrowseDraft.userGroupsMode = prevMode;
+                addBrowseDraft.userGroups = prevGroups;
+              }
+              renderAddBrowseModal();
+              syncAddBrowseModalSubmit();
               return;
             }
-            if (!current.id) return;
-            browseUgErrorShownByConfigId[current.id] = true;
-            renderBrowseUgRequiredError(current);
-            renderTree();
+            var cfg = getActiveBrowseConfig();
+            if (!cfg || !revertBrowseUserGroupsToAllIfEmpty(cfg, cfg.id)) return;
+            renderBrowseUserGroupsUi(cfg);
+            markUnsaved();
           }, 0);
         }
 
@@ -11103,6 +11004,18 @@
 
         var catalogDisabledTipTimer = null;
 
+        function syncBrowseConditionModeDisabledTip(optionEl, isDisabled, tipText) {
+          if (!optionEl) return;
+          var textEl = optionEl.querySelector('span');
+          optionEl.classList.toggle('is-disabled', isDisabled);
+          if (!textEl) return;
+          if (isDisabled && tipText) {
+            textEl.setAttribute('data-disabled-tip', tipText);
+          } else {
+            textEl.removeAttribute('data-disabled-tip');
+          }
+        }
+
         function showCatalogDisabledTip(text, target) {
           hideCatalogDisabledTip();
           if (!text || !target) return;
@@ -11115,15 +11028,15 @@
             tip.classList.remove('is-visible');
             var margin = 8;
             var targetRect = target.getBoundingClientRect();
-            tip.style.left = (targetRect.right + margin) + 'px';
-            tip.style.top = targetRect.top + 'px';
+            tip.style.left = targetRect.left + 'px';
+            tip.style.top = (targetRect.bottom + margin) + 'px';
             var tipRect = tip.getBoundingClientRect();
             if (tipRect.right > window.innerWidth - margin) {
-              tip.style.left = Math.max(margin, targetRect.left - tipRect.width - margin) + 'px';
+              tip.style.left = Math.max(margin, window.innerWidth - tipRect.width - margin) + 'px';
               tipRect = tip.getBoundingClientRect();
             }
             if (tipRect.bottom > window.innerHeight - margin) {
-              tip.style.top = Math.max(margin, window.innerHeight - tipRect.height - margin) + 'px';
+              tip.style.top = Math.max(margin, targetRect.top - tipRect.height - margin) + 'px';
             }
             tip.classList.add('is-visible');
           }, 500);
@@ -11304,7 +11217,6 @@
             getBrowseUserGroupLabel,
             function (id) {
               addBrowseDraft.userGroups = addBrowseDraft.userGroups.filter(function (x) { return x !== id; });
-              if (addBrowseDraft.userGroups.length) clearAddBrowseUgRequiredError();
               renderAddBrowseModal();
               syncAddBrowseModalSubmit();
             }
@@ -11313,15 +11225,11 @@
           document.querySelectorAll('#add-sv-ug-mode input[type="radio"]').forEach(function (radio) {
             if (radio.value === 'all') {
               radio.disabled = allBlockedTips.length > 0;
-              var allLabel = radio.closest('.modal__condition-mode-option');
-              if (allLabel) {
-                allLabel.classList.toggle('is-disabled', allBlockedTips.length > 0);
-                if (allBlockedTips.length) {
-                  allLabel.setAttribute('data-disabled-tip', allBlockedTips.join(' '));
-                } else {
-                  allLabel.removeAttribute('data-disabled-tip');
-                }
-              }
+              syncBrowseConditionModeDisabledTip(
+                radio.closest('.modal__condition-mode-option'),
+                allBlockedTips.length > 0,
+                allBlockedTips.join(' ')
+              );
             } else {
               radio.disabled = false;
             }
@@ -11329,11 +11237,6 @@
           });
           var ugSpecific = document.getElementById('add-sv-ug-specific');
           if (ugSpecific) ugSpecific.hidden = addBrowseDraft.userGroupsMode !== 'specific';
-          renderBrowseUgRequiredError(
-            draftBrowseConfigFromAddModal(),
-            'add-sv-ug-error',
-            shouldShowAddBrowseUgRequiredError()
-          );
         }
 
         function resetAddBrowseModal() {
@@ -11345,7 +11248,6 @@
           addBrowseOtHighlight = -1;
           addBrowseUgHighlight = -1;
           clearAddBrowseConflictMessages();
-          clearAddBrowseUgRequiredError();
           var otInput = document.getElementById('add-sv-object-types-input');
           var ugInput = document.getElementById('add-sv-user-groups-input');
           if (otInput) otInput.value = '';
@@ -11392,15 +11294,11 @@
           document.querySelectorAll('#sv-browse-ug-mode input[type="radio"]').forEach(function (radio) {
             if (radio.value === 'all') {
               radio.disabled = allDisabled;
-              var allLabel = radio.closest('.form-row__condition-mode-option');
-              if (allLabel) {
-                allLabel.classList.toggle('is-disabled', allDisabled);
-                if (allDisabled) {
-                  allLabel.setAttribute('data-disabled-tip', allBlockedTips.join(' '));
-                } else {
-                  allLabel.removeAttribute('data-disabled-tip');
-                }
-              }
+              syncBrowseConditionModeDisabledTip(
+                radio.closest('.form-row__condition-mode-option'),
+                allDisabled,
+                allBlockedTips.join(' ')
+              );
             }
             radio.checked = radio.value === config.userGroupsMode;
           });
@@ -11412,12 +11310,10 @@
             getBrowseUserGroupLabel,
             function (id) {
               config.userGroups = config.userGroups.filter(function (x) { return x !== id; });
-              if (config.userGroups.length) clearBrowseUgRequiredError(config.id);
               renderBrowseUserGroupsUi(config);
               markUnsaved();
             }
           );
-          renderBrowseUgRequiredError(config);
           renderBrowseDetailValidation(config);
           renderTree();
         }
@@ -11552,12 +11448,7 @@
                 var cfgSel = selected.type === 'sv-config' &&
                   selected.categoryId === cat.id &&
                   selected.configId === cfg.id ? ' is-selected' : '';
-                var needsUgError = cat.kind === 'browse-table' && shouldShowBrowseUgRequiredError(cfg);
-                var errorClass = needsUgError ? ' tree-item--error' : '';
-                var errorTip = needsUgError
-                  ? ' data-error-tip="' + escapeHtml(getBrowseUserGroupRequiredMessage()) + '"'
-                  : '';
-                html += '<li><div class="tree-item' + cfgSel + errorClass + '"' + errorTip +
+                html += '<li><div class="tree-item' + cfgSel + '"' +
                   ' data-type="sv-config" data-category-id="' + cat.id + '" data-id="' + cfg.id + '">' +
                   '<span class="tree-item__toggle is-hidden"></span>' +
                   '<span class="tree-item__label">' + escapeHtml(cfg.configurationName) + '</span></div></li>';
@@ -11945,9 +11836,6 @@
               cfg.userGroupsMode = radio.value;
               if (cfg.userGroupsMode === 'all') {
                 cfg.userGroups = [];
-                clearBrowseUgRequiredError(cfg.id);
-              } else {
-                clearBrowseUgRequiredError(cfg.id);
               }
               if (!validateBrowseConfigState(cfg, cfg.id)) {
                 cfg.userGroupsMode = prevMode;
@@ -12009,7 +11897,6 @@
               var cfg = getActiveBrowseConfig();
               if (!cfg || item.disabled || cfg.userGroups.indexOf(item.id) !== -1) return;
               cfg.userGroups.push(item.id);
-              clearBrowseUgRequiredError(cfg.id);
               if (!validateBrowseConfigState(cfg, cfg.id)) {
                 cfg.userGroups.pop();
                 return;
@@ -12025,9 +11912,7 @@
           );
 
           document.getElementById('sv-browse-user-groups-input').addEventListener('blur', function () {
-            var cfg = getActiveBrowseConfig();
-            if (!cfg) return;
-            onBrowseUserGroupsInputBlur(cfg, false);
+            onBrowseUserGroupsInputBlur(false);
           });
 
           document.querySelectorAll('#add-sv-ug-mode input[type="radio"]').forEach(function (radio) {
@@ -12045,7 +11930,6 @@
                 }
               }
               clearAddBrowseConflictMessages();
-              clearAddBrowseUgRequiredError();
               addBrowseDraft.userGroupsMode = radio.value;
               if (addBrowseDraft.userGroupsMode === 'all') addBrowseDraft.userGroups = [];
               renderAddBrowseModal();
@@ -12103,7 +11987,6 @@
             function (item) {
               if (item.disabled || addBrowseDraft.userGroups.indexOf(item.id) !== -1) return;
               clearAddBrowseConflictMessages();
-              clearAddBrowseUgRequiredError();
               addBrowseDraft.userGroups.push(item.id);
               document.getElementById('add-sv-user-groups-input').value = '';
               hideCatalogTypeahead(
@@ -12118,7 +12001,7 @@
           );
 
           document.getElementById('add-sv-user-groups-input').addEventListener('blur', function () {
-            onBrowseUserGroupsInputBlur(draftBrowseConfigFromAddModal(), true);
+            onBrowseUserGroupsInputBlur(true);
           });
 
           document.getElementById('sv-reference-config-name').addEventListener('input', function () {
