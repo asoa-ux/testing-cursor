@@ -66,6 +66,25 @@
       color: var(--white);
     }
 
+    .app-header--custom-branding {
+      background: var(--white);
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-header--custom-branding .icon-btn {
+      color: var(--toolbar-icon);
+    }
+
+    .app-header--custom-branding .app-header__brand {
+      color: var(--text);
+    }
+
+    .app-header--custom-branding .app-header__title,
+    .app-header--custom-branding .app-header__lang {
+      color: var(--text);
+    }
+
     .app-header__brand {
       display: flex;
       align-items: center;
@@ -123,6 +142,8 @@
     }
 
     .icon-btn:hover { background: rgba(255,255,255,0.12); }
+
+    .app-header--custom-branding .icon-btn:hover { background: rgba(0, 0, 0, 0.06); }
     .icon-btn .icon { font-size: 20px; }
 
     .badge-wrap { position: relative; }
@@ -1745,97 +1766,136 @@
       text-decoration: none;
     }
 
-    .config-group-branding {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 16px;
-      max-width: 520px;
+    .config-group-logo-upload {
+      max-width: 480px;
+      border: 1px dashed var(--border);
+      border-radius: 2px;
+      background: var(--white);
     }
 
-    .config-group-branding__preview {
+    .config-group-logo-upload.is-disabled {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .config-group-logo-upload.is-dragover {
+      border-color: var(--link);
+      background: #f8fbfd;
+    }
+
+    .config-group-logo-upload__empty {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .config-group-logo-upload__empty-icon {
+      display: block;
+      margin: 0 auto 12px;
+      font-size: 32px;
+      color: var(--text-secondary);
+    }
+
+    .config-group-logo-upload__hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .config-group-logo-upload__preview {
       display: flex;
       align-items: center;
       justify-content: center;
-      box-sizing: border-box;
-      min-height: 48px;
-      min-width: 120px;
-      padding: 0 1rem;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      background: var(--header-bg);
+      min-height: 160px;
+      padding: 24px;
     }
 
-    .config-group-branding__preview--has-bg {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
+    .config-group-logo-upload__preview--checkered {
+      background-color: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect width='8' height='8' fill='%23f3f3f7'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23f3f3f7'/%3E%3C/svg%3E");
+      background-size: 16px 16px;
     }
 
-    .config-group-branding__preview img {
+    .config-group-logo-upload__preview img {
       display: block;
-      height: 1.5rem;
-      width: auto;
-      max-width: 12rem;
+      max-width: 100%;
+      max-height: 200px;
       object-fit: contain;
-      object-position: center;
     }
 
-    .config-group-branding__preview-placeholder {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .config-group-branding__actions {
+    .config-group-logo-upload__meta {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-      padding-top: 4px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: #f3f2f1;
+      border-top: 1px solid var(--border);
     }
 
-    .config-group-branding__upload {
-      display: inline-flex;
+    .config-group-logo-upload__meta-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .config-group-branding__hex-field {
+      display: flex;
       align-items: center;
-      padding: 6px 12px;
-      font-size: 13px;
+      gap: 8px;
+      max-width: 480px;
+    }
+
+    .config-group-branding__hex-field .underline-input {
+      flex: 1;
+    }
+
+    .config-group-branding__color-swatch {
+      width: 20px;
+      height: 20px;
+      padding: 0;
       border: 1px solid var(--border);
       border-radius: 2px;
       background: var(--white);
       cursor: pointer;
+      flex-shrink: 0;
     }
 
-    .config-group-branding__upload:hover { background: #f3f2f1; }
-
-    .config-group-branding__upload.is-disabled {
-      opacity: 0.55;
-      pointer-events: none;
-      cursor: default;
-    }
-
-    .config-group-branding__upload.is-disabled:hover { background: var(--white); }
-
-    .config-group-branding__upload input { display: none; }
-
-    .config-group-branding__color:disabled {
+    .config-group-branding__color-swatch:disabled {
       opacity: 0.55;
       cursor: not-allowed;
     }
 
-    .config-group-branding__color-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+    .config-group-branding__preview-link {
+      margin-top: 4px;
     }
 
-    .config-group-branding__color {
-      width: 40px;
-      height: 32px;
-      padding: 2px;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      background: var(--white);
-      cursor: pointer;
+    .config-group-branding__preview-link[hidden] {
+      display: none !important;
+    }
+
+    .branding-preview-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--text);
+      background: #e8f4fc;
+      border-bottom: 1px solid #b3d9f0;
+    }
+
+    .branding-preview-bar[hidden] {
+      display: none !important;
+    }
+
+    .branding-preview-bar__text {
+      color: #323130;
     }
 
     .form-row {
@@ -1860,6 +1920,11 @@
       font-size: 13px;
     }
 
+    .underline-input:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     .underline-input:focus {
       outline: none;
       border-bottom-color: var(--accent);
@@ -1878,6 +1943,14 @@
     }
 
     .chip-field:focus-within { border-bottom-color: var(--accent); }
+
+    .chip-field.is-disabled {
+      opacity: 0.55;
+    }
+
+    .chip-field.is-disabled .chip-field__input {
+      cursor: not-allowed;
+    }
 
     .chip {
       display: inline-flex;
@@ -2516,6 +2589,10 @@
 </head>
 <body>
 
+  <div class="branding-preview-bar" id="branding-preview-bar" hidden role="status" aria-live="polite">
+    <span class="branding-preview-bar__text">Previewing <strong id="branding-preview-bar-group"></strong> branding in the header.</span>
+  </div>
+
   <header class="app-header">
     <a href="#" class="app-header__brand" aria-label="Inriver home">
       <img src="logo.svg" alt="" class="app-header__logo" width="24" height="24" decoding="async">
@@ -2677,35 +2754,50 @@
                 <label class="form-row__label" for="config-group-name"><span class="required">*</span> Name</label>
                 <input type="text" id="config-group-name" class="underline-input" autocomplete="off">
               </div>
+              <div class="form-row form-row--stacked">
+                <label class="form-row__label" for="config-group-ug-input"><span class="required">*</span> Default user groups</label>
+                <div class="ug-picker" id="config-group-ug-picker">
+                  <div class="chip-field" id="config-group-ug-field">
+                    <input type="text" class="chip-field__input" id="config-group-ug-input" placeholder="Search" aria-label="Default user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="config-group-ug-typeahead" aria-autocomplete="list">
+                    <span class="chip-field__search"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
+                  </div>
+                  <ul class="filter-sheet__typeahead-menu" id="config-group-ug-typeahead" role="listbox" hidden></ul>
+                </div>
+              </div>
             </section>
-            <section class="form-section" aria-labelledby="config-group-branding-heading" hidden>
+            <section class="form-section" aria-labelledby="config-group-branding-heading">
               <h2 class="form-section__heading" id="config-group-branding-heading">Branding</h2>
-              <p class="form-section__hint" id="config-group-branding-hint">Override the default top bar logo and logo area background for this configuration group. Leave unset to use the application default.</p>
               <p class="form-section__hint" id="config-group-branding-hint-default" hidden>The Default configuration group always uses the application logo and cannot be customized.</p>
               <div class="form-row form-row--stacked">
                 <span class="form-row__label" id="config-group-branding-logo-label">Logo</span>
-                <div>
-                  <div class="config-group-branding">
-                    <div class="config-group-branding__preview" id="config-group-branding-preview" role="img" aria-labelledby="config-group-branding-logo-label">
-                      <img id="config-group-branding-preview-logo" alt="" hidden>
-                      <span class="config-group-branding__preview-placeholder" id="config-group-branding-preview-placeholder">Default logo</span>
+                <div class="config-group-logo-upload" id="config-group-logo-upload-zone">
+                  <div class="config-group-logo-upload__empty" id="config-group-logo-empty">
+                    <i class="ph ph-file-arrow-up config-group-logo-upload__empty-icon" aria-hidden="true"></i>
+                    <p><button type="button" class="text-btn" id="config-group-logo-upload-btn">Upload image</button> or drag and drop</p>
+                    <p class="config-group-logo-upload__hint">Format: jpeg, png, gif or svg<br>Minimum resolution: 335 × 450px</p>
+                    <input type="file" id="config-group-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/gif" hidden aria-label="Upload logo">
+                  </div>
+                  <div id="config-group-logo-filled" hidden>
+                    <div class="config-group-logo-upload__preview">
+                      <img id="config-group-branding-preview-logo" alt="">
                     </div>
-                    <div class="config-group-branding__actions">
-                      <label class="config-group-branding__upload">
-                        Upload logo
-                        <input type="file" id="config-group-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/webp" aria-label="Upload logo">
-                      </label>
-                      <button type="button" class="text-btn" id="config-group-logo-clear" disabled>Use default logo</button>
+                    <div class="config-group-logo-upload__meta">
+                      <span class="config-group-logo-upload__meta-text" id="config-group-logo-meta-text"></span>
+                      <button type="button" class="text-btn" id="config-group-logo-clear">Remove</button>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="form-row">
-                <label class="form-row__label" for="config-group-branding-bg">Logo area background</label>
-                <div class="config-group-branding__color-row">
-                  <input type="color" class="config-group-branding__color" id="config-group-branding-bg" value="#004F3B" aria-label="Logo area background color">
-                  <button type="button" class="text-btn" id="config-group-branding-bg-clear" disabled>Clear background</button>
+                <label class="form-row__label" for="config-group-branding-bg-hex">Logo background color</label>
+                <div class="config-group-branding__hex-field">
+                  <input type="text" id="config-group-branding-bg-hex" class="underline-input" value="#FFFFFF" autocomplete="off" spellcheck="false" aria-label="Logo background color">
+                  <input type="color" class="config-group-branding__color-swatch" id="config-group-branding-bg" value="#ffffff" aria-label="Pick logo background color">
                 </div>
+              </div>
+              <div class="form-row">
+                <span class="form-row__label" aria-hidden="true"></span>
+                <button type="button" class="text-btn config-group-branding__preview-link" id="config-group-branding-preview-toggle">Preview branding</button>
               </div>
             </section>
           </div>
@@ -4099,6 +4191,7 @@
       var FILTER_USER_GROUPS = [
         { id: 'super-users', label: 'Super users' },
         { id: 'buyer-group', label: 'Buyer group' },
+        { id: 'arla-group', label: 'Arla group' },
         { id: 'enrichment-group', label: 'Enrichment Group' },
         { id: 'data-stewards', label: 'Data stewards' },
         { id: 'compliance-team', label: 'Compliance team' },
@@ -4116,7 +4209,31 @@
       }
 
       var APP_DEFAULT_LOGO = 'logo.svg';
-      var LOGO_UPLOAD_MAX_BYTES = 256 * 1024;
+      var LOGO_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
+
+      function formatBrandingFileSize(bytes) {
+        if (!bytes && bytes !== 0) return '';
+        if (bytes < 1024) return bytes + 'B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + 'KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + 'MB';
+      }
+
+      function formatBrandingLogoMeta(meta) {
+        if (!meta) return '';
+        return meta.fileName + ' — Size: ' + formatBrandingFileSize(meta.fileSize) +
+          ' | Resolution: ' + meta.width + ' × ' + meta.height + 'px';
+      }
+
+      function displayBrandingBgHex(color) {
+        return color || '#FFFFFF';
+      }
+
+      function parseBrandingBgHex(hex) {
+        var v = (hex || '').trim();
+        if (!v || v.toUpperCase() === '#FFFFFF' || v.toUpperCase() === 'FFFFFF') return null;
+        if (v.charAt(0) !== '#') v = '#' + v;
+        return v;
+      }
 
       var ConfigurationStore = (function () {
         var DEFAULT_GROUP_ID = 'default';
@@ -4129,7 +4246,8 @@
         var pendingBrandingByGroupId = {};
 
         function defaultPerspectiveUserGroupsForId(id) {
-          if (id === 'default' || id === 'arla') return ['Buyer group', 'Super users'];
+          if (id === 'default') return ['Buyer group', 'Super users'];
+          if (id === 'arla') return ['Arla group'];
           return [];
         }
 
@@ -4148,6 +4266,7 @@
             if (g.brandingBackgroundColor !== undefined) {
               existing.brandingBackgroundColor = g.brandingBackgroundColor;
             }
+            if (g.brandingLogoMeta !== undefined) existing.brandingLogoMeta = g.brandingLogoMeta;
             return existing;
           }
           var rec = {
@@ -4158,7 +4277,8 @@
             defaultPerspectiveUserGroups: readDefaultPerspectiveUserGroups(g),
             expanded: g.expanded !== false,
             brandingLogo: g.brandingLogo || null,
-            brandingBackgroundColor: g.brandingBackgroundColor || null
+            brandingBackgroundColor: g.brandingBackgroundColor || null,
+            brandingLogoMeta: g.brandingLogoMeta || null
           };
           groups.push(rec);
           if (!workAreasByGroup[rec.id]) workAreasByGroup[rec.id] = [];
@@ -4411,6 +4531,7 @@
             if (patch.brandingBackgroundColor !== undefined) {
               g.brandingBackgroundColor = patch.brandingBackgroundColor;
             }
+            if (patch.brandingLogoMeta !== undefined) g.brandingLogoMeta = patch.brandingLogoMeta;
           }
           notifyMeta();
         }
@@ -4418,7 +4539,7 @@
         function getEffectiveGroupBrandingFields(groupId) {
           var g = findGroup(groupId);
           if (!g || isDefaultGroup(groupId)) {
-            return { brandingLogo: null, brandingBackgroundColor: null };
+            return { brandingLogo: null, brandingBackgroundColor: null, brandingLogoMeta: null };
           }
           var pending = pendingBrandingByGroupId[groupId];
           return {
@@ -4427,7 +4548,10 @@
               : g.brandingLogo,
             brandingBackgroundColor: pending && pending.brandingBackgroundColor !== undefined
               ? pending.brandingBackgroundColor
-              : g.brandingBackgroundColor
+              : g.brandingBackgroundColor,
+            brandingLogoMeta: pending && pending.brandingLogoMeta !== undefined
+              ? pending.brandingLogoMeta
+              : g.brandingLogoMeta
           };
         }
 
@@ -4435,7 +4559,13 @@
           if (isDefaultGroup(id)) return;
           if (!pendingBrandingByGroupId[id]) pendingBrandingByGroupId[id] = {};
           var pending = pendingBrandingByGroupId[id];
-          if (patch.brandingLogo !== undefined) pending.brandingLogo = patch.brandingLogo;
+          if (patch.brandingLogo !== undefined) {
+            pending.brandingLogo = patch.brandingLogo;
+            if (patch.brandingLogoMeta === undefined && patch.brandingLogo === null) {
+              pending.brandingLogoMeta = null;
+            }
+          }
+          if (patch.brandingLogoMeta !== undefined) pending.brandingLogoMeta = patch.brandingLogoMeta;
           if (patch.brandingBackgroundColor !== undefined) {
             pending.brandingBackgroundColor = patch.brandingBackgroundColor;
           }
@@ -4449,6 +4579,7 @@
             var g = findGroup(id);
             if (!g || isDefaultGroup(id)) return;
             if (p.brandingLogo !== undefined) g.brandingLogo = p.brandingLogo;
+            if (p.brandingLogoMeta !== undefined) g.brandingLogoMeta = p.brandingLogoMeta;
             if (p.brandingBackgroundColor !== undefined) {
               g.brandingBackgroundColor = p.brandingBackgroundColor;
             }
@@ -4459,23 +4590,39 @@
 
         function getGroupBranding(groupId) {
           if (!groupId || isDefaultGroup(groupId)) {
-            return { logoUrl: APP_DEFAULT_LOGO, backgroundColor: null, hasCustomLogo: false };
+            return {
+              logoUrl: APP_DEFAULT_LOGO,
+              backgroundColor: null,
+              hasCustomLogo: false,
+              hasCustomBranding: false
+            };
           }
           var g = findGroup(groupId);
           while (g) {
             if (isDefaultGroup(g.id)) {
-              return { logoUrl: APP_DEFAULT_LOGO, backgroundColor: null, hasCustomLogo: false };
+              return {
+                logoUrl: APP_DEFAULT_LOGO,
+                backgroundColor: null,
+                hasCustomLogo: false,
+                hasCustomBranding: false
+              };
             }
             if (g.brandingLogo || g.brandingBackgroundColor) {
               return {
                 logoUrl: g.brandingLogo || APP_DEFAULT_LOGO,
                 backgroundColor: g.brandingBackgroundColor || null,
-                hasCustomLogo: !!g.brandingLogo
+                hasCustomLogo: !!g.brandingLogo,
+                hasCustomBranding: true
               };
             }
             g = g.parentId ? findGroup(g.parentId) : null;
           }
-          return { logoUrl: APP_DEFAULT_LOGO, backgroundColor: null, hasCustomLogo: false };
+          return {
+            logoUrl: APP_DEFAULT_LOGO,
+            backgroundColor: null,
+            hasCustomLogo: false,
+            hasCustomBranding: false
+          };
         }
 
         function reorderGroups(orderedIds, options) {
@@ -4558,6 +4705,7 @@
           tabsByGroup[newRec.id] = deepCloneTabsForStore(tabsByGroup[sourceId]);
           newRec.brandingLogo = src.brandingLogo || null;
           newRec.brandingBackgroundColor = src.brandingBackgroundColor || null;
+          newRec.brandingLogoMeta = src.brandingLogoMeta ? Object.assign({}, src.brandingLogoMeta) : null;
           newRec.childGroupIds = [];
           (src.childGroupIds || []).forEach(function (childId) {
             var childClone = duplicateGroupRecursive(childId, newRec.id);
@@ -4732,13 +4880,76 @@
         return null;
       }
 
+      function getGroupBrandingForHeader(groupId) {
+        if (brandingHeaderPreviewGroupId && groupId === brandingHeaderPreviewGroupId &&
+            !ConfigurationStore.isDefaultGroup(groupId)) {
+          var fields = ConfigurationStore.getEffectiveGroupBrandingFields(groupId);
+          var hasCustomLogo = !!fields.brandingLogo;
+          var backgroundColor = fields.brandingBackgroundColor || null;
+          return {
+            logoUrl: fields.brandingLogo || APP_DEFAULT_LOGO,
+            backgroundColor: backgroundColor,
+            hasCustomLogo: hasCustomLogo,
+            hasCustomBranding: hasCustomLogo || !!backgroundColor
+          };
+        }
+        return ConfigurationStore.getGroupBranding(groupId);
+      }
+
+      function syncBrandingHeaderPreviewControls(group) {
+        var toggleBtn = document.getElementById('config-group-branding-preview-toggle');
+        var bar = document.getElementById('branding-preview-bar');
+        var barGroup = document.getElementById('branding-preview-bar-group');
+        var isDefault = group && ConfigurationStore.isDefaultGroup(group.id);
+        var isActive = !!(group && brandingHeaderPreviewGroupId === group.id);
+        if (toggleBtn) {
+          toggleBtn.hidden = !!isDefault;
+          toggleBtn.disabled = !!isDefault;
+          toggleBtn.textContent = isActive ? 'Close branding preview' : 'Preview branding';
+        }
+        if (bar) bar.hidden = !isActive;
+        if (barGroup) barGroup.textContent = group && isActive ? group.label : '';
+      }
+
+      function closeBrandingHeaderPreview() {
+        if (!brandingHeaderPreviewGroupId) return;
+        brandingHeaderPreviewGroupId = null;
+        var bar = document.getElementById('branding-preview-bar');
+        if (bar) bar.hidden = true;
+        var barGroup = document.getElementById('branding-preview-bar-group');
+        if (barGroup) barGroup.textContent = '';
+        if (selected.type === 'configuration-group') {
+          var group = ConfigurationStore.findGroup(selected.groupId);
+          if (group) syncBrandingHeaderPreviewControls(group);
+        }
+        applyAppHeaderBranding();
+      }
+
+      function openBrandingHeaderPreview(groupId) {
+        if (!groupId || ConfigurationStore.isDefaultGroup(groupId)) return;
+        brandingHeaderPreviewGroupId = groupId;
+        var group = ConfigurationStore.findGroup(groupId);
+        syncBrandingHeaderPreviewControls(group);
+        applyAppHeaderBranding();
+      }
+
+      function refreshBrandingHeaderIfPreviewing(groupId) {
+        if (brandingHeaderPreviewGroupId === groupId) {
+          applyAppHeaderBranding();
+        }
+      }
+
       function applyAppHeaderBranding() {
+        var header = document.querySelector('.app-header');
         var brand = document.querySelector('.app-header__brand');
         var img = document.querySelector('.app-header__logo');
-        if (!brand || !img) return;
+        if (!header || !brand || !img) return;
 
-        var branding = ConfigurationStore.getGroupBranding(resolveHeaderBrandingGroupId());
-        img.src = branding.logoUrl;
+        var branding = getGroupBrandingForHeader(resolveHeaderBrandingGroupId());
+        header.classList.toggle('app-header--custom-branding', !!branding.hasCustomBranding);
+        if (img.getAttribute('src') !== branding.logoUrl) {
+          img.src = branding.logoUrl;
+        }
         img.alt = branding.hasCustomLogo ? 'Custom logo' : '';
 
         if (branding.backgroundColor) {
@@ -8627,6 +8838,7 @@
 
       var addModalMode = null;
       var hasUnsavedChanges = false;
+      var brandingHeaderPreviewGroupId = null;
 
       function getWaAddOptions() {
         if (selected.type === 'root') {
@@ -10001,6 +10213,254 @@
           configGroupsExpanded: true,
           quickLinksExpanded: false
         };
+        var ugPickerHighlight = -1;
+        var ugPickerBlurTimer = null;
+
+        function getConfigGroupUserGroupSuggestions(query, selectedLabels) {
+          var q = query.trim().toLowerCase();
+          return FILTER_USER_GROUPS.filter(function (ug) {
+            if (selectedLabels.indexOf(ug.label) !== -1) return false;
+            if (!q) return true;
+            return ug.label.toLowerCase().indexOf(q) !== -1;
+          });
+        }
+
+        function renderConfigGroupUserGroups(group) {
+          var field = document.getElementById('config-group-ug-field');
+          var input = document.getElementById('config-group-ug-input');
+          if (!field || !input || !group) return;
+
+          var labels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
+          if (labels.length !== (group.defaultPerspectiveUserGroups || []).length) {
+            ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: labels });
+          }
+
+          var isDefault = ConfigurationStore.isDefaultGroup(group.id);
+          input.disabled = isDefault;
+          field.classList.toggle('is-disabled', isDefault);
+
+          field.querySelectorAll('.chip').forEach(function (chip) { chip.remove(); });
+          labels.forEach(function (label) {
+            var chip = document.createElement('span');
+            chip.className = 'chip';
+            chip.appendChild(document.createTextNode(label));
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'chip__remove';
+            rm.setAttribute('aria-label', 'Remove ' + label);
+            rm.textContent = '×';
+            rm.disabled = isDefault;
+            rm.addEventListener('click', function () {
+              var g = ConfigurationStore.findGroup(group.id);
+              if (!g || ConfigurationStore.isDefaultGroup(g.id)) return;
+              var next = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id).filter(function (x) {
+                return x !== label;
+              });
+              ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: next });
+              renderConfigGroupUserGroups(ConfigurationStore.findGroup(group.id));
+              markUnsaved();
+            });
+            chip.appendChild(rm);
+            field.insertBefore(chip, input);
+          });
+        }
+
+        function hideConfigGroupUgTypeahead() {
+          var menu = document.getElementById('config-group-ug-typeahead');
+          var input = document.getElementById('config-group-ug-input');
+          if (menu) menu.hidden = true;
+          if (input) input.setAttribute('aria-expanded', 'false');
+          ugPickerHighlight = -1;
+        }
+
+        function renderConfigGroupUgTypeahead() {
+          var menu = document.getElementById('config-group-ug-typeahead');
+          var input = document.getElementById('config-group-ug-input');
+          if (!menu || !input) return;
+          if (selected.type !== 'configuration-group') {
+            hideConfigGroupUgTypeahead();
+            return;
+          }
+
+          var group = ConfigurationStore.findGroup(selected.groupId);
+          if (!group || ConfigurationStore.isDefaultGroup(group.id)) {
+            hideConfigGroupUgTypeahead();
+            return;
+          }
+
+          var selectedLabels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
+          var suggestions = getConfigGroupUserGroupSuggestions(input.value, selectedLabels);
+          menu.innerHTML = '';
+          if (!suggestions.length) {
+            hideConfigGroupUgTypeahead();
+            return;
+          }
+
+          if (ugPickerHighlight >= suggestions.length) {
+            ugPickerHighlight = suggestions.length - 1;
+          }
+
+          suggestions.forEach(function (ug, index) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'filter-sheet__typeahead-option' +
+              (index === ugPickerHighlight ? ' is-highlighted' : '');
+            btn.setAttribute('role', 'option');
+            btn.textContent = ug.label;
+            btn.addEventListener('mousedown', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            btn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              addConfigGroupUserGroupLabel(ug.label);
+            });
+            menu.appendChild(btn);
+          });
+
+          menu.hidden = false;
+          input.setAttribute('aria-expanded', 'true');
+        }
+
+        function addConfigGroupUserGroupLabel(label) {
+          if (selected.type !== 'configuration-group') return;
+          var group = ConfigurationStore.findGroup(selected.groupId);
+          if (!group || ConfigurationStore.isDefaultGroup(group.id)) return;
+          if (!FILTER_USER_GROUPS.some(function (ug) { return ug.label === label; })) return;
+
+          var labels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
+          if (labels.indexOf(label) !== -1) return;
+          labels.push(label);
+          ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: labels });
+
+          var input = document.getElementById('config-group-ug-input');
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
+          ugPickerHighlight = -1;
+          renderConfigGroupUserGroups(ConfigurationStore.findGroup(group.id));
+          renderConfigGroupUgTypeahead();
+          markUnsaved();
+        }
+
+        function initConfigGroupUserGroupPicker() {
+          var input = document.getElementById('config-group-ug-input');
+          var menu = document.getElementById('config-group-ug-typeahead');
+          if (!input || !menu || input._ugBound) return;
+          input._ugBound = true;
+
+          menu.addEventListener('mousedown', function (e) { e.stopPropagation(); });
+
+          input.addEventListener('input', function () {
+            ugPickerHighlight = -1;
+            renderConfigGroupUgTypeahead();
+          });
+
+          input.addEventListener('focus', function () {
+            if (ugPickerBlurTimer) {
+              clearTimeout(ugPickerBlurTimer);
+              ugPickerBlurTimer = null;
+            }
+            renderConfigGroupUgTypeahead();
+          });
+
+          input.addEventListener('blur', function () {
+            ugPickerBlurTimer = setTimeout(hideConfigGroupUgTypeahead, 150);
+          });
+
+          input.addEventListener('keydown', function (e) {
+            if (!menu || menu.hidden) {
+              if (e.key === 'Enter') e.preventDefault();
+              return;
+            }
+
+            var group = ConfigurationStore.findGroup(selected.groupId);
+            if (!group) return;
+            var suggestions = getConfigGroupUserGroupSuggestions(
+              input.value,
+              ConfigurationStore.getDefaultPerspectiveUserGroups(group.id)
+            );
+            if (!suggestions.length) {
+              if (e.key === 'Enter') e.preventDefault();
+              return;
+            }
+
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              ugPickerHighlight = (ugPickerHighlight + 1) % suggestions.length;
+              renderConfigGroupUgTypeahead();
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              ugPickerHighlight = ugPickerHighlight <= 0
+                ? suggestions.length - 1
+                : ugPickerHighlight - 1;
+              renderConfigGroupUgTypeahead();
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              var pick = ugPickerHighlight >= 0 ? ugPickerHighlight : 0;
+              addConfigGroupUserGroupLabel(suggestions[pick].label);
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              input.value = '';
+              hideConfigGroupUgTypeahead();
+            }
+          });
+        }
+
+        function applyBrandingLogoFile(file) {
+          if (!file || selected.type !== 'configuration-group') return;
+          if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+          if (file.size > LOGO_UPLOAD_MAX_BYTES) {
+            showToast('Logo must be 5 MB or smaller', 'error');
+            return;
+          }
+          var allowed = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/gif'];
+          if (allowed.indexOf(file.type) === -1) {
+            showToast('Use JPEG, PNG, GIF, or SVG', 'error');
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function () {
+            var dataUrl = reader.result;
+            var img = new Image();
+            img.onload = function () {
+              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+                brandingLogo: dataUrl,
+                brandingLogoMeta: {
+                  fileName: file.name,
+                  fileSize: file.size,
+                  width: img.naturalWidth || img.width,
+                  height: img.naturalHeight || img.height
+                }
+              });
+              var group = ConfigurationStore.findGroup(selected.groupId);
+              renderConfigGroupBranding(group);
+              refreshBrandingHeaderIfPreviewing(selected.groupId);
+              markUnsaved();
+            };
+            img.onerror = function () {
+              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+                brandingLogo: dataUrl,
+                brandingLogoMeta: {
+                  fileName: file.name,
+                  fileSize: file.size,
+                  width: 0,
+                  height: 0
+                }
+              });
+              var group = ConfigurationStore.findGroup(selected.groupId);
+              renderConfigGroupBranding(group);
+              refreshBrandingHeaderIfPreviewing(selected.groupId);
+              markUnsaved();
+            };
+            img.src = dataUrl;
+          };
+          reader.onerror = function () {
+            showToast('Could not read logo file', 'error');
+          };
+          reader.readAsDataURL(file);
+        }
 
         function showDetailView(view) {
           ['view-system-main', 'view-system-quick-links', 'view-config-groups-folder', 'view-config-group'].forEach(function (id) {
@@ -10030,11 +10490,17 @@
         function renderConfigGroupDetail(groupId) {
           var group = ConfigurationStore.findGroup(groupId);
           if (!group) return;
+          if (brandingHeaderPreviewGroupId && brandingHeaderPreviewGroupId !== groupId) {
+            closeBrandingHeaderPreview();
+          }
           selected = { type: 'configuration-group', groupId: groupId };
           document.getElementById('config-group-title').textContent = group.label;
-          var parent = group.parentId ? ConfigurationStore.findGroup(group.parentId) : null;
           document.getElementById('config-group-subtitle').textContent = 'Configuration group';
           document.getElementById('config-group-name').value = group.label;
+          hideConfigGroupUgTypeahead();
+          var ugInput = document.getElementById('config-group-ug-input');
+          if (ugInput) ugInput.value = '';
+          renderConfigGroupUserGroups(group);
           renderConfigGroupBranding(group);
           showDetailView('config-group');
           renderTree();
@@ -10042,100 +10508,182 @@
         }
 
         function renderConfigGroupBranding(group) {
-          var preview = document.getElementById('config-group-branding-preview');
+          var uploadZone = document.getElementById('config-group-logo-upload-zone');
+          var emptyState = document.getElementById('config-group-logo-empty');
+          var filledState = document.getElementById('config-group-logo-filled');
           var previewImg = document.getElementById('config-group-branding-preview-logo');
-          var placeholder = document.getElementById('config-group-branding-preview-placeholder');
+          var metaText = document.getElementById('config-group-logo-meta-text');
           var clearLogoBtn = document.getElementById('config-group-logo-clear');
           var bgInput = document.getElementById('config-group-branding-bg');
-          var clearBgBtn = document.getElementById('config-group-branding-bg-clear');
-          var uploadLabel = document.querySelector('.config-group-branding__upload');
+          var bgHexInput = document.getElementById('config-group-branding-bg-hex');
           var uploadInput = document.getElementById('config-group-logo-upload');
           var hintDefault = document.getElementById('config-group-branding-hint-default');
-          var hintEditable = document.getElementById('config-group-branding-hint');
-          if (!preview || !group) return;
+          if (!uploadZone || !group) return;
 
           var isDefault = ConfigurationStore.isDefaultGroup(group.id);
           if (hintDefault) hintDefault.hidden = !isDefault;
-          if (hintEditable) hintEditable.hidden = isDefault;
 
-          previewImg.src = APP_DEFAULT_LOGO;
-          previewImg.hidden = false;
-          if (placeholder) placeholder.hidden = true;
-          preview.style.backgroundColor = 'var(--header-bg)';
-          preview.classList.remove('config-group-branding__preview--has-bg');
+          uploadZone.classList.toggle('is-disabled', isDefault);
+          if (uploadInput) uploadInput.disabled = isDefault;
 
-          if (!isDefault) {
-            var branding = ConfigurationStore.getEffectiveGroupBrandingFields(group.id);
-            previewImg.src = branding.brandingLogo || APP_DEFAULT_LOGO;
-            if (branding.brandingBackgroundColor) {
-              preview.style.backgroundColor = branding.brandingBackgroundColor;
-              preview.classList.add('config-group-branding__preview--has-bg');
+          var branding = ConfigurationStore.getEffectiveGroupBrandingFields(group.id);
+          var hasLogo = !isDefault && !!branding.brandingLogo;
+
+          if (emptyState) emptyState.hidden = hasLogo;
+          if (filledState) filledState.hidden = !hasLogo;
+
+          if (hasLogo && previewImg) {
+            previewImg.src = branding.brandingLogo;
+            previewImg.alt = group.label + ' logo';
+            var previewWrap = previewImg.closest('.config-group-logo-upload__preview');
+            if (previewWrap) {
+              if (branding.brandingBackgroundColor) {
+                previewWrap.classList.remove('config-group-logo-upload__preview--checkered');
+                previewWrap.style.backgroundColor = branding.brandingBackgroundColor;
+              } else {
+                previewWrap.style.backgroundColor = '';
+                previewWrap.classList.add('config-group-logo-upload__preview--checkered');
+              }
             }
+          } else if (previewImg) {
+            previewImg.removeAttribute('src');
+            previewImg.alt = '';
           }
 
-          if (uploadLabel) uploadLabel.classList.toggle('is-disabled', isDefault);
-          if (uploadInput) uploadInput.disabled = isDefault;
-          var effectiveBranding = ConfigurationStore.getEffectiveGroupBrandingFields(group.id);
-          if (clearLogoBtn) {
-            clearLogoBtn.disabled = isDefault || !effectiveBranding.brandingLogo;
+          if (metaText) {
+            metaText.textContent = hasLogo ? formatBrandingLogoMeta(branding.brandingLogoMeta) : '';
+          }
+          if (clearLogoBtn) clearLogoBtn.disabled = isDefault || !hasLogo;
+
+          var bgDisabled = isDefault || !hasLogo;
+          var bgHex = displayBrandingBgHex(bgDisabled ? null : branding.brandingBackgroundColor);
+          if (bgHexInput) {
+            bgHexInput.value = bgHex;
+            bgHexInput.disabled = bgDisabled;
           }
           if (bgInput) {
-            bgInput.value = effectiveBranding.brandingBackgroundColor || '#004F3B';
-            bgInput.disabled = isDefault;
+            bgInput.value = bgHex.toLowerCase();
+            bgInput.disabled = bgDisabled;
           }
-          if (clearBgBtn) {
-            clearBgBtn.disabled = isDefault || !effectiveBranding.brandingBackgroundColor;
-          }
+
+          syncBrandingHeaderPreviewControls(group);
         }
 
         function initConfigGroupBrandingControls() {
           var upload = document.getElementById('config-group-logo-upload');
+          var uploadBtn = document.getElementById('config-group-logo-upload-btn');
+          var uploadZone = document.getElementById('config-group-logo-upload-zone');
           var clearLogoBtn = document.getElementById('config-group-logo-clear');
           var bgInput = document.getElementById('config-group-branding-bg');
-          var clearBgBtn = document.getElementById('config-group-branding-bg-clear');
+          var bgHexInput = document.getElementById('config-group-branding-bg-hex');
+          var previewToggleBtn = document.getElementById('config-group-branding-preview-toggle');
           if (!upload || upload._brandingBound) return;
           upload._brandingBound = true;
 
-          upload.addEventListener('change', function () {
+          if (previewToggleBtn) {
+            previewToggleBtn.addEventListener('click', function () {
+              if (selected.type !== 'configuration-group') return;
+              if (brandingHeaderPreviewGroupId === selected.groupId) {
+                closeBrandingHeaderPreview();
+              } else {
+                openBrandingHeaderPreview(selected.groupId);
+              }
+            });
+          }
+
+          function openLogoPicker() {
             if (selected.type !== 'configuration-group') return;
             if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+            upload.click();
+          }
+
+          if (uploadBtn) uploadBtn.addEventListener('click', openLogoPicker);
+
+          if (uploadZone) {
+            uploadZone.addEventListener('click', function (e) {
+              if (e.target.closest('#config-group-logo-clear')) return;
+              if (e.target.closest('#config-group-logo-filled')) return;
+              if (e.target.closest('#config-group-logo-upload-btn')) return;
+              if (!e.target.closest('#config-group-logo-empty')) return;
+              openLogoPicker();
+            });
+
+            uploadZone.addEventListener('dragover', function (e) {
+              if (selected.type !== 'configuration-group') return;
+              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+              e.preventDefault();
+              uploadZone.classList.add('is-dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', function () {
+              uploadZone.classList.remove('is-dragover');
+            });
+
+            uploadZone.addEventListener('drop', function (e) {
+              e.preventDefault();
+              uploadZone.classList.remove('is-dragover');
+              if (selected.type !== 'configuration-group') return;
+              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+              var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+              if (file) applyBrandingLogoFile(file);
+            });
+          }
+
+          upload.addEventListener('change', function () {
             var file = upload.files && upload.files[0];
             upload.value = '';
-            if (!file) return;
-            if (file.size > LOGO_UPLOAD_MAX_BYTES) {
-              showToast('Logo must be 256 KB or smaller', 'error');
-              return;
-            }
-            var allowed = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/webp'];
-            if (allowed.indexOf(file.type) === -1) {
-              showToast('Use SVG, PNG, JPEG, or WebP', 'error');
-              return;
-            }
-            var reader = new FileReader();
-            reader.onload = function () {
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
-                brandingLogo: reader.result
-              });
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              renderConfigGroupBranding(group);
-              markUnsaved();
-              showToast('Custom logo uploaded', 'success');
-            };
-            reader.onerror = function () {
-              showToast('Could not read logo file', 'error');
-            };
-            reader.readAsDataURL(file);
+            if (file) applyBrandingLogoFile(file);
           });
 
           if (clearLogoBtn) {
             clearLogoBtn.addEventListener('click', function () {
               if (selected.type !== 'configuration-group') return;
               if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, { brandingLogo: null });
+              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+                brandingLogo: null,
+                brandingLogoMeta: null,
+                brandingBackgroundColor: null
+              });
               var group = ConfigurationStore.findGroup(selected.groupId);
               renderConfigGroupBranding(group);
+              refreshBrandingHeaderIfPreviewing(selected.groupId);
               markUnsaved();
-              showToast('Using default logo', 'info');
+            });
+          }
+
+          function syncBrandingBgFromHex() {
+            if (!bgHexInput) return;
+            if (selected.type !== 'configuration-group') return;
+            if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+            var branding = ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId);
+            if (!branding.brandingLogo) return;
+            var parsed = parseBrandingBgHex(bgHexInput.value);
+            ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+              brandingBackgroundColor: parsed
+            });
+            if (bgInput) bgInput.value = displayBrandingBgHex(parsed).toLowerCase();
+            var group = ConfigurationStore.findGroup(selected.groupId);
+            renderConfigGroupBranding(group);
+            refreshBrandingHeaderIfPreviewing(selected.groupId);
+            markUnsaved();
+          }
+
+          if (bgHexInput) {
+            bgHexInput.addEventListener('change', function () {
+              if (selected.type !== 'configuration-group') return;
+              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+              if (!ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId).brandingLogo) return;
+              syncBrandingBgFromHex();
+            });
+            bgHexInput.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selected.type !== 'configuration-group') return;
+                if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+                if (!ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId).brandingLogo) return;
+                syncBrandingBgFromHex();
+                bgHexInput.blur();
+              }
             });
           }
 
@@ -10143,26 +10691,13 @@
             bgInput.addEventListener('input', function () {
               if (selected.type !== 'configuration-group') return;
               if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+              if (!ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId).brandingLogo) return;
+              if (bgHexInput) bgHexInput.value = bgInput.value.toUpperCase();
               ConfigurationStore.setPendingGroupBranding(selected.groupId, {
-                brandingBackgroundColor: bgInput.value
+                brandingBackgroundColor: parseBrandingBgHex(bgInput.value)
               });
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              renderConfigGroupBranding(group);
+              refreshBrandingHeaderIfPreviewing(selected.groupId);
               markUnsaved();
-            });
-          }
-
-          if (clearBgBtn) {
-            clearBgBtn.addEventListener('click', function () {
-              if (selected.type !== 'configuration-group') return;
-              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
-                brandingBackgroundColor: null
-              });
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              renderConfigGroupBranding(group);
-              markUnsaved();
-              showToast('Logo area background cleared', 'info');
             });
           }
         }
@@ -10252,6 +10787,7 @@
             return;
           }
           if (type === 'main-settings') {
+            closeBrandingHeaderPreview();
             selected = { type: 'main-settings' };
             showDetailView('system-main');
             renderTree();
@@ -10260,6 +10796,7 @@
             return;
           }
           if (type === 'config-groups-folder') {
+            closeBrandingHeaderPreview();
             selected = { type: 'config-groups-folder' };
             showDetailView('config-groups-folder');
             renderConfigGroupsFolderView();
@@ -10269,6 +10806,7 @@
             return;
           }
           if (type === 'quick-links') {
+            closeBrandingHeaderPreview();
             selected = { type: 'quick-links' };
             showDetailView('system-quick-links');
             renderTree();
@@ -10383,6 +10921,7 @@
             markUnsaved();
           });
           initConfigGroupBrandingControls();
+          initConfigGroupUserGroupPicker();
           selected = { type: 'main-settings' };
           showDetailView('system-main');
           renderTree();
@@ -10396,7 +10935,10 @@
             if (selected.type === 'config-groups-folder') renderConfigGroupsFolderView();
             if (selected.type === 'configuration-group') {
               var group = ConfigurationStore.findGroup(selected.groupId);
-              if (group) renderConfigGroupBranding(group);
+              if (group) {
+                renderConfigGroupUserGroups(group);
+                renderConfigGroupBranding(group);
+              }
             }
             updateToolbarButtons();
             applyAppHeaderBranding();
@@ -10486,6 +11028,7 @@
       }
 
       function onEditorPanelChange() {
+        closeBrandingHeaderPreview();
         closeAddPopover();
         closeDuplicatePopover();
         closeMovePopover();
