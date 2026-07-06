@@ -1435,7 +1435,7 @@
     }
 
     .tree ul { list-style: none; margin: 0; padding: 0; }
-    .tree-children { padding-left: 16px; }
+    .tree ul.tree-children { padding-left: 16px; }
     .tree-children.is-collapsed { display: none; }
 
     .tree-item {
@@ -10381,11 +10381,8 @@
 
       var SystemSettingsEditor = (function () {
         var treeState = {
-          systemExpanded: true,
-          mainExpanded: true,
           configGroupsExpanded: true,
-          brandingAssetsExpanded: true,
-          quickLinksExpanded: false
+          brandingAssetsExpanded: true
         };
         function getUserGroupSuggestions(query, selectedLabels) {
           var q = query.trim().toLowerCase();
@@ -10862,6 +10859,7 @@
           var group = ConfigurationStore.findGroup(groupId);
           if (!group) return;
           closeBrandingHeaderPreview();
+          treeState.configGroupsExpanded = true;
           selected = { type: 'configuration-group', groupId: groupId };
           document.getElementById('config-group-title').textContent = group.label;
           document.getElementById('config-group-subtitle').textContent = 'Configuration group';
@@ -10877,6 +10875,7 @@
           if (brandingHeaderPreviewAssetId && brandingHeaderPreviewAssetId !== assetId) {
             closeBrandingHeaderPreview();
           }
+          treeState.brandingAssetsExpanded = true;
           selected = { type: 'branding-asset', assetId: assetId };
           document.getElementById('branding-asset-title').textContent = asset.label;
           document.getElementById('branding-asset-subtitle').textContent = 'Branding asset';
@@ -11306,9 +11305,10 @@
         }
 
         function renderTree() {
-          var html = '<ul><li data-expanded="' + treeState.systemExpanded + '">';
-          html += treeItem('system-root', 'system', 'System settings', treeState.systemExpanded, true);
-          html += '<ul class="tree-children' + (treeState.systemExpanded ? '' : ' is-collapsed') + '">';
+          var html = '<ul>';
+          html += '<li data-expanded="false">';
+          html += treeItem('system-root', 'system', 'System settings', false, false);
+          html += '</li>';
           html += '<li data-expanded="false">';
           html += treeItem('main-settings', null, 'Main settings', false, false);
           html += '</li>';
@@ -11322,9 +11322,10 @@
           html += '<ul class="tree-children' + (treeState.brandingAssetsExpanded ? '' : ' is-collapsed') + '">';
           html += renderBrandingAssetBranch();
           html += '</ul></li>';
-          html += '<li data-expanded="' + treeState.quickLinksExpanded + '">';
-          html += treeItem('quick-links', null, 'Quick links', treeState.quickLinksExpanded, false);
-          html += '</li></ul></li></ul>';
+          html += '<li data-expanded="false">';
+          html += treeItem('quick-links', null, 'Quick links', false, false);
+          html += '</li>';
+          html += '</ul>';
           document.getElementById('system-settings-tree').innerHTML = html;
         }
 
@@ -11341,10 +11342,8 @@
             var children = li.querySelector(':scope > .tree-children');
             if (children) children.classList.toggle('is-collapsed', !expanded);
             toggle.innerHTML = expanded ? ICONS.chevronDown : ICONS.chevronRight;
-            if (type === 'system-root') treeState.systemExpanded = expanded;
             if (type === 'config-groups-folder') treeState.configGroupsExpanded = expanded;
             if (type === 'branding-assets-folder') treeState.brandingAssetsExpanded = expanded;
-            if (type === 'quick-links') treeState.quickLinksExpanded = expanded;
             if (type === 'configuration-group') {
               var gid = item.dataset.id;
               ConfigurationStore.updateGroup(gid, { expanded: expanded });
@@ -11540,6 +11539,7 @@
             pendingSystemDelete = false;
             pendingDeleteBrandingAssetId = null;
             closeBrandingHeaderPreview();
+            treeState.brandingAssetsExpanded = true;
             selected = { type: 'branding-assets-folder' };
             showDetailView('branding-assets-folder');
             renderBrandingAssetsFolderView();
@@ -11554,6 +11554,7 @@
           pendingSystemDelete = false;
           pendingDeleteGroupId = null;
           pendingDeleteBrandingAssetId = null;
+          treeState.configGroupsExpanded = true;
           selected = { type: 'config-groups-folder' };
           showDetailView('config-groups-folder');
           renderConfigGroupsFolderView();
