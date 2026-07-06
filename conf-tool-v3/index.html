@@ -2045,6 +2045,46 @@
 
     .label-info:hover { color: var(--accent); }
 
+    .label-info[data-info-tip] {
+      position: relative;
+    }
+
+    .label-info[data-info-tip]::after {
+      content: attr(data-info-tip);
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 8px);
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: 240px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      text-align: left;
+      white-space: normal;
+      color: var(--disabled-tip-color);
+      background: var(--disabled-tip-bg);
+      border-radius: 4px;
+      box-shadow: var(--disabled-tip-shadow);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1100;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .label-info[data-info-tip]:hover::after,
+    .label-info[data-info-tip]:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
     .radio-stack {
       display: flex;
       flex-direction: column;
@@ -2806,13 +2846,18 @@
             <section class="form-section" aria-labelledby="branding-asset-branding-heading">
               <h2 class="form-section__heading" id="branding-asset-branding-heading">Branding</h2>
               <div class="form-row form-row--stacked">
-                <span class="form-row__label" id="branding-asset-branding-logo-label"><span class="required">*</span> Logo</span>
+                <div class="form-row__label-row">
+                  <span class="form-row__label" id="branding-asset-branding-logo-label"><span class="required">*</span> Logo</span>
+                  <button type="button" class="label-info" data-info-tip="If possible, use a compact version of the logo, as it works best in small sizes." aria-label="More information about logo">
+                    <i class="ph ph-info icon icon--16" aria-hidden="true"></i>
+                  </button>
+                </div>
                 <div class="config-group-logo-upload" id="branding-asset-logo-upload-zone">
                   <div class="config-group-logo-upload__empty" id="branding-asset-logo-empty">
                     <i class="ph ph-file-arrow-up config-group-logo-upload__empty-icon" aria-hidden="true"></i>
                     <p><button type="button" class="text-btn" id="branding-asset-logo-upload-btn">Upload image</button> or drag and drop</p>
-                    <p class="config-group-logo-upload__hint">Format: jpeg, png, gif or svg<br>Minimum resolution: 335 × 450px</p>
-                    <input type="file" id="branding-asset-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/gif" hidden aria-label="Upload logo">
+                    <p class="config-group-logo-upload__hint">Format: jpeg, png or svg (preferable)<br>Recommended: at least 48px tall, with a transparent background</p>
+                    <input type="file" id="branding-asset-logo-upload" accept="image/jpeg,image/png,image/svg+xml,.jpg,.jpeg,.png,.svg" hidden aria-label="Upload logo">
                   </div>
                   <div id="branding-asset-logo-filled" hidden>
                     <div class="config-group-logo-upload__preview">
@@ -3453,13 +3498,18 @@
         </div>
         <div class="modal__field is-hidden" id="add-field-branding-asset">
           <div class="modal__field">
-            <span class="modal__label"><span class="required">*</span> Logo</span>
+            <div class="form-row__label-row">
+              <span class="modal__label"><span class="required">*</span> Logo</span>
+              <button type="button" class="label-info" data-info-tip="If possible, use a compact version of the logo, as it works best in small sizes." aria-label="More information about logo">
+                <i class="ph ph-info icon icon--16" aria-hidden="true"></i>
+              </button>
+            </div>
             <div class="config-group-logo-upload modal__logo-upload" id="add-branding-logo-upload-zone">
               <div class="config-group-logo-upload__empty" id="add-branding-logo-empty">
                 <i class="ph ph-file-arrow-up config-group-logo-upload__empty-icon" aria-hidden="true"></i>
                 <p><button type="button" class="text-btn" id="add-branding-logo-upload-btn">Upload image</button> or drag and drop</p>
-                <p class="config-group-logo-upload__hint">Format: jpeg, png, gif or svg</p>
-                <input type="file" id="add-branding-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/gif" hidden aria-label="Upload logo">
+                <p class="config-group-logo-upload__hint">Format: jpeg, png or svg (preferable)<br>Recommended: at least 48px tall, with a transparent background</p>
+                <input type="file" id="add-branding-logo-upload" accept="image/jpeg,image/png,image/svg+xml,.jpg,.jpeg,.png,.svg" hidden aria-label="Upload logo">
               </div>
               <div id="add-branding-logo-filled" hidden>
                 <div class="config-group-logo-upload__preview config-group-logo-upload__preview--checkered">
@@ -4301,7 +4351,28 @@
         width: 400,
         height: 400
       };
-      var LOGO_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
+      var BRANDING_LOGO_MIME_TYPES = {
+        'image/jpeg': true,
+        'image/png': true,
+        'image/svg+xml': true
+      };
+      var BRANDING_LOGO_EXTENSIONS = {
+        jpg: true,
+        jpeg: true,
+        png: true,
+        svg: true
+      };
+
+      function isBrandingLogoFileAllowed(file) {
+        if (!file) return false;
+        if (file.type && BRANDING_LOGO_MIME_TYPES[file.type]) return true;
+        var match = /\.([a-z0-9]+)$/i.exec(file.name || '');
+        return !!(match && BRANDING_LOGO_EXTENSIONS[match[1].toLowerCase()]);
+      }
+
+      function getBrandingLogoFormatError() {
+        return 'Use jpeg, png, or svg.';
+      }
 
       function formatBrandingFileSize(bytes) {
         if (!bytes && bytes !== 0) return '';
@@ -10535,13 +10606,8 @@
 
         function applyAddBrandingModalLogoFile(file) {
           if (!file) return;
-          if (file.size > LOGO_UPLOAD_MAX_BYTES) {
-            showToast('Logo must be 5 MB or smaller', 'error');
-            return;
-          }
-          var allowed = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/gif'];
-          if (allowed.indexOf(file.type) === -1) {
-            showToast('Use JPEG, PNG, GIF, or SVG', 'error');
+          if (!isBrandingLogoFileAllowed(file)) {
+            showToast(getBrandingLogoFormatError(), 'error');
             return;
           }
           var reader = new FileReader();
@@ -10699,13 +10765,8 @@
 
         function applyBrandingAssetLogoFile(file) {
           if (!file || selected.type !== 'branding-asset') return;
-          if (file.size > LOGO_UPLOAD_MAX_BYTES) {
-            showToast('Logo must be 5 MB or smaller', 'error');
-            return;
-          }
-          var allowed = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/gif'];
-          if (allowed.indexOf(file.type) === -1) {
-            showToast('Use JPEG, PNG, GIF, or SVG', 'error');
+          if (!isBrandingLogoFileAllowed(file)) {
+            showToast(getBrandingLogoFormatError(), 'error');
             return;
           }
           var reader = new FileReader();
