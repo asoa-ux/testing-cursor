@@ -2264,6 +2264,23 @@
 
     .modal__field-message-list li + li { margin-top: 4px; }
 
+    .modal__logo-upload {
+      max-width: 100%;
+    }
+
+    .modal__logo-upload .config-group-logo-upload__empty {
+      padding: 20px 16px;
+    }
+
+    .modal__logo-upload .config-group-logo-upload__preview {
+      max-height: 120px;
+    }
+
+    .modal__logo-upload .config-group-logo-upload__preview img {
+      max-height: 120px;
+      object-fit: contain;
+    }
+
     .modal__condition-mode {
       display: flex;
       flex-direction: column;
@@ -2590,7 +2607,7 @@
 <body>
 
   <div class="branding-preview-bar" id="branding-preview-bar" hidden role="status" aria-live="polite">
-    <span class="branding-preview-bar__text">Previewing <strong id="branding-preview-bar-group"></strong> branding in the header.</span>
+    <span class="branding-preview-bar__text">Previewing <strong id="branding-preview-bar-name"></strong> branding in the header.</span>
   </div>
 
   <header class="app-header">
@@ -2754,50 +2771,84 @@
                 <label class="form-row__label" for="config-group-name"><span class="required">*</span> Name</label>
                 <input type="text" id="config-group-name" class="underline-input" autocomplete="off">
               </div>
-              <div class="form-row form-row--stacked">
-                <label class="form-row__label" for="config-group-ug-input"><span class="required">*</span> Default user groups</label>
-                <div class="ug-picker" id="config-group-ug-picker">
-                  <div class="chip-field" id="config-group-ug-field">
-                    <input type="text" class="chip-field__input" id="config-group-ug-input" placeholder="Search" aria-label="Default user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="config-group-ug-typeahead" aria-autocomplete="list">
-                    <span class="chip-field__search"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
-                  </div>
-                  <ul class="filter-sheet__typeahead-menu" id="config-group-ug-typeahead" role="listbox" hidden></ul>
-                </div>
+            </section>
+          </div>
+          <div class="detail-view" id="view-branding-assets-folder" data-view="branding-assets-folder">
+            <header class="detail-header">
+              <h1 class="detail__title">All branding assets</h1>
+            </header>
+            <hr class="detail__divider">
+            <div class="order-section">
+              <span class="order-section__label">Branding assets</span>
+              <div class="order-panel">
+                <ul class="order-list" id="system-branding-assets-list"></ul>
+                <p class="order-list__empty is-hidden" id="system-branding-assets-empty">No branding assets yet.</p>
+              </div>
+            </div>
+          </div>
+          <div class="detail-view" id="view-branding-asset" data-view="branding-asset">
+            <header class="detail-header">
+              <h1 class="detail__title" id="branding-asset-title">Branding asset</h1>
+              <p class="detail__subtitle" id="branding-asset-subtitle">Branding asset</p>
+            </header>
+            <hr class="detail__divider">
+            <section class="form-section">
+              <h2 class="form-section__heading">Basic information</h2>
+              <div class="form-row">
+                <span class="form-row__label">Type</span>
+                <span class="form-row__value" id="branding-asset-type">Branding asset</span>
+              </div>
+              <div class="form-row">
+                <label class="form-row__label" for="branding-asset-name"><span class="required">*</span> Name</label>
+                <input type="text" id="branding-asset-name" class="underline-input" autocomplete="off">
               </div>
             </section>
-            <section class="form-section" aria-labelledby="config-group-branding-heading">
-              <h2 class="form-section__heading" id="config-group-branding-heading">Branding</h2>
-              <p class="form-section__hint" id="config-group-branding-hint-default" hidden>The Default configuration group always uses the application logo and cannot be customized.</p>
+            <section class="form-section" aria-labelledby="branding-asset-branding-heading">
+              <h2 class="form-section__heading" id="branding-asset-branding-heading">Branding</h2>
               <div class="form-row form-row--stacked">
-                <span class="form-row__label" id="config-group-branding-logo-label">Logo</span>
-                <div class="config-group-logo-upload" id="config-group-logo-upload-zone">
-                  <div class="config-group-logo-upload__empty" id="config-group-logo-empty">
+                <span class="form-row__label" id="branding-asset-branding-logo-label"><span class="required">*</span> Logo</span>
+                <div class="config-group-logo-upload" id="branding-asset-logo-upload-zone">
+                  <div class="config-group-logo-upload__empty" id="branding-asset-logo-empty">
                     <i class="ph ph-file-arrow-up config-group-logo-upload__empty-icon" aria-hidden="true"></i>
-                    <p><button type="button" class="text-btn" id="config-group-logo-upload-btn">Upload image</button> or drag and drop</p>
+                    <p><button type="button" class="text-btn" id="branding-asset-logo-upload-btn">Upload image</button> or drag and drop</p>
                     <p class="config-group-logo-upload__hint">Format: jpeg, png, gif or svg<br>Minimum resolution: 335 × 450px</p>
-                    <input type="file" id="config-group-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/gif" hidden aria-label="Upload logo">
+                    <input type="file" id="branding-asset-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/gif" hidden aria-label="Upload logo">
                   </div>
-                  <div id="config-group-logo-filled" hidden>
+                  <div id="branding-asset-logo-filled" hidden>
                     <div class="config-group-logo-upload__preview">
-                      <img id="config-group-branding-preview-logo" alt="">
+                      <img id="branding-asset-preview-logo" alt="">
                     </div>
                     <div class="config-group-logo-upload__meta">
-                      <span class="config-group-logo-upload__meta-text" id="config-group-logo-meta-text"></span>
-                      <button type="button" class="text-btn" id="config-group-logo-clear">Remove</button>
+                      <span class="config-group-logo-upload__meta-text" id="branding-asset-logo-meta-text"></span>
+                      <button type="button" class="text-btn" id="branding-asset-logo-clear">Remove</button>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="form-row">
-                <label class="form-row__label" for="config-group-branding-bg-hex">Logo background color</label>
+                <label class="form-row__label" for="branding-asset-bg-hex">Logo background color</label>
                 <div class="config-group-branding__hex-field">
-                  <input type="text" id="config-group-branding-bg-hex" class="underline-input" value="#FFFFFF" autocomplete="off" spellcheck="false" aria-label="Logo background color">
-                  <input type="color" class="config-group-branding__color-swatch" id="config-group-branding-bg" value="#ffffff" aria-label="Pick logo background color">
+                  <input type="text" id="branding-asset-bg-hex" class="underline-input" value="#FFFFFF" autocomplete="off" spellcheck="false" aria-label="Logo background color">
+                  <input type="color" class="config-group-branding__color-swatch" id="branding-asset-bg" value="#ffffff" aria-label="Pick logo background color">
                 </div>
               </div>
               <div class="form-row">
                 <span class="form-row__label" aria-hidden="true"></span>
-                <button type="button" class="text-btn config-group-branding__preview-link" id="config-group-branding-preview-toggle">Preview branding</button>
+                <button type="button" class="text-btn config-group-branding__preview-link" id="branding-asset-preview-toggle">Preview branding</button>
+              </div>
+            </section>
+            <section class="form-section" aria-labelledby="branding-asset-conditions-heading">
+              <h2 class="form-section__heading" id="branding-asset-conditions-heading">Conditions for display</h2>
+              <p class="form-section__hint">You must specify 1 or more user groups for the logo to be displayed.</p>
+              <div class="form-row form-row--stacked">
+                <label class="form-row__label" for="branding-asset-ug-input"><span class="required">*</span> User groups</label>
+                <div class="ug-picker" id="branding-asset-ug-picker">
+                  <div class="chip-field" id="branding-asset-ug-field">
+                    <input type="text" class="chip-field__input" id="branding-asset-ug-input" placeholder="Search" aria-label="User groups for branding display" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="branding-asset-ug-typeahead" aria-autocomplete="list">
+                    <span class="chip-field__search"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
+                  </div>
+                  <ul class="filter-sheet__typeahead-menu" id="branding-asset-ug-typeahead" role="listbox" hidden></ul>
+                </div>
               </div>
             </section>
           </div>
@@ -3399,6 +3450,40 @@
             </div>
           </div>
           <div class="modal__field-message is-error" id="add-sv-browse-message" hidden role="status" aria-live="polite"></div>
+        </div>
+        <div class="modal__field is-hidden" id="add-field-branding-asset">
+          <div class="modal__field">
+            <span class="modal__label"><span class="required">*</span> Logo</span>
+            <div class="config-group-logo-upload modal__logo-upload" id="add-branding-logo-upload-zone">
+              <div class="config-group-logo-upload__empty" id="add-branding-logo-empty">
+                <i class="ph ph-file-arrow-up config-group-logo-upload__empty-icon" aria-hidden="true"></i>
+                <p><button type="button" class="text-btn" id="add-branding-logo-upload-btn">Upload image</button> or drag and drop</p>
+                <p class="config-group-logo-upload__hint">Format: jpeg, png, gif or svg</p>
+                <input type="file" id="add-branding-logo-upload" accept="image/svg+xml,image/png,image/jpeg,image/gif" hidden aria-label="Upload logo">
+              </div>
+              <div id="add-branding-logo-filled" hidden>
+                <div class="config-group-logo-upload__preview config-group-logo-upload__preview--checkered">
+                  <img id="add-branding-preview-logo" alt="">
+                </div>
+                <div class="config-group-logo-upload__meta">
+                  <span class="config-group-logo-upload__meta-text" id="add-branding-logo-meta-text"></span>
+                  <button type="button" class="text-btn" id="add-branding-logo-clear">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal__field">
+            <span class="modal__label"><span class="required">*</span> User groups</span>
+            <div class="ug-picker">
+              <div class="chip-field modal__chip-field" id="add-branding-user-groups-field">
+                <span class="modal__chips" id="add-branding-user-groups-chips"></span>
+                <input type="text" class="chip-field__input" id="add-branding-user-groups-input" placeholder="Search" aria-label="Search user groups" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="add-branding-user-groups-typeahead" aria-autocomplete="list">
+                <span class="chip-field__search"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
+              </div>
+              <ul class="filter-sheet__typeahead-menu" id="add-branding-user-groups-typeahead" role="listbox" hidden></ul>
+            </div>
+          </div>
+          <div class="modal__field-message is-error" id="add-branding-asset-message" hidden role="status" aria-live="polite"></div>
         </div>
       </form>
       <div class="modal__footer">
@@ -4209,6 +4294,13 @@
       }
 
       var APP_DEFAULT_LOGO = 'logo.svg';
+      var DEFAULT_ARLA_BRANDING_LOGO = 'arla-logo.webp';
+      var DEFAULT_ARLA_BRANDING_LOGO_META = {
+        fileName: 'arla-logo.webp',
+        fileSize: 22310,
+        width: 400,
+        height: 400
+      };
       var LOGO_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
       function formatBrandingFileSize(bytes) {
@@ -4243,18 +4335,155 @@
         var bootstrappedWa = false;
         var bootstrappedTabs = false;
         var listeners = [];
-        var pendingBrandingByGroupId = {};
+        var brandingAssets = [];
+        var pendingBrandingByAssetId = {};
 
-        function defaultPerspectiveUserGroupsForId(id) {
-          if (id === 'default') return ['Buyer group', 'Super users'];
-          if (id === 'arla') return ['Arla group'];
-          return [];
+        function findBrandingAsset(id) {
+          return brandingAssets.find(function (x) { return x.id === id; }) || null;
         }
 
-        function readDefaultPerspectiveUserGroups(g) {
-          return normalizeUserGroupLabels(
-            g.defaultPerspectiveUserGroups || g.defaultUserGroups || defaultPerspectiveUserGroupsForId(g.id)
-          );
+        function uniqueBrandingAssetId(base) {
+          var id = slugId(base);
+          while (findBrandingAsset(id)) {
+            id = slugId(base + '-' + Math.random().toString(36).slice(2, 6));
+          }
+          return id;
+        }
+
+        function ensureDefaultBrandingAssets() {
+          if (brandingAssets.length) return;
+          brandingAssets.push({
+            id: 'arla',
+            label: 'Arla',
+            userGroups: ['Arla group'],
+            brandingLogo: DEFAULT_ARLA_BRANDING_LOGO,
+            brandingBackgroundColor: null,
+            brandingLogoMeta: DEFAULT_ARLA_BRANDING_LOGO_META,
+            expanded: true
+          });
+        }
+
+        function getBrandingAssets() {
+          return brandingAssets.slice();
+        }
+
+        function getBrandingAssetUserGroups(assetId) {
+          var asset = findBrandingAsset(assetId);
+          if (!asset) return [];
+          return normalizeUserGroupLabels(asset.userGroups || []);
+        }
+
+        function addBrandingAsset(label, options) {
+          options = options || {};
+          var id = uniqueBrandingAssetId(label || 'branding-asset');
+          var rec = {
+            id: id,
+            label: label || 'Branding asset',
+            userGroups: normalizeUserGroupLabels(options.userGroups || []),
+            brandingLogo: options.brandingLogo || null,
+            brandingBackgroundColor: options.brandingBackgroundColor || null,
+            brandingLogoMeta: options.brandingLogoMeta || null,
+            expanded: true
+          };
+          brandingAssets.push(rec);
+          notifyMeta();
+          return rec;
+        }
+
+        function updateBrandingAsset(id, patch) {
+          var asset = findBrandingAsset(id);
+          if (!asset) return;
+          if (patch.label !== undefined) asset.label = patch.label;
+          if (patch.userGroups !== undefined) {
+            asset.userGroups = normalizeUserGroupLabels(patch.userGroups);
+          }
+          if (patch.expanded !== undefined) asset.expanded = patch.expanded;
+          if (patch.brandingLogo !== undefined) asset.brandingLogo = patch.brandingLogo;
+          if (patch.brandingBackgroundColor !== undefined) {
+            asset.brandingBackgroundColor = patch.brandingBackgroundColor;
+          }
+          if (patch.brandingLogoMeta !== undefined) asset.brandingLogoMeta = patch.brandingLogoMeta;
+          notifyMeta();
+        }
+
+        function removeBrandingAsset(id) {
+          var idx = brandingAssets.findIndex(function (x) { return x.id === id; });
+          if (idx === -1) return;
+          brandingAssets.splice(idx, 1);
+          delete pendingBrandingByAssetId[id];
+          notifyMeta();
+        }
+
+        function getEffectiveBrandingAssetFields(assetId) {
+          var asset = findBrandingAsset(assetId);
+          if (!asset) {
+            return { brandingLogo: null, brandingBackgroundColor: null, brandingLogoMeta: null };
+          }
+          var pending = pendingBrandingByAssetId[assetId];
+          return {
+            brandingLogo: pending && pending.brandingLogo !== undefined
+              ? pending.brandingLogo
+              : asset.brandingLogo,
+            brandingBackgroundColor: pending && pending.brandingBackgroundColor !== undefined
+              ? pending.brandingBackgroundColor
+              : asset.brandingBackgroundColor,
+            brandingLogoMeta: pending && pending.brandingLogoMeta !== undefined
+              ? pending.brandingLogoMeta
+              : asset.brandingLogoMeta
+          };
+        }
+
+        function setPendingBrandingAsset(id, patch) {
+          if (!findBrandingAsset(id)) return;
+          if (!pendingBrandingByAssetId[id]) pendingBrandingByAssetId[id] = {};
+          var pending = pendingBrandingByAssetId[id];
+          if (patch.brandingLogo !== undefined) {
+            pending.brandingLogo = patch.brandingLogo;
+            if (patch.brandingLogoMeta === undefined && patch.brandingLogo === null) {
+              pending.brandingLogoMeta = null;
+            }
+          }
+          if (patch.brandingLogoMeta !== undefined) pending.brandingLogoMeta = patch.brandingLogoMeta;
+          if (patch.brandingBackgroundColor !== undefined) {
+            pending.brandingBackgroundColor = patch.brandingBackgroundColor;
+          }
+        }
+
+        function commitAllPendingBranding() {
+          var ids = Object.keys(pendingBrandingByAssetId);
+          if (!ids.length) return;
+          ids.forEach(function (id) {
+            var p = pendingBrandingByAssetId[id];
+            var asset = findBrandingAsset(id);
+            if (!asset) return;
+            if (p.brandingLogo !== undefined) asset.brandingLogo = p.brandingLogo;
+            if (p.brandingLogoMeta !== undefined) asset.brandingLogoMeta = p.brandingLogoMeta;
+            if (p.brandingBackgroundColor !== undefined) {
+              asset.brandingBackgroundColor = p.brandingBackgroundColor;
+            }
+          });
+          pendingBrandingByAssetId = {};
+          notifyMeta();
+        }
+
+        function brandingPayloadFromFields(fields) {
+          var hasCustomLogo = !!fields.brandingLogo;
+          var backgroundColor = fields.brandingBackgroundColor || null;
+          return {
+            logoUrl: fields.brandingLogo || APP_DEFAULT_LOGO,
+            backgroundColor: backgroundColor,
+            hasCustomLogo: hasCustomLogo,
+            hasCustomBranding: hasCustomLogo || !!backgroundColor
+          };
+        }
+
+        function getDefaultBrandingPayload() {
+          return {
+            logoUrl: APP_DEFAULT_LOGO,
+            backgroundColor: null,
+            hasCustomLogo: false,
+            hasCustomBranding: false
+          };
         }
 
         function ensureGroupRecord(g) {
@@ -4262,11 +4491,6 @@
           if (existing) {
             if (g.childGroupIds) existing.childGroupIds = g.childGroupIds.slice();
             if (g.parentId !== undefined) existing.parentId = g.parentId || null;
-            if (g.brandingLogo !== undefined) existing.brandingLogo = g.brandingLogo;
-            if (g.brandingBackgroundColor !== undefined) {
-              existing.brandingBackgroundColor = g.brandingBackgroundColor;
-            }
-            if (g.brandingLogoMeta !== undefined) existing.brandingLogoMeta = g.brandingLogoMeta;
             return existing;
           }
           var rec = {
@@ -4274,11 +4498,7 @@
             label: g.label,
             parentId: g.parentId || null,
             childGroupIds: (g.childGroupIds || []).slice(),
-            defaultPerspectiveUserGroups: readDefaultPerspectiveUserGroups(g),
-            expanded: g.expanded !== false,
-            brandingLogo: g.brandingLogo || null,
-            brandingBackgroundColor: g.brandingBackgroundColor || null,
-            brandingLogoMeta: g.brandingLogoMeta || null
+            expanded: g.expanded !== false
           };
           groups.push(rec);
           if (!workAreasByGroup[rec.id]) workAreasByGroup[rec.id] = [];
@@ -4294,7 +4514,6 @@
               label: g.label,
               parentId: parentId,
               childGroupIds: childIds,
-              defaultPerspectiveUserGroups: defaultPerspectiveUserGroupsForId(g.id),
               expanded: g.expanded
             });
             workAreasByGroup[g.id] = (g.workAreas || []).slice();
@@ -4312,7 +4531,6 @@
               label: g.label,
               parentId: parentId,
               childGroupIds: childIds,
-              defaultPerspectiveUserGroups: defaultPerspectiveUserGroupsForId(g.id),
               expanded: g.expanded
             });
             tabsByGroup[g.id] = (g.tabs || []).slice();
@@ -4367,6 +4585,7 @@
           }
           pruneToTopLevelGroups();
           flattenGroupsToSingleLevel();
+          ensureDefaultBrandingAssets();
         }
 
         function notifyMeta() {
@@ -4452,7 +4671,7 @@
           return tabsByGroup[groupId] || [];
         }
 
-        function addGroup(label, defaultPerspectiveUserGroups, parentId) {
+        function addGroup(label, parentId) {
           var id = slugId(label);
           while (findGroup(id)) id = slugId(label + '-' + Math.random().toString(36).slice(2, 6));
           parentId = parentId || null;
@@ -4461,7 +4680,6 @@
             label: label,
             parentId: parentId,
             childGroupIds: [],
-            defaultPerspectiveUserGroups: normalizeUserGroupLabels(defaultPerspectiveUserGroups || []),
             expanded: true
           };
           groups.push(rec);
@@ -4520,109 +4738,8 @@
           var g = findGroup(id);
           if (!g) return;
           if (patch.label !== undefined) g.label = patch.label;
-          if (patch.defaultPerspectiveUserGroups !== undefined) {
-            g.defaultPerspectiveUserGroups = normalizeUserGroupLabels(patch.defaultPerspectiveUserGroups);
-          } else if (patch.defaultUserGroups !== undefined) {
-            g.defaultPerspectiveUserGroups = normalizeUserGroupLabels(patch.defaultUserGroups);
-          }
           if (patch.expanded !== undefined) g.expanded = patch.expanded;
-          if (!isDefaultGroup(id)) {
-            if (patch.brandingLogo !== undefined) g.brandingLogo = patch.brandingLogo;
-            if (patch.brandingBackgroundColor !== undefined) {
-              g.brandingBackgroundColor = patch.brandingBackgroundColor;
-            }
-            if (patch.brandingLogoMeta !== undefined) g.brandingLogoMeta = patch.brandingLogoMeta;
-          }
           notifyMeta();
-        }
-
-        function getEffectiveGroupBrandingFields(groupId) {
-          var g = findGroup(groupId);
-          if (!g || isDefaultGroup(groupId)) {
-            return { brandingLogo: null, brandingBackgroundColor: null, brandingLogoMeta: null };
-          }
-          var pending = pendingBrandingByGroupId[groupId];
-          return {
-            brandingLogo: pending && pending.brandingLogo !== undefined
-              ? pending.brandingLogo
-              : g.brandingLogo,
-            brandingBackgroundColor: pending && pending.brandingBackgroundColor !== undefined
-              ? pending.brandingBackgroundColor
-              : g.brandingBackgroundColor,
-            brandingLogoMeta: pending && pending.brandingLogoMeta !== undefined
-              ? pending.brandingLogoMeta
-              : g.brandingLogoMeta
-          };
-        }
-
-        function setPendingGroupBranding(id, patch) {
-          if (isDefaultGroup(id)) return;
-          if (!pendingBrandingByGroupId[id]) pendingBrandingByGroupId[id] = {};
-          var pending = pendingBrandingByGroupId[id];
-          if (patch.brandingLogo !== undefined) {
-            pending.brandingLogo = patch.brandingLogo;
-            if (patch.brandingLogoMeta === undefined && patch.brandingLogo === null) {
-              pending.brandingLogoMeta = null;
-            }
-          }
-          if (patch.brandingLogoMeta !== undefined) pending.brandingLogoMeta = patch.brandingLogoMeta;
-          if (patch.brandingBackgroundColor !== undefined) {
-            pending.brandingBackgroundColor = patch.brandingBackgroundColor;
-          }
-        }
-
-        function commitAllPendingBranding() {
-          var ids = Object.keys(pendingBrandingByGroupId);
-          if (!ids.length) return;
-          ids.forEach(function (id) {
-            var p = pendingBrandingByGroupId[id];
-            var g = findGroup(id);
-            if (!g || isDefaultGroup(id)) return;
-            if (p.brandingLogo !== undefined) g.brandingLogo = p.brandingLogo;
-            if (p.brandingLogoMeta !== undefined) g.brandingLogoMeta = p.brandingLogoMeta;
-            if (p.brandingBackgroundColor !== undefined) {
-              g.brandingBackgroundColor = p.brandingBackgroundColor;
-            }
-          });
-          pendingBrandingByGroupId = {};
-          notifyMeta();
-        }
-
-        function getGroupBranding(groupId) {
-          if (!groupId || isDefaultGroup(groupId)) {
-            return {
-              logoUrl: APP_DEFAULT_LOGO,
-              backgroundColor: null,
-              hasCustomLogo: false,
-              hasCustomBranding: false
-            };
-          }
-          var g = findGroup(groupId);
-          while (g) {
-            if (isDefaultGroup(g.id)) {
-              return {
-                logoUrl: APP_DEFAULT_LOGO,
-                backgroundColor: null,
-                hasCustomLogo: false,
-                hasCustomBranding: false
-              };
-            }
-            if (g.brandingLogo || g.brandingBackgroundColor) {
-              return {
-                logoUrl: g.brandingLogo || APP_DEFAULT_LOGO,
-                backgroundColor: g.brandingBackgroundColor || null,
-                hasCustomLogo: !!g.brandingLogo,
-                hasCustomBranding: true
-              };
-            }
-            g = g.parentId ? findGroup(g.parentId) : null;
-          }
-          return {
-            logoUrl: APP_DEFAULT_LOGO,
-            backgroundColor: null,
-            hasCustomLogo: false,
-            hasCustomBranding: false
-          };
         }
 
         function reorderGroups(orderedIds, options) {
@@ -4631,12 +4748,6 @@
             return topLevelGroupIds.indexOf(id) !== -1;
           });
           notifyMeta();
-        }
-
-        function getDefaultPerspectiveUserGroups(groupId) {
-          var g = findGroup(groupId);
-          if (!g) return [];
-          return readDefaultPerspectiveUserGroups(g).slice();
         }
 
         function uniqueSlugId(base) {
@@ -4698,14 +4809,10 @@
           if (!src) return null;
           var newRec = addGroup(
             src.label + ' (copy)',
-            readDefaultPerspectiveUserGroups(src).slice(),
             parentId
           );
           workAreasByGroup[newRec.id] = deepCloneWorkAreasForStore(workAreasByGroup[sourceId]);
           tabsByGroup[newRec.id] = deepCloneTabsForStore(tabsByGroup[sourceId]);
-          newRec.brandingLogo = src.brandingLogo || null;
-          newRec.brandingBackgroundColor = src.brandingBackgroundColor || null;
-          newRec.brandingLogoMeta = src.brandingLogoMeta ? Object.assign({}, src.brandingLogoMeta) : null;
           newRec.childGroupIds = [];
           (src.childGroupIds || []).forEach(function (childId) {
             var childClone = duplicateGroupRecursive(childId, newRec.id);
@@ -4776,14 +4883,20 @@
           removeGroup: removeGroup,
           updateGroup: updateGroup,
           reorderGroups: reorderGroups,
-          getDefaultPerspectiveUserGroups: getDefaultPerspectiveUserGroups,
           countNestedContent: countNestedContent,
           duplicateGroup: duplicateGroup,
           copyWorkAreasIntoGroup: copyWorkAreasIntoGroup,
           copyTabsIntoGroup: copyTabsIntoGroup,
-          getGroupBranding: getGroupBranding,
-          getEffectiveGroupBrandingFields: getEffectiveGroupBrandingFields,
-          setPendingGroupBranding: setPendingGroupBranding,
+          getBrandingAssets: getBrandingAssets,
+          findBrandingAsset: findBrandingAsset,
+          addBrandingAsset: addBrandingAsset,
+          updateBrandingAsset: updateBrandingAsset,
+          removeBrandingAsset: removeBrandingAsset,
+          getBrandingAssetUserGroups: getBrandingAssetUserGroups,
+          getEffectiveBrandingAssetFields: getEffectiveBrandingAssetFields,
+          setPendingBrandingAsset: setPendingBrandingAsset,
+          brandingPayloadFromFields: brandingPayloadFromFields,
+          getDefaultBrandingPayload: getDefaultBrandingPayload,
           commitAllPendingBranding: commitAllPendingBranding
         };
       })();
@@ -4863,78 +4976,50 @@
         return !!getEditorGroupScopeId();
       }
 
-      function resolveHeaderBrandingGroupId() {
-        var ctx = getEditorContext();
-        if (!ctx) return null;
-        if (ctx === 'system-settings') {
-          if (selected.type === 'configuration-group') return selected.groupId;
-          return null;
+      function getBrandingForHeader() {
+        if (brandingHeaderPreviewAssetId) {
+          var fields = ConfigurationStore.getEffectiveBrandingAssetFields(brandingHeaderPreviewAssetId);
+          return ConfigurationStore.brandingPayloadFromFields(fields);
         }
-        if (ctx === 'work-areas' || ctx === 'tabs-setup') {
-          if (selected.type === 'root') {
-            return hasSingleConfigurationGroup() ? getSoleConfigurationGroupId() : null;
-          }
-          if (selected.type === 'configuration-group') return selected.groupId;
-          return selected.groupId || null;
-        }
-        return null;
+        return ConfigurationStore.getDefaultBrandingPayload();
       }
 
-      function getGroupBrandingForHeader(groupId) {
-        if (brandingHeaderPreviewGroupId && groupId === brandingHeaderPreviewGroupId &&
-            !ConfigurationStore.isDefaultGroup(groupId)) {
-          var fields = ConfigurationStore.getEffectiveGroupBrandingFields(groupId);
-          var hasCustomLogo = !!fields.brandingLogo;
-          var backgroundColor = fields.brandingBackgroundColor || null;
-          return {
-            logoUrl: fields.brandingLogo || APP_DEFAULT_LOGO,
-            backgroundColor: backgroundColor,
-            hasCustomLogo: hasCustomLogo,
-            hasCustomBranding: hasCustomLogo || !!backgroundColor
-          };
-        }
-        return ConfigurationStore.getGroupBranding(groupId);
-      }
-
-      function syncBrandingHeaderPreviewControls(group) {
-        var toggleBtn = document.getElementById('config-group-branding-preview-toggle');
+      function syncBrandingHeaderPreviewControls(asset) {
+        var toggleBtn = document.getElementById('branding-asset-preview-toggle');
         var bar = document.getElementById('branding-preview-bar');
-        var barGroup = document.getElementById('branding-preview-bar-group');
-        var isDefault = group && ConfigurationStore.isDefaultGroup(group.id);
-        var isActive = !!(group && brandingHeaderPreviewGroupId === group.id);
+        var barName = document.getElementById('branding-preview-bar-name');
+        var isActive = !!(asset && brandingHeaderPreviewAssetId === asset.id);
         if (toggleBtn) {
-          toggleBtn.hidden = !!isDefault;
-          toggleBtn.disabled = !!isDefault;
           toggleBtn.textContent = isActive ? 'Close branding preview' : 'Preview branding';
         }
         if (bar) bar.hidden = !isActive;
-        if (barGroup) barGroup.textContent = group && isActive ? group.label : '';
+        if (barName) barName.textContent = asset && isActive ? asset.label : '';
       }
 
       function closeBrandingHeaderPreview() {
-        if (!brandingHeaderPreviewGroupId) return;
-        brandingHeaderPreviewGroupId = null;
+        if (!brandingHeaderPreviewAssetId) return;
+        brandingHeaderPreviewAssetId = null;
         var bar = document.getElementById('branding-preview-bar');
         if (bar) bar.hidden = true;
-        var barGroup = document.getElementById('branding-preview-bar-group');
-        if (barGroup) barGroup.textContent = '';
-        if (selected.type === 'configuration-group') {
-          var group = ConfigurationStore.findGroup(selected.groupId);
-          if (group) syncBrandingHeaderPreviewControls(group);
+        var barName = document.getElementById('branding-preview-bar-name');
+        if (barName) barName.textContent = '';
+        if (selected.type === 'branding-asset') {
+          var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+          if (asset) syncBrandingHeaderPreviewControls(asset);
         }
         applyAppHeaderBranding();
       }
 
-      function openBrandingHeaderPreview(groupId) {
-        if (!groupId || ConfigurationStore.isDefaultGroup(groupId)) return;
-        brandingHeaderPreviewGroupId = groupId;
-        var group = ConfigurationStore.findGroup(groupId);
-        syncBrandingHeaderPreviewControls(group);
+      function openBrandingHeaderPreview(assetId) {
+        if (!assetId || !ConfigurationStore.findBrandingAsset(assetId)) return;
+        brandingHeaderPreviewAssetId = assetId;
+        var asset = ConfigurationStore.findBrandingAsset(assetId);
+        syncBrandingHeaderPreviewControls(asset);
         applyAppHeaderBranding();
       }
 
-      function refreshBrandingHeaderIfPreviewing(groupId) {
-        if (brandingHeaderPreviewGroupId === groupId) {
+      function refreshBrandingHeaderIfPreviewing(assetId) {
+        if (brandingHeaderPreviewAssetId === assetId) {
           applyAppHeaderBranding();
         }
       }
@@ -4945,7 +5030,7 @@
         var img = document.querySelector('.app-header__logo');
         if (!header || !brand || !img) return;
 
-        var branding = getGroupBrandingForHeader(resolveHeaderBrandingGroupId());
+        var branding = getBrandingForHeader();
         header.classList.toggle('app-header--custom-branding', !!branding.hasCustomBranding);
         if (img.getAttribute('src') !== branding.logoUrl) {
           img.src = branding.logoUrl;
@@ -8838,7 +8923,7 @@
 
       var addModalMode = null;
       var hasUnsavedChanges = false;
-      var brandingHeaderPreviewGroupId = null;
+      var brandingHeaderPreviewAssetId = null;
 
       function getWaAddOptions() {
         if (selected.type === 'root') {
@@ -9960,11 +10045,13 @@
         var labelName = document.getElementById('add-label-name');
         var typeField = document.getElementById('add-field-tab-type');
         var svBrowseField = document.getElementById('add-field-sv-browse');
+        var brandingField = document.getElementById('add-field-branding-asset');
         var nameInput = document.getElementById('add-input-name');
         var submitBtn = document.getElementById('add-modal-submit');
         var isTabs = getEditorContext() === 'tabs-setup';
         typeField.classList.add('is-hidden');
         if (svBrowseField) svBrowseField.classList.add('is-hidden');
+        if (brandingField) brandingField.classList.add('is-hidden');
         submitBtn.textContent = 'Add';
         submitBtn.disabled = false;
 
@@ -9972,6 +10059,13 @@
           titleEl.textContent = 'Add configuration group';
           labelName.textContent = 'Name';
           nameInput.value = '';
+        } else if (mode === 'branding-asset') {
+          titleEl.textContent = 'Add branding asset';
+          labelName.textContent = 'Name';
+          nameInput.value = '';
+          if (brandingField) brandingField.classList.remove('is-hidden');
+          submitBtn.textContent = 'Create';
+          SystemSettingsEditor.prepareBrandingAddModal();
         } else if (mode === 'work-area') {
           titleEl.textContent = 'Add work area';
           labelName.textContent = 'Work area name';
@@ -10018,6 +10112,11 @@
           browseMessage.hidden = true;
           browseMessage.innerHTML = '';
         }
+        var brandingField = document.getElementById('add-field-branding-asset');
+        if (brandingField) brandingField.classList.add('is-hidden');
+        if (typeof SystemSettingsEditor !== 'undefined' && SystemSettingsEditor.resetAddBrandingModal) {
+          SystemSettingsEditor.resetAddBrandingModal();
+        }
         if (getEditorContext() === 'tabs-setup') TabsEditor.closeAddModalRef();
         else if (getEditorContext() === 'specific-views') SpecificViewsEditor.closeAddModalRef();
         else addModalMode = null;
@@ -10029,6 +10128,9 @@
         if (!name) return;
         if (getEditorContext() === 'system-settings') {
           if (addModalMode === 'configuration-group') SystemSettingsEditor.submitAddGroup(name);
+          else if (addModalMode === 'branding-asset') {
+            if (!SystemSettingsEditor.submitAddBrandingAsset(name)) return;
+          }
           closeAddModal();
           return;
         }
@@ -10066,7 +10168,7 @@
           var newP = {
             id: slugId(name),
             label: name,
-            userGroups: ConfigurationStore.getDefaultPerspectiveUserGroups(selected.groupId).slice(),
+            userGroups: [],
             form: { title: name, subtitle: 'Task perspective', name: name }
           };
           parentWa.perspectives.push(newP);
@@ -10211,12 +10313,10 @@
           systemExpanded: true,
           mainExpanded: true,
           configGroupsExpanded: true,
+          brandingAssetsExpanded: true,
           quickLinksExpanded: false
         };
-        var ugPickerHighlight = -1;
-        var ugPickerBlurTimer = null;
-
-        function getConfigGroupUserGroupSuggestions(query, selectedLabels) {
+        function getUserGroupSuggestions(query, selectedLabels) {
           var q = query.trim().toLowerCase();
           return FILTER_USER_GROUPS.filter(function (ug) {
             if (selectedLabels.indexOf(ug.label) !== -1) return false;
@@ -10225,22 +10325,94 @@
           });
         }
 
-        function renderConfigGroupUserGroups(group) {
-          var field = document.getElementById('config-group-ug-field');
-          var input = document.getElementById('config-group-ug-input');
-          if (!field || !input || !group) return;
+        var addBrandingDraft = {
+          userGroups: [],
+          brandingLogo: null,
+          brandingLogoMeta: null
+        };
+        var addBrandingModalUgHighlight = -1;
+        var addBrandingModalUgBlurTimer = null;
 
-          var labels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
-          if (labels.length !== (group.defaultPerspectiveUserGroups || []).length) {
-            ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: labels });
+        function getBrandingAssetIncompleteReasons(draft) {
+          var reasons = [];
+          if (!draft.label || !String(draft.label).trim()) {
+            reasons.push('Enter a name.');
           }
+          if (!draft.brandingLogo) {
+            reasons.push('Upload a logo.');
+          }
+          if (!draft.userGroups || !draft.userGroups.length) {
+            reasons.push('Add at least one user group.');
+          }
+          return reasons;
+        }
 
-          var isDefault = ConfigurationStore.isDefaultGroup(group.id);
-          input.disabled = isDefault;
-          field.classList.toggle('is-disabled', isDefault);
+        function isBrandingAssetDraftComplete(draft) {
+          return getBrandingAssetIncompleteReasons(draft).length === 0;
+        }
 
-          field.querySelectorAll('.chip').forEach(function (chip) { chip.remove(); });
-          labels.forEach(function (label) {
+        function draftBrandingAssetFromAddModal(name) {
+          return {
+            label: name,
+            userGroups: addBrandingDraft.userGroups.slice(),
+            brandingLogo: addBrandingDraft.brandingLogo,
+            brandingLogoMeta: addBrandingDraft.brandingLogoMeta
+          };
+        }
+
+        function getAddBrandingModalBlockers(name) {
+          return getBrandingAssetIncompleteReasons(draftBrandingAssetFromAddModal(name));
+        }
+
+        function renderAddBrandingModalMessage(blockers) {
+          var messageEl = document.getElementById('add-branding-asset-message');
+          if (!messageEl) return;
+          if (!blockers.length) {
+            messageEl.hidden = true;
+            messageEl.innerHTML = '';
+            messageEl.classList.remove('is-error');
+            return;
+          }
+          messageEl.classList.add('is-error');
+          if (blockers.length === 1) {
+            messageEl.textContent = blockers[0];
+          } else {
+            messageEl.innerHTML = '<ul class="modal__field-message-list">' +
+              blockers.map(function (b) {
+                return '<li>' + escapeHtml(b) + '</li>';
+              }).join('') +
+              '</ul>';
+          }
+          messageEl.hidden = false;
+        }
+
+        function renderAddBrandingModalLogo() {
+          var emptyState = document.getElementById('add-branding-logo-empty');
+          var filledState = document.getElementById('add-branding-logo-filled');
+          var previewImg = document.getElementById('add-branding-preview-logo');
+          var metaText = document.getElementById('add-branding-logo-meta-text');
+          var hasLogo = !!addBrandingDraft.brandingLogo;
+          if (emptyState) emptyState.hidden = hasLogo;
+          if (filledState) filledState.hidden = !hasLogo;
+          if (hasLogo && previewImg) {
+            previewImg.src = addBrandingDraft.brandingLogo;
+            previewImg.alt = 'Logo preview';
+          } else if (previewImg) {
+            previewImg.removeAttribute('src');
+            previewImg.alt = '';
+          }
+          if (metaText && addBrandingDraft.brandingLogoMeta) {
+            metaText.textContent = formatBrandingLogoMeta(addBrandingDraft.brandingLogoMeta);
+          } else if (metaText) {
+            metaText.textContent = '';
+          }
+        }
+
+        function renderAddBrandingModalUserGroups() {
+          var chipsHost = document.getElementById('add-branding-user-groups-chips');
+          if (!chipsHost) return;
+          chipsHost.innerHTML = '';
+          addBrandingDraft.userGroups.forEach(function (label) {
             var chip = document.createElement('span');
             chip.className = 'chip';
             chip.appendChild(document.createTextNode(label));
@@ -10249,62 +10421,45 @@
             rm.className = 'chip__remove';
             rm.setAttribute('aria-label', 'Remove ' + label);
             rm.textContent = '×';
-            rm.disabled = isDefault;
-            rm.addEventListener('click', function () {
-              var g = ConfigurationStore.findGroup(group.id);
-              if (!g || ConfigurationStore.isDefaultGroup(g.id)) return;
-              var next = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id).filter(function (x) {
+            rm.addEventListener('click', function (e) {
+              e.stopPropagation();
+              addBrandingDraft.userGroups = addBrandingDraft.userGroups.filter(function (x) {
                 return x !== label;
               });
-              ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: next });
-              renderConfigGroupUserGroups(ConfigurationStore.findGroup(group.id));
-              markUnsaved();
+              renderAddBrandingModal();
+              syncAddBrandingModalSubmit();
             });
             chip.appendChild(rm);
-            field.insertBefore(chip, input);
+            chipsHost.appendChild(chip);
           });
         }
 
-        function hideConfigGroupUgTypeahead() {
-          var menu = document.getElementById('config-group-ug-typeahead');
-          var input = document.getElementById('config-group-ug-input');
+        function hideAddBrandingModalUgTypeahead() {
+          var menu = document.getElementById('add-branding-user-groups-typeahead');
+          var input = document.getElementById('add-branding-user-groups-input');
           if (menu) menu.hidden = true;
           if (input) input.setAttribute('aria-expanded', 'false');
-          ugPickerHighlight = -1;
+          addBrandingModalUgHighlight = -1;
         }
 
-        function renderConfigGroupUgTypeahead() {
-          var menu = document.getElementById('config-group-ug-typeahead');
-          var input = document.getElementById('config-group-ug-input');
+        function renderAddBrandingModalUgTypeahead() {
+          var menu = document.getElementById('add-branding-user-groups-typeahead');
+          var input = document.getElementById('add-branding-user-groups-input');
           if (!menu || !input) return;
-          if (selected.type !== 'configuration-group') {
-            hideConfigGroupUgTypeahead();
-            return;
-          }
-
-          var group = ConfigurationStore.findGroup(selected.groupId);
-          if (!group || ConfigurationStore.isDefaultGroup(group.id)) {
-            hideConfigGroupUgTypeahead();
-            return;
-          }
-
-          var selectedLabels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
-          var suggestions = getConfigGroupUserGroupSuggestions(input.value, selectedLabels);
+          var suggestions = getUserGroupSuggestions(input.value, addBrandingDraft.userGroups);
           menu.innerHTML = '';
           if (!suggestions.length) {
-            hideConfigGroupUgTypeahead();
+            hideAddBrandingModalUgTypeahead();
             return;
           }
-
-          if (ugPickerHighlight >= suggestions.length) {
-            ugPickerHighlight = suggestions.length - 1;
+          if (addBrandingModalUgHighlight >= suggestions.length) {
+            addBrandingModalUgHighlight = suggestions.length - 1;
           }
-
           suggestions.forEach(function (ug, index) {
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'filter-sheet__typeahead-option' +
-              (index === ugPickerHighlight ? ' is-highlighted' : '');
+              (index === addBrandingModalUgHighlight ? ' is-highlighted' : '');
             btn.setAttribute('role', 'option');
             btn.textContent = ug.label;
             btn.addEventListener('mousedown', function (e) {
@@ -10313,104 +10468,73 @@
             });
             btn.addEventListener('click', function (e) {
               e.stopPropagation();
-              addConfigGroupUserGroupLabel(ug.label);
+              addBrandingModalUserGroupLabel(ug.label);
             });
             menu.appendChild(btn);
           });
-
           menu.hidden = false;
           input.setAttribute('aria-expanded', 'true');
         }
 
-        function addConfigGroupUserGroupLabel(label) {
-          if (selected.type !== 'configuration-group') return;
-          var group = ConfigurationStore.findGroup(selected.groupId);
-          if (!group || ConfigurationStore.isDefaultGroup(group.id)) return;
+        function addBrandingModalUserGroupLabel(label) {
           if (!FILTER_USER_GROUPS.some(function (ug) { return ug.label === label; })) return;
-
-          var labels = ConfigurationStore.getDefaultPerspectiveUserGroups(group.id);
-          if (labels.indexOf(label) !== -1) return;
-          labels.push(label);
-          ConfigurationStore.updateGroup(group.id, { defaultPerspectiveUserGroups: labels });
-
-          var input = document.getElementById('config-group-ug-input');
+          if (addBrandingDraft.userGroups.indexOf(label) !== -1) return;
+          addBrandingDraft.userGroups.push(label);
+          var input = document.getElementById('add-branding-user-groups-input');
           if (input) {
             input.value = '';
             input.focus();
           }
-          ugPickerHighlight = -1;
-          renderConfigGroupUserGroups(ConfigurationStore.findGroup(group.id));
-          renderConfigGroupUgTypeahead();
-          markUnsaved();
+          addBrandingModalUgHighlight = -1;
+          renderAddBrandingModal();
+          syncAddBrandingModalSubmit();
         }
 
-        function initConfigGroupUserGroupPicker() {
-          var input = document.getElementById('config-group-ug-input');
-          var menu = document.getElementById('config-group-ug-typeahead');
-          if (!input || !menu || input._ugBound) return;
-          input._ugBound = true;
-
-          menu.addEventListener('mousedown', function (e) { e.stopPropagation(); });
-
-          input.addEventListener('input', function () {
-            ugPickerHighlight = -1;
-            renderConfigGroupUgTypeahead();
-          });
-
-          input.addEventListener('focus', function () {
-            if (ugPickerBlurTimer) {
-              clearTimeout(ugPickerBlurTimer);
-              ugPickerBlurTimer = null;
-            }
-            renderConfigGroupUgTypeahead();
-          });
-
-          input.addEventListener('blur', function () {
-            ugPickerBlurTimer = setTimeout(hideConfigGroupUgTypeahead, 150);
-          });
-
-          input.addEventListener('keydown', function (e) {
-            if (!menu || menu.hidden) {
-              if (e.key === 'Enter') e.preventDefault();
-              return;
-            }
-
-            var group = ConfigurationStore.findGroup(selected.groupId);
-            if (!group) return;
-            var suggestions = getConfigGroupUserGroupSuggestions(
-              input.value,
-              ConfigurationStore.getDefaultPerspectiveUserGroups(group.id)
-            );
-            if (!suggestions.length) {
-              if (e.key === 'Enter') e.preventDefault();
-              return;
-            }
-
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              ugPickerHighlight = (ugPickerHighlight + 1) % suggestions.length;
-              renderConfigGroupUgTypeahead();
-            } else if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              ugPickerHighlight = ugPickerHighlight <= 0
-                ? suggestions.length - 1
-                : ugPickerHighlight - 1;
-              renderConfigGroupUgTypeahead();
-            } else if (e.key === 'Enter') {
-              e.preventDefault();
-              var pick = ugPickerHighlight >= 0 ? ugPickerHighlight : 0;
-              addConfigGroupUserGroupLabel(suggestions[pick].label);
-            } else if (e.key === 'Escape') {
-              e.preventDefault();
-              input.value = '';
-              hideConfigGroupUgTypeahead();
-            }
-          });
+        function renderAddBrandingModal() {
+          renderAddBrandingModalLogo();
+          renderAddBrandingModalUserGroups();
         }
 
-        function applyBrandingLogoFile(file) {
-          if (!file || selected.type !== 'configuration-group') return;
-          if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+        function resetAddBrandingModal() {
+          addBrandingDraft = {
+            userGroups: [],
+            brandingLogo: null,
+            brandingLogoMeta: null
+          };
+          addBrandingModalUgHighlight = -1;
+          hideAddBrandingModalUgTypeahead();
+          var ugInput = document.getElementById('add-branding-user-groups-input');
+          if (ugInput) ugInput.value = '';
+          var uploadInput = document.getElementById('add-branding-logo-upload');
+          if (uploadInput) uploadInput.value = '';
+          renderAddBrandingModal();
+          renderAddBrandingModalMessage([]);
+          syncAddBrandingModalSubmit();
+        }
+
+        function prepareBrandingAddModal() {
+          resetAddBrandingModal();
+        }
+
+        function syncAddBrandingModalSubmit() {
+          if (getEditorContext() !== 'system-settings' || addModalMode !== 'branding-asset') return;
+          var submit = document.getElementById('add-modal-submit');
+          var submitWrap = document.getElementById('add-modal-submit-wrap');
+          if (!submit) return;
+          var name = document.getElementById('add-input-name').value.trim();
+          var blockers = getAddBrandingModalBlockers(name);
+          submit.disabled = blockers.length > 0;
+          if (submitWrap) {
+            if (blockers.length) {
+              submitWrap.setAttribute('data-disabled-tip', blockers.join(' '));
+            } else {
+              submitWrap.removeAttribute('data-disabled-tip');
+            }
+          }
+        }
+
+        function applyAddBrandingModalLogoFile(file) {
+          if (!file) return;
           if (file.size > LOGO_UPLOAD_MAX_BYTES) {
             showToast('Logo must be 5 MB or smaller', 'error');
             return;
@@ -10425,7 +10549,171 @@
             var dataUrl = reader.result;
             var img = new Image();
             img.onload = function () {
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+              addBrandingDraft.brandingLogo = dataUrl;
+              addBrandingDraft.brandingLogoMeta = {
+                fileName: file.name,
+                fileSize: file.size,
+                width: img.naturalWidth || img.width,
+                height: img.naturalHeight || img.height
+              };
+              renderAddBrandingModal();
+              syncAddBrandingModalSubmit();
+            };
+            img.onerror = function () {
+              addBrandingDraft.brandingLogo = dataUrl;
+              addBrandingDraft.brandingLogoMeta = {
+                fileName: file.name,
+                fileSize: file.size,
+                width: 0,
+                height: 0
+              };
+              renderAddBrandingModal();
+              syncAddBrandingModalSubmit();
+            };
+            img.src = dataUrl;
+          };
+          reader.onerror = function () {
+            showToast('Could not read logo file', 'error');
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function initAddBrandingModalControls() {
+          var upload = document.getElementById('add-branding-logo-upload');
+          var uploadBtn = document.getElementById('add-branding-logo-upload-btn');
+          var uploadZone = document.getElementById('add-branding-logo-upload-zone');
+          var clearLogoBtn = document.getElementById('add-branding-logo-clear');
+          var ugInput = document.getElementById('add-branding-user-groups-input');
+          var ugMenu = document.getElementById('add-branding-user-groups-typeahead');
+          var nameInput = document.getElementById('add-input-name');
+
+          if (upload && !upload._brandingAddBound) {
+            upload._brandingAddBound = true;
+            upload.addEventListener('change', function () {
+              var file = upload.files && upload.files[0];
+              if (file) applyAddBrandingModalLogoFile(file);
+              upload.value = '';
+            });
+          }
+
+          if (uploadBtn && !uploadBtn._brandingAddBound) {
+            uploadBtn._brandingAddBound = true;
+            uploadBtn.addEventListener('click', function () {
+              if (upload) upload.click();
+            });
+          }
+
+          if (clearLogoBtn && !clearLogoBtn._brandingAddBound) {
+            clearLogoBtn._brandingAddBound = true;
+            clearLogoBtn.addEventListener('click', function () {
+              addBrandingDraft.brandingLogo = null;
+              addBrandingDraft.brandingLogoMeta = null;
+              renderAddBrandingModal();
+              syncAddBrandingModalSubmit();
+            });
+          }
+
+          if (uploadZone && !uploadZone._brandingAddBound) {
+            uploadZone._brandingAddBound = true;
+            uploadZone.addEventListener('dragover', function (e) {
+              e.preventDefault();
+              uploadZone.classList.add('is-dragover');
+            });
+            uploadZone.addEventListener('dragleave', function () {
+              uploadZone.classList.remove('is-dragover');
+            });
+            uploadZone.addEventListener('drop', function (e) {
+              e.preventDefault();
+              uploadZone.classList.remove('is-dragover');
+              var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+              if (file) applyAddBrandingModalLogoFile(file);
+            });
+            uploadZone.addEventListener('click', function (e) {
+              if (e.target.closest('#add-branding-logo-clear')) return;
+              if (e.target.closest('#add-branding-logo-filled')) return;
+              if (e.target.closest('#add-branding-logo-upload-btn')) return;
+              if (!e.target.closest('#add-branding-logo-empty')) return;
+              if (upload) upload.click();
+            });
+          }
+
+          if (ugMenu && !ugMenu._brandingAddBound) {
+            ugMenu._brandingAddBound = true;
+            ugMenu.addEventListener('mousedown', function (e) { e.stopPropagation(); });
+          }
+
+          if (ugInput && !ugInput._brandingAddBound) {
+            ugInput._brandingAddBound = true;
+            ugInput.addEventListener('input', function () {
+              addBrandingModalUgHighlight = -1;
+              renderAddBrandingModalUgTypeahead();
+              syncAddBrandingModalSubmit();
+            });
+            ugInput.addEventListener('focus', function () {
+              if (addBrandingModalUgBlurTimer) {
+                clearTimeout(addBrandingModalUgBlurTimer);
+                addBrandingModalUgBlurTimer = null;
+              }
+              renderAddBrandingModalUgTypeahead();
+            });
+            ugInput.addEventListener('blur', function () {
+              addBrandingModalUgBlurTimer = setTimeout(hideAddBrandingModalUgTypeahead, 150);
+            });
+            ugInput.addEventListener('keydown', function (e) {
+              if (!ugMenu || ugMenu.hidden) {
+                if (e.key === 'Enter') e.preventDefault();
+                return;
+              }
+              var suggestions = getUserGroupSuggestions(ugInput.value, addBrandingDraft.userGroups);
+              if (!suggestions.length) {
+                if (e.key === 'Enter') e.preventDefault();
+                return;
+              }
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                addBrandingModalUgHighlight = (addBrandingModalUgHighlight + 1) % suggestions.length;
+                renderAddBrandingModalUgTypeahead();
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                addBrandingModalUgHighlight = addBrandingModalUgHighlight <= 0
+                  ? suggestions.length - 1
+                  : addBrandingModalUgHighlight - 1;
+                renderAddBrandingModalUgTypeahead();
+              } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var pick = addBrandingModalUgHighlight >= 0 ? addBrandingModalUgHighlight : 0;
+                addBrandingModalUserGroupLabel(suggestions[pick].label);
+              } else if (e.key === 'Escape') {
+                e.preventDefault();
+                ugInput.value = '';
+                hideAddBrandingModalUgTypeahead();
+              }
+            });
+          }
+
+          if (nameInput && !nameInput._brandingAddNameBound) {
+            nameInput._brandingAddNameBound = true;
+            nameInput.addEventListener('input', syncAddBrandingModalSubmit);
+          }
+        }
+
+        function applyBrandingAssetLogoFile(file) {
+          if (!file || selected.type !== 'branding-asset') return;
+          if (file.size > LOGO_UPLOAD_MAX_BYTES) {
+            showToast('Logo must be 5 MB or smaller', 'error');
+            return;
+          }
+          var allowed = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/gif'];
+          if (allowed.indexOf(file.type) === -1) {
+            showToast('Use JPEG, PNG, GIF, or SVG', 'error');
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function () {
+            var dataUrl = reader.result;
+            var img = new Image();
+            img.onload = function () {
+              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingLogo: dataUrl,
                 brandingLogoMeta: {
                   fileName: file.name,
@@ -10434,13 +10722,13 @@
                   height: img.naturalHeight || img.height
                 }
               });
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              renderConfigGroupBranding(group);
-              refreshBrandingHeaderIfPreviewing(selected.groupId);
+              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+              renderBrandingAssetBranding(asset);
+              refreshBrandingHeaderIfPreviewing(selected.assetId);
               markUnsaved();
             };
             img.onerror = function () {
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingLogo: dataUrl,
                 brandingLogoMeta: {
                   fileName: file.name,
@@ -10449,9 +10737,9 @@
                   height: 0
                 }
               });
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              renderConfigGroupBranding(group);
-              refreshBrandingHeaderIfPreviewing(selected.groupId);
+              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+              renderBrandingAssetBranding(asset);
+              refreshBrandingHeaderIfPreviewing(selected.assetId);
               markUnsaved();
             };
             img.src = dataUrl;
@@ -10463,7 +10751,14 @@
         }
 
         function showDetailView(view) {
-          ['view-system-main', 'view-system-quick-links', 'view-config-groups-folder', 'view-config-group'].forEach(function (id) {
+          [
+            'view-system-main',
+            'view-system-quick-links',
+            'view-config-groups-folder',
+            'view-config-group',
+            'view-branding-assets-folder',
+            'view-branding-asset'
+          ].forEach(function (id) {
             var el = document.getElementById(id);
             if (el) el.classList.toggle('is-visible', el.id === 'view-' + view);
           });
@@ -10487,54 +10782,75 @@
           });
         }
 
+        function renderBrandingAssetsFolderView() {
+          var list = document.getElementById('system-branding-assets-list');
+          var empty = document.getElementById('system-branding-assets-empty');
+          var assets = ConfigurationStore.getBrandingAssets().slice();
+          var activeIndex = selected.type === 'branding-asset'
+            ? assets.findIndex(function (a) { return a.id === selected.assetId; })
+            : -1;
+          renderOrderList(list, empty, assets, activeIndex, function () {
+            markUnsaved();
+            showToast('Order updated', 'info');
+            renderTree();
+            renderBrandingAssetsFolderView();
+          });
+        }
+
         function renderConfigGroupDetail(groupId) {
           var group = ConfigurationStore.findGroup(groupId);
           if (!group) return;
-          if (brandingHeaderPreviewGroupId && brandingHeaderPreviewGroupId !== groupId) {
-            closeBrandingHeaderPreview();
-          }
+          closeBrandingHeaderPreview();
           selected = { type: 'configuration-group', groupId: groupId };
           document.getElementById('config-group-title').textContent = group.label;
           document.getElementById('config-group-subtitle').textContent = 'Configuration group';
           document.getElementById('config-group-name').value = group.label;
-          hideConfigGroupUgTypeahead();
-          var ugInput = document.getElementById('config-group-ug-input');
-          if (ugInput) ugInput.value = '';
-          renderConfigGroupUserGroups(group);
-          renderConfigGroupBranding(group);
           showDetailView('config-group');
           renderTree();
           applyAppHeaderBranding();
         }
 
-        function renderConfigGroupBranding(group) {
-          var uploadZone = document.getElementById('config-group-logo-upload-zone');
-          var emptyState = document.getElementById('config-group-logo-empty');
-          var filledState = document.getElementById('config-group-logo-filled');
-          var previewImg = document.getElementById('config-group-branding-preview-logo');
-          var metaText = document.getElementById('config-group-logo-meta-text');
-          var clearLogoBtn = document.getElementById('config-group-logo-clear');
-          var bgInput = document.getElementById('config-group-branding-bg');
-          var bgHexInput = document.getElementById('config-group-branding-bg-hex');
-          var uploadInput = document.getElementById('config-group-logo-upload');
-          var hintDefault = document.getElementById('config-group-branding-hint-default');
-          if (!uploadZone || !group) return;
+        function renderBrandingAssetDetail(assetId) {
+          var asset = ConfigurationStore.findBrandingAsset(assetId);
+          if (!asset) return;
+          if (brandingHeaderPreviewAssetId && brandingHeaderPreviewAssetId !== assetId) {
+            closeBrandingHeaderPreview();
+          }
+          selected = { type: 'branding-asset', assetId: assetId };
+          document.getElementById('branding-asset-title').textContent = asset.label;
+          document.getElementById('branding-asset-subtitle').textContent = 'Branding asset';
+          document.getElementById('branding-asset-name').value = asset.label;
+          hideBrandingAssetUgTypeahead();
+          var ugInput = document.getElementById('branding-asset-ug-input');
+          if (ugInput) ugInput.value = '';
+          renderBrandingAssetUserGroups(asset);
+          renderBrandingAssetBranding(asset);
+          showDetailView('branding-asset');
+          renderTree();
+          applyAppHeaderBranding();
+        }
 
-          var isDefault = ConfigurationStore.isDefaultGroup(group.id);
-          if (hintDefault) hintDefault.hidden = !isDefault;
+        function renderBrandingAssetBranding(asset) {
+          var uploadZone = document.getElementById('branding-asset-logo-upload-zone');
+          var emptyState = document.getElementById('branding-asset-logo-empty');
+          var filledState = document.getElementById('branding-asset-logo-filled');
+          var previewImg = document.getElementById('branding-asset-preview-logo');
+          var metaText = document.getElementById('branding-asset-logo-meta-text');
+          var clearLogoBtn = document.getElementById('branding-asset-logo-clear');
+          var bgInput = document.getElementById('branding-asset-bg');
+          var bgHexInput = document.getElementById('branding-asset-bg-hex');
+          var uploadInput = document.getElementById('branding-asset-logo-upload');
+          if (!uploadZone || !asset) return;
 
-          uploadZone.classList.toggle('is-disabled', isDefault);
-          if (uploadInput) uploadInput.disabled = isDefault;
-
-          var branding = ConfigurationStore.getEffectiveGroupBrandingFields(group.id);
-          var hasLogo = !isDefault && !!branding.brandingLogo;
+          var branding = ConfigurationStore.getEffectiveBrandingAssetFields(asset.id);
+          var hasLogo = !!branding.brandingLogo;
 
           if (emptyState) emptyState.hidden = hasLogo;
           if (filledState) filledState.hidden = !hasLogo;
 
           if (hasLogo && previewImg) {
             previewImg.src = branding.brandingLogo;
-            previewImg.alt = group.label + ' logo';
+            previewImg.alt = asset.label + ' logo';
             var previewWrap = previewImg.closest('.config-group-logo-upload__preview');
             if (previewWrap) {
               if (branding.brandingBackgroundColor) {
@@ -10553,9 +10869,9 @@
           if (metaText) {
             metaText.textContent = hasLogo ? formatBrandingLogoMeta(branding.brandingLogoMeta) : '';
           }
-          if (clearLogoBtn) clearLogoBtn.disabled = isDefault || !hasLogo;
+          if (clearLogoBtn) clearLogoBtn.disabled = !hasLogo;
 
-          var bgDisabled = isDefault || !hasLogo;
+          var bgDisabled = !hasLogo;
           var bgHex = displayBrandingBgHex(bgDisabled ? null : branding.brandingBackgroundColor);
           if (bgHexInput) {
             bgHexInput.value = bgHex;
@@ -10566,34 +10882,213 @@
             bgInput.disabled = bgDisabled;
           }
 
-          syncBrandingHeaderPreviewControls(group);
+          syncBrandingHeaderPreviewControls(asset);
         }
 
-        function initConfigGroupBrandingControls() {
-          var upload = document.getElementById('config-group-logo-upload');
-          var uploadBtn = document.getElementById('config-group-logo-upload-btn');
-          var uploadZone = document.getElementById('config-group-logo-upload-zone');
-          var clearLogoBtn = document.getElementById('config-group-logo-clear');
-          var bgInput = document.getElementById('config-group-branding-bg');
-          var bgHexInput = document.getElementById('config-group-branding-bg-hex');
-          var previewToggleBtn = document.getElementById('config-group-branding-preview-toggle');
+        var brandingAssetUgPickerHighlight = -1;
+        var brandingAssetUgPickerBlurTimer = null;
+
+        function renderBrandingAssetUserGroups(asset) {
+          var field = document.getElementById('branding-asset-ug-field');
+          var input = document.getElementById('branding-asset-ug-input');
+          if (!field || !input || !asset) return;
+
+          var labels = ConfigurationStore.getBrandingAssetUserGroups(asset.id);
+          if (labels.length !== (asset.userGroups || []).length) {
+            ConfigurationStore.updateBrandingAsset(asset.id, { userGroups: labels });
+          }
+
+          field.querySelectorAll('.chip').forEach(function (chip) { chip.remove(); });
+          labels.forEach(function (label) {
+            var chip = document.createElement('span');
+            chip.className = 'chip';
+            chip.appendChild(document.createTextNode(label));
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'chip__remove';
+            rm.setAttribute('aria-label', 'Remove ' + label);
+            rm.textContent = '×';
+            rm.addEventListener('click', function () {
+              var a = ConfigurationStore.findBrandingAsset(asset.id);
+              if (!a) return;
+              var next = ConfigurationStore.getBrandingAssetUserGroups(asset.id).filter(function (x) {
+                return x !== label;
+              });
+              ConfigurationStore.updateBrandingAsset(asset.id, { userGroups: next });
+              renderBrandingAssetUserGroups(ConfigurationStore.findBrandingAsset(asset.id));
+              markUnsaved();
+            });
+            chip.appendChild(rm);
+            field.insertBefore(chip, input);
+          });
+        }
+
+        function hideBrandingAssetUgTypeahead() {
+          var menu = document.getElementById('branding-asset-ug-typeahead');
+          var input = document.getElementById('branding-asset-ug-input');
+          if (menu) menu.hidden = true;
+          if (input) input.setAttribute('aria-expanded', 'false');
+          brandingAssetUgPickerHighlight = -1;
+        }
+
+        function renderBrandingAssetUgTypeahead() {
+          var menu = document.getElementById('branding-asset-ug-typeahead');
+          var input = document.getElementById('branding-asset-ug-input');
+          if (!menu || !input) return;
+          if (selected.type !== 'branding-asset') {
+            hideBrandingAssetUgTypeahead();
+            return;
+          }
+
+          var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+          if (!asset) {
+            hideBrandingAssetUgTypeahead();
+            return;
+          }
+
+          var selectedLabels = ConfigurationStore.getBrandingAssetUserGroups(asset.id);
+          var suggestions = getUserGroupSuggestions(input.value, selectedLabels);
+          menu.innerHTML = '';
+          if (!suggestions.length) {
+            hideBrandingAssetUgTypeahead();
+            return;
+          }
+
+          if (brandingAssetUgPickerHighlight >= suggestions.length) {
+            brandingAssetUgPickerHighlight = suggestions.length - 1;
+          }
+
+          suggestions.forEach(function (ug, index) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'filter-sheet__typeahead-option' +
+              (index === brandingAssetUgPickerHighlight ? ' is-highlighted' : '');
+            btn.setAttribute('role', 'option');
+            btn.textContent = ug.label;
+            btn.addEventListener('mousedown', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            btn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              addBrandingAssetUserGroupLabel(ug.label);
+            });
+            menu.appendChild(btn);
+          });
+
+          menu.hidden = false;
+          input.setAttribute('aria-expanded', 'true');
+        }
+
+        function addBrandingAssetUserGroupLabel(label) {
+          if (selected.type !== 'branding-asset') return;
+          var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+          if (!asset || !FILTER_USER_GROUPS.some(function (ug) { return ug.label === label; })) return;
+
+          var labels = ConfigurationStore.getBrandingAssetUserGroups(asset.id);
+          if (labels.indexOf(label) !== -1) return;
+          labels.push(label);
+          ConfigurationStore.updateBrandingAsset(asset.id, { userGroups: labels });
+
+          var input = document.getElementById('branding-asset-ug-input');
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
+          brandingAssetUgPickerHighlight = -1;
+          renderBrandingAssetUserGroups(ConfigurationStore.findBrandingAsset(asset.id));
+          renderBrandingAssetUgTypeahead();
+          markUnsaved();
+        }
+
+        function initBrandingAssetUserGroupPicker() {
+          var input = document.getElementById('branding-asset-ug-input');
+          var menu = document.getElementById('branding-asset-ug-typeahead');
+          if (!input || !menu || input._ugBound) return;
+          input._ugBound = true;
+
+          menu.addEventListener('mousedown', function (e) { e.stopPropagation(); });
+
+          input.addEventListener('input', function () {
+            brandingAssetUgPickerHighlight = -1;
+            renderBrandingAssetUgTypeahead();
+          });
+
+          input.addEventListener('focus', function () {
+            if (brandingAssetUgPickerBlurTimer) {
+              clearTimeout(brandingAssetUgPickerBlurTimer);
+              brandingAssetUgPickerBlurTimer = null;
+            }
+            renderBrandingAssetUgTypeahead();
+          });
+
+          input.addEventListener('blur', function () {
+            brandingAssetUgPickerBlurTimer = setTimeout(hideBrandingAssetUgTypeahead, 150);
+          });
+
+          input.addEventListener('keydown', function (e) {
+            if (!menu || menu.hidden) {
+              if (e.key === 'Enter') e.preventDefault();
+              return;
+            }
+
+            var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+            if (!asset) return;
+            var suggestions = getUserGroupSuggestions(
+              input.value,
+              ConfigurationStore.getBrandingAssetUserGroups(asset.id)
+            );
+            if (!suggestions.length) {
+              if (e.key === 'Enter') e.preventDefault();
+              return;
+            }
+
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              brandingAssetUgPickerHighlight = (brandingAssetUgPickerHighlight + 1) % suggestions.length;
+              renderBrandingAssetUgTypeahead();
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              brandingAssetUgPickerHighlight = brandingAssetUgPickerHighlight <= 0
+                ? suggestions.length - 1
+                : brandingAssetUgPickerHighlight - 1;
+              renderBrandingAssetUgTypeahead();
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              var pick = brandingAssetUgPickerHighlight >= 0 ? brandingAssetUgPickerHighlight : 0;
+              addBrandingAssetUserGroupLabel(suggestions[pick].label);
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              input.value = '';
+              hideBrandingAssetUgTypeahead();
+            }
+          });
+        }
+
+        function initBrandingAssetControls() {
+          var upload = document.getElementById('branding-asset-logo-upload');
+          var uploadBtn = document.getElementById('branding-asset-logo-upload-btn');
+          var uploadZone = document.getElementById('branding-asset-logo-upload-zone');
+          var clearLogoBtn = document.getElementById('branding-asset-logo-clear');
+          var bgInput = document.getElementById('branding-asset-bg');
+          var bgHexInput = document.getElementById('branding-asset-bg-hex');
+          var previewToggleBtn = document.getElementById('branding-asset-preview-toggle');
           if (!upload || upload._brandingBound) return;
           upload._brandingBound = true;
 
           if (previewToggleBtn) {
             previewToggleBtn.addEventListener('click', function () {
-              if (selected.type !== 'configuration-group') return;
-              if (brandingHeaderPreviewGroupId === selected.groupId) {
+              if (selected.type !== 'branding-asset') return;
+              if (brandingHeaderPreviewAssetId === selected.assetId) {
                 closeBrandingHeaderPreview();
               } else {
-                openBrandingHeaderPreview(selected.groupId);
+                openBrandingHeaderPreview(selected.assetId);
               }
             });
           }
 
           function openLogoPicker() {
-            if (selected.type !== 'configuration-group') return;
-            if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+            if (selected.type !== 'branding-asset') return;
             upload.click();
           }
 
@@ -10601,16 +11096,15 @@
 
           if (uploadZone) {
             uploadZone.addEventListener('click', function (e) {
-              if (e.target.closest('#config-group-logo-clear')) return;
-              if (e.target.closest('#config-group-logo-filled')) return;
-              if (e.target.closest('#config-group-logo-upload-btn')) return;
-              if (!e.target.closest('#config-group-logo-empty')) return;
+              if (e.target.closest('#branding-asset-logo-clear')) return;
+              if (e.target.closest('#branding-asset-logo-filled')) return;
+              if (e.target.closest('#branding-asset-logo-upload-btn')) return;
+              if (!e.target.closest('#branding-asset-logo-empty')) return;
               openLogoPicker();
             });
 
             uploadZone.addEventListener('dragover', function (e) {
-              if (selected.type !== 'configuration-group') return;
-              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+              if (selected.type !== 'branding-asset') return;
               e.preventDefault();
               uploadZone.classList.add('is-dragover');
             });
@@ -10622,65 +11116,60 @@
             uploadZone.addEventListener('drop', function (e) {
               e.preventDefault();
               uploadZone.classList.remove('is-dragover');
-              if (selected.type !== 'configuration-group') return;
-              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
+              if (selected.type !== 'branding-asset') return;
               var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-              if (file) applyBrandingLogoFile(file);
+              if (file) applyBrandingAssetLogoFile(file);
             });
           }
 
           upload.addEventListener('change', function () {
             var file = upload.files && upload.files[0];
             upload.value = '';
-            if (file) applyBrandingLogoFile(file);
+            if (file) applyBrandingAssetLogoFile(file);
           });
 
           if (clearLogoBtn) {
             clearLogoBtn.addEventListener('click', function () {
-              if (selected.type !== 'configuration-group') return;
-              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+              if (selected.type !== 'branding-asset') return;
+              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingLogo: null,
                 brandingLogoMeta: null,
                 brandingBackgroundColor: null
               });
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              renderConfigGroupBranding(group);
-              refreshBrandingHeaderIfPreviewing(selected.groupId);
+              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+              renderBrandingAssetBranding(asset);
+              refreshBrandingHeaderIfPreviewing(selected.assetId);
               markUnsaved();
             });
           }
 
           function syncBrandingBgFromHex() {
             if (!bgHexInput) return;
-            if (selected.type !== 'configuration-group') return;
-            if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-            var branding = ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId);
+            if (selected.type !== 'branding-asset') return;
+            var branding = ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId);
             if (!branding.brandingLogo) return;
             var parsed = parseBrandingBgHex(bgHexInput.value);
-            ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+            ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
               brandingBackgroundColor: parsed
             });
             if (bgInput) bgInput.value = displayBrandingBgHex(parsed).toLowerCase();
-            var group = ConfigurationStore.findGroup(selected.groupId);
-            renderConfigGroupBranding(group);
-            refreshBrandingHeaderIfPreviewing(selected.groupId);
+            var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+            renderBrandingAssetBranding(asset);
+            refreshBrandingHeaderIfPreviewing(selected.assetId);
             markUnsaved();
           }
 
           if (bgHexInput) {
             bgHexInput.addEventListener('change', function () {
-              if (selected.type !== 'configuration-group') return;
-              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-              if (!ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId).brandingLogo) return;
+              if (selected.type !== 'branding-asset') return;
+              if (!ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId).brandingLogo) return;
               syncBrandingBgFromHex();
             });
             bgHexInput.addEventListener('keydown', function (e) {
               if (e.key === 'Enter') {
                 e.preventDefault();
-                if (selected.type !== 'configuration-group') return;
-                if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-                if (!ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId).brandingLogo) return;
+                if (selected.type !== 'branding-asset') return;
+                if (!ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId).brandingLogo) return;
                 syncBrandingBgFromHex();
                 bgHexInput.blur();
               }
@@ -10689,14 +11178,13 @@
 
           if (bgInput) {
             bgInput.addEventListener('input', function () {
-              if (selected.type !== 'configuration-group') return;
-              if (ConfigurationStore.isDefaultGroup(selected.groupId)) return;
-              if (!ConfigurationStore.getEffectiveGroupBrandingFields(selected.groupId).brandingLogo) return;
+              if (selected.type !== 'branding-asset') return;
+              if (!ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId).brandingLogo) return;
               if (bgHexInput) bgHexInput.value = bgInput.value.toUpperCase();
-              ConfigurationStore.setPendingGroupBranding(selected.groupId, {
+              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingBackgroundColor: parseBrandingBgHex(bgInput.value)
               });
-              refreshBrandingHeaderIfPreviewing(selected.groupId);
+              refreshBrandingHeaderIfPreviewing(selected.assetId);
               markUnsaved();
             });
           }
@@ -10707,7 +11195,11 @@
           if (type === 'main-settings' && selected.type === 'main-settings') sel = ' is-selected';
           if (type === 'config-groups-folder' && selected.type === 'config-groups-folder') sel = ' is-selected';
           if (type === 'quick-links' && selected.type === 'quick-links') sel = ' is-selected';
+          if (type === 'branding-assets-folder' && selected.type === 'branding-assets-folder') sel = ' is-selected';
           if (type === 'configuration-group' && selected.type === 'configuration-group' && selected.groupId === id) {
+            sel = ' is-selected';
+          }
+          if (type === 'branding-asset' && selected.type === 'branding-asset' && selected.assetId === id) {
             sel = ' is-selected';
           }
           var toggle = hasChildren
@@ -10718,6 +11210,8 @@
           if (id) dataAttrs += ' data-id="' + id + '"';
           var iconHtml = type === 'configuration-group'
             ? '<span class="tree-item__icon">' + ICONS.group + '</span>'
+            : type === 'branding-asset'
+              ? '<span class="tree-item__icon">' + ICONS.group + '</span>'
             : '';
           return '<div class="tree-item' + sel + '" ' + dataAttrs + '>' + toggle +
             iconHtml +
@@ -10737,6 +11231,17 @@
           return html;
         }
 
+        function renderBrandingAssetBranch() {
+          var html = '';
+          ConfigurationStore.getBrandingAssets().forEach(function (asset) {
+            var expanded = asset.expanded !== false;
+            html += '<li data-expanded="' + (expanded ? 'true' : 'false') + '">';
+            html += treeItem('branding-asset', asset.id, asset.label, expanded, false);
+            html += '</li>';
+          });
+          return html;
+        }
+
         function renderTree() {
           var html = '<ul><li data-expanded="' + treeState.systemExpanded + '">';
           html += treeItem('system-root', 'system', 'System settings', treeState.systemExpanded, true);
@@ -10748,6 +11253,11 @@
           html += treeItem('config-groups-folder', 'config-groups', 'Configuration groups', treeState.configGroupsExpanded, true);
           html += '<ul class="tree-children' + (treeState.configGroupsExpanded ? '' : ' is-collapsed') + '">';
           html += renderConfigGroupBranch();
+          html += '</ul></li>';
+          html += '<li data-expanded="' + treeState.brandingAssetsExpanded + '">';
+          html += treeItem('branding-assets-folder', 'branding-assets', 'Branding assets', treeState.brandingAssetsExpanded, true);
+          html += '<ul class="tree-children' + (treeState.brandingAssetsExpanded ? '' : ' is-collapsed') + '">';
+          html += renderBrandingAssetBranch();
           html += '</ul></li>';
           html += '<li data-expanded="' + treeState.quickLinksExpanded + '">';
           html += treeItem('quick-links', null, 'Quick links', treeState.quickLinksExpanded, false);
@@ -10770,10 +11280,16 @@
             toggle.innerHTML = expanded ? ICONS.chevronDown : ICONS.chevronRight;
             if (type === 'system-root') treeState.systemExpanded = expanded;
             if (type === 'config-groups-folder') treeState.configGroupsExpanded = expanded;
+            if (type === 'branding-assets-folder') treeState.brandingAssetsExpanded = expanded;
             if (type === 'quick-links') treeState.quickLinksExpanded = expanded;
             if (type === 'configuration-group') {
               var gid = item.dataset.id;
               ConfigurationStore.updateGroup(gid, { expanded: expanded });
+              renderTree();
+            }
+            if (type === 'branding-asset') {
+              var aid = item.dataset.id;
+              ConfigurationStore.updateBrandingAsset(aid, { expanded: expanded });
               renderTree();
             }
             return;
@@ -10783,6 +11299,11 @@
           var type = item.dataset.type;
           if (type === 'configuration-group') {
             renderConfigGroupDetail(item.dataset.id);
+            updateToolbarButtons();
+            return;
+          }
+          if (type === 'branding-asset') {
+            renderBrandingAssetDetail(item.dataset.id);
             updateToolbarButtons();
             return;
           }
@@ -10805,6 +11326,16 @@
             applyAppHeaderBranding();
             return;
           }
+          if (type === 'branding-assets-folder') {
+            closeBrandingHeaderPreview();
+            selected = { type: 'branding-assets-folder' };
+            showDetailView('branding-assets-folder');
+            renderBrandingAssetsFolderView();
+            renderTree();
+            updateToolbarButtons();
+            applyAppHeaderBranding();
+            return;
+          }
           if (type === 'quick-links') {
             closeBrandingHeaderPreview();
             selected = { type: 'quick-links' };
@@ -10819,6 +11350,9 @@
           if (selected.type === 'config-groups-folder' || selected.type === 'configuration-group') {
             return [{ mode: 'configuration-group', label: 'Configuration group' }];
           }
+          if (selected.type === 'branding-assets-folder' || selected.type === 'branding-asset') {
+            return [{ mode: 'branding-asset', label: 'Branding asset' }];
+          }
           return [];
         }
 
@@ -10828,7 +11362,7 @@
 
         function getAddDisabledTip() {
           if (isAddEnabled()) return '';
-          return 'Select Configuration groups or a configuration group in the sidebar to add a configuration group.';
+          return 'Select Configuration groups or Branding assets in the sidebar to add an item.';
         }
 
         function getRemoveDisabledTip() {
@@ -10840,15 +11374,20 @@
           if (selected.type === 'configuration-group') {
             return 'The selected configuration group cannot be removed.';
           }
-          if (selected.type === 'main-settings' || selected.type === 'quick-links') {
-            return 'Select a configuration group in the sidebar to remove it (Default cannot be removed).';
+          if (selected.type === 'branding-asset') {
+            return 'The selected branding asset cannot be removed.';
           }
-          return 'Select a configuration group to remove (Default cannot be removed).';
+          if (selected.type === 'main-settings' || selected.type === 'quick-links') {
+            return 'Select a configuration group or branding asset in the sidebar to remove it.';
+          }
+          return 'Select a configuration group or branding asset to remove it.';
         }
 
         function canRemove() {
-          return selected.type === 'configuration-group' &&
-            !ConfigurationStore.isDefaultGroup(selected.groupId);
+          if (selected.type === 'configuration-group') {
+            return !ConfigurationStore.isDefaultGroup(selected.groupId);
+          }
+          return selected.type === 'branding-asset';
         }
 
         function canDuplicate() {
@@ -10860,7 +11399,7 @@
         }
 
         function submitAddGroup(name) {
-          var rec = ConfigurationStore.addGroup(name, [], null);
+          var rec = ConfigurationStore.addGroup(name, null);
           treeState.configGroupsExpanded = true;
           renderConfigGroupDetail(rec.id);
           renderConfigGroupsFolderView();
@@ -10869,11 +11408,47 @@
           showToast('Configuration group "' + name + '" added', 'success');
         }
 
+        function submitAddBrandingAsset(name) {
+          var draft = draftBrandingAssetFromAddModal(name);
+          var blockers = getBrandingAssetIncompleteReasons(draft);
+          if (blockers.length) {
+            renderAddBrandingModalMessage(blockers);
+            showToast('Complete all required fields', 'error');
+            return false;
+          }
+          var rec = ConfigurationStore.addBrandingAsset(name, {
+            userGroups: draft.userGroups,
+            brandingLogo: draft.brandingLogo,
+            brandingLogoMeta: draft.brandingLogoMeta
+          });
+          treeState.brandingAssetsExpanded = true;
+          renderBrandingAssetDetail(rec.id);
+          renderBrandingAssetsFolderView();
+          updateToolbarButtons();
+          markUnsaved();
+          showToast('Branding asset "' + name + '" added', 'success');
+          return true;
+        }
+
         var pendingSystemDelete = false;
         var pendingDeleteGroupId = null;
+        var pendingDeleteBrandingAssetId = null;
 
         function openRemoveModal() {
           if (!canRemove()) return;
+          var cascade = document.getElementById('delete-modal-cascade');
+          if (selected.type === 'branding-asset') {
+            var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+            if (!asset) return;
+            document.getElementById('delete-modal-message').textContent =
+              'Are you sure you want to delete the branding asset "' + asset.label + '"?';
+            cascade.classList.add('is-hidden');
+            document.getElementById('delete-modal-overlay').classList.add('is-open');
+            pendingSystemDelete = true;
+            pendingDeleteGroupId = null;
+            pendingDeleteBrandingAssetId = asset.id;
+            return;
+          }
           var g = ConfigurationStore.findGroup(selected.groupId);
           if (!g) return;
           var counts = ConfigurationStore.countNestedContent(g.id);
@@ -10892,13 +11467,30 @@
           document.getElementById('delete-modal-overlay').classList.add('is-open');
           pendingSystemDelete = true;
           pendingDeleteGroupId = g.id;
+          pendingDeleteBrandingAssetId = null;
         }
 
         function confirmRemove() {
-          if (!pendingSystemDelete || !pendingDeleteGroupId) return false;
+          if (!pendingSystemDelete) return false;
+          if (pendingDeleteBrandingAssetId) {
+            ConfigurationStore.removeBrandingAsset(pendingDeleteBrandingAssetId);
+            pendingSystemDelete = false;
+            pendingDeleteBrandingAssetId = null;
+            closeBrandingHeaderPreview();
+            selected = { type: 'branding-assets-folder' };
+            showDetailView('branding-assets-folder');
+            renderBrandingAssetsFolderView();
+            renderTree();
+            updateToolbarButtons();
+            markUnsaved();
+            showToast('Branding asset removed', 'success');
+            return true;
+          }
+          if (!pendingDeleteGroupId) return false;
           ConfigurationStore.removeGroup(pendingDeleteGroupId);
           pendingSystemDelete = false;
           pendingDeleteGroupId = null;
+          pendingDeleteBrandingAssetId = null;
           selected = { type: 'config-groups-folder' };
           showDetailView('config-groups-folder');
           renderConfigGroupsFolderView();
@@ -10920,8 +11512,15 @@
             document.getElementById('config-group-title').textContent = this.value;
             markUnsaved();
           });
-          initConfigGroupBrandingControls();
-          initConfigGroupUserGroupPicker();
+          document.getElementById('branding-asset-name').addEventListener('input', function () {
+            if (selected.type !== 'branding-asset') return;
+            ConfigurationStore.updateBrandingAsset(selected.assetId, { label: this.value });
+            document.getElementById('branding-asset-title').textContent = this.value;
+            markUnsaved();
+          });
+          initBrandingAssetControls();
+          initBrandingAssetUserGroupPicker();
+          initAddBrandingModalControls();
           selected = { type: 'main-settings' };
           showDetailView('system-main');
           renderTree();
@@ -10933,11 +11532,12 @@
           refresh: function () {
             renderTree();
             if (selected.type === 'config-groups-folder') renderConfigGroupsFolderView();
-            if (selected.type === 'configuration-group') {
-              var group = ConfigurationStore.findGroup(selected.groupId);
-              if (group) {
-                renderConfigGroupUserGroups(group);
-                renderConfigGroupBranding(group);
+            if (selected.type === 'branding-assets-folder') renderBrandingAssetsFolderView();
+            if (selected.type === 'branding-asset') {
+              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+              if (asset) {
+                renderBrandingAssetUserGroups(asset);
+                renderBrandingAssetBranding(asset);
               }
             }
             updateToolbarButtons();
@@ -10951,10 +11551,17 @@
           canRemove: canRemove,
           canDuplicate: canDuplicate,
           submitAddGroup: submitAddGroup,
+          submitAddBrandingAsset: submitAddBrandingAsset,
+          prepareBrandingAddModal: prepareBrandingAddModal,
+          resetAddBrandingModal: resetAddBrandingModal,
           openRemoveModal: openRemoveModal,
           confirmRemove: confirmRemove,
           isPendingDelete: function () { return pendingSystemDelete; },
-          clearPendingDelete: function () { pendingSystemDelete = false; }
+          clearPendingDelete: function () {
+            pendingSystemDelete = false;
+            pendingDeleteGroupId = null;
+            pendingDeleteBrandingAssetId = null;
+          }
         };
       })();
 
