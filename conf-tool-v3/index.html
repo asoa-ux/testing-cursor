@@ -11245,6 +11245,8 @@
               ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingBackgroundColor: parseBrandingBgHex(bgInput.value)
               });
+              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+              renderBrandingAssetBranding(asset);
               refreshBrandingHeaderIfPreviewing(selected.assetId);
               markUnsaved();
             });
