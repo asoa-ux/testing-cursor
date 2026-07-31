@@ -683,6 +683,17 @@
     .sidebar-chrome--option-3[hidden] { display: none !important; }
     .sidebar-chrome--option-4[hidden] { display: none !important; }
 
+    /* Tree free-text search descoped — keep filter chrome only */
+    .sidebar__search-wrap,
+    .sidebar-search-line,
+    .sidebar-toolbar--search-only {
+      display: none !important;
+    }
+
+    .sidebar-chrome--option-3 {
+      display: none !important;
+    }
+
     .smart-filter {
       position: relative;
       padding: 8px 12px 10px;
@@ -1331,7 +1342,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      padding: 8px 0 0;
+      padding: 0;
     }
 
     .filter-btn {
@@ -1426,12 +1437,15 @@
 
     .tree {
       overflow: visible;
-      padding: 0 12px;
+      padding: 8px 12px;
       font-size: 13px;
     }
 
-    .sidebar__panel > .tree:first-child {
-      padding-top: 8px;
+    /* Filter chrome already provides top inset — avoid double spacing */
+    .sidebar[data-filter-layout="option-1"] .tree,
+    .sidebar[data-filter-layout="option-2"] .tree,
+    .sidebar[data-filter-layout="option-4"] .tree {
+      padding-top: 0;
     }
 
     .tree ul { list-style: none; margin: 0; padding: 0; }
@@ -1450,6 +1464,91 @@
 
     .tree-item:hover { background: rgba(0,0,0,0.04); }
     .tree-item.is-selected { background: var(--selection-bg); }
+
+    .tree-item.is-filter-sticky {
+      border-left: 3px solid #f7b500;
+      padding-left: 5px;
+      position: relative;
+    }
+
+    .tree-item.is-filter-sticky.is-selected {
+      background: var(--selection-bg);
+    }
+
+    .tree-item.is-filter-sticky[data-filter-sticky-tip]::after {
+      content: attr(data-filter-sticky-tip);
+      position: absolute;
+      left: 8px;
+      top: calc(100% + 6px);
+      width: max-content;
+      max-width: 260px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      font-style: normal;
+      text-align: left;
+      white-space: pre-line;
+      color: var(--white);
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1200;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .tree-item.is-filter-sticky[data-filter-sticky-tip]:hover::after,
+    .tree-item.is-filter-sticky[data-filter-sticky-tip]:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
+    .filter-mismatch-banner {
+      display: flex;
+      gap: 10px;
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      background: #fffbf5;
+      border: 1px solid #ede0d4;
+      border-radius: 2px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .filter-mismatch-banner[hidden] {
+      display: none !important;
+    }
+
+    .filter-mismatch-banner__icon {
+      color: #8a8886;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+
+    .filter-mismatch-banner__body {
+      min-width: 0;
+    }
+
+    .filter-mismatch-banner__title {
+      margin: 0 0 2px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .filter-mismatch-banner__text {
+      margin: 0;
+      color: var(--text);
+    }
 
     .multi-select-summary__hint {
       margin: 0 0 16px;
@@ -1730,6 +1829,10 @@
     .order-list__item.is-dragging { opacity: 0.5; }
     .order-list__item.is-over { background: #f3f3f3; }
     .order-list__item.is-active { background: #f3f3f3; }
+    .order-list__item--locked {
+      cursor: default;
+      color: var(--text-secondary);
+    }
 
     .order-list__drag {
       color: var(--text-secondary);
@@ -1737,6 +1840,8 @@
     }
 
     .form-section { margin-bottom: 28px; }
+
+    .form-section[hidden] { display: none !important; }
 
     .form-section__heading {
       font-size: 14px;
@@ -1810,12 +1915,12 @@
       justify-content: center;
       min-height: 160px;
       padding: 24px;
+      background-color: #f2f2f2;
     }
 
     .config-group-logo-upload__preview--checkered {
-      background-color: #fff;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect width='8' height='8' fill='%23f3f3f7'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23f3f3f7'/%3E%3C/svg%3E");
-      background-size: 16px 16px;
+      background-color: #f2f2f2;
+      background-image: none;
     }
 
     .config-group-logo-upload__preview img {
@@ -1879,6 +1984,18 @@
       display: none !important;
     }
 
+    .config-group-branding__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    .config-group-branding__actions .config-group-branding__preview-link {
+      margin-top: 0;
+    }
+
     .branding-preview-bar {
       display: flex;
       align-items: center;
@@ -1906,6 +2023,8 @@
       margin-bottom: 12px;
     }
 
+    .form-row[hidden] { display: none !important; }
+
     .form-row__label { padding-top: 6px; font-size: 13px; }
     .form-row__label .required { color: var(--required); }
     .form-row__value { font-size: 13px; padding-top: 6px; }
@@ -1918,11 +2037,30 @@
       border-bottom: 1px solid var(--border);
       background: transparent;
       font-size: 13px;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .underline-input:disabled {
       opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    .underline-input[readonly],
+    .underline-input:read-only {
+      cursor: default;
+      color: var(--text);
+      -webkit-text-fill-color: var(--text);
+      opacity: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .underline-input[readonly]:focus,
+    .underline-input:read-only:focus {
+      outline: none;
+      border-bottom-color: var(--border);
     }
 
     .underline-input:focus {
@@ -2052,9 +2190,9 @@
     .label-info[data-info-tip]::after {
       content: attr(data-info-tip);
       position: absolute;
-      left: 50%;
-      top: calc(100% + 8px);
-      transform: translateX(-50%);
+      left: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
       width: max-content;
       max-width: 240px;
       padding: 6px 10px;
@@ -2838,16 +2976,17 @@
                 <span class="form-row__label">Type</span>
                 <span class="form-row__value" id="branding-asset-type">Branding asset</span>
               </div>
-              <div class="form-row">
+              <div class="form-row" id="branding-asset-name-row">
                 <label class="form-row__label" for="branding-asset-name"><span class="required">*</span> Name</label>
                 <input type="text" id="branding-asset-name" class="underline-input" autocomplete="off">
               </div>
             </section>
             <section class="form-section" aria-labelledby="branding-asset-branding-heading">
               <h2 class="form-section__heading" id="branding-asset-branding-heading">Branding</h2>
+              <p class="form-section__hint" id="branding-asset-branding-hint" hidden>This logo is shown to every user, unless a more specific branding asset matches their user groups.</p>
               <div class="form-row form-row--stacked">
                 <div class="form-row__label-row">
-                  <span class="form-row__label" id="branding-asset-branding-logo-label"><span class="required">*</span> Logo</span>
+                  <span class="form-row__label" id="branding-asset-branding-logo-label"><span class="required" id="branding-asset-logo-required">*</span> Logo</span>
                   <button type="button" class="label-info" data-info-tip="If possible, use a compact version of the logo, as it works best in small sizes." aria-label="More information about logo">
                     <i class="ph ph-info icon icon--16" aria-hidden="true"></i>
                   </button>
@@ -2879,13 +3018,16 @@
               </div>
               <div class="form-row">
                 <span class="form-row__label" aria-hidden="true"></span>
-                <button type="button" class="text-btn config-group-branding__preview-link" id="branding-asset-preview-toggle">Preview branding</button>
+                <div class="config-group-branding__actions">
+                  <button type="button" class="text-btn config-group-branding__preview-link" id="branding-asset-preview-toggle">Preview branding</button>
+                  <button type="button" class="text-btn config-group-branding__preview-link" id="branding-asset-reset-default" hidden>Reset to default</button>
+                </div>
               </div>
             </section>
-            <section class="form-section" aria-labelledby="branding-asset-conditions-heading">
+            <section class="form-section" id="branding-asset-conditions-section" aria-labelledby="branding-asset-conditions-heading">
               <h2 class="form-section__heading" id="branding-asset-conditions-heading">Conditions for display</h2>
-              <p class="form-section__hint">You must specify 1 or more user groups for the logo to be displayed.</p>
-              <div class="form-row form-row--stacked">
+              <p class="form-section__hint" id="branding-asset-conditions-hint">You must specify 1 or more user groups for the logo to be displayed.</p>
+              <div class="form-row form-row--stacked" id="branding-asset-conditions-fields">
                 <label class="form-row__label" for="branding-asset-ug-input"><span class="required">*</span> User groups</label>
                 <div class="ug-picker" id="branding-asset-ug-picker">
                   <div class="chip-field" id="branding-asset-ug-field">
@@ -2906,7 +3048,7 @@
         <aside class="sidebar" data-filter-layout="option-1">
           <div class="sidebar__panel">
           <div class="sidebar-chrome sidebar-chrome--option-1">
-            <div class="sidebar__search-wrap">
+            <div class="sidebar__search-wrap" hidden>
               <input type="search" class="sidebar__search" id="tree-search" placeholder="Search" aria-label="Search">
               <span class="sidebar__search-icon">
                 <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
@@ -2929,7 +3071,7 @@
           </div>
           <div class="sidebar-chrome sidebar-chrome--option-2" hidden>
             <div class="sidebar-toolbar">
-              <div class="sidebar-search-line">
+              <div class="sidebar-search-line" hidden>
                 <input type="search" class="sidebar-search-line__input" id="tree-search-v2" placeholder="Search" aria-label="Search">
                 <span class="sidebar-search-line__icon"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
               </div>
@@ -2969,6 +3111,13 @@
         </aside>
 
         <main class="detail" id="detail-panel">
+          <div class="filter-mismatch-banner" id="wa-filter-mismatch-banner" hidden role="status">
+            <span class="filter-mismatch-banner__icon" aria-hidden="true"><i class="ph ph-warning icon icon--16"></i></span>
+            <div class="filter-mismatch-banner__body">
+              <p class="filter-mismatch-banner__title" id="wa-filter-mismatch-title">Perspective will be filtered out</p>
+              <p class="filter-mismatch-banner__text" id="wa-filter-mismatch-text">This perspective will be filtered out once you select another row.</p>
+            </div>
+          </div>
           <div class="detail-view is-visible" id="view-root" data-view="root">
             <header class="detail-header">
               <h1 class="detail__title">All configuration groups</h1>
@@ -3107,7 +3256,7 @@
         <aside class="sidebar" data-filter-layout="option-1">
           <div class="sidebar__panel">
           <div class="sidebar-chrome sidebar-chrome--option-1">
-            <div class="sidebar__search-wrap">
+            <div class="sidebar__search-wrap" hidden>
               <input type="search" class="sidebar__search" id="tabs-tree-search" placeholder="Search" aria-label="Search">
               <span class="sidebar__search-icon">
                 <i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i>
@@ -3136,7 +3285,7 @@
           </div>
           <div class="sidebar-chrome sidebar-chrome--option-2" hidden>
             <div class="sidebar-toolbar">
-              <div class="sidebar-search-line">
+              <div class="sidebar-search-line" hidden>
                 <input type="search" class="sidebar-search-line__input" id="tabs-tree-search-v2" placeholder="Search" aria-label="Search">
                 <span class="sidebar-search-line__icon"><i class="ph ph-magnifying-glass icon icon--16" aria-hidden="true"></i></span>
               </div>
@@ -3176,6 +3325,13 @@
         </aside>
 
         <main class="detail" id="tabs-detail-panel">
+          <div class="filter-mismatch-banner" id="tabs-filter-mismatch-banner" hidden role="status">
+            <span class="filter-mismatch-banner__icon" aria-hidden="true"><i class="ph ph-warning icon icon--16"></i></span>
+            <div class="filter-mismatch-banner__body">
+              <p class="filter-mismatch-banner__title" id="tabs-filter-mismatch-title">Tab will be filtered out</p>
+              <p class="filter-mismatch-banner__text" id="tabs-filter-mismatch-text">This tab will be filtered out once you select another row.</p>
+            </div>
+          </div>
           <div class="detail-view is-visible" id="tabs-view-root" data-view="root">
             <header class="detail-header">
               <h1 class="detail__title">All configuration groups</h1>
@@ -4344,6 +4500,7 @@
       }
 
       var APP_DEFAULT_LOGO = 'logo.svg';
+      var DEFAULT_BRANDING_ASSET_ID = 'default-branding';
       var DEFAULT_ARLA_BRANDING_LOGO = 'arla-logo.webp';
       var DEFAULT_ARLA_BRANDING_LOGO_META = {
         fileName: 'arla-logo.webp',
@@ -4413,43 +4570,91 @@
           return brandingAssets.find(function (x) { return x.id === id; }) || null;
         }
 
+        function isDefaultBrandingAsset(id) {
+          return id === DEFAULT_BRANDING_ASSET_ID;
+        }
+
         function uniqueBrandingAssetId(base) {
           var id = slugId(base);
-          while (findBrandingAsset(id)) {
+          if (id === DEFAULT_BRANDING_ASSET_ID) id = slugId(base + '-asset');
+          while (findBrandingAsset(id) || id === DEFAULT_BRANDING_ASSET_ID) {
             id = slugId(base + '-' + Math.random().toString(36).slice(2, 6));
           }
           return id;
         }
 
+        function ensureDefaultBrandingAtFront() {
+          var def = findBrandingAsset(DEFAULT_BRANDING_ASSET_ID);
+          if (!def) {
+            brandingAssets.unshift({
+              id: DEFAULT_BRANDING_ASSET_ID,
+              label: 'Default',
+              isDefault: true,
+              userGroups: [],
+              brandingLogo: null,
+              brandingBackgroundColor: null,
+              brandingLogoMeta: null,
+              expanded: true
+            });
+            return;
+          }
+          def.isDefault = true;
+          def.label = 'Default';
+          def.userGroups = [];
+          brandingAssets = [def].concat(brandingAssets.filter(function (a) {
+            return a.id !== DEFAULT_BRANDING_ASSET_ID;
+          }));
+        }
+
         function ensureDefaultBrandingAssets() {
-          if (brandingAssets.length) return;
-          brandingAssets.push({
-            id: 'arla',
-            label: 'Arla',
-            userGroups: ['Arla group'],
-            brandingLogo: DEFAULT_ARLA_BRANDING_LOGO,
-            brandingBackgroundColor: null,
-            brandingLogoMeta: DEFAULT_ARLA_BRANDING_LOGO_META,
-            expanded: true
+          ensureDefaultBrandingAtFront();
+          var hasAudience = brandingAssets.some(function (a) {
+            return !isDefaultBrandingAsset(a.id);
           });
+          if (!hasAudience) {
+            brandingAssets.push({
+              id: 'arla',
+              label: 'Arla',
+              isDefault: false,
+              userGroups: ['Arla group'],
+              brandingLogo: DEFAULT_ARLA_BRANDING_LOGO,
+              brandingBackgroundColor: null,
+              brandingLogoMeta: DEFAULT_ARLA_BRANDING_LOGO_META,
+              expanded: true
+            });
+          }
         }
 
         function getBrandingAssets() {
+          ensureDefaultBrandingAtFront();
           return brandingAssets.slice();
+        }
+
+        function getDefaultBrandingAsset() {
+          ensureDefaultBrandingAtFront();
+          return findBrandingAsset(DEFAULT_BRANDING_ASSET_ID);
+        }
+
+        function getAudienceBrandingAssets() {
+          return getBrandingAssets().filter(function (a) {
+            return !isDefaultBrandingAsset(a.id);
+          });
         }
 
         function getBrandingAssetUserGroups(assetId) {
           var asset = findBrandingAsset(assetId);
-          if (!asset) return [];
+          if (!asset || isDefaultBrandingAsset(assetId)) return [];
           return normalizeUserGroupLabels(asset.userGroups || []);
         }
 
         function addBrandingAsset(label, options) {
           options = options || {};
+          ensureDefaultBrandingAtFront();
           var id = uniqueBrandingAssetId(label || 'branding-asset');
           var rec = {
             id: id,
             label: label || 'Branding asset',
+            isDefault: false,
             userGroups: normalizeUserGroupLabels(options.userGroups || []),
             brandingLogo: options.brandingLogo || null,
             brandingBackgroundColor: options.brandingBackgroundColor || null,
@@ -4464,6 +4669,19 @@
         function updateBrandingAsset(id, patch) {
           var asset = findBrandingAsset(id);
           if (!asset) return;
+          if (isDefaultBrandingAsset(id)) {
+            if (patch.brandingLogo !== undefined) asset.brandingLogo = patch.brandingLogo;
+            if (patch.brandingBackgroundColor !== undefined) {
+              asset.brandingBackgroundColor = patch.brandingBackgroundColor;
+            }
+            if (patch.brandingLogoMeta !== undefined) asset.brandingLogoMeta = patch.brandingLogoMeta;
+            if (patch.expanded !== undefined) asset.expanded = patch.expanded;
+            asset.label = 'Default';
+            asset.userGroups = [];
+            asset.isDefault = true;
+            notifyMeta();
+            return;
+          }
           if (patch.label !== undefined) asset.label = patch.label;
           if (patch.userGroups !== undefined) {
             asset.userGroups = normalizeUserGroupLabels(patch.userGroups);
@@ -4478,11 +4696,53 @@
         }
 
         function removeBrandingAsset(id) {
+          if (isDefaultBrandingAsset(id)) return;
           var idx = brandingAssets.findIndex(function (x) { return x.id === id; });
           if (idx === -1) return;
           brandingAssets.splice(idx, 1);
           delete pendingBrandingByAssetId[id];
           notifyMeta();
+        }
+
+        function reorderBrandingAssets(orderedAudienceIds) {
+          ensureDefaultBrandingAtFront();
+          var def = findBrandingAsset(DEFAULT_BRANDING_ASSET_ID);
+          var byId = {};
+          brandingAssets.forEach(function (a) { byId[a.id] = a; });
+          var next = def ? [def] : [];
+          (orderedAudienceIds || []).forEach(function (id) {
+            if (isDefaultBrandingAsset(id) || !byId[id]) return;
+            if (next.some(function (a) { return a.id === id; })) return;
+            next.push(byId[id]);
+          });
+          brandingAssets.forEach(function (a) {
+            if (!next.some(function (x) { return x.id === a.id; })) next.push(a);
+          });
+          brandingAssets = next;
+          notifyMeta();
+        }
+
+        function resolveBrandingForUserGroups(userGroupLabels) {
+          var labels = normalizeUserGroupLabels(userGroupLabels || []);
+          var audienceMatch = getAudienceBrandingAssets().find(function (asset) {
+            var groups = normalizeUserGroupLabels(asset.userGroups || []);
+            return groups.some(function (g) { return labels.indexOf(g) !== -1; });
+          });
+          if (audienceMatch) {
+            return brandingPayloadFromFields(getEffectiveBrandingAssetFields(audienceMatch.id));
+          }
+          var def = getDefaultBrandingAsset();
+          if (def) {
+            var fields = getEffectiveBrandingAssetFields(def.id);
+            if (fields.brandingLogo || fields.brandingBackgroundColor) {
+              return brandingPayloadFromFields(fields);
+            }
+          }
+          return getDefaultBrandingPayload();
+        }
+
+        function getOrganizationBrandingPayload() {
+          return resolveBrandingForUserGroups([]);
         }
 
         function getEffectiveBrandingAssetFields(assetId) {
@@ -4959,15 +5219,21 @@
           copyWorkAreasIntoGroup: copyWorkAreasIntoGroup,
           copyTabsIntoGroup: copyTabsIntoGroup,
           getBrandingAssets: getBrandingAssets,
+          getDefaultBrandingAsset: getDefaultBrandingAsset,
+          getAudienceBrandingAssets: getAudienceBrandingAssets,
           findBrandingAsset: findBrandingAsset,
+          isDefaultBrandingAsset: isDefaultBrandingAsset,
           addBrandingAsset: addBrandingAsset,
           updateBrandingAsset: updateBrandingAsset,
           removeBrandingAsset: removeBrandingAsset,
+          reorderBrandingAssets: reorderBrandingAssets,
           getBrandingAssetUserGroups: getBrandingAssetUserGroups,
           getEffectiveBrandingAssetFields: getEffectiveBrandingAssetFields,
           setPendingBrandingAsset: setPendingBrandingAsset,
           brandingPayloadFromFields: brandingPayloadFromFields,
           getDefaultBrandingPayload: getDefaultBrandingPayload,
+          getOrganizationBrandingPayload: getOrganizationBrandingPayload,
+          resolveBrandingForUserGroups: resolveBrandingForUserGroups,
           commitAllPendingBranding: commitAllPendingBranding
         };
       })();
@@ -5052,16 +5318,32 @@
           var fields = ConfigurationStore.getEffectiveBrandingAssetFields(brandingHeaderPreviewAssetId);
           return ConfigurationStore.brandingPayloadFromFields(fields);
         }
-        return ConfigurationStore.getDefaultBrandingPayload();
+        return ConfigurationStore.getOrganizationBrandingPayload();
       }
 
       function syncBrandingHeaderPreviewControls(asset) {
         var toggleBtn = document.getElementById('branding-asset-preview-toggle');
+        var resetBtn = document.getElementById('branding-asset-reset-default');
         var bar = document.getElementById('branding-preview-bar');
         var barName = document.getElementById('branding-preview-bar-name');
         var isActive = !!(asset && brandingHeaderPreviewAssetId === asset.id);
+        var isDefault = !!(asset && ConfigurationStore.isDefaultBrandingAsset(asset.id));
+        var fields = asset ? ConfigurationStore.getEffectiveBrandingAssetFields(asset.id) : null;
+        var hasCustomLogo = !!(fields && fields.brandingLogo);
+        var canPreview = !!(asset && (!isDefault || hasCustomLogo));
+
+        if (isActive && !canPreview) {
+          closeBrandingHeaderPreview();
+          return;
+        }
+
         if (toggleBtn) {
           toggleBtn.textContent = isActive ? 'Close branding preview' : 'Preview branding';
+          toggleBtn.disabled = !canPreview;
+        }
+        if (resetBtn) {
+          resetBtn.hidden = !isDefault;
+          resetBtn.disabled = !(isDefault && hasCustomLogo);
         }
         if (bar) bar.hidden = !isActive;
         if (barName) barName.textContent = asset && isActive ? asset.label : '';
@@ -5083,6 +5365,10 @@
 
       function openBrandingHeaderPreview(assetId) {
         if (!assetId || !ConfigurationStore.findBrandingAsset(assetId)) return;
+        if (ConfigurationStore.isDefaultBrandingAsset(assetId) &&
+            !ConfigurationStore.getEffectiveBrandingAssetFields(assetId).brandingLogo) {
+          return;
+        }
         brandingHeaderPreviewAssetId = assetId;
         var asset = ConfigurationStore.findBrandingAsset(assetId);
         syncBrandingHeaderPreviewControls(asset);
@@ -5702,6 +5988,89 @@
         return isWaSelectionVisible(selected);
       }
 
+      function isWaStickyFilterSelection() {
+        return selected.type !== 'root' && isFilterActive() && !isWaSelectionVisible(selected);
+      }
+
+      function isStickyWaGroupPath(groupId) {
+        return isWaStickyFilterSelection() && selected.groupId === groupId;
+      }
+
+      function isStickyWaWorkAreaPath(groupId, workAreaId) {
+        return isStickyWaGroupPath(groupId) &&
+          (selected.type === 'work-area' || selected.type === 'perspective') &&
+          selected.workAreaId === workAreaId;
+      }
+
+      function isStickyWaTreeItem(type, id, groupId, workAreaId) {
+        if (!isWaStickyFilterSelection()) return false;
+        if (type === 'group') {
+          return selected.type === 'group' && selected.groupId === id;
+        }
+        if (type === 'work-area') {
+          return selected.type === 'work-area' &&
+            selected.groupId === groupId &&
+            selected.workAreaId === id;
+        }
+        if (type === 'perspective') {
+          return selected.type === 'perspective' &&
+            selected.groupId === groupId &&
+            selected.workAreaId === workAreaId &&
+            selected.perspectiveId === id;
+        }
+        return false;
+      }
+
+      function getFilterMismatchMessages(type) {
+        var titleNoun = 'Item';
+        var bodyNoun = 'item';
+        if (type === 'perspective') {
+          titleNoun = 'Perspective';
+          bodyNoun = 'perspective';
+        } else if (type === 'tab') {
+          titleNoun = 'Tab';
+          bodyNoun = 'tab';
+        } else if (type === 'work-area') {
+          titleNoun = 'Work area';
+          bodyNoun = 'work area';
+        } else if (type === 'group') {
+          titleNoun = 'Configuration group';
+          bodyNoun = 'configuration group';
+        }
+        var title = titleNoun + ' will be filtered out';
+        var body = 'This ' + bodyNoun + ' will be filtered out once you select another ' +
+          bodyNoun + '.';
+        return {
+          title: title,
+          body: body,
+          tip: title + '\n' + body,
+          tipAttr: title + '&#10;' + body
+        };
+      }
+
+      function fillFilterMismatchBanner(bannerId, titleId, textId, type, show) {
+        var banner = document.getElementById(bannerId);
+        if (!banner) return;
+        banner.hidden = !show;
+        if (!show) return;
+        var messages = getFilterMismatchMessages(type);
+        var titleEl = document.getElementById(titleId);
+        var textEl = document.getElementById(textId);
+        if (titleEl) titleEl.textContent = messages.title;
+        if (textEl) textEl.textContent = messages.body;
+      }
+
+      function updateWaFilterMismatchBanner() {
+        var show = getEditorContext() === 'work-areas' && isWaStickyFilterSelection();
+        fillFilterMismatchBanner(
+          'wa-filter-mismatch-banner',
+          'wa-filter-mismatch-title',
+          'wa-filter-mismatch-text',
+          selected.type,
+          show
+        );
+      }
+
       function getWaShiftSelectSiblings(sel) {
         if (sel.type === 'work-area') {
           var gWa = findGroup(sel.groupId);
@@ -5834,6 +6203,7 @@
         var treeItem = e.target.closest('.tree-item');
         if (!treeItem) return;
 
+        var wasSticky = isWaStickyFilterSelection();
         var type = treeItem.dataset.type;
         if (type === 'root') {
           selected = { type: 'root' };
@@ -5852,10 +6222,14 @@
           return;
         }
         waTreeMultiSelect.reset(selected);
-        document.querySelectorAll('#config-tree .tree-item.is-selected').forEach(function (el) {
-          el.classList.remove('is-selected');
-        });
-        treeItem.classList.add('is-selected');
+        if (wasSticky || isFilterActive()) {
+          applyTreeFilters({ immediate: true });
+        } else {
+          document.querySelectorAll('#config-tree .tree-item.is-selected').forEach(function (el) {
+            el.classList.remove('is-selected');
+          });
+          treeItem.classList.add('is-selected');
+        }
         updateDetail();
       }
 
@@ -6026,13 +6400,26 @@
         treeItem.focus({ preventScroll: true });
       }
 
-      function applyTreeFilters() {
+      function applyTreeFilters(opts) {
+        opts = opts || {};
+        var immediate = opts.immediate === true;
         if (waFilterSearchTimer) {
           clearTimeout(waFilterSearchTimer);
           waFilterSearchTimer = null;
         }
 
         if (isWaFilterQueryMode()) {
+          if (immediate) {
+            waFilterSearchLoading = false;
+            waQueryResults = searchWaConfiguration();
+            renderWaPrunedFilterTree();
+            updateSidebarFooter();
+            updateFilterBadges();
+            updateToolbarButtons();
+            updateWaFilterMismatchBanner();
+            if (waFilterPanelOpen) waFilterSheet.render();
+            return;
+          }
           waFilterSearchLoading = true;
           waQueryResults = null;
           renderWaSearchingTree();
@@ -6048,6 +6435,7 @@
             updateSidebarFooter();
             updateFilterBadges();
             updateToolbarButtons();
+            updateWaFilterMismatchBanner();
             if (waFilterPanelOpen) waFilterSheet.render();
           }, WA_FILTER_SEARCH_MS);
           return;
@@ -6059,6 +6447,7 @@
         updateSidebarFooter();
         updateFilterBadges();
         updateToolbarButtons();
+        updateWaFilterMismatchBanner();
         if (waFilterPanelOpen) waFilterSheet.render();
       }
 
@@ -6803,19 +7192,20 @@
       }
 
       function renderGroupBranch(group, filterOn, autoExpand) {
-        if (filterOn && !groupHasVisibleContent(group)) return '';
+        var stickyPath = isStickyWaGroupPath(group.id);
+        if (filterOn && !groupHasVisibleContent(group) && !stickyPath) return '';
 
         var hasVisibleWorkAreas = group.workAreas.some(function (wa) {
-          return workAreaHasVisibleContent(wa, group);
+          return workAreaHasVisibleContent(wa, group) || isStickyWaWorkAreaPath(group.id, wa.id);
         });
         var hasVisibleNested = isMultiLevelGroups() && (group.groups || []).some(function (sub) {
-          return !filterOn || groupHasVisibleContent(sub);
+          return (!filterOn || groupHasVisibleContent(sub)) || isStickyWaGroupPath(sub.id);
         });
         var hasVisibleChildren = hasVisibleWorkAreas || hasVisibleNested;
         var hasChildren = filterOn
-          ? hasVisibleChildren
+          ? hasVisibleChildren || stickyPath
           : group.workAreas.length > 0 || (isMultiLevelGroups() && (group.groups || []).length > 0);
-        var expanded = autoExpand && hasVisibleChildren ? true : group.expanded;
+        var expanded = stickyPath || (autoExpand && hasVisibleChildren) ? true : group.expanded;
 
         var html = '<li data-expanded="' + expanded + '">';
         html += treeItemMarkup(
@@ -6839,12 +7229,21 @@
       }
 
       function renderWorkAreaBranch(wa, group, filterOn, autoExpand) {
-        if (filterOn && !workAreaHasVisibleContent(wa, group)) return '';
+        var stickyPath = isStickyWaWorkAreaPath(group.id, wa.id);
+        if (filterOn && !workAreaHasVisibleContent(wa, group) && !stickyPath) return '';
 
-        var visiblePerspectives = filterOn ? getVisiblePerspectives(wa, group) : wa.perspectives;
+        var visiblePerspectives = filterOn ? getVisiblePerspectives(wa, group).slice() : wa.perspectives.slice();
+        if (filterOn && stickyPath && selected.type === 'perspective') {
+          var stickyPerspective = findPerspective(group.id, wa.id, selected.perspectiveId);
+          if (stickyPerspective && !visiblePerspectives.some(function (p) {
+            return p.id === stickyPerspective.id;
+          })) {
+            visiblePerspectives.push(stickyPerspective);
+          }
+        }
         var hasVisibleChildren = visiblePerspectives.length > 0;
         var hasChildren = filterOn ? hasVisibleChildren : wa.perspectives.length > 0;
-        var expanded = autoExpand && hasVisibleChildren ? true : wa.expanded;
+        var expanded = stickyPath || (autoExpand && hasVisibleChildren) ? true : wa.expanded;
 
         var html = '<li data-expanded="' + expanded + '">';
         html += treeItemMarkup(
@@ -7965,8 +8364,10 @@
         var onChange = function (id, checked) {
           if (checked) {
             if (treeFilters.userGroups.indexOf(id) === -1) treeFilters.userGroups.push(id);
+            treeFilters.userGroupsMode = 'specific';
           } else {
             treeFilters.userGroups = treeFilters.userGroups.filter(function (x) { return x !== id; });
+            if (!treeFilters.userGroups.length) treeFilters.userGroupsMode = 'off';
           }
           applyTreeFilters();
         };
@@ -8551,6 +8952,11 @@
         var iconKey = node.type === 'work-area' ? 'workArea' : node.type;
         var icon = ICONS[iconKey] || ICONS.perspective;
         var sel = isSelected(node.type, node.id, groupId, workAreaId) ? ' is-selected' : '';
+        var sticky = isStickyWaTreeItem(node.type, node.id, groupId, workAreaId);
+        var stickyClass = sticky ? ' is-filter-sticky' : '';
+        var stickyTip = sticky
+          ? ' data-filter-sticky-tip="' + getFilterMismatchMessages(node.type).tipAttr + '"'
+          : '';
         var dataAttrs = 'data-type="' + node.type + '" data-id="' + node.id + '"';
         if (groupId) dataAttrs += ' data-group-id="' + groupId + '"';
         if (workAreaId) dataAttrs += ' data-work-area-id="' + workAreaId + '"';
@@ -8561,7 +8967,7 @@
             (expanded ? ICONS.chevronDown : ICONS.chevronRight) + '</button>'
           : '<span class="tree-item__toggle is-hidden"></span>';
 
-        return '<div class="tree-item' + sel + '" ' + dataAttrs + '>' +
+        return '<div class="tree-item' + sel + stickyClass + '" ' + dataAttrs + stickyTip + '>' +
           toggleHtml +
           '<span class="tree-item__icon">' + icon + '</span>' +
           '<span class="tree-item__label">' + formatTreeLabel(node.label) + '</span>' +
@@ -8595,10 +9001,14 @@
         });
       }
 
-      function renderOrderList(listEl, emptyEl, items, activeIndex, onReorder) {
+      function renderOrderList(listEl, emptyEl, items, activeIndex, onReorder, options) {
+        options = options || {};
         function getItemLabel(item) {
           if (typeof item === 'string') return item;
           return item.label || '';
+        }
+        function isLocked(item) {
+          return typeof options.isLocked === 'function' ? !!options.isLocked(item) : false;
         }
         var readOnly = listEl.classList.contains('order-list--readonly');
         if (!items.length) {
@@ -8612,8 +9022,10 @@
         listEl.innerHTML = '';
         items.forEach(function (item, index) {
           var li = document.createElement('li');
-          li.className = 'order-list__item' + (index === activeIndex ? ' is-active' : '');
-          if (!readOnly) {
+          var locked = isLocked(item);
+          li.className = 'order-list__item' + (index === activeIndex ? ' is-active' : '') +
+            (locked ? ' order-list__item--locked' : '');
+          if (!readOnly && !locked) {
             li.draggable = true;
             li.dataset.index = String(index);
             li.innerHTML = '<span>' + escapeHtml(getItemLabel(item)) + '</span>' + ICONS.drag;
@@ -8782,7 +9194,7 @@
         if (selected.type !== 'perspective') return;
         persistWaGroupToStore(selected.groupId);
         markUnsaved();
-        applyTreeFilters();
+        applyTreeFilters({ immediate: true });
       }
 
       function hidePerspectiveUgTypeahead() {
@@ -8873,7 +9285,12 @@
           rm.addEventListener('click', function () {
             p.userGroups = p.userGroups.filter(function (x) { return x !== label; });
             renderPerspectiveUserGroups(p);
-            renderPerspectiveUgTypeahead();
+            var input = document.getElementById('perspective-ug-input');
+            if (input) {
+              input.value = '';
+              input.blur();
+            }
+            hidePerspectiveUgTypeahead();
             persistPerspectiveUserGroups();
           });
           chip.appendChild(rm);
@@ -8987,6 +9404,7 @@
         } else if (selected.type === 'perspective') {
           renderPerspectiveView(selected.groupId, selected.workAreaId, selected.perspectiveId);
         }
+        updateWaFilterMismatchBanner();
         updateDuplicateMenuItems();
         updateToolbarButtons();
         applyAppHeaderBranding();
@@ -9106,7 +9524,11 @@
       }
 
       function getHiddenByFiltersTip() {
-        return 'The selected item is hidden by the current search or filters.';
+        if (selected && (selected.type === 'perspective' || selected.type === 'tab' ||
+            selected.type === 'work-area' || selected.type === 'group')) {
+          return getFilterMismatchMessages(selected.type).body;
+        }
+        return 'This item will be filtered out once you select another perspective or tab.';
       }
 
       function tipGroupsManagedInSystemSettings(actionVerb) {
@@ -9115,7 +9537,7 @@
       }
 
       function waSelectionHiddenFromFilters() {
-        return selected.type !== 'root' && isFilterActive() && !isSelectionVisibleInTree();
+        return isWaStickyFilterSelection();
       }
 
       function getWaAddDisabledTip() {
@@ -10343,7 +10765,7 @@
         var dragIndex = null;
         var getLabel = function (item) { return typeof item === 'string' ? item : item.label; };
 
-        listEl.querySelectorAll('.order-list__item').forEach(function (item) {
+        listEl.querySelectorAll('.order-list__item:not(.order-list__item--locked)').forEach(function (item) {
           item.addEventListener('dragstart', function (e) {
             dragIndex = parseInt(item.dataset.index, 10);
             item.classList.add('is-dragging');
@@ -10381,6 +10803,7 @@
 
       var SystemSettingsEditor = (function () {
         var treeState = {
+          systemSettingsExpanded: true,
           configGroupsExpanded: true,
           brandingAssetsExpanded: true
         };
@@ -10848,17 +11271,63 @@
             ? assets.findIndex(function (a) { return a.id === selected.assetId; })
             : -1;
           renderOrderList(list, empty, assets, activeIndex, function () {
+            var audienceIds = assets
+              .filter(function (a) { return !ConfigurationStore.isDefaultBrandingAsset(a.id); })
+              .map(function (a) { return a.id; });
+            ConfigurationStore.reorderBrandingAssets(audienceIds);
             markUnsaved();
             showToast('Order updated', 'info');
             renderTree();
             renderBrandingAssetsFolderView();
+          }, {
+            isLocked: function (item) {
+              return ConfigurationStore.isDefaultBrandingAsset(item.id);
+            }
           });
+        }
+
+        function syncBrandingAssetDetailChrome(asset) {
+          var isDefault = ConfigurationStore.isDefaultBrandingAsset(asset.id);
+          var typeEl = document.getElementById('branding-asset-type');
+          var nameInput = document.getElementById('branding-asset-name');
+          var nameRow = document.getElementById('branding-asset-name-row');
+          var subtitle = document.getElementById('branding-asset-subtitle');
+          var brandingHint = document.getElementById('branding-asset-branding-hint');
+          var conditionsSection = document.getElementById('branding-asset-conditions-section');
+          var conditionsFields = document.getElementById('branding-asset-conditions-fields');
+          var conditionsHint = document.getElementById('branding-asset-conditions-hint');
+          var conditionsHeading = document.getElementById('branding-asset-conditions-heading');
+          var logoRequired = document.getElementById('branding-asset-logo-required');
+
+          if (typeEl) typeEl.textContent = isDefault ? 'Default branding' : 'Branding asset';
+          if (subtitle) subtitle.textContent = isDefault ? 'Default branding' : 'Branding asset';
+          if (nameInput) {
+            nameInput.value = asset.label;
+            nameInput.disabled = false;
+            nameInput.readOnly = isDefault;
+          }
+          if (nameRow) {
+            nameRow.hidden = false;
+            var nameRequired = nameRow.querySelector('.required');
+            if (nameRequired) nameRequired.hidden = isDefault;
+          }
+          if (logoRequired) logoRequired.hidden = isDefault;
+          if (brandingHint) brandingHint.hidden = !isDefault;
+          if (conditionsSection) conditionsSection.hidden = isDefault;
+          if (conditionsFields) conditionsFields.hidden = false;
+          if (conditionsHint) {
+            conditionsHint.textContent = 'You must specify 1 or more user groups for the logo to be displayed.';
+          }
+          if (conditionsHeading) {
+            conditionsHeading.textContent = 'Conditions for display';
+          }
         }
 
         function renderConfigGroupDetail(groupId) {
           var group = ConfigurationStore.findGroup(groupId);
           if (!group) return;
           closeBrandingHeaderPreview();
+          treeState.systemSettingsExpanded = true;
           treeState.configGroupsExpanded = true;
           selected = { type: 'configuration-group', groupId: groupId };
           document.getElementById('config-group-title').textContent = group.label;
@@ -10878,11 +11347,10 @@
           treeState.brandingAssetsExpanded = true;
           selected = { type: 'branding-asset', assetId: assetId };
           document.getElementById('branding-asset-title').textContent = asset.label;
-          document.getElementById('branding-asset-subtitle').textContent = 'Branding asset';
-          document.getElementById('branding-asset-name').value = asset.label;
           hideBrandingAssetUgTypeahead();
           var ugInput = document.getElementById('branding-asset-ug-input');
           if (ugInput) ugInput.value = '';
+          syncBrandingAssetDetailChrome(asset);
           renderBrandingAssetUserGroups(asset);
           renderBrandingAssetBranding(asset);
           showDetailView('branding-asset');
@@ -10903,13 +11371,16 @@
           if (!uploadZone || !asset) return;
 
           var branding = ConfigurationStore.getEffectiveBrandingAssetFields(asset.id);
-          var hasLogo = !!branding.brandingLogo;
+          var isDefault = ConfigurationStore.isDefaultBrandingAsset(asset.id);
+          var hasCustomLogo = !!branding.brandingLogo;
+          var showLogo = hasCustomLogo || isDefault;
+          var logoUrl = hasCustomLogo ? branding.brandingLogo : (isDefault ? APP_DEFAULT_LOGO : null);
 
-          if (emptyState) emptyState.hidden = hasLogo;
-          if (filledState) filledState.hidden = !hasLogo;
+          if (emptyState) emptyState.hidden = showLogo;
+          if (filledState) filledState.hidden = !showLogo;
 
-          if (hasLogo && previewImg) {
-            previewImg.src = branding.brandingLogo;
+          if (showLogo && previewImg && logoUrl) {
+            previewImg.src = logoUrl;
             previewImg.alt = asset.label + ' logo';
             var previewWrap = previewImg.closest('.config-group-logo-upload__preview');
             if (previewWrap) {
@@ -10927,11 +11398,25 @@
           }
 
           if (metaText) {
-            metaText.textContent = hasLogo ? formatBrandingLogoMeta(branding.brandingLogoMeta) : '';
+            if (hasCustomLogo) {
+              metaText.textContent = formatBrandingLogoMeta(branding.brandingLogoMeta);
+            } else if (isDefault) {
+              metaText.textContent = 'logo.svg';
+            } else {
+              metaText.textContent = '';
+            }
           }
-          if (clearLogoBtn) clearLogoBtn.disabled = !hasLogo;
+          if (clearLogoBtn) {
+            if (isDefault && !hasCustomLogo) {
+              clearLogoBtn.textContent = 'Replace';
+              clearLogoBtn.disabled = false;
+            } else {
+              clearLogoBtn.textContent = 'Remove';
+              clearLogoBtn.disabled = !hasCustomLogo;
+            }
+          }
 
-          var bgDisabled = !hasLogo;
+          var bgDisabled = !showLogo;
           var bgHex = displayBrandingBgHex(bgDisabled ? null : branding.brandingBackgroundColor);
           if (bgHexInput) {
             bgHexInput.value = bgHex;
@@ -10952,6 +11437,10 @@
           var field = document.getElementById('branding-asset-ug-field');
           var input = document.getElementById('branding-asset-ug-input');
           if (!field || !input || !asset) return;
+          if (ConfigurationStore.isDefaultBrandingAsset(asset.id)) {
+            field.querySelectorAll('.chip').forEach(function (chip) { chip.remove(); });
+            return;
+          }
 
           var labels = ConfigurationStore.getBrandingAssetUserGroups(asset.id);
           if (labels.length !== (asset.userGroups || []).length) {
@@ -10976,6 +11465,9 @@
               });
               ConfigurationStore.updateBrandingAsset(asset.id, { userGroups: next });
               renderBrandingAssetUserGroups(ConfigurationStore.findBrandingAsset(asset.id));
+              var ugInput = document.getElementById('branding-asset-ug-input');
+              if (ugInput) ugInput.value = '';
+              hideBrandingAssetUgTypeahead();
               markUnsaved();
             });
             chip.appendChild(rm);
@@ -11001,7 +11493,7 @@
           }
 
           var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
-          if (!asset) {
+          if (!asset || ConfigurationStore.isDefaultBrandingAsset(asset.id)) {
             hideBrandingAssetUgTypeahead();
             return;
           }
@@ -11043,7 +11535,8 @@
         function addBrandingAssetUserGroupLabel(label) {
           if (selected.type !== 'branding-asset') return;
           var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
-          if (!asset || !FILTER_USER_GROUPS.some(function (ug) { return ug.label === label; })) return;
+          if (!asset || ConfigurationStore.isDefaultBrandingAsset(asset.id)) return;
+          if (!FILTER_USER_GROUPS.some(function (ug) { return ug.label === label; })) return;
 
           var labels = ConfigurationStore.getBrandingAssetUserGroups(asset.id);
           if (labels.indexOf(label) !== -1) return;
@@ -11139,11 +11632,33 @@
           if (previewToggleBtn) {
             previewToggleBtn.addEventListener('click', function () {
               if (selected.type !== 'branding-asset') return;
+              if (previewToggleBtn.disabled) return;
               if (brandingHeaderPreviewAssetId === selected.assetId) {
                 closeBrandingHeaderPreview();
               } else {
                 openBrandingHeaderPreview(selected.assetId);
               }
+            });
+          }
+
+          var resetDefaultBtn = document.getElementById('branding-asset-reset-default');
+          if (resetDefaultBtn) {
+            resetDefaultBtn.addEventListener('click', function () {
+              if (selected.type !== 'branding-asset') return;
+              if (!ConfigurationStore.isDefaultBrandingAsset(selected.assetId)) return;
+              if (resetDefaultBtn.disabled) return;
+              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
+                brandingLogo: null,
+                brandingLogoMeta: null,
+                brandingBackgroundColor: null
+              });
+              if (brandingHeaderPreviewAssetId === selected.assetId) {
+                closeBrandingHeaderPreview();
+              }
+              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+              renderBrandingAssetBranding(asset);
+              applyAppHeaderBranding();
+              markUnsaved();
             });
           }
 
@@ -11191,6 +11706,11 @@
           if (clearLogoBtn) {
             clearLogoBtn.addEventListener('click', function () {
               if (selected.type !== 'branding-asset') return;
+              var branding = ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId);
+              if (ConfigurationStore.isDefaultBrandingAsset(selected.assetId) && !branding.brandingLogo) {
+                openLogoPicker();
+                return;
+              }
               ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingLogo: null,
                 brandingLogoMeta: null,
@@ -11203,11 +11723,15 @@
             });
           }
 
+          function brandingAssetAllowsBackground(assetId) {
+            if (ConfigurationStore.isDefaultBrandingAsset(assetId)) return true;
+            return !!ConfigurationStore.getEffectiveBrandingAssetFields(assetId).brandingLogo;
+          }
+
           function syncBrandingBgFromHex() {
             if (!bgHexInput) return;
             if (selected.type !== 'branding-asset') return;
-            var branding = ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId);
-            if (!branding.brandingLogo) return;
+            if (!brandingAssetAllowsBackground(selected.assetId)) return;
             var parsed = parseBrandingBgHex(bgHexInput.value);
             ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
               brandingBackgroundColor: parsed
@@ -11222,14 +11746,14 @@
           if (bgHexInput) {
             bgHexInput.addEventListener('change', function () {
               if (selected.type !== 'branding-asset') return;
-              if (!ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId).brandingLogo) return;
+              if (!brandingAssetAllowsBackground(selected.assetId)) return;
               syncBrandingBgFromHex();
             });
             bgHexInput.addEventListener('keydown', function (e) {
               if (e.key === 'Enter') {
                 e.preventDefault();
                 if (selected.type !== 'branding-asset') return;
-                if (!ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId).brandingLogo) return;
+                if (!brandingAssetAllowsBackground(selected.assetId)) return;
                 syncBrandingBgFromHex();
                 bgHexInput.blur();
               }
@@ -11239,7 +11763,7 @@
           if (bgInput) {
             bgInput.addEventListener('input', function () {
               if (selected.type !== 'branding-asset') return;
-              if (!ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId).brandingLogo) return;
+              if (!brandingAssetAllowsBackground(selected.assetId)) return;
               if (bgHexInput) bgHexInput.value = bgInput.value.toUpperCase();
               ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
                 brandingBackgroundColor: parseBrandingBgHex(bgInput.value)
@@ -11254,6 +11778,7 @@
 
         function treeItem(type, id, label, expanded, hasChildren, groupId) {
           var sel = '';
+          if (type === 'system-root' && selected.type === 'system-root') sel = ' is-selected';
           if (type === 'main-settings' && selected.type === 'main-settings') sel = ' is-selected';
           if (type === 'config-groups-folder' && selected.type === 'config-groups-folder') sel = ' is-selected';
           if (type === 'quick-links' && selected.type === 'quick-links') sel = ' is-selected';
@@ -11272,8 +11797,6 @@
           if (id) dataAttrs += ' data-id="' + id + '"';
           var iconHtml = type === 'configuration-group'
             ? '<span class="tree-item__icon">' + ICONS.group + '</span>'
-            : type === 'branding-asset'
-              ? '<span class="tree-item__icon">' + ICONS.group + '</span>'
             : '';
           return '<div class="tree-item' + sel + '" ' + dataAttrs + '>' + toggle +
             iconHtml +
@@ -11306,9 +11829,9 @@
 
         function renderTree() {
           var html = '<ul>';
-          html += '<li data-expanded="false">';
-          html += treeItem('system-root', 'system', 'System settings', false, false);
-          html += '</li>';
+          html += '<li data-expanded="' + (treeState.systemSettingsExpanded ? 'true' : 'false') + '">';
+          html += treeItem('system-root', 'system', 'System settings', treeState.systemSettingsExpanded, true);
+          html += '<ul class="tree-children' + (treeState.systemSettingsExpanded ? '' : ' is-collapsed') + '">';
           html += '<li data-expanded="false">';
           html += treeItem('main-settings', null, 'Main settings', false, false);
           html += '</li>';
@@ -11316,6 +11839,7 @@
           html += treeItem('config-groups-folder', 'config-groups', 'Configuration groups', treeState.configGroupsExpanded, true);
           html += '<ul class="tree-children' + (treeState.configGroupsExpanded ? '' : ' is-collapsed') + '">';
           html += renderConfigGroupBranch();
+          html += '</ul></li>';
           html += '</ul></li>';
           html += '<li data-expanded="' + treeState.brandingAssetsExpanded + '">';
           html += treeItem('branding-assets-folder', 'branding-assets', 'Branding assets', treeState.brandingAssetsExpanded, true);
@@ -11342,6 +11866,7 @@
             var children = li.querySelector(':scope > .tree-children');
             if (children) children.classList.toggle('is-collapsed', !expanded);
             toggle.innerHTML = expanded ? ICONS.chevronDown : ICONS.chevronRight;
+            if (type === 'system-root') treeState.systemSettingsExpanded = expanded;
             if (type === 'config-groups-folder') treeState.configGroupsExpanded = expanded;
             if (type === 'branding-assets-folder') treeState.brandingAssetsExpanded = expanded;
             if (type === 'configuration-group') {
@@ -11359,6 +11884,16 @@
           var item = e.target.closest('.tree-item');
           if (!item) return;
           var type = item.dataset.type;
+          if (type === 'system-root') {
+            closeBrandingHeaderPreview();
+            treeState.systemSettingsExpanded = true;
+            selected = { type: 'system-root' };
+            showDetailView('system-main');
+            renderTree();
+            updateToolbarButtons();
+            applyAppHeaderBranding();
+            return;
+          }
           if (type === 'configuration-group') {
             renderConfigGroupDetail(item.dataset.id);
             updateToolbarButtons();
@@ -11371,6 +11906,7 @@
           }
           if (type === 'main-settings') {
             closeBrandingHeaderPreview();
+            treeState.systemSettingsExpanded = true;
             selected = { type: 'main-settings' };
             showDetailView('system-main');
             renderTree();
@@ -11380,6 +11916,7 @@
           }
           if (type === 'config-groups-folder') {
             closeBrandingHeaderPreview();
+            treeState.systemSettingsExpanded = true;
             selected = { type: 'config-groups-folder' };
             showDetailView('config-groups-folder');
             renderConfigGroupsFolderView();
@@ -11433,13 +11970,18 @@
               ConfigurationStore.isDefaultGroup(selected.groupId)) {
             return null;
           }
+          if (selected.type === 'branding-asset' &&
+              ConfigurationStore.isDefaultBrandingAsset(selected.assetId)) {
+            return 'Default branding asset cannot be removed';
+          }
           if (selected.type === 'configuration-group') {
             return 'The selected configuration group cannot be removed.';
           }
           if (selected.type === 'branding-asset') {
             return 'The selected branding asset cannot be removed.';
           }
-          if (selected.type === 'main-settings' || selected.type === 'quick-links') {
+          if (selected.type === 'main-settings' || selected.type === 'system-root' ||
+              selected.type === 'quick-links') {
             return 'Select a configuration group or branding asset in the sidebar to remove it.';
           }
           return 'Select a configuration group or branding asset to remove it.';
@@ -11449,7 +11991,10 @@
           if (selected.type === 'configuration-group') {
             return !ConfigurationStore.isDefaultGroup(selected.groupId);
           }
-          return selected.type === 'branding-asset';
+          if (selected.type === 'branding-asset') {
+            return !ConfigurationStore.isDefaultBrandingAsset(selected.assetId);
+          }
+          return false;
         }
 
         function canDuplicate() {
@@ -11462,6 +12007,7 @@
 
         function submitAddGroup(name) {
           var rec = ConfigurationStore.addGroup(name, null);
+          treeState.systemSettingsExpanded = true;
           treeState.configGroupsExpanded = true;
           renderConfigGroupDetail(rec.id);
           renderConfigGroupsFolderView();
@@ -11501,7 +12047,7 @@
           var cascade = document.getElementById('delete-modal-cascade');
           if (selected.type === 'branding-asset') {
             var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
-            if (!asset) return;
+            if (!asset || ConfigurationStore.isDefaultBrandingAsset(asset.id)) return;
             document.getElementById('delete-modal-message').textContent =
               'Are you sure you want to delete the branding asset "' + asset.label + '"?';
             cascade.classList.add('is-hidden');
@@ -11578,6 +12124,7 @@
           });
           document.getElementById('branding-asset-name').addEventListener('input', function () {
             if (selected.type !== 'branding-asset') return;
+            if (ConfigurationStore.isDefaultBrandingAsset(selected.assetId)) return;
             ConfigurationStore.updateBrandingAsset(selected.assetId, { label: this.value });
             document.getElementById('branding-asset-title').textContent = this.value;
             markUnsaved();
@@ -11600,6 +12147,7 @@
             if (selected.type === 'branding-asset') {
               var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
               if (asset) {
+                syncBrandingAssetDetailChrome(asset);
                 renderBrandingAssetUserGroups(asset);
                 renderBrandingAssetBranding(asset);
               }
@@ -11730,6 +12278,10 @@
         } else {
           updateDetail();
           updateWaFilterTrigger();
+        }
+        updateWaFilterMismatchBanner();
+        if (typeof TabsEditor !== 'undefined' && TabsEditor.updateFilterMismatchBanner) {
+          TabsEditor.updateFilterMismatchBanner();
         }
       }
 
@@ -13807,6 +14359,38 @@
           return isTabsSelectionVisible(selected);
         }
 
+        function isTabsStickyFilterSelection() {
+          return selected.type !== 'root' && isFilterActive() && !isTabsSelectionVisible(selected);
+        }
+
+        function isStickyTabsGroupPath(groupId) {
+          return isTabsStickyFilterSelection() && selected.groupId === groupId;
+        }
+
+        function isStickyTabsTreeItem(type, id, groupId) {
+          if (!isTabsStickyFilterSelection()) return false;
+          if (type === 'group') {
+            return selected.type === 'group' && selected.groupId === id;
+          }
+          if (type === 'tab') {
+            return selected.type === 'tab' &&
+              selected.groupId === groupId &&
+              selected.tabId === id;
+          }
+          return false;
+        }
+
+        function updateTabsFilterMismatchBanner() {
+          var show = getEditorContext() === 'tabs-setup' && isTabsStickyFilterSelection();
+          fillFilterMismatchBanner(
+            'tabs-filter-mismatch-banner',
+            'tabs-filter-mismatch-title',
+            'tabs-filter-mismatch-text',
+            selected.type,
+            show
+          );
+        }
+
         function getTabsShiftSelectSiblings(sel) {
           if (sel.type === 'tab') {
             var g = findGroup(sel.groupId);
@@ -13873,6 +14457,11 @@
 
         function treeItemMarkup(node, groupId, expanded, hasChildren) {
           var sel = isSelected(node.type, node.id, groupId) ? ' is-selected' : '';
+          var sticky = isStickyTabsTreeItem(node.type, node.id, groupId);
+          var stickyClass = sticky ? ' is-filter-sticky' : '';
+          var stickyTip = sticky
+            ? ' data-filter-sticky-tip="' + getFilterMismatchMessages(node.type).tipAttr + '"'
+            : '';
           var dataAttrs = 'data-type="' + node.type + '" data-id="' + node.id + '"';
           if (groupId) dataAttrs += ' data-group-id="' + groupId + '"';
           var showToggle = hasChildren && node.type !== 'tab';
@@ -13883,7 +14472,7 @@
           var iconHtml = node.type === 'tab'
             ? ''
             : '<span class="tree-item__icon">' + (ICONS[node.type] || ICONS.group) + '</span>';
-          return '<div class="tree-item' + sel + '" ' + dataAttrs + '>' +
+          return '<div class="tree-item' + sel + stickyClass + '" ' + dataAttrs + stickyTip + '>' +
             toggleHtml +
             iconHtml +
             '<span class="tree-item__label">' + formatTreeLabel(node.label) + '</span>' +
@@ -13891,17 +14480,24 @@
         }
 
         function renderGroupBranch(group, filterOn, autoExpand) {
-          if (filterOn && !groupHasVisibleContent(group)) return '';
-          var visibleTabs = filterOn ? getVisibleTabs(group) : group.tabs;
+          var stickyPath = isStickyTabsGroupPath(group.id);
+          if (filterOn && !groupHasVisibleContent(group) && !stickyPath) return '';
+          var visibleTabs = filterOn ? getVisibleTabs(group).slice() : group.tabs.slice();
+          if (filterOn && stickyPath && selected.type === 'tab') {
+            var stickyTab = findTab(group.id, selected.tabId);
+            if (stickyTab && !visibleTabs.some(function (t) { return t.id === stickyTab.id; })) {
+              visibleTabs.push(stickyTab);
+            }
+          }
           var hasVisibleNested = isMultiLevelGroups() && (group.groups || []).some(function (sub) {
-            return !filterOn || groupHasVisibleContent(sub);
+            return (!filterOn || groupHasVisibleContent(sub)) || isStickyTabsGroupPath(sub.id);
           });
           var hasVisibleTabs = visibleTabs.length > 0;
           var hasVisibleChildren = hasVisibleTabs || hasVisibleNested;
           var hasChildren = filterOn
-            ? hasVisibleChildren
+            ? hasVisibleChildren || stickyPath
             : group.tabs.length > 0 || (isMultiLevelGroups() && (group.groups || []).length > 0);
-          var expanded = autoExpand && hasVisibleChildren ? true : group.expanded;
+          var expanded = stickyPath || (autoExpand && hasVisibleChildren) ? true : group.expanded;
           var html = '<li data-expanded="' + expanded + '">';
           html += treeItemMarkup({ type: 'group', id: group.id, label: group.label }, null, expanded, hasChildren);
           html += '<ul class="tree-children' + (expanded ? '' : ' is-collapsed') + '">';
@@ -13923,7 +14519,13 @@
           var autoExpand = shouldAutoExpandTree();
           var soleGroup = getSoleTabsGroupNode();
           if (soleGroup) {
-            var visibleTabs = filterOn ? getVisibleTabs(soleGroup) : soleGroup.tabs;
+            var visibleTabs = filterOn ? getVisibleTabs(soleGroup).slice() : soleGroup.tabs.slice();
+            if (filterOn && isStickyTabsGroupPath(soleGroup.id) && selected.type === 'tab') {
+              var stickySoleTab = findTab(soleGroup.id, selected.tabId);
+              if (stickySoleTab && !visibleTabs.some(function (t) { return t.id === stickySoleTab.id; })) {
+                visibleTabs.push(stickySoleTab);
+              }
+            }
             visibleTabs.forEach(function (tab) {
               branches += '<li>' + treeItemMarkup({ type: 'tab', id: tab.id, label: tab.label }, soleGroup.id, false, false) + '</li>';
             });
@@ -14181,6 +14783,7 @@
           updateSidebarFooter();
           updateFilterBadges();
           updateToolbarButtons();
+          updateTabsFilterMismatchBanner();
           if (tabsFilterPanelOpen) tabsFilterSheet.render();
         }
 
@@ -14347,6 +14950,8 @@
               tab[key] = (tab[key] || []).filter(function (l) { return l !== label; });
               renderChipField(fieldEl, tab[key], tab, key);
               markUnsaved();
+              applyTreeFilters();
+              updateDetail();
             });
             fieldEl.insertBefore(chip, input);
           });
@@ -14401,6 +15006,7 @@
           if (selected.type === 'root') renderRootView();
           else if (selected.type === 'group') renderGroupView(selected.groupId);
           else if (selected.type === 'tab') renderTabView(selected.groupId, selected.tabId);
+          updateTabsFilterMismatchBanner();
           updateTabsDuplicateMenuItems();
           updateToolbarButtons();
           applyAppHeaderBranding();
@@ -14480,7 +15086,7 @@
         }
 
         function tabsSelectionHiddenFromFilters() {
-          return selected.type !== 'root' && isFilterActive() && !isSelectionVisibleInTree();
+          return isTabsStickyFilterSelection();
         }
 
         function getTabsAddDisabledTip() {
@@ -15026,8 +15632,10 @@
           var onChange = function (id, checked) {
             if (checked) {
               if (filters.userGroups.indexOf(id) === -1) filters.userGroups.push(id);
+              filters.userGroupsMode = 'specific';
             } else {
               filters.userGroups = filters.userGroups.filter(function (x) { return x !== id; });
+              if (!filters.userGroups.length) filters.userGroupsMode = 'off';
             }
             applyTreeFilters();
           };
@@ -15253,6 +15861,7 @@
             }
             var treeItem = e.target.closest('.tree-item');
             if (!treeItem) return;
+            var wasSticky = isTabsStickyFilterSelection();
             var type = treeItem.dataset.type;
             if (type === 'root') {
               selected = { type: 'root' };
@@ -15264,10 +15873,14 @@
               return;
             }
             tabsTreeMultiSelect.reset(selected);
-            document.querySelectorAll('#tabs-config-tree .tree-item.is-selected').forEach(function (el) {
-              el.classList.remove('is-selected');
-            });
-            treeItem.classList.add('is-selected');
+            if (wasSticky || isFilterActive()) {
+              applyTreeFilters();
+            } else {
+              document.querySelectorAll('#tabs-config-tree .tree-item.is-selected').forEach(function (el) {
+                el.classList.remove('is-selected');
+              });
+              treeItem.classList.add('is-selected');
+            }
             updateDetail();
           });
 
@@ -15464,6 +16077,7 @@
           normalizeTreeGroups: normalizeTabsTreeGroups,
           applyTreeFilters: applyTreeFilters,
           updateFilterBadges: updateFilterBadges,
+          updateFilterMismatchBanner: updateTabsFilterMismatchBanner,
           updateToolbarButtons: updateToolbarButtons,
           updateDetail: updateDetail,
           getAddOptions: getAddOptions,
