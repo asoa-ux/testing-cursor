@@ -89,7 +89,7 @@ Open panels resize between **24rem** (min) and **56rem** (max).
 
 ### …the user switches tabs?
 - The content area **changes layout** (form ↔ table; Panel included or not; left vs right).
-- **Browse, Task list, Assistant stay exactly as they were.**
+- Shell panels stay as they were — **unless** the new layout includes the Panel and that would exceed the open-panel cap for this width. Then something closes automatically (same order as below), usually Browse first.
 
 ### …the window gets narrower?
 - Open panels **shrink** first (down to 24rem each).
@@ -109,14 +109,14 @@ Open panels resize between **24rem** (min) and **56rem** (max).
 
 ## When space runs out — who closes first?
 
-Fixed order (not “last opened” — that felt random in testing):
+In **Details**, investigating outranks navigating. Fixed order (not “last opened”):
 
-1. Browse  
-2. Panel (in content area)  
-3. Task list  
-4. Assistant  
+1. Browse — navigate elsewhere  
+2. Task list — navigate within the current scope  
+3. Panel — investigation context for the selection  
+4. Assistant — companion while you work  
 
-Task list and Assistant are kept longer than Browse and Panel.
+Browse and Task list yield before Panel and Assistant.
 
 ---
 
@@ -177,7 +177,7 @@ Narrow screens: hidden rails, panels as overlays. The prototype has experimental
 
 - **Constants:** `LAYOUT_MIN` / `PANEL_MIN` / `CONTENT_MIN` = 24rem · `PANEL_MAX` = 56rem · `COLLAPSED_W` = 48px.
 - **State:** panel `open` is global; tabs select which **layout** is active. The Panel only participates when the current tab’s layout includes it.
-- **Eviction:** runs on window **resize**, not tab change.
+- **Eviction:** runs on window **resize**, and on **tab change** when a Panel layout would exceed the open-panel cap.
 - **API:** `window.PanelFramework` — `setMode`, `setTab`, `open` / `close` / `toggle`, `getState`, `on` / `off`; events `mode-change`, `tab-change`, `breakpoint-change`, `open`, `close`, `resize`.
 
 ---
@@ -189,5 +189,5 @@ Narrow screens: hidden rails, panels as overlays. The prototype has experimental
 3. Form only / Table — full-width layouts with no Panel. Return to Form + panel — Panel is back if the user hadn’t closed it.  
 4. Collapse Browse or Panel — rail remains; expand again. Assistant closes fully; reopen via “Chat with AI”.  
 5. Resize an open shell panel and the content-area Panel.  
-6. Narrow the window — panels close in order: Browse → Panel → Task list → Assistant.  
+6. Narrow the window — panels close in order: Browse → Task list → Panel → Assistant.  
 7. Bulk at ~896px+ — table scrolls inside its container if needed; page does not scroll sideways.

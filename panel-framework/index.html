@@ -1448,20 +1448,22 @@ window.PanelFramework = (() => {
   // ---------- Panel definitions ----------
   // Each panel's role, side, position, and eviction priority in one place.
   // `priority` is consulted when we need to free a slot — lower number
-  // yields first. The "secondary" panel on each side has priority 1, the
-  // "primary" has 2. Ties at the same priority use EVICTION_SLOT_ORDER
-  // (Browse, then Info, then Task list, then Assistant).
+  // yields first. Ties use EVICTION_SLOT_ORDER.
+  //
+  // In Details, investigating outranks navigating:
+  //   1 Browse (nav elsewhere) → 2 Task list (nav in scope) →
+  //   3 Panel (investigation context) → 4 Assistant (companion)
   //
   // Roles:
   //   leftA  (outer-left)  — high-level navigation  (Browse)
   //   leftB  (inner-left)  — secondary navigation   (Task list)
-  //   rightA (inner-right) — meta-data / details    (Info panel)
+  //   rightA (inner-right) — meta-data / details    (Panel)
   //   rightB (outer-right) — AI chat / activity     (Assistant)
   const PANELS = {
     leftA:  { title: 'Browse',     side: 'left',  position: 'outer', priority: 1, shortcut: '1' },
     leftB:  { title: 'Task list',  side: 'left',  position: 'inner', priority: 2, shortcut: '2' },
-    rightA: { title: 'Panel', side: 'right', position: 'inner', priority: 1, shortcut: '3' },
-    rightB: { title: 'Assistant',  side: 'right', position: 'outer', priority: 2, shortcut: '4' },
+    rightA: { title: 'Panel',      side: 'right', position: 'inner', priority: 3, shortcut: '3' },
+    rightB: { title: 'Assistant',  side: 'right', position: 'outer', priority: 4, shortcut: '4' },
   };
 
   // ---------- Per-mode breakpoint ladders ----------
@@ -1533,8 +1535,8 @@ window.PanelFramework = (() => {
     return tab.workspacePanel === 'left' || tab.workspacePanel === 'right';
   }
 
-  // Workspace Info stays in panel state when a tab hides it; only layout math
-  // and eviction treat it as absent. Shell panels are never touched on tab switch.
+  // On tabs without a Panel, rightA stays in state but is out of the layout.
+  // Switching back to a Panel layout can bring it into the open count again.
   function isWorkspacePanelVisible() {
     return currentMode === 'details' && tabUsesWorkspacePanel(tabConfig());
   }
@@ -1936,8 +1938,8 @@ window.PanelFramework = (() => {
 
   // Comparator: lower priority number yields first. Ties use a fixed slot
   // order (never openOrder — that felt random as panels were opened/closed).
-  //   1. Browse → 2. Info → 3. Task list → 4. Assistant
-  const EVICTION_SLOT_ORDER = ['leftA', 'rightA', 'leftB', 'rightB'];
+  //   1. Browse → 2. Task list → 3. Panel → 4. Assistant
+  const EVICTION_SLOT_ORDER = ['leftA', 'leftB', 'rightA', 'rightB'];
 
   function byEvictionPriority(aId, bId) {
     const pa = PANELS[aId].priority || 0;
@@ -2038,11 +2040,14 @@ window.PanelFramework = (() => {
 
     const max = currentMaxAllowed();
     const openCount = layoutOpenCount();
+    // Content-area Panel only counts on tabs whose layout includes it.
+    // Opening it on Form only / Table must not kick out shell panels.
+    const willCountInLayout = !(isContentAreaPanel(id) && !isWorkspacePanelVisible());
 
-    if (openCount >= max) {
+    if (willCountInLayout && openCount >= max) {
       // Prefer to evict the lowest-priority panel on the OPPOSITE side.
       // If no opposite-side panel is open, fall back to the lowest-priority
-      // panel overall. Ties break to oldest-opened first.
+      // panel overall.
       const newSide = PANELS[id].side;
       const opposite = newSide === 'left' ? 'right' : 'left';
       const oppositeIds = layoutOpenOrder().filter(pid => PANELS[pid].side === opposite);
@@ -2091,8 +2096,9 @@ window.PanelFramework = (() => {
     }
   }
 
-  // Tab switch: visibility only for workspace Info (CSS). Shell panels stay put.
-  // Breakpoint eviction runs on viewport resize only, not on tab change.
+  // Tab switch changes the content layout. Shell panels stay put.
+  // If the new layout includes the Panel and that puts us over the open-panel
+  // cap (Panel was still "open" in state from a previous Panel tab), evict.
   function applyTabWorkspacePanel() {
     if (currentMode !== 'details' || currentBp === 'hamburger') return;
     const needsInfo = tabUsesWorkspacePanel(tabConfig());
@@ -2102,12 +2108,23 @@ window.PanelFramework = (() => {
     }
   }
 
+  function enforceOpenPanelCap() {
+    if (currentBp === 'hamburger') return;
+    const max = currentMaxAllowed();
+    while (layoutOpenCount() > max) {
+      const evictId = pickPanelToEvict(layoutOpenOrder());
+      if (!evictId) break;
+      closePanel(evictId, { silent: true, auto: true });
+    }
+  }
+
   function setTab(tabId) {
     if (currentMode !== 'details' || !DETAILS_TABS[tabId] || tabId === currentTab) return;
     const previousTab = currentTab;
     currentTab = tabId;
     syncLayoutClasses();
     applyTabWorkspacePanel();
+    enforceOpenPanelCap();
     applyAll();
     resolveLayoutOverflow();
     applyAll();
