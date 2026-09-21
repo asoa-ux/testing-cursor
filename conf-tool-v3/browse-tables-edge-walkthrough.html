@@ -336,7 +336,7 @@
   <div class="page">
     <h1>Browse tables — post-creation edge cases</h1>
     <p class="lede">
-      Option B after create: edit an existing table. Invalid OT + scope drafts show a warning; Save stays disabled. Create-time behaviour lives in Browse tables V3.
+      Option B after create: edit an existing table. Invalid OT + scope drafts show an error; Save stays disabled. Create-time behaviour lives in Browse tables V3.
     </p>
 
     <div class="picker">
@@ -366,7 +366,7 @@
           <button type="button" class="modal__close" tabindex="-1" aria-hidden="true">×</button>
         </div>
         <div class="modal__body">
-          <div class="modal__msg is-warning" id="modal-msg" hidden></div>
+          <div class="modal__msg is-error" id="modal-msg" hidden></div>
           <p class="field__hint" style="margin-top:0;margin-bottom:16px;">You must specify 1 or more object types for this table to be displayed. It will be visible to all users unless you select specific user groups.</p>
           <div class="field">
             <label class="field__label" for="config-name"><span class="req">*</span> Configuration name</label>
@@ -432,7 +432,7 @@
     var scenarios = [
       {
         id: 'remove-last',
-        label: 'Cannot clear last group when everyone exists',
+        label: 'Clear last group → conflict when everyone exists',
         blurb: 'Editing Product enrichment. Shoes already owns Product for everyone.',
         title: 'Edit browse table',
         startDraft: {
@@ -442,16 +442,24 @@
         },
         steps: [
           {
-            text: 'Check the Enrichment group chip',
-            hint: 'No × — clearing would become everyone and clash with the shoes table.',
+            text: 'Remove the Enrichment group chip',
+            hint: 'Clearing is allowed. Empty means everyone — that conflicts with the shoes table.',
             check: function () {
-              var chip = document.querySelector('#ug-chips .chip');
-              var hasRemove = chip && chip.querySelector('button');
-              return draft.userGroups.length === 1 && !hasRemove;
+              return window.__lastAction === 'ug-removed-to-everyone' &&
+                draft.userGroups.length === 0 &&
+                !!document.getElementById('modal-msg') &&
+                !document.getElementById('modal-msg').hidden;
+            }
+          },
+          {
+            text: 'Try Save',
+            hint: 'Save stays blocked. The shoes everyone table remains valid; this one is illegal until you add a free group or change object type.',
+            check: function () {
+              return window.__lastAction === 'save-blocked';
             }
           }
         ],
-        complete: 'Last group stays locked while an everyone table owns the same object type.'
+        complete: 'Last chip can be cleared; an error lands on this table and blocks save.'
       },
       {
         id: 'buyer-blocked',
@@ -621,7 +629,7 @@
       var msg = document.getElementById('modal-msg');
       if (conflict) {
         msg.hidden = false;
-        msg.className = 'modal__msg is-warning';
+        msg.className = 'modal__msg is-error';
         msg.innerHTML = conflict.html;
       } else {
         msg.hidden = true;
@@ -668,16 +676,6 @@
       });
     }
 
-    function emptyWouldConflictWithEveryone() {
-      if (!draft.objectTypes.length) return false;
-      return draft.objectTypes.some(function (ot) {
-        return WORLD.some(function (w) {
-          if (editingName && w.name === editingName) return false;
-          return w.objectTypes.indexOf(ot) !== -1 && !w.userGroups.length;
-        });
-      });
-    }
-
     function renderUgChips() {
       renderChips(
         'ug-chips',
@@ -690,10 +688,6 @@
           }
           syncUi();
           advanceIfReady();
-        },
-        function () {
-          if (draft.userGroups.length > 1) return true;
-          return !emptyWouldConflictWithEveryone();
         }
       );
     }
@@ -942,7 +936,7 @@
       var conflict = draftConflict();
       if (conflict) {
         setModalWarning(conflict);
-        showToast(conflict.text, 'warning');
+        showToast(conflict.text, 'error');
       } else {
         setModalWarning(null);
         showToast('Complete required fields', 'error');

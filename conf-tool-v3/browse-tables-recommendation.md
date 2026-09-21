@@ -24,7 +24,7 @@ The question is: **is empty-as-everyone still the best control when “everyone�
 
 **Use All / Specific radios for browse tables** (explicit All), instead of relying on an empty typeahead alone.
 
-We keep the same product meaning (no groups → all users). We change the **control** so All vs Specific is a deliberate choice where uniqueness is easy to break by accident.
+We keep the same product meaning (no groups → all users). We change the **control** so All is explicit and disabled when taken — invalid everyone clashes are **prevented**, which matches how this tool usually avoids error states.
 
 ---
 
@@ -54,6 +54,7 @@ You cannot have two tables that claim the same object type for the same user gro
 - Makes “everyone” an explicit choice when uniqueness matters  
 - A second everyone table for the same object type can’t be created — All is disabled when taken  
 - Under Specific, at least one group is required — “cannot be empty” is a normal mandatory-field rule  
+- Stays consistent with how this tool usually works: **prevent** invalid configurations, don’t leave the admin in an error state  
 - Conflicts are easy to explain: you can’t switch to All when an everyone table already exists  
 
 **Tradeoff**
@@ -77,13 +78,9 @@ You cannot have two tables that claim the same object type for the same user gro
 
 **Why uniqueness still makes it awkward**
 
-If we keep the usual optional typeahead and do **not** special-case it, admins can easily create two tables that both mean “Product for all users” (leave chips empty on create, or clear the last group on edit). Then it is unclear which table the end user should see — uniqueness is broken.
+To keep the field optional, we would allow clearing the last group. Empty means everyone. When an everyone table already exists for that object type, *this* table becomes illegal — an **error** on that config, save blocked. The other everyone table stays valid.
 
-So we had to add a workaround: when an everyone table already exists for that object type, the last user-group chip cannot be removed (clearing it would become a second everyone table).
-
-That workaround is hard to defend. On a **mandatory** field, “cannot be empty” is a normal rule. Here the field is **optional** — empty is a valid meaning (“everyone”), same as elsewhere. We do not have a clean argument for why this optional field sometimes cannot be cleared.
-
-Pattern consistency is preserved in appearance only. Behaviour stops matching other optional user-group fields.
+That is workable, but it would be **the first time** in this configuration tool that we deliberately allow an error state instead of preventing it. Elsewhere we avoid letting admins land in invalid configurations. Radios keep that convention: All is disabled when taken, Specific requires at least one group — no error draft.
 
 ---
 
@@ -93,25 +90,25 @@ Pattern consistency is preserved in appearance only. Behaviour stops matching ot
 |---|---|---|
 | Meaning of “no groups” | All selected | Empty chips (= all) — same as elsewhere |
 | Matches other Conditions screens | No (extra radios) | Yes (looks the same) |
-| Second everyone table (same object type) | Blocked (All disabled) | Easy without a workaround (empty = everyone) |
-| “Cannot be empty” defendable? | Yes — Specific is mandatory | No — field is optional, empty is valid |
-| Extra special cases for uniqueness | Few | Many (incl. last-chip lock) |
+| Second everyone table (same object type) | Blocked (All disabled) | Allowed edit → error on that table; save blocked |
+| Allows an error state in the config? | No — prevented | Yes — first time we would allow that here |
+| Matches “avoid invalid configs” convention | Yes | No |
 
 ---
 
 ## Why we recommend explicit All
 
-1. **Uniqueness** — only one everyone (and one per group) per object type. Without that, two everyone tables leave “which one does the user see?” unanswered.  
-2. **Radios make Specific mandatory** — we can require at least one group without inventing a rule for an optional field.  
-3. Reusing the optional typeahead forces a last-chip lock that other Conditions screens do not have — pattern consistency breaks in behaviour even if the control looks the same.
+1. **Uniqueness** — only one everyone (and one per group) per object type.  
+2. **This tool usually prevents errors** — we don’t leave admins in invalid configurations. Allowing clear-to-everyone → error would be a first.  
+3. **Radios prevent the bad state** — All disabled when taken; Specific requires at least one group. Pattern consistency on the typeahead is not worth introducing error states.
 
-We are not saying empty means something new. We are saying uniqueness makes the usual optional control hard to defend here — so we prefer an **explicit All user groups** choice.
+We are not saying empty means something new. We are saying uniqueness + “avoid errors” favour an **explicit All user groups** choice over reusing the optional typeahead.
 
 ---
 
 ## One-line answer for stakeholders
 
-> Elsewhere, empty user groups already means visible to all. Browse tables keep that meaning, but uniqueness means two everyone tables would conflict — and it would be unclear which one the user sees. Reusing the optional typeahead forces a workaround (sometimes you can’t clear the last group). We recommend All / Specific radios so “at least one group” is a normal mandatory rule under Specific, and All is an explicit choice that can be disabled when taken.
+> Elsewhere, empty user groups already means visible to all. Browse tables keep that meaning, but uniqueness means two everyone tables conflict. Reusing the typeahead would mean allowing an error on the table you just broke (first time we deliberately allow that in this tool). We recommend All / Specific radios so invalid everyone clashes are prevented — consistent with how we usually avoid error states.
 
 ---
 

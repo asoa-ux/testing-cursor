@@ -1515,6 +1515,10 @@
       position: relative;
     }
 
+    .tree-item.is-conflict-error {
+      position: relative;
+    }
+
     .tree-item__status-line {
       position: absolute;
       left: 0;
@@ -1525,6 +1529,10 @@
       border-radius: 1px;
       flex-shrink: 0;
       z-index: 1;
+    }
+
+    .tree-item__status-line--error {
+      background: #d13438;
     }
 
     .tree-item__status-line[data-conflict-tip] {
@@ -3690,7 +3698,7 @@
             </section>
           </div>
           <div class="detail-view" id="view-sv-browse-table-v3" data-view="sv-browse-table-v3">
-            <div class="form-section__validation" id="sv-browse-v3-validation-message" hidden role="status"></div>
+            <div class="form-section__validation" id="sv-browse-v3-validation-message" hidden role="alert"></div>
             <header class="detail-header">
               <h1 class="detail__title" id="sv-browse-v3-title">Browse table</h1>
               <p class="detail__subtitle" id="sv-browse-v3-subtitle">Browse tables V3</p>
@@ -3797,7 +3805,7 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
       <h2 class="modal__header" id="add-modal-title">Add</h2>
       <form class="modal__body" id="add-modal-form">
-        <div class="modal__field-message is-warning" id="add-sv-browse-v3-message" hidden role="status" aria-live="polite"></div>
+        <div class="modal__field-message is-error" id="add-sv-browse-v3-message" hidden role="alert" aria-live="assertive"></div>
         <div class="modal__field-message is-warning" id="add-sv-browse-message" hidden role="status" aria-live="polite"></div>
         <div class="modal__field-message is-warning" id="add-sv-browse-v2-message" hidden role="status" aria-live="polite"></div>
         <div class="modal__field" id="add-field-name">
@@ -13883,13 +13891,23 @@
 
         function findBrowseV3ConfigConflicts(config, excludeConfigId) {
           var cat = findCategory('browse-table-v3');
-          if (!cat) return [];
+          if (!cat || !config) return [];
+          var configIndex = -1;
+          for (var ci = 0; ci < cat.configs.length; ci++) {
+            if (cat.configs[ci].id === config.id) {
+              configIndex = ci;
+              break;
+            }
+          }
           var conflicts = [];
           getBrowseV3ConfigSlots(config).forEach(function (slot) {
             var otherNames = [];
             var seenName = {};
-            cat.configs.forEach(function (other) {
+            cat.configs.forEach(function (other, otherIndex) {
               if (other.id === excludeConfigId) return;
+              // Earlier table owns the slot; only later duplicates are illegal.
+              // Drafts (not yet in the list) conflict with any existing occupant.
+              if (configIndex >= 0 && otherIndex > configIndex) return;
               getBrowseV3ConfigSlots(other).forEach(function (otherSlot) {
                 if (otherSlot.objectType !== slot.objectType || otherSlot.scope !== slot.scope) return;
                 if (seenName[other.configurationName]) return;
@@ -13981,8 +13999,8 @@
             messageEl.classList.remove('is-warning', 'is-error');
             return;
           }
-          messageEl.classList.remove('is-error');
-          messageEl.classList.add('is-warning');
+          messageEl.classList.remove('is-warning');
+          messageEl.classList.add('is-error');
           if (conflictBlockers.length === 1) {
             messageEl.innerHTML = conflictBlockers[0];
           } else {
@@ -14144,7 +14162,7 @@
             messageEl.className = 'form-section__validation';
             return;
           }
-          messageEl.className = 'form-section__validation form-section__validation--warning';
+          messageEl.className = 'form-section__validation form-section__validation--error';
           if (messages.length === 1) messageEl.innerHTML = messages[0];
           else {
             messageEl.innerHTML = '<ul class="form-section__validation-list">' +
@@ -14154,57 +14172,6 @@
           messageEl.hidden = false;
         }
 
-        function canRemoveBrowseV3UserGroup(config, ugId) {
-          var groups = config.userGroups || [];
-          if (groups.indexOf(ugId) === -1) return false;
-          if (groups.length > 1) return true;
-          // Last chip → empty = everyone. Block when any OT already has an everyone table.
-          return !browseV3EmptyWouldConflictWithEveryone(config);
-        }
-
-        function browseV3EmptyWouldConflictWithEveryone(config) {
-          var objectTypes = config.objectTypes || [];
-          if (!objectTypes.length) return false;
-          for (var i = 0; i < objectTypes.length; i++) {
-            var occupants = findBrowseV3SlotOccupants(
-              objectTypes[i],
-              '__all__',
-              config.id
-            );
-            if (occupants.length) return true;
-          }
-          return false;
-        }
-
-        function getBrowseV3LastUserGroupBlockedReasons(config) {
-          if ((config.userGroups || []).length !== 1) return [];
-          if (!browseV3EmptyWouldConflictWithEveryone(config)) return [];
-          var tips = [];
-          var seen = {};
-          (config.objectTypes || []).forEach(function (objectType) {
-            var occupants = findBrowseV3SlotOccupants(objectType, '__all__', config.id);
-            if (!occupants.length) return;
-            var names = occupants.map(function (o) { return o.configurationName; });
-            var key = objectType + '\0' + names.join('\0');
-            if (seen[key]) return;
-            seen[key] = true;
-            tips.push({
-              slot: { objectType: objectType, scope: '__all__' },
-              otherNames: names
-            });
-          });
-          return tips;
-        }
-
-        function getBrowseV3LastUserGroupBlockedTip(config) {
-          var reasons = getBrowseV3LastUserGroupBlockedReasons(config);
-          if (!reasons.length) return '';
-          return reasons.map(function (r) {
-            return 'You can\'t remove the last user group. ' +
-              formatBrowseV3SlotConflictTip(r.slot, r.otherNames);
-          }).join(' ');
-        }
-
         function renderBrowseV3UserGroupsUi(config) {
           normalizeBrowseV3Config(config);
           renderIdChips(
@@ -14212,34 +14179,11 @@
             config.userGroups,
             getBrowseUserGroupLabel,
             function (id) {
-              if (!canRemoveBrowseV3UserGroup(config, id)) return;
               config.userGroups = config.userGroups.filter(function (x) { return x !== id; });
               renderBrowseV3UserGroupsUi(config);
               markUnsaved();
-            },
-            {
-              canRemove: function (id) {
-                return canRemoveBrowseV3UserGroup(config, id);
-              }
             }
           );
-          var blockedTip = getBrowseV3LastUserGroupBlockedTip(config);
-          if (blockedTip) {
-            document.querySelectorAll('#sv-browse-v3-user-groups-chips .chip').forEach(function (chip) {
-              if (chip.querySelector('.chip__remove')) return;
-              chip.classList.add('chip--locked');
-              chip.setAttribute('tabindex', '0');
-              chip.setAttribute('aria-description', blockedTip);
-              chip.addEventListener('mouseenter', function () {
-                showCatalogDisabledTip(blockedTip, chip, { placement: 'right', delay: 500 });
-              });
-              chip.addEventListener('mouseleave', hideCatalogDisabledTip);
-              chip.addEventListener('focus', function () {
-                showCatalogDisabledTip(blockedTip, chip, { placement: 'right', delay: 0 });
-              });
-              chip.addEventListener('blur', hideCatalogDisabledTip);
-            });
-          }
           renderBrowseV3DetailValidation(config);
           renderTree();
         }
@@ -14876,7 +14820,7 @@
           } else if (cat.kind === 'browse-table-v3') {
             document.getElementById('sv-category-subtitle').textContent = 'Browse tables V3';
             document.getElementById('sv-category-description').textContent =
-              'Optional user groups in the create modal (empty = everyone). Create is blocked when the object type + user group combination already exists. After create, the last user group cannot be removed when an everyone table already covers the same object type.';
+              'Optional user groups (empty = everyone). Create is blocked when the object type + user group combination already exists. Clearing groups to everyone while another everyone table already covers the same object type shows an error on this table — save stays blocked until fixed.';
           } else {
             document.getElementById('sv-category-subtitle').textContent = 'Reference table';
             document.getElementById('sv-category-description').textContent =
@@ -14913,10 +14857,13 @@
                   warnTip = getBrowseV3ConfigTreeWarnTip(cfg);
                 }
                 if (warnTip) {
-                  warnClass = ' is-conflict-warn';
+                  var isV3Conflict = cat.kind === 'browse-table-v3';
+                  warnClass = isV3Conflict ? ' is-conflict-error' : ' is-conflict-warn';
                   var tipAttr = escapeHtml(warnTip).replace(/\n/g, '&#10;');
                   warnLine =
-                    '<span class="tree-item__status-line" data-conflict-tip="' + tipAttr +
+                    '<span class="tree-item__status-line' +
+                    (isV3Conflict ? ' tree-item__status-line--error' : '') +
+                    '" data-conflict-tip="' + tipAttr +
                     '" role="img" tabindex="0" aria-label="' + tipAttr + '"></span>';
                 }
                 html += '<li><div class="tree-item' + cfgSel + warnClass + '"' +
