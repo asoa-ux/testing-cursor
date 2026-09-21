@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search</title>
+    <link rel="stylesheet" href="styles.css?v=tab-accent" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="lab-bar">
+        <span class="lab-tag">Explore</span>
+        <span>Saved searches as</span>
+        <button type="button" id="lab-saved-menu">Menu</button>
+        <button type="button" id="lab-saved-tabs">Tabs</button>
+        <span class="lab-split"></span>
+        <span>Super types as</span>
+        <button type="button" id="lab-type-tabs">Tabs</button>
+        <button type="button" id="lab-type-filters">Filters</button>
+        <span class="lab-split"></span>
+        <span>No criteria</span>
+        <button type="button" id="lab-start-empty">Empty</button>
+        <button type="button" id="lab-start-all">All items</button>
+        <span class="lab-split"></span>
+        <button type="button" id="lab-custom-session">Customize</button>
+        <button type="button" id="lab-custom-views">Views</button>
+        <span class="lab-hint">Saved-search tabs and Search-in tabs are separate. Views: one column layout for all types.</span>
+      </div>
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="top-icon" aria-label="Menu">
+            <svg viewBox="0 0 18 18" fill="none"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="top-icon" aria-label="Back">
+            <svg viewBox="0 0 18 18" fill="none"><path d="M11 4 6 9l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <h1>Search</h1>
+        </div>
+        <div class="topbar-right">
+          <span>English (US)</span>
+          <span>Main</span>
+          <button type="button" class="topbar-assistant" id="btn-assistant" aria-pressed="false">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M4 5.5h12v8H8l-3.5 2.5V13.5H4v-8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            Assistant
+          </button>
+          <button type="button" class="top-icon" aria-label="Notifications">
+            <svg viewBox="0 0 18 18" fill="none"><path d="M5 7.5a4 4 0 1 1 8 0c0 2.5 1 3.5 1 3.5H4s1-1 1-3.5Z" stroke="currentColor" stroke-width="1.3"/><path d="M8 14.5h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <i class="dot"></i>
+          </button>
+          <button type="button" class="top-icon" aria-label="Apps">
+            <svg viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="5" height="5" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="3" width="5" height="5" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="10" width="5" height="5" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="10" width="5" height="5" stroke="currentColor" stroke-width="1.3"/></svg>
+          </button>
+          <button type="button" class="top-icon" aria-label="Settings">
+            <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M9 3.2v1.6M9 13.2v1.6M3.2 9h1.6M13.2 9h1.6M5 5l1.1 1.1M11.9 11.9 13 13M13 5l-1.1 1.1M6.1 11.9 5 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="top-icon" aria-label="Help">
+            <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7.2 7.2a1.8 1.8 0 1 1 2.4 1.7c-.5.3-.8.7-.8 1.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="9" cy="12.4" r="0.6" fill="currentColor"/></svg>
+          </button>
+          <button type="button" class="top-icon" aria-label="Account">
+            <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="7" r="2.4" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 14.2c.8-2 2.4-3 4.5-3s3.7 1 4.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="shell" id="shell">
+      <div class="stage">
+      <div class="toolbar">
+        <div class="search-field" id="search-field">
+          <svg class="search-ico" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <div class="search-clauses" id="search-clauses"></div>
+          <input id="search-input" placeholder="Search" autocomplete="off" />
+          <button type="button" class="search-clear" id="btn-search-clear" hidden aria-label="Clear search">✕</button>
+          <button type="button" class="search-saved" id="btn-saved-open" aria-label="Saved searches" aria-haspopup="listbox" aria-expanded="false">
+            <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <button type="button" class="tbtn" id="btn-sort" aria-pressed="false">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M6.5 4v12M6.5 4 4 6.5M6.5 4 9 6.5M13.5 16V4M13.5 16 11 13.5M13.5 16l2.5-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sort
+        </button>
+        <span class="toolbar-split" aria-hidden="true"></span>
+        <button type="button" class="tbtn" id="btn-saved" aria-pressed="false">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M5 3.5h10v13l-5-3.2-5 3.2v-13Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span class="tbtn-label">
+            <span id="btn-saved-label">Save search</span>
+            <svg class="tbtn-caret" id="btn-saved-caret" viewBox="0 0 12 12" fill="none" hidden aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </button>
+        <span class="toolbar-split" aria-hidden="true"></span>
+        <div class="toolbar-actions">
+          <button type="button" class="tbtn item-action" disabled>
+            <svg viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="6" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><rect x="12" y="3" width="6" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="13" width="6" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 7v2h10V7M10 9v4" stroke="currentColor" stroke-width="1.3"/></svg>
+            Add to workflow
+          </button>
+          <button type="button" class="tbtn item-action" disabled>
+            <svg viewBox="0 0 20 20" fill="none"><path d="M3 7.5 10 4l7 3.5v8L10 19l-7-3.5v-8Z" stroke="currentColor" stroke-width="1.3"/><path d="M3 7.5 10 11l7-3.5" stroke="currentColor" stroke-width="1.3"/></svg>
+            Collection
+          </button>
+          <button type="button" class="tbtn item-action" disabled>
+            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.2" stroke="currentColor" stroke-width="1.3"/></svg>
+            Business action
+          </button>
+          <button type="button" class="tbtn item-action" disabled>
+            <svg viewBox="0 0 20 20" fill="none"><path d="M4 13v3h12v-3" stroke="currentColor" stroke-width="1.3"/><path d="M10 4v10M10 4 7 7M10 4l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Export
+          </button>
+        </div>
+        <div class="toolbar-end">
+          <button type="button" class="tbtn" id="btn-customize" aria-pressed="false">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h12M4 14h12" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.4" fill="currentColor"/><circle cx="13" cy="10" r="1.4" fill="currentColor"/><circle cx="7" cy="14" r="1.4" fill="currentColor"/></svg>
+            Customize
+          </button>
+          <button type="button" class="tbtn" id="btn-view" aria-pressed="false" hidden>
+            <svg viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h12M4 14h12" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.4" fill="currentColor"/><circle cx="13" cy="10" r="1.4" fill="currentColor"/><circle cx="7" cy="14" r="1.4" fill="currentColor"/></svg>
+            <span class="tbtn-label">
+              <span id="btn-view-label">Default view</span>
+              <i class="tab-dot" id="btn-view-dot" hidden></i>
+              <svg class="tbtn-caret" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <button type="button" class="tbtn" id="btn-details" aria-pressed="false">
+            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M11 4v12" stroke="currentColor" stroke-width="1.3"/></svg>
+            Details
+          </button>
+          <div class="view-mode" role="group" aria-label="View mode">
+            <div class="view-mode-btns">
+              <button type="button" class="view-btn" id="btn-view-cards" aria-label="Card view" title="Card view">
+                <svg viewBox="0 0 20 20" fill="none"><rect x="4" y="3.5" width="12" height="3.4" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="8.3" width="12" height="3.4" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="13.1" width="12" height="3.4" rx="0.6" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+              <button type="button" class="view-btn" id="btn-view-gallery" aria-label="Gallery view" title="Gallery view">
+                <svg viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="10.9" y="3.5" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="3.5" y="10.9" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="10.9" y="10.9" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+              <button type="button" class="view-btn" id="btn-view-table" aria-label="Table view" title="Table view">
+                <svg viewBox="0 0 20 20" fill="none"><rect x="3.5" y="4" width="3.6" height="12" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="8.2" y="4" width="3.6" height="12" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="12.9" y="4" width="3.6" height="12" rx="0.6" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <span>View mode</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="session-tabs" id="session-tabs" hidden aria-label="Open searches"></nav>
+      <div class="tab-menu" id="tab-menu" hidden></div>
+      <div class="tab-info" id="tab-info" hidden role="dialog" aria-label="Saved search definition"></div>
+
+      <div class="search-suggest" id="search-suggest" hidden></div>
+
+      <div class="saved-popover" id="saved-popover">
+        <div class="saved-pop-head">
+          <strong>Saved searches</strong>
+          <button type="button" class="icon-quiet" id="btn-saved-close" aria-label="Close">✕</button>
+        </div>
+        <ul class="saved-list" id="saved-list"></ul>
+        <div class="saved-pop-menu" id="saved-pop-menu">
+          <button type="button" class="saved-menu-btn" id="btn-saved-update">Save this search</button>
+          <button type="button" class="saved-menu-btn" id="btn-saved-as">Save as new</button>
+        </div>
+        <div class="saved-as-panel" id="saved-as-panel" hidden>
+          <strong class="saved-as-title" id="saved-as-title">Save search</strong>
+          <label class="saved-name-field">Name
+            <input id="saved-name" placeholder="Name this search" />
+          </label>
+          <div class="saved-pop-actions">
+            <button type="button" class="btn-text" id="btn-saved-cancel">Cancel</button>
+            <button type="button" class="btn-sort-apply" id="btn-saved-save">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="view-popover" id="view-popover">
+        <div class="view-pop-main" id="view-pop-main">
+          <div class="saved-pop-menu" id="view-list"></div>
+          <div class="view-pop-sep"></div>
+          <div class="saved-pop-menu">
+            <button type="button" class="saved-menu-btn" id="btn-view-save">Save this view</button>
+            <button type="button" class="saved-menu-btn" id="btn-view-as">Save as new</button>
+            <button type="button" class="saved-menu-btn" id="btn-view-edit">Edit columns…</button>
+          </div>
+        </div>
+        <div class="saved-as-panel" id="view-as-panel" hidden>
+          <strong class="saved-as-title">Save as new</strong>
+          <label class="saved-name-field">Name
+            <input id="view-name" placeholder="Name this view" />
+          </label>
+          <div class="saved-pop-actions">
+            <button type="button" class="btn-text" id="btn-view-cancel">Cancel</button>
+            <button type="button" class="btn-sort-apply" id="btn-view-create">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sort-popover" id="sort-popover">
+        <div class="sort-pop-top">
+          <button type="button" class="icon-quiet" id="btn-sort-close" aria-label="Close">✕</button>
+          <label class="sort-pop-field">Sort by
+            <select id="sort-key"></select>
+          </label>
+          <span class="sort-pop-from">From</span>
+          <div class="sort-az" role="group" aria-label="Sort direction">
+            <button type="button" data-dir="asc">A→Z</button>
+            <button type="button" data-dir="desc">Z→A</button>
+          </div>
+        </div>
+        <div class="sort-pop-bottom">
+          <select id="sort-key-2" aria-label="Then sort by"></select>
+          <span class="dialog-foot-spacer"></span>
+          <button type="button" class="btn-text" id="btn-sort-cancel">Cancel</button>
+          <button type="button" class="btn-sort-apply" id="btn-sort-apply">Apply</button>
+        </div>
+      </div>
+
+      <nav class="type-tabs" id="type-tabs" aria-label="Search in">
+        <span>Search in:</span>
+      </nav>
+
+      <div class="workspace page-list" id="workspace">
+        <aside class="facets" id="facets"></aside>
+        <div class="resize-handle" data-panel="filters" aria-label="Resize filters"></div>
+        <section class="results" id="results"></section>
+        <div class="resize-handle handle-list" data-panel="list" aria-label="Resize nav list"></div>
+        <main class="details-page" id="details"></main>
+      </div>
+      </div>
+        <div class="resize-handle handle-chat" data-panel="chat" data-invert="true" aria-label="Resize assistant"></div>
+        <aside class="chat" id="chat">
+          <header class="chat-head">
+            <div>
+              <strong>Assistant</strong>
+              <p>Maps natural language onto Search</p>
+            </div>
+            <button type="button" class="icon-quiet" id="btn-chat-close" aria-label="Close assistant">✕</button>
+          </header>
+          <div class="chat-context" id="chat-context"></div>
+          <div class="chat-log" id="chat-log"></div>
+          <form class="composer" id="chat-form">
+            <div class="assist-suggest" id="chat-suggestions"></div>
+            <div class="composer-input">
+              <textarea id="chat-input" rows="2" placeholder="Find red running shoes in size 42"></textarea>
+              <button type="submit" class="composer-send" aria-label="Send">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </form>
+        </aside>
+      </div>
+
+      <div class="modal-overlay" id="facet-modal">
+        <div class="modal picker facet-picker" role="dialog" aria-modal="true" aria-labelledby="facet-title">
+          <header class="dialog-head">
+            <h2 id="facet-title">Choose filters</h2>
+            <button type="button" class="icon-quiet" id="btn-facet-close" aria-label="Close">✕</button>
+          </header>
+          <div class="picker-body" id="facet-body"></div>
+          <footer class="dialog-foot picker-foot">
+            <button type="button" class="linkish" id="btn-facet-reset">Restore defaults</button>
+            <span class="dialog-foot-spacer"></span>
+            <button type="button" class="btn-text" id="btn-facet-cancel">Cancel</button>
+            <button type="button" class="btn-apply" id="btn-facet-apply">Apply</button>
+          </footer>
+        </div>
+      </div>
+
+      <div class="modal-overlay" id="leave-modal">
+        <div class="leave-dialog" role="dialog" aria-modal="true" aria-labelledby="leave-title">
+          <p id="leave-title">Do you want to save the changes that you made to your saved search?</p>
+          <div class="leave-actions">
+            <button type="button" class="btn-leave-discard" id="btn-leave-discard">Don't Save</button>
+            <button type="button" class="btn-sort-apply" id="btn-leave-save">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-overlay" id="customize-modal">
+        <div class="modal picker" role="dialog" aria-modal="true" aria-labelledby="customize-title">
+          <header class="dialog-head">
+            <h2 id="customize-title">Add columns to Search for <span id="customize-type-label">PRODUCT</span></h2>
+            <button type="button" class="icon-quiet" id="btn-customize-close" aria-label="Close">✕</button>
+          </header>
+          <div class="picker-tabs" id="picker-tabs">
+            <button type="button" data-pane="browse" class="on">Browse</button>
+            <button type="button" data-pane="search">Search</button>
+          </div>
+          <div class="picker-body" id="customize-body"></div>
+          <footer class="dialog-foot picker-foot">
+            <button type="button" class="linkish" id="btn-customize-reset">Restore defaults</button>
+            <span class="dialog-foot-spacer"></span>
+            <button type="button" class="btn-text" id="btn-customize-cancel">Cancel</button>
+            <button type="button" class="btn-apply" id="btn-customize-apply">Apply</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+    <script src="app.js?v=defaults-tabs-filters"></script>
+  </body>
+</html>
