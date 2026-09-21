@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browse tables — user groups recommendation</title>
+  <style>
+    :root {
+      --text: #323130;
+      --muted: #605e5c;
+      --border: #e0e0e0;
+      --bg: #faf9f8;
+      --card: #ffffff;
+      --accent: #0078d4;
+      --accent-soft: #e1f5fe;
+      --ok: #0b6a0b;
+      --ok-soft: #dff6dd;
+      --problem: #5c2d91;
+      --problem-soft: #f3e9f7;
+      --radius: 4px;
+      --font: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px 72px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 8px;
+      line-height: 1.25;
+    }
+    h2 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 36px 0 12px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+    p { margin: 0 0 12px; }
+    .lede {
+      color: var(--muted);
+      margin: 0 0 24px;
+      max-width: 58ch;
+    }
+    .problem {
+      background: var(--problem-soft);
+      border-left: 3px solid var(--problem);
+      padding: 16px 18px;
+      margin: 0 0 20px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .problem strong.label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--problem);
+      margin-bottom: 8px;
+    }
+    .problem ol {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+    .problem li { margin: 6px 0; }
+    .callout {
+      background: var(--ok-soft);
+      border-left: 3px solid var(--ok);
+      padding: 14px 16px;
+      margin: 0 0 28px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .callout strong { display: block; margin-bottom: 4px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .card--rec { border-top: 3px solid var(--ok); }
+    .card--alt { border-top: 3px solid #8a8886; }
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-bottom: 8px;
+    }
+    .pill--rec { background: var(--ok-soft); color: var(--ok); }
+    .pill--alt { background: #f3f2f1; color: #605e5c; }
+    ul, ol.plain {
+      margin: 8px 0 12px;
+      padding-left: 20px;
+    }
+    li { margin: 4px 0; }
+    .muted { color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 12px 0 16px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      background: #f3f2f1;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    tr:last-child td { border-bottom: none; }
+    .one-liner {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin: 20px 0;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 14px;
+    }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .example {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Browse tables — user groups pattern</h1>
+
+    <nav class="nav">
+      <a href="browse-tables-recommendation.md">Markdown copy</a>
+      <a href="index.html">Prototype</a>
+      <a href="radio-browse-tables-edge-walkthrough.html">Radios walkthrough</a>
+      <a href="browse-tables-edge-walkthrough.html">Typeahead walkthrough</a>
+    </nav>
+
+    <div class="problem">
+      <strong class="label">The problem</strong>
+      <p style="margin:0">For browse tables, under Conditions for display, how should admins set who can see a table?</p>
+      <ol>
+        <li><strong>Reuse the pattern we usually have</strong> for user groups: optional typeahead. Empty means visible to all users.</li>
+        <li><strong>Introduce an explicit “All user groups” choice</strong> (All vs Specific radios), because browse tables also enforce uniqueness.</li>
+      </ol>
+      <p class="muted" style="margin:12px 0 0">
+        Elsewhere, empty already means visible to all. That meaning does not change.
+        What is different here is uniqueness: only one everyone table (and one per group) per object type.
+        So the question is not “what does empty mean?” — it is whether empty-as-everyone is still the best
+        <em>control</em> when everyone can conflict with another table.
+      </p>
+    </div>
+
+    <div class="callout">
+      <strong>Recommendation</strong>
+      Use <strong>All / Specific radios</strong> — an explicit All choice — for browse tables.
+    </div>
+
+    <h2>The uniqueness rule (same for both options)</h2>
+    <p>A browse table is unique by <strong>object type + who can see it</strong>:</p>
+    <ul class="plain">
+      <li><strong>Everyone</strong> = all users</li>
+      <li><strong>Specific</strong> = one or more user groups</li>
+    </ul>
+    <p>You cannot have two tables that claim the same object type for everyone, or the same object type for the same user group.</p>
+    <p class="muted">At runtime, the user sees the configuration that is more specific to their user group.</p>
+
+    <h2>Option A — Explicit All / Specific (recommended)</h2>
+    <div class="card card--rec">
+      <span class="pill pill--rec">Option A</span>
+      <h3>Introduce an explicit All user groups choice</h3>
+      <p><strong>How it works</strong></p>
+      <ul class="plain">
+        <li>Admin chooses <strong>All</strong> or <strong>Specific</strong></li>
+        <li><strong>All</strong> = visible to everyone</li>
+        <li><strong>Specific</strong> = at least one group required</li>
+        <li>If they pick Specific and leave without adding a group, we go back to All</li>
+      </ul>
+      <p><strong>Why choose this</strong></p>
+      <ul class="plain">
+        <li>Makes “everyone” an explicit choice when uniqueness matters</li>
+        <li>A second everyone table for the same object type can’t be created — All is disabled when taken</li>
+        <li>Under Specific, at least one group is required — “cannot be empty” is a normal mandatory-field rule</li>
+        <li>Conflicts are easy to explain (can’t switch to All when taken)</li>
+      </ul>
+      <p class="muted" style="margin:0"><strong>Tradeoff:</strong> looks different from other Conditions user-group fields.</p>
+    </div>
+
+    <h2>Option B — Reuse the usual typeahead</h2>
+    <div class="card card--alt">
+      <span class="pill pill--alt">Option B</span>
+      <h3>Same chips and same meaning as elsewhere</h3>
+      <p><strong>How it works</strong></p>
+      <ul class="plain">
+        <li>Empty chips = visible to everyone <em>(same as other Conditions for display cases)</em></li>
+        <li>Adding groups limits who sees the table</li>
+      </ul>
+      <p><strong>Why choose this</strong></p>
+      <ul class="plain">
+        <li>Matches the rest of the tool’s pattern and meaning</li>
+        <li>Fewer controls on screen</li>
+      </ul>
+      <p><strong>Why uniqueness still makes it awkward</strong></p>
+      <p>
+        If we keep the usual optional typeahead and do <em>not</em> special-case it, admins can easily create
+        two tables that both mean “Product for all users” (leave chips empty on create, or clear the last group on edit).
+        Then it is unclear which table the end user should see — uniqueness is broken.
+      </p>
+      <p>
+        So we had to add a workaround: when an everyone table already exists for that object type,
+        the last user-group chip cannot be removed (clearing it would become a second everyone table).
+      </p>
+      <p>
+        That workaround is hard to defend. On a <strong>mandatory</strong> field, “cannot be empty” is a normal rule.
+        Here the field is <strong>optional</strong> — empty is a valid meaning (“everyone”), same as elsewhere.
+        We do not have a clean argument for why this optional field sometimes cannot be cleared.
+      </p>
+    </div>
+
+    <h2>Quick comparison</h2>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>A — Explicit All</th>
+          <th>B — Reuse typeahead</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Meaning of “no groups”</td>
+          <td>All selected</td>
+          <td>Empty chips (= all) — same as elsewhere</td>
+        </tr>
+        <tr>
+          <td>Matches other Conditions screens</td>
+          <td>No (extra radios)</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Second everyone table (same object type)</td>
+          <td>Blocked (All disabled)</td>
+          <td>Easy without a workaround (empty = everyone)</td>
+        </tr>
+        <tr>
+          <td>“Cannot be empty” defendable?</td>
+          <td>Yes — Specific is mandatory</td>
+          <td>No — field is optional, empty is valid</td>
+        </tr>
+        <tr>
+          <td>Extra special cases for uniqueness</td>
+          <td>Few</td>
+          <td>Many (incl. last-chip lock)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Why we recommend explicit All</h2>
+    <ol class="plain">
+      <li><strong>Uniqueness</strong> — only one everyone (and one per group) per object type. Without that, two everyone tables leave “which one does the user see?” unanswered.</li>
+      <li><strong>Radios make Specific mandatory</strong> — we can require at least one group without inventing a rule for an optional field.</li>
+      <li>Reusing the optional typeahead forces a last-chip lock that other Conditions screens do not have — pattern consistency breaks in behaviour even if the control looks the same.</li>
+    </ol>
+    <p class="muted">We are not saying empty means something new. We are saying uniqueness makes the usual optional control hard to defend here.</p>
+
+    <div class="one-liner">
+      <strong>One-liner for stakeholders:</strong>
+      Elsewhere, empty user groups already means visible to all. Browse tables keep that meaning, but uniqueness means two everyone tables would conflict — and it would be unclear which one the user sees. Reusing the optional typeahead forces a workaround (sometimes you can’t clear the last group). We recommend All / Specific radios so “at least one group” is a normal mandatory rule under Specific, and All is an explicit choice that can be disabled when taken.
+    </div>
+
+    <h2>Conflict message examples</h2>
+    <p class="example">Shoes (everyone) has already been configured for Product for all users.</p>
+    <p class="example">Shoes (buyer group) has already been configured for Product for Buyer group.</p>
+
+    <h2>Where to try it</h2>
+    <p>
+      Prototype → Specific views → <strong>Browse tables V1</strong> (radios) and <strong>Browse tables V3</strong> (typeahead).<br>
+      Plain-text version:
+      <a href="browse-tables-recommendation.md">browse-tables-recommendation.md</a>
+    </p>
+  </div>
+</body>
+</html>

@@ -5,6 +5,11 @@ Use these together to keep toolbar rules consistent and catch regressions.
 | Doc | Purpose |
 |-----|---------|
 | [DESIGN.md](./DESIGN.md) | Visual system for agents — colors, typography, components (matches `index.html`) |
+| [CREATE-MODAL.md](./CREATE-MODAL.md) | Default “mandatory only” create rule, and when optional fields are allowed |
+| [browse-tables-recommendation.md](./browse-tables-recommendation.md) | Stakeholder-ready note: both options, why we deviate from the typeahead pattern, recommendation |
+| [browse-tables-decision.html](./browse-tables-decision.html) | Same recommendation in a simple readable page |
+| [browse-tables-edge-walkthrough.html](./browse-tables-edge-walkthrough.html) | Interactive post-creation edge-case walkthrough for Option B / typeahead (V3) |
+| [radio-browse-tables-edge-walkthrough.html](./radio-browse-tables-edge-walkthrough.html) | Interactive edge-case walkthrough for Option A / radios (Browse table) |
 | [TOOLTIP-BLUEPRINT.md](./TOOLTIP-BLUEPRINT.md) | Exact disabled-tip strings and **no-tooltip** rules per app tab/selection |
 | [ACTION-STATE-STRATEGY.md](./ACTION-STATE-STRATEGY.md) | Enablement flow, audit checklist, testing levels, debug order |
 | [ISSUES-REGISTER.md](./ISSUES-REGISTER.md) | Known gaps, fixed regressions, triage steps |

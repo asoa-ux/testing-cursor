@@ -1511,6 +1511,62 @@
         visibility 0s linear var(--toolbar-disabled-tip-delay);
     }
 
+    .tree-item.is-conflict-warn {
+      position: relative;
+    }
+
+    .tree-item__status-line {
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background: #f7b500;
+      border-radius: 1px;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .tree-item__status-line[data-conflict-tip] {
+      cursor: help;
+    }
+
+    .tree-item__status-line[data-conflict-tip]::after {
+      content: attr(data-conflict-tip);
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: max-content;
+      max-width: 280px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 400;
+      text-align: left;
+      white-space: pre-line;
+      color: var(--white);
+      background: #323130;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1200;
+      transition:
+        opacity 0.12s ease 0s,
+        visibility 0s linear 0.12s;
+    }
+
+    .tree-item__status-line[data-conflict-tip]:hover::after,
+    .tree-item__status-line[data-conflict-tip]:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.12s ease var(--toolbar-disabled-tip-delay),
+        visibility 0s linear var(--toolbar-disabled-tip-delay);
+    }
+
     .filter-mismatch-banner {
       display: flex;
       gap: 10px;
@@ -1698,6 +1754,14 @@
       line-height: 1.45;
       border-radius: 2px;
       max-width: 480px;
+    }
+
+    .detail-view > .form-section__validation {
+      margin-top: 0;
+      margin-bottom: 16px;
+      max-width: none;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .form-section__validation[hidden] { display: none !important; }
@@ -2073,6 +2137,7 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 6px;
+      width: 100%;
       max-width: 480px;
       padding: 4px 28px 4px 0;
       border-bottom: 1px solid var(--border);
@@ -2132,7 +2197,12 @@
 
     .ug-picker {
       position: relative;
+      width: 100%;
       max-width: 480px;
+    }
+
+    .ug-picker .chip-field {
+      max-width: none;
     }
 
     .ug-picker .filter-sheet__typeahead-menu {
@@ -2141,7 +2211,8 @@
       right: 0;
       top: 100%;
       z-index: 20;
-      width: auto;
+      width: 100%;
+      box-sizing: border-box;
       margin-top: 2px;
     }
 
@@ -2418,10 +2489,14 @@
 
     .modal__field-message {
       margin-top: 12px;
+      margin-bottom: 12px;
       padding: 10px 12px;
       font-size: 12px;
       line-height: 1.45;
       border-radius: 2px;
+      width: 100%;
+      max-width: none;
+      box-sizing: border-box;
       background: #fdf6f0;
       border: 1px solid #ede0d4;
       color: #444;
@@ -2433,6 +2508,12 @@
       color: #442726;
     }
 
+    .modal__field-message.is-warning {
+      background: #fffbf5;
+      border-color: #ede0d4;
+      color: #444;
+    }
+
     .modal__field-message[hidden] { display: none !important; }
 
     .modal__field-message-list {
@@ -2441,6 +2522,11 @@
     }
 
     .modal__field-message-list li + li { margin-top: 4px; }
+
+    .modal__field-message strong,
+    .form-section__validation strong {
+      font-weight: 600;
+    }
 
     .modal__logo-upload {
       max-width: 100%;
@@ -2534,6 +2620,7 @@
     .modal__ug-specific {
       margin-left: 22px;
       width: calc(100% - 22px);
+      max-width: calc(480px - 22px);
     }
 
     .modal__ug-specific .ug-picker {
@@ -2541,6 +2628,7 @@
     }
 
     .modal__chip-field {
+      width: 100%;
       max-width: none;
       padding-right: 56px;
     }
@@ -2625,6 +2713,7 @@
     .form-row__ug-specific {
       margin-left: 22px;
       width: calc(100% - 22px);
+      max-width: calc(480px - 22px);
     }
 
     .form-row__ug-specific .ug-picker {
@@ -3479,9 +3568,10 @@
             <p class="detail__description" id="sv-category-description"></p>
           </div>
           <div class="detail-view" id="view-sv-browse-table" data-view="sv-browse-table">
+            <div class="form-section__validation" id="sv-browse-validation-message" hidden role="status"></div>
             <header class="detail-header">
               <h1 class="detail__title" id="sv-browse-title">Browse table</h1>
-              <p class="detail__subtitle" id="sv-browse-subtitle">Browse table</p>
+              <p class="detail__subtitle" id="sv-browse-subtitle">Browse tables V1</p>
             </header>
             <hr class="detail__divider">
             <section class="form-section">
@@ -3493,7 +3583,7 @@
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Conditions for display</h2>
-              <p class="form-section__hint">You must specify 1 or more object types and user groups for this table to be displayed.</p>
+              <p class="form-section__hint">You must specify 1 or more object types and user groups for this table to be displayed.<br>The user will see the configuration that is more specific to their user group.</p>
               <div class="form-row">
                 <span class="form-row__label"><span class="required">*</span> Object types</span>
                 <div class="ug-picker">
@@ -3532,7 +3622,6 @@
                   </div>
                 </div>
               </div>
-              <div class="form-section__validation" id="sv-browse-validation-message" hidden role="status"></div>
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Table settings</h2>
@@ -3546,6 +3635,7 @@
             </section>
           </div>
           <div class="detail-view" id="view-sv-browse-table-v2" data-view="sv-browse-table-v2">
+            <div class="form-section__validation" id="sv-browse-v2-validation-message" hidden role="status"></div>
             <header class="detail-header">
               <h1 class="detail__title" id="sv-browse-v2-title">Browse table</h1>
               <p class="detail__subtitle" id="sv-browse-v2-subtitle">Browse tables V2</p>
@@ -3587,7 +3677,6 @@
                   <ul class="filter-sheet__typeahead-menu" id="sv-browse-v2-user-groups-typeahead" role="listbox" hidden></ul>
                 </div>
               </div>
-              <div class="form-section__validation" id="sv-browse-v2-validation-message" hidden role="status"></div>
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Table settings</h2>
@@ -3601,6 +3690,7 @@
             </section>
           </div>
           <div class="detail-view" id="view-sv-browse-table-v3" data-view="sv-browse-table-v3">
+            <div class="form-section__validation" id="sv-browse-v3-validation-message" hidden role="status"></div>
             <header class="detail-header">
               <h1 class="detail__title" id="sv-browse-v3-title">Browse table</h1>
               <p class="detail__subtitle" id="sv-browse-v3-subtitle">Browse tables V3</p>
@@ -3615,7 +3705,7 @@
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Conditions for display</h2>
-              <p class="form-section__hint">User groups are optional. Leave empty to show this table to all users, or add a group to limit it. Only one “for everyone” table is allowed per object type.</p>
+              <p class="form-section__hint">You must specify 1 or more object types for this table to be displayed. It will be visible to all users unless you select specific user groups.</p>
               <div class="form-row">
                 <span class="form-row__label"><span class="required">*</span> Object types</span>
                 <div class="ug-picker">
@@ -3642,7 +3732,6 @@
                   <ul class="filter-sheet__typeahead-menu" id="sv-browse-v3-user-groups-typeahead" role="listbox" hidden></ul>
                 </div>
               </div>
-              <div class="form-section__validation" id="sv-browse-v3-validation-message" hidden role="status"></div>
             </section>
             <section class="form-section">
               <h2 class="form-section__heading">Table settings</h2>
@@ -3708,6 +3797,9 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
       <h2 class="modal__header" id="add-modal-title">Add</h2>
       <form class="modal__body" id="add-modal-form">
+        <div class="modal__field-message is-warning" id="add-sv-browse-v3-message" hidden role="status" aria-live="polite"></div>
+        <div class="modal__field-message is-warning" id="add-sv-browse-message" hidden role="status" aria-live="polite"></div>
+        <div class="modal__field-message is-warning" id="add-sv-browse-v2-message" hidden role="status" aria-live="polite"></div>
         <div class="modal__field" id="add-field-name">
           <label class="modal__label" for="add-input-name"><span class="required">*</span> <span id="add-label-name">Name</span></label>
           <input type="text" class="modal__input" id="add-input-name" required autocomplete="off">
@@ -3760,7 +3852,6 @@
               </div>
             </div>
           </div>
-          <div class="modal__field-message is-error" id="add-sv-browse-message" hidden role="status" aria-live="polite"></div>
         </div>
         <div class="modal__field is-hidden" id="add-field-sv-browse-v2">
           <div class="modal__field">
@@ -3776,7 +3867,6 @@
               <ul class="filter-sheet__typeahead-menu" id="add-sv-v2-object-types-typeahead" role="listbox" hidden></ul>
             </div>
           </div>
-          <div class="modal__field-message is-error" id="add-sv-browse-v2-message" hidden role="status" aria-live="polite"></div>
         </div>
         <div class="modal__field is-hidden" id="add-field-sv-browse-v3">
           <div class="modal__field">
@@ -3794,7 +3884,6 @@
           </div>
           <div class="modal__field">
             <span class="modal__label">User groups</span>
-            <p class="form-section__hint" style="margin-top:0;margin-bottom:8px;">Leave empty to show this table to all users. Add a user group to limit it.</p>
             <div class="ug-picker">
               <div class="chip-field chip-field--has-action modal__chip-field" id="add-sv-v3-user-groups-field">
                 <span class="modal__chips" id="add-sv-v3-user-groups-chips"></span>
@@ -3805,8 +3894,8 @@
               </div>
               <ul class="filter-sheet__typeahead-menu" id="add-sv-v3-user-groups-typeahead" role="listbox" hidden></ul>
             </div>
+            <p class="form-section__hint" style="margin-top:8px;margin-bottom:0;">This browse table will be visible to all users unless you select specific user groups.</p>
           </div>
-          <div class="modal__field-message is-error" id="add-sv-browse-v3-message" hidden role="status" aria-live="polite"></div>
         </div>
         <div class="modal__field is-hidden" id="add-field-branding-asset">
           <div class="modal__field">
@@ -10595,7 +10684,7 @@
         if (hasUnsavedChanges && getEditorContext() === 'specific-views') {
           var svSaveTip = SpecificViewsEditor.getSaveDisabledTip();
           if (svSaveTip) {
-            showToast(svSaveTip, 'error');
+            showToast(svSaveTip, 'info');
             return;
           }
           SpecificViewsEditor.finalizeBrowseV2UnsetScopes();
@@ -12500,33 +12589,25 @@
         var categories = [
           {
             id: 'browse-table',
-            label: 'Browse table',
+            label: 'Browse tables V1',
             kind: 'browse-table',
             expanded: true,
             configs: [
               {
-                id: 'bt-table-1',
-                configurationName: 'Table 1',
-                objectTypes: ['Product', 'Asset'],
-                userGroupsMode: 'specific',
-                userGroups: ['data-stewards'],
-                columns: ['ID', 'Name', 'Object type', 'Status', 'Modified']
-              },
-              {
-                id: 'bt-table-2',
-                configurationName: 'Table 2',
-                objectTypes: ['Product'],
-                userGroupsMode: 'specific',
-                userGroups: ['enrichment-group'],
-                columns: ['ID', 'Name', 'Product type', 'Completeness', 'Status']
-              },
-              {
-                id: 'bt-table-3',
-                configurationName: 'Table 3',
+                id: 'bt-shoes-everyone',
+                configurationName: 'Shoes (everyone)',
                 objectTypes: ['Product'],
                 userGroupsMode: 'all',
                 userGroups: [],
-                columns: ['ID', 'Name', 'Object type', 'Product type', 'Primary image']
+                columns: ['ID', 'Name', 'Object type', 'Product type']
+              },
+              {
+                id: 'bt-shoes-buyer',
+                configurationName: 'Shoes (buyer group)',
+                objectTypes: ['Product'],
+                userGroupsMode: 'specific',
+                userGroups: ['buyer-group'],
+                columns: ['ID', 'Name', 'Completeness', 'Status']
               }
             ]
           },
@@ -12537,25 +12618,18 @@
             expanded: true,
             configs: [
               {
-                id: 'btv2-shoes',
-                configurationName: 'Table for shoes (everyone)',
+                id: 'btv2-shoes-everyone',
+                configurationName: 'Shoes (everyone)',
                 objectTypes: ['Product'],
                 userGroups: [],
                 columns: ['ID', 'Name', 'Object type', 'Product type']
               },
               {
-                id: 'btv2-buyer',
-                configurationName: 'Product buyer view',
+                id: 'btv2-shoes-buyer',
+                configurationName: 'Shoes (buyer group)',
                 objectTypes: ['Product'],
                 userGroups: ['buyer-group'],
                 columns: ['ID', 'Name', 'Completeness', 'Status']
-              },
-              {
-                id: 'btv2-category',
-                configurationName: 'Category default',
-                objectTypes: ['Category'],
-                userGroups: [],
-                columns: ['ID', 'Name', 'Object type']
               }
             ]
           },
@@ -12566,25 +12640,18 @@
             expanded: true,
             configs: [
               {
-                id: 'btv3-shoes',
-                configurationName: 'Table for shoes (everyone)',
+                id: 'btv3-shoes-everyone',
+                configurationName: 'Shoes (everyone)',
                 objectTypes: ['Product'],
                 userGroups: [],
                 columns: ['ID', 'Name', 'Object type', 'Product type']
               },
               {
-                id: 'btv3-buyer',
-                configurationName: 'Product buyer view',
+                id: 'btv3-shoes-buyer',
+                configurationName: 'Shoes (buyer group)',
                 objectTypes: ['Product'],
                 userGroups: ['buyer-group'],
                 columns: ['ID', 'Name', 'Completeness', 'Status']
-              },
-              {
-                id: 'btv3-category',
-                configurationName: 'Category default',
-                objectTypes: ['Category'],
-                userGroups: [],
-                columns: ['ID', 'Name', 'Object type']
               }
             ]
           },
@@ -12681,36 +12748,86 @@
         }
 
         function findBrowseSlotOccupant(objectType, scope, excludeConfigId) {
+          var occupants = findBrowseSlotOccupants(objectType, scope, excludeConfigId);
+          return occupants.length ? occupants[0] : null;
+        }
+
+        function findBrowseSlotOccupants(objectType, scope, excludeConfigId) {
           var cat = findCategory('browse-table');
-          if (!cat) return null;
-          for (var i = 0; i < cat.configs.length; i++) {
-            var other = cat.configs[i];
-            if (other.id === excludeConfigId) continue;
+          if (!cat) return [];
+          var occupants = [];
+          cat.configs.forEach(function (other) {
+            if (other.id === excludeConfigId) return;
             normalizeBrowseConfig(other);
             var slots = getBrowseConfigSlots(other);
             for (var j = 0; j < slots.length; j++) {
               if (slots[j].objectType === objectType && slots[j].scope === scope) {
-                return other;
+                occupants.push(other);
+                break;
               }
             }
-          }
-          return null;
+          });
+          return occupants;
         }
 
-        function formatBrowseSlotConflictTip(slot, tableName) {
-          var tableRef = tableName || 'another table';
-          if (slot.scope === '__all__') {
-            return 'All user groups is already being used for ' + slot.objectType + ' in ' + tableRef + '.';
-          }
-          return 'This user group is already being used for the same object type in ' + tableRef + '.';
+        function formatBrowseTableNameList(tableNames) {
+          var names = (tableNames || []).filter(Boolean);
+          if (!names.length) return 'Another table';
+          if (names.length === 1) return names[0];
+          if (names.length === 2) return names[0] + ' and ' + names[1];
+          return names.slice(0, -1).join(', ') + ', and ' + names[names.length - 1];
         }
 
-        function formatBrowseObjectTypeConflictTip(slot, tableName) {
-          var tableRef = tableName || 'another table';
+        function formatBrowseTableNameListHtml(tableNames) {
+          var names = (tableNames || []).filter(Boolean);
+          if (!names.length) return '<strong>Another table</strong>';
+          var bold = names.map(function (n) {
+            return '<strong>' + escapeHtml(n) + '</strong>';
+          });
+          if (bold.length === 1) return bold[0];
+          if (bold.length === 2) return bold[0] + ' and ' + bold[1];
+          return bold.slice(0, -1).join(', ') + ', and ' + bold[bold.length - 1];
+        }
+
+        function normalizeBrowseConflictTableNames(tableNames) {
+          if (Array.isArray(tableNames)) return tableNames.filter(Boolean);
+          if (tableNames) return [tableNames];
+          return ['Another table'];
+        }
+
+        function formatBrowseSlotConflictTip(slot, tableNames) {
+          var names = normalizeBrowseConflictTableNames(tableNames);
+          var tableRef = formatBrowseTableNameList(names);
+          var verb = names.length > 1 ? ' have' : ' has';
+          var otName = slot.objectType || 'object type';
           if (slot.scope === '__all__') {
-            return 'This object type is already being used for all user groups in ' + tableRef + '.';
+            return tableRef + verb + ' already been configured for ' + otName + ' for all users.';
           }
-          return 'This object type is already being used for the same user group in ' + tableRef + '.';
+          var ugLabel = getBrowseUserGroupLabel(slot.scope) || 'that user group';
+          return tableRef + verb +
+            ' already been configured for ' + otName + ' for ' + ugLabel + '.';
+        }
+
+        function formatBrowseSlotConflictTipHtml(slot, tableNames) {
+          var names = normalizeBrowseConflictTableNames(tableNames);
+          var tableRef = formatBrowseTableNameListHtml(names);
+          var verb = names.length > 1 ? ' have' : ' has';
+          var otName = '<strong>' + escapeHtml(slot.objectType || 'object type') + '</strong>';
+          if (slot.scope === '__all__') {
+            return tableRef + verb + ' already been configured for ' + otName + ' for all users.';
+          }
+          var ugLabel = getBrowseUserGroupLabel(slot.scope) || 'that user group';
+          return tableRef + verb +
+            ' already been configured for ' + otName +
+            ' for <strong>' + escapeHtml(ugLabel) + '</strong>.';
+        }
+
+        function formatBrowseObjectTypeConflictTip(slot, tableNames) {
+          return formatBrowseSlotConflictTip(slot, tableNames);
+        }
+
+        function formatBrowseObjectTypeConflictTipHtml(slot, tableNames) {
+          return formatBrowseSlotConflictTipHtml(slot, tableNames);
         }
 
         function getBrowseAllModeBlockedTips(config, excludeConfigId) {
@@ -12718,14 +12835,34 @@
           var tips = [];
           var seen = {};
           config.objectTypes.forEach(function (objectType) {
-            var occupant = findBrowseSlotOccupant(objectType, '__all__', excludeConfigId);
-            if (!occupant) return;
-            var key = objectType + '\0' + occupant.id;
+            var occupants = findBrowseSlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
             if (seen[key]) return;
             seen[key] = true;
             tips.push(formatBrowseSlotConflictTip(
               { objectType: objectType, scope: '__all__' },
-              occupant.configurationName
+              names
+            ));
+          });
+          return tips;
+        }
+
+        function getBrowseAllModeBlockedTipsHtml(config, excludeConfigId) {
+          if (!config.objectTypes || !config.objectTypes.length) return [];
+          var tips = [];
+          var seen = {};
+          config.objectTypes.forEach(function (objectType) {
+            var occupants = findBrowseSlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push(formatBrowseSlotConflictTipHtml(
+              { objectType: objectType, scope: '__all__' },
+              names
             ));
           });
           return tips;
@@ -12735,14 +12872,17 @@
           if (config.userGroupsMode !== 'specific') return '';
           if (!config.objectTypes || !config.objectTypes.length) return '';
           var tips = [];
-          var seenTables = {};
+          var seenKey = {};
           config.objectTypes.forEach(function (objectType) {
-            var occupant = findBrowseSlotOccupant(objectType, ugId, excludeConfigId);
-            if (!occupant || seenTables[occupant.id]) return;
-            seenTables[occupant.id] = true;
+            var occupants = findBrowseSlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seenKey[key]) return;
+            seenKey[key] = true;
             tips.push(formatBrowseSlotConflictTip(
               { objectType: objectType, scope: ugId },
-              occupant.configurationName
+              names
             ));
           });
           return tips.join(' ');
@@ -12750,28 +12890,75 @@
 
         function getBrowseObjectTypeBlockedTip(config, objectType, excludeConfigId) {
           if (config.userGroupsMode !== 'all' && config.userGroupsMode !== 'specific') return '';
-          var tips = [];
-          var seen = {};
           if (config.userGroupsMode === 'all') {
-            var allOccupant = findBrowseSlotOccupant(objectType, '__all__', excludeConfigId);
-            if (allOccupant) {
-              return formatBrowseObjectTypeConflictTip(
-                { objectType: objectType, scope: '__all__' },
-                allOccupant.configurationName
-              );
-            }
-            return '';
+            var allOccupants = findBrowseSlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!allOccupants.length) return '';
+            return formatBrowseObjectTypeConflictTip(
+              { objectType: objectType, scope: '__all__' },
+              allOccupants.map(function (o) { return o.configurationName; })
+            );
           }
           if (!config.userGroups || !config.userGroups.length) return '';
+          var tips = [];
+          var seen = {};
           config.userGroups.forEach(function (ugId) {
-            var occupant = findBrowseSlotOccupant(objectType, ugId, excludeConfigId);
-            if (!occupant) return;
-            var key = ugId + '\0' + occupant.id;
+            var occupants = findBrowseSlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = ugId + '\0' + names.join('\0');
             if (seen[key]) return;
             seen[key] = true;
             tips.push(formatBrowseObjectTypeConflictTip(
               { objectType: objectType, scope: ugId },
-              occupant.configurationName
+              names
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseObjectTypeBlockedTipHtml(config, objectType, excludeConfigId) {
+          if (config.userGroupsMode !== 'all' && config.userGroupsMode !== 'specific') return '';
+          if (config.userGroupsMode === 'all') {
+            var allOccupants = findBrowseSlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!allOccupants.length) return '';
+            return formatBrowseObjectTypeConflictTipHtml(
+              { objectType: objectType, scope: '__all__' },
+              allOccupants.map(function (o) { return o.configurationName; })
+            );
+          }
+          if (!config.userGroups || !config.userGroups.length) return '';
+          var tips = [];
+          var seen = {};
+          config.userGroups.forEach(function (ugId) {
+            var occupants = findBrowseSlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = ugId + '\0' + names.join('\0');
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push(formatBrowseObjectTypeConflictTipHtml(
+              { objectType: objectType, scope: ugId },
+              names
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseUserGroupBlockedTipHtml(config, ugId, excludeConfigId) {
+          if (config.userGroupsMode !== 'specific') return '';
+          if (!config.objectTypes || !config.objectTypes.length) return '';
+          var tips = [];
+          var seenKey = {};
+          config.objectTypes.forEach(function (objectType) {
+            var occupants = findBrowseSlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seenKey[key]) return;
+            seenKey[key] = true;
+            tips.push(formatBrowseSlotConflictTipHtml(
+              { objectType: objectType, scope: ugId },
+              names
             ));
           });
           return tips.join(' ');
@@ -12781,18 +12968,25 @@
           var cat = findCategory('browse-table');
           if (!cat) return [];
           var conflicts = [];
-          var seen = {};
           getBrowseConfigSlots(config).forEach(function (slot) {
+            var otherNames = [];
+            var seenName = {};
             cat.configs.forEach(function (other) {
               if (other.id === excludeConfigId) return;
               getBrowseConfigSlots(other).forEach(function (otherSlot) {
                 if (otherSlot.objectType !== slot.objectType || otherSlot.scope !== slot.scope) return;
-                var key = slot.objectType + '\0' + slot.scope;
-                if (seen[key]) return;
-                seen[key] = true;
-                conflicts.push({ slot: slot, otherName: other.configurationName });
+                if (seenName[other.configurationName]) return;
+                seenName[other.configurationName] = true;
+                otherNames.push(other.configurationName);
               });
             });
+            if (otherNames.length) {
+              conflicts.push({
+                slot: slot,
+                otherNames: otherNames,
+                otherName: otherNames[0]
+              });
+            }
           });
           return conflicts;
         }
@@ -12801,7 +12995,16 @@
           var conflicts = findBrowseConfigConflicts(config, excludeConfigId);
           if (!conflicts.length) return '';
           var c = conflicts[0];
-          return formatBrowseSlotConflictTip(c.slot, c.otherName);
+          return formatBrowseSlotConflictTip(c.slot, c.otherNames);
+        }
+
+        function getBrowseConfigTreeWarnTip(config) {
+          if (!config) return '';
+          var conflicts = findBrowseConfigConflicts(config, config.id);
+          if (!conflicts.length) return '';
+          return conflicts.map(function (c) {
+            return formatBrowseSlotConflictTip(c.slot, c.otherNames);
+          }).join('\n');
         }
 
         function getAddBrowseModalBlockers(draftConfig) {
@@ -12820,7 +13023,7 @@
           }
           if (isBrowseConfigComplete(draftConfig)) {
             findBrowseConfigConflicts(draftConfig, null).forEach(function (c) {
-              blockers.push(formatBrowseSlotConflictTip(c.slot, c.otherName));
+              blockers.push(formatBrowseSlotConflictTip(c.slot, c.otherNames));
             });
           }
           return blockers;
@@ -12829,7 +13032,7 @@
         function getAddBrowseModalConflictBlockers(draftConfig) {
           if (!isBrowseConfigComplete(draftConfig)) return [];
           return findBrowseConfigConflicts(draftConfig, null).map(function (c) {
-            return formatBrowseSlotConflictTip(c.slot, c.otherName);
+            return formatBrowseSlotConflictTipHtml(c.slot, c.otherNames);
           });
         }
 
@@ -12839,16 +13042,17 @@
           if (!conflictBlockers.length) {
             messageEl.hidden = true;
             messageEl.innerHTML = '';
-            messageEl.classList.remove('is-error');
+            messageEl.classList.remove('is-warning', 'is-error');
             return;
           }
-          messageEl.classList.add('is-error');
+          messageEl.classList.remove('is-error');
+          messageEl.classList.add('is-warning');
           if (conflictBlockers.length === 1) {
-            messageEl.textContent = conflictBlockers[0];
+            messageEl.innerHTML = conflictBlockers[0];
           } else {
             messageEl.innerHTML = '<ul class="modal__field-message-list">' +
               conflictBlockers.map(function (b) {
-                return '<li>' + escapeHtml(b) + '</li>';
+                return '<li>' + b + '</li>';
               }).join('') +
               '</ul>';
           }
@@ -12857,6 +13061,11 @@
 
         function getBrowseUserGroupRequiredMessage() {
           return 'You must select at least one user group.';
+        }
+
+        function canRemoveBrowseSpecificUserGroup(userGroups, ugId) {
+          if (!userGroups || userGroups.indexOf(ugId) === -1) return false;
+          return userGroups.length > 1;
         }
 
         function needsBrowseUserGroupSelection(config) {
@@ -12870,41 +13079,46 @@
           setTimeout(function () { input.focus(); }, 0);
         }
 
-        function revertBrowseUserGroupsToAllIfEmpty(config, excludeConfigId) {
-          if (!config || !needsBrowseUserGroupSelection(config)) return false;
-          var prevMode = config.userGroupsMode;
-          var prevGroups = (config.userGroups || []).slice();
-          config.userGroupsMode = 'all';
-          config.userGroups = [];
-          if (!validateBrowseConfigState(config, excludeConfigId)) {
-            config.userGroupsMode = prevMode;
-            config.userGroups = prevGroups;
-            return false;
-          }
-          return true;
-        }
-
-        function onBrowseUserGroupsInputBlur(isAddModal) {
+        function onBrowseUserGroupsInputBlur(isModal) {
           setTimeout(function () {
-            if (isAddModal) {
-              if (!needsBrowseUserGroupSelection(draftBrowseConfigFromAddModal())) return;
-              var prevMode = addBrowseDraft.userGroupsMode;
-              var prevGroups = addBrowseDraft.userGroups.slice();
+            if (isModal) {
+              if (addModalMode !== 'browse-table') return;
+              if (addBrowseDraft.userGroupsMode !== 'specific') return;
+              if (addBrowseDraft.userGroups && addBrowseDraft.userGroups.length) return;
+              var modalActive = document.activeElement;
+              if (modalActive && (
+                modalActive.id === 'add-sv-user-groups-input' ||
+                modalActive.closest('#add-sv-user-groups-typeahead') ||
+                modalActive.closest('#add-sv-ug-specific')
+              )) return;
+              if (getAddBrowseAllBlockedTips().length) return;
               addBrowseDraft.userGroupsMode = 'all';
               addBrowseDraft.userGroups = [];
-              if (!validateBrowseConfigState(draftBrowseConfigFromAddModal(), null)) {
-                addBrowseDraft.userGroupsMode = prevMode;
-                addBrowseDraft.userGroups = prevGroups;
-              }
+              clearAddBrowseConflictMessages();
               renderAddBrowseModal();
               syncAddBrowseModalSubmit();
               return;
             }
             var cfg = getActiveBrowseConfig();
-            if (!cfg || !revertBrowseUserGroupsToAllIfEmpty(cfg, cfg.id)) return;
+            if (!cfg || cfg.userGroupsMode !== 'specific') return;
+            if (cfg.userGroups && cfg.userGroups.length) return;
+            var active = document.activeElement;
+            if (active && (
+              active.id === 'sv-browse-user-groups-input' ||
+              active.closest('#sv-browse-user-groups-typeahead') ||
+              active.closest('#sv-browse-ug-specific')
+            )) return;
+            if (getBrowseAllModeBlockedTips(cfg, cfg.id).length) return;
+            cfg.userGroupsMode = 'all';
+            cfg.userGroups = [];
+            if (!validateBrowseConfigState(cfg, cfg.id)) {
+              cfg.userGroupsMode = 'specific';
+              renderBrowseUserGroupsUi(cfg);
+              return;
+            }
             renderBrowseUserGroupsUi(cfg);
             markUnsaved();
-          }, 0);
+          }, 180);
         }
 
         function isBrowseConfigComplete(config) {
@@ -12938,7 +13152,7 @@
             });
             findBrowseConfigConflicts(config, config.id).forEach(function (c) {
               blockers.push(
-                '“' + config.configurationName + '”: ' + formatBrowseSlotConflictTip(c.slot, c.otherName)
+                '“' + config.configurationName + '”: ' + formatBrowseSlotConflictTip(c.slot, c.otherNames)
               );
             });
           });
@@ -13003,49 +13217,54 @@
         }
 
         function findBrowseV2SlotOccupant(objectType, scope, excludeConfigId) {
+          var occupants = findBrowseV2SlotOccupants(objectType, scope, excludeConfigId);
+          return occupants.length ? occupants[0] : null;
+        }
+
+        function findBrowseV2SlotOccupants(objectType, scope, excludeConfigId) {
           var cat = findCategory('browse-table-v2');
-          if (!cat) return null;
-          for (var i = 0; i < cat.configs.length; i++) {
-            var other = cat.configs[i];
-            if (other.id === excludeConfigId) continue;
+          if (!cat) return [];
+          var occupants = [];
+          cat.configs.forEach(function (other) {
+            if (other.id === excludeConfigId) return;
             normalizeBrowseV2Config(other);
             var slots = getBrowseV2ConflictSlots(other);
             for (var j = 0; j < slots.length; j++) {
               if (slots[j].objectType === objectType && slots[j].scope === scope) {
-                return other;
+                occupants.push(other);
+                break;
               }
             }
-          }
-          return null;
+          });
+          return occupants;
         }
 
-        function formatBrowseV2SlotConflictTip(slot, tableName) {
-          var tableRef = tableName || 'another table';
-          if (slot.scope === '__all__') {
-            return 'A table for everyone is already configured for ' + slot.objectType + ' in ' + tableRef + '.';
-          }
-          return 'This user group is already being used for the same object type in ' + tableRef + '.';
+        function formatBrowseV2SlotConflictTip(slot, tableNames) {
+          return formatBrowseSlotConflictTip(slot, tableNames);
         }
 
-        function formatBrowseV2ObjectTypeConflictTip(slot, tableName) {
-          var tableRef = tableName || 'another table';
-          if (slot.scope === '__all__') {
-            return 'This object type already has a table for everyone in ' + tableRef + '.';
-          }
-          return 'This object type is already being used for the same user group in ' + tableRef + '.';
+        function formatBrowseV2SlotConflictTipHtml(slot, tableNames) {
+          return formatBrowseSlotConflictTipHtml(slot, tableNames);
+        }
+
+        function formatBrowseV2ObjectTypeConflictTip(slot, tableNames) {
+          return formatBrowseSlotConflictTip(slot, tableNames);
         }
 
         function getBrowseV2UserGroupBlockedTip(config, ugId, excludeConfigId) {
           if (!config.objectTypes || !config.objectTypes.length) return '';
           var tips = [];
-          var seenTables = {};
+          var seenKey = {};
           config.objectTypes.forEach(function (objectType) {
-            var occupant = findBrowseV2SlotOccupant(objectType, ugId, excludeConfigId);
-            if (!occupant || seenTables[occupant.id]) return;
-            seenTables[occupant.id] = true;
+            var occupants = findBrowseV2SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seenKey[key]) return;
+            seenKey[key] = true;
             tips.push(formatBrowseV2SlotConflictTip(
               { objectType: objectType, scope: ugId },
-              occupant.configurationName
+              names
             ));
           });
           return tips.join(' ');
@@ -13054,26 +13273,70 @@
         function getBrowseV2ObjectTypeBlockedTip(config, objectType, excludeConfigId) {
           // Unset resolves to everyone on save — same uniqueness as empty groups.
           if (isBrowseV2UserGroupsUnset(config) || !config.userGroups.length) {
-            var allOccupant = findBrowseV2SlotOccupant(objectType, '__all__', excludeConfigId);
-            if (allOccupant) {
-              return formatBrowseV2ObjectTypeConflictTip(
-                { objectType: objectType, scope: '__all__' },
-                allOccupant.configurationName
-              );
-            }
-            return '';
+            var allOccupants = findBrowseV2SlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!allOccupants.length) return '';
+            return formatBrowseV2ObjectTypeConflictTip(
+              { objectType: objectType, scope: '__all__' },
+              allOccupants.map(function (o) { return o.configurationName; })
+            );
           }
           var tips = [];
           var seen = {};
           config.userGroups.forEach(function (ugId) {
-            var occupant = findBrowseV2SlotOccupant(objectType, ugId, excludeConfigId);
-            if (!occupant) return;
-            var key = ugId + '\0' + occupant.id;
+            var occupants = findBrowseV2SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = ugId + '\0' + names.join('\0');
             if (seen[key]) return;
             seen[key] = true;
             tips.push(formatBrowseV2ObjectTypeConflictTip(
               { objectType: objectType, scope: ugId },
-              occupant.configurationName
+              names
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseV2ObjectTypeBlockedTipHtml(config, objectType, excludeConfigId) {
+          if (isBrowseV2UserGroupsUnset(config) || !config.userGroups.length) {
+            var allOccupants = findBrowseV2SlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!allOccupants.length) return '';
+            return formatBrowseV2SlotConflictTipHtml(
+              { objectType: objectType, scope: '__all__' },
+              allOccupants.map(function (o) { return o.configurationName; })
+            );
+          }
+          var tips = [];
+          var seen = {};
+          config.userGroups.forEach(function (ugId) {
+            var occupants = findBrowseV2SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = ugId + '\0' + names.join('\0');
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push(formatBrowseV2SlotConflictTipHtml(
+              { objectType: objectType, scope: ugId },
+              names
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseV2UserGroupBlockedTipHtml(config, ugId, excludeConfigId) {
+          if (!config.objectTypes || !config.objectTypes.length) return '';
+          var tips = [];
+          var seenKey = {};
+          config.objectTypes.forEach(function (objectType) {
+            var occupants = findBrowseV2SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seenKey[key]) return;
+            seenKey[key] = true;
+            tips.push(formatBrowseV2SlotConflictTipHtml(
+              { objectType: objectType, scope: ugId },
+              names
             ));
           });
           return tips.join(' ');
@@ -13083,18 +13346,25 @@
           var cat = findCategory('browse-table-v2');
           if (!cat) return [];
           var conflicts = [];
-          var seen = {};
           getBrowseV2ConflictSlots(config).forEach(function (slot) {
+            var otherNames = [];
+            var seenName = {};
             cat.configs.forEach(function (other) {
               if (other.id === excludeConfigId) return;
               getBrowseV2ConflictSlots(other).forEach(function (otherSlot) {
                 if (otherSlot.objectType !== slot.objectType || otherSlot.scope !== slot.scope) return;
-                var key = slot.objectType + '\0' + slot.scope;
-                if (seen[key]) return;
-                seen[key] = true;
-                conflicts.push({ slot: slot, otherName: other.configurationName });
+                if (seenName[other.configurationName]) return;
+                seenName[other.configurationName] = true;
+                otherNames.push(other.configurationName);
               });
             });
+            if (otherNames.length) {
+              conflicts.push({
+                slot: slot,
+                otherNames: otherNames,
+                otherName: otherNames[0]
+              });
+            }
           });
           return conflicts;
         }
@@ -13102,7 +13372,16 @@
         function getBrowseV2ConflictMessage(config, excludeConfigId) {
           var conflicts = findBrowseV2ConfigConflicts(config, excludeConfigId);
           if (!conflicts.length) return '';
-          return formatBrowseV2SlotConflictTip(conflicts[0].slot, conflicts[0].otherName);
+          return formatBrowseV2SlotConflictTip(conflicts[0].slot, conflicts[0].otherNames);
+        }
+
+        function getBrowseV2ConfigTreeWarnTip(config) {
+          if (!config) return '';
+          var conflicts = findBrowseV2ConfigConflicts(config, config.id);
+          if (!conflicts.length) return '';
+          return conflicts.map(function (c) {
+            return formatBrowseV2SlotConflictTip(c.slot, c.otherNames);
+          }).join('\n');
         }
 
         function getBrowseV2ConfigIncompleteReasons(config) {
@@ -13130,7 +13409,7 @@
             });
             findBrowseV2ConfigConflicts(config, config.id).forEach(function (c) {
               blockers.push(
-                '“' + config.configurationName + '”: ' + formatBrowseV2SlotConflictTip(c.slot, c.otherName)
+                '“' + config.configurationName + '”: ' + formatBrowseV2SlotConflictTip(c.slot, c.otherNames)
               );
             });
           });
@@ -13152,7 +13431,7 @@
           if (draftConfig.userGroups && draftConfig.userGroups.length &&
               isBrowseV2ConfigComplete(draftConfig)) {
             findBrowseV2ConfigConflicts(draftConfig, null).forEach(function (c) {
-              blockers.push(formatBrowseV2SlotConflictTip(c.slot, c.otherName));
+              blockers.push(formatBrowseV2SlotConflictTip(c.slot, c.otherNames));
             });
           }
           return blockers;
@@ -13162,7 +13441,7 @@
           if (!draftConfig.userGroups || !draftConfig.userGroups.length) return [];
           if (!isBrowseV2ConfigComplete(draftConfig)) return [];
           return findBrowseV2ConfigConflicts(draftConfig, null).map(function (c) {
-            return formatBrowseV2SlotConflictTip(c.slot, c.otherName);
+            return formatBrowseV2SlotConflictTipHtml(c.slot, c.otherNames);
           });
         }
 
@@ -13172,16 +13451,17 @@
           if (!conflictBlockers.length) {
             messageEl.hidden = true;
             messageEl.innerHTML = '';
-            messageEl.classList.remove('is-error');
+            messageEl.classList.remove('is-warning', 'is-error');
             return;
           }
-          messageEl.classList.add('is-error');
+          messageEl.classList.remove('is-error');
+          messageEl.classList.add('is-warning');
           if (conflictBlockers.length === 1) {
-            messageEl.textContent = conflictBlockers[0];
+            messageEl.innerHTML = conflictBlockers[0];
           } else {
             messageEl.innerHTML = '<ul class="modal__field-message-list">' +
               conflictBlockers.map(function (b) {
-                return '<li>' + escapeHtml(b) + '</li>';
+                return '<li>' + b + '</li>';
               }).join('') +
               '</ul>';
           }
@@ -13203,8 +13483,8 @@
         }
 
         function showAddBrowseV2BlockedPick(item) {
-          if (!item || !item.disabledTip) return;
-          addBrowseV2ModalShownConflicts = [item.disabledTip];
+          if (!item || (!item.disabledTip && !item.disabledTipHtml)) return;
+          addBrowseV2ModalShownConflicts = [item.disabledTipHtml || escapeHtml(item.disabledTip)];
           renderAddBrowseV2ModalMessage(addBrowseV2ModalShownConflicts);
         }
 
@@ -13236,11 +13516,15 @@
             var disabledTip = config
               ? getBrowseV2ObjectTypeBlockedTip(config, ot, excludeConfigId)
               : '';
+            var disabledTipHtml = config && disabledTip
+              ? getBrowseV2ObjectTypeBlockedTipHtml(config, ot, excludeConfigId)
+              : '';
             return {
               id: ot,
               label: ot,
               disabled: !!disabledTip,
-              disabledTip: disabledTip || undefined
+              disabledTip: disabledTip || undefined,
+              disabledTipHtml: disabledTipHtml || undefined
             };
           });
         }
@@ -13255,11 +13539,15 @@
             var disabledTip = config
               ? getBrowseV2UserGroupBlockedTip(config, ug.id, excludeConfigId)
               : '';
+            var disabledTipHtml = config && disabledTip
+              ? getBrowseV2UserGroupBlockedTipHtml(config, ug.id, excludeConfigId)
+              : '';
             return {
               id: ug.id,
               label: ug.label,
               disabled: !!disabledTip,
-              disabledTip: disabledTip || undefined
+              disabledTip: disabledTip || undefined,
+              disabledTipHtml: disabledTipHtml || undefined
             };
           });
         }
@@ -13318,7 +13606,7 @@
           var messageEl = document.getElementById('sv-browse-v2-validation-message');
           if (!messageEl || !config) return;
           var conflicts = findBrowseV2ConfigConflicts(config, config.id).map(function (c) {
-            return formatBrowseV2SlotConflictTip(c.slot, c.otherName);
+            return formatBrowseV2SlotConflictTipHtml(c.slot, c.otherNames);
           });
           if (!conflicts.length) {
             messageEl.hidden = true;
@@ -13326,12 +13614,12 @@
             messageEl.className = 'form-section__validation';
             return;
           }
-          messageEl.className = 'form-section__validation form-section__validation--error';
+          messageEl.className = 'form-section__validation form-section__validation--warning';
           if (conflicts.length === 1) {
-            messageEl.textContent = conflicts[0];
+            messageEl.innerHTML = conflicts[0];
           } else {
             messageEl.innerHTML = '<ul class="form-section__validation-list">' +
-              conflicts.map(function (m) { return '<li>' + escapeHtml(m) + '</li>'; }).join('') +
+              conflicts.map(function (m) { return '<li>' + m + '</li>'; }).join('') +
               '</ul>';
           }
           messageEl.hidden = false;
@@ -13369,6 +13657,11 @@
               config.objectTypes = config.objectTypes.filter(function (x) { return x !== value; });
               renderBrowseV2ObjectTypesUi(config);
               markUnsaved();
+            },
+            {
+              canRemove: function () {
+                return (config.objectTypes || []).length > 1;
+              }
             }
           );
           renderBrowseV2UserGroupsUi(config);
@@ -13448,47 +13741,89 @@
         }
 
         function findBrowseV3SlotOccupant(objectType, scope, excludeConfigId) {
+          var occupants = findBrowseV3SlotOccupants(objectType, scope, excludeConfigId);
+          return occupants.length ? occupants[0] : null;
+        }
+
+        function findBrowseV3SlotOccupants(objectType, scope, excludeConfigId) {
           var cat = findCategory('browse-table-v3');
-          if (!cat) return null;
-          for (var i = 0; i < cat.configs.length; i++) {
-            var other = cat.configs[i];
-            if (other.id === excludeConfigId) continue;
+          if (!cat) return [];
+          var occupants = [];
+          cat.configs.forEach(function (other) {
+            if (other.id === excludeConfigId) return;
             normalizeBrowseV3Config(other);
             var slots = getBrowseV3ConfigSlots(other);
             for (var j = 0; j < slots.length; j++) {
-              if (slots[j].objectType === objectType && slots[j].scope === scope) return other;
+              if (slots[j].objectType === objectType && slots[j].scope === scope) {
+                occupants.push(other);
+                break;
+              }
             }
-          }
-          return null;
+          });
+          return occupants;
         }
 
-        function formatBrowseV3SlotConflictTip(slot, tableName) {
-          var tableRef = tableName || 'another table';
-          if (slot.scope === '__all__') {
-            return 'A table for everyone is already configured for ' + slot.objectType + ' in ' + tableRef + '.';
-          }
-          return 'This user group is already being used for the same object type in ' + tableRef + '.';
+        function formatBrowseV3TableNameList(tableNames) {
+          return formatBrowseTableNameList(tableNames);
         }
 
-        function formatBrowseV3ObjectTypeConflictTip(slot, tableName) {
-          var tableRef = tableName || 'another table';
-          if (slot.scope === '__all__') {
-            return 'This object type already has a table for everyone in ' + tableRef + '.';
-          }
-          return 'This object type is already being used for the same user group in ' + tableRef + '.';
+        function formatBrowseV3TableNameListHtml(tableNames) {
+          return formatBrowseTableNameListHtml(tableNames);
+        }
+
+        function normalizeBrowseV3ConflictTableNames(tableNames) {
+          return normalizeBrowseConflictTableNames(tableNames);
+        }
+
+        function formatBrowseV3SlotConflictTip(slot, tableNames) {
+          return formatBrowseSlotConflictTip(slot, tableNames);
+        }
+
+        function formatBrowseV3SlotConflictTipHtml(slot, tableNames) {
+          return formatBrowseSlotConflictTipHtml(slot, tableNames);
+        }
+
+        function formatBrowseV3ObjectTypeConflictTip(slot, tableNames) {
+          return formatBrowseSlotConflictTip(slot, tableNames);
+        }
+
+        function formatBrowseV3ObjectTypeConflictTipHtml(slot, tableNames) {
+          return formatBrowseSlotConflictTipHtml(slot, tableNames);
         }
 
         function getBrowseV3UserGroupBlockedTip(config, ugId, excludeConfigId) {
           if (!config.objectTypes || !config.objectTypes.length) return '';
           var tips = [];
-          var seenTables = {};
+          var seenKey = {};
           config.objectTypes.forEach(function (objectType) {
-            var occupant = findBrowseV3SlotOccupant(objectType, ugId, excludeConfigId);
-            if (!occupant || seenTables[occupant.id]) return;
-            seenTables[occupant.id] = true;
+            var occupants = findBrowseV3SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seenKey[key]) return;
+            seenKey[key] = true;
             tips.push(formatBrowseV3SlotConflictTip(
               { objectType: objectType, scope: ugId },
-              occupant.configurationName
+              names
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseV3UserGroupBlockedTipHtml(config, ugId, excludeConfigId) {
+          if (!config.objectTypes || !config.objectTypes.length) return '';
+          var tips = [];
+          var seenKey = {};
+          config.objectTypes.forEach(function (objectType) {
+            var occupants = findBrowseV3SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seenKey[key]) return;
+            seenKey[key] = true;
+            tips.push(formatBrowseV3SlotConflictTipHtml(
+              { objectType: objectType, scope: ugId },
+              names
             ));
           });
           return tips.join(' ');
@@ -13496,26 +13831,51 @@
 
         function getBrowseV3ObjectTypeBlockedTip(config, objectType, excludeConfigId) {
           if (!config.userGroups || !config.userGroups.length) {
-            var allOccupant = findBrowseV3SlotOccupant(objectType, '__all__', excludeConfigId);
-            if (allOccupant) {
-              return formatBrowseV3ObjectTypeConflictTip(
-                { objectType: objectType, scope: '__all__' },
-                allOccupant.configurationName
-              );
-            }
-            return '';
+            var allOccupants = findBrowseV3SlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!allOccupants.length) return '';
+            return formatBrowseV3ObjectTypeConflictTip(
+              { objectType: objectType, scope: '__all__' },
+              allOccupants.map(function (o) { return o.configurationName; })
+            );
           }
           var tips = [];
           var seen = {};
           config.userGroups.forEach(function (ugId) {
-            var occupant = findBrowseV3SlotOccupant(objectType, ugId, excludeConfigId);
-            if (!occupant) return;
-            var key = ugId + '\0' + occupant.id;
+            var occupants = findBrowseV3SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = ugId + '\0' + names.join('\0');
             if (seen[key]) return;
             seen[key] = true;
             tips.push(formatBrowseV3ObjectTypeConflictTip(
               { objectType: objectType, scope: ugId },
-              occupant.configurationName
+              names
+            ));
+          });
+          return tips.join(' ');
+        }
+
+        function getBrowseV3ObjectTypeBlockedTipHtml(config, objectType, excludeConfigId) {
+          if (!config.userGroups || !config.userGroups.length) {
+            var allOccupants = findBrowseV3SlotOccupants(objectType, '__all__', excludeConfigId);
+            if (!allOccupants.length) return '';
+            return formatBrowseV3ObjectTypeConflictTipHtml(
+              { objectType: objectType, scope: '__all__' },
+              allOccupants.map(function (o) { return o.configurationName; })
+            );
+          }
+          var tips = [];
+          var seen = {};
+          config.userGroups.forEach(function (ugId) {
+            var occupants = findBrowseV3SlotOccupants(objectType, ugId, excludeConfigId);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = ugId + '\0' + names.join('\0');
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push(formatBrowseV3ObjectTypeConflictTipHtml(
+              { objectType: objectType, scope: ugId },
+              names
             ));
           });
           return tips.join(' ');
@@ -13525,18 +13885,25 @@
           var cat = findCategory('browse-table-v3');
           if (!cat) return [];
           var conflicts = [];
-          var seen = {};
           getBrowseV3ConfigSlots(config).forEach(function (slot) {
+            var otherNames = [];
+            var seenName = {};
             cat.configs.forEach(function (other) {
               if (other.id === excludeConfigId) return;
               getBrowseV3ConfigSlots(other).forEach(function (otherSlot) {
                 if (otherSlot.objectType !== slot.objectType || otherSlot.scope !== slot.scope) return;
-                var key = slot.objectType + '\0' + slot.scope;
-                if (seen[key]) return;
-                seen[key] = true;
-                conflicts.push({ slot: slot, otherName: other.configurationName });
+                if (seenName[other.configurationName]) return;
+                seenName[other.configurationName] = true;
+                otherNames.push(other.configurationName);
               });
             });
+            if (otherNames.length) {
+              conflicts.push({
+                slot: slot,
+                otherNames: otherNames,
+                otherName: otherNames[0]
+              });
+            }
           });
           return conflicts;
         }
@@ -13544,7 +13911,16 @@
         function getBrowseV3ConflictMessage(config, excludeConfigId) {
           var conflicts = findBrowseV3ConfigConflicts(config, excludeConfigId);
           if (!conflicts.length) return '';
-          return formatBrowseV3SlotConflictTip(conflicts[0].slot, conflicts[0].otherName);
+          return formatBrowseV3SlotConflictTip(conflicts[0].slot, conflicts[0].otherNames);
+        }
+
+        function getBrowseV3ConfigTreeWarnTip(config) {
+          if (!config) return '';
+          var conflicts = findBrowseV3ConfigConflicts(config, config.id);
+          if (!conflicts.length) return '';
+          return conflicts.map(function (c) {
+            return formatBrowseV3SlotConflictTip(c.slot, c.otherNames);
+          }).join('\n');
         }
 
         function getBrowseV3ConfigIncompleteReasons(config) {
@@ -13572,7 +13948,7 @@
             });
             findBrowseV3ConfigConflicts(config, config.id).forEach(function (c) {
               blockers.push(
-                '“' + config.configurationName + '”: ' + formatBrowseV3SlotConflictTip(c.slot, c.otherName)
+                '“' + config.configurationName + '”: ' + formatBrowseV3SlotConflictTip(c.slot, c.otherNames)
               );
             });
           });
@@ -13583,7 +13959,7 @@
           var blockers = getBrowseV3ConfigIncompleteReasons(draftConfig);
           if (isBrowseV3ConfigComplete(draftConfig)) {
             findBrowseV3ConfigConflicts(draftConfig, null).forEach(function (c) {
-              blockers.push(formatBrowseV3SlotConflictTip(c.slot, c.otherName));
+              blockers.push(formatBrowseV3SlotConflictTip(c.slot, c.otherNames));
             });
           }
           return blockers;
@@ -13592,7 +13968,7 @@
         function getAddBrowseV3ModalConflictBlockers(draftConfig) {
           if (!isBrowseV3ConfigComplete(draftConfig)) return [];
           return findBrowseV3ConfigConflicts(draftConfig, null).map(function (c) {
-            return formatBrowseV3SlotConflictTip(c.slot, c.otherName);
+            return formatBrowseV3SlotConflictTipHtml(c.slot, c.otherNames);
           });
         }
 
@@ -13602,16 +13978,17 @@
           if (!conflictBlockers.length) {
             messageEl.hidden = true;
             messageEl.innerHTML = '';
-            messageEl.classList.remove('is-error');
+            messageEl.classList.remove('is-warning', 'is-error');
             return;
           }
-          messageEl.classList.add('is-error');
+          messageEl.classList.remove('is-error');
+          messageEl.classList.add('is-warning');
           if (conflictBlockers.length === 1) {
-            messageEl.textContent = conflictBlockers[0];
+            messageEl.innerHTML = conflictBlockers[0];
           } else {
             messageEl.innerHTML = '<ul class="modal__field-message-list">' +
               conflictBlockers.map(function (b) {
-                return '<li>' + escapeHtml(b) + '</li>';
+                return '<li>' + b + '</li>';
               }).join('') +
               '</ul>';
           }
@@ -13626,8 +14003,8 @@
         }
 
         function showAddBrowseV3BlockedPick(item) {
-          if (!item || !item.disabledTip) return;
-          addBrowseV3ModalShownConflicts = [item.disabledTip];
+          if (!item || !(item.disabledTipHtml || item.disabledTip)) return;
+          addBrowseV3ModalShownConflicts = [item.disabledTipHtml || escapeHtml(item.disabledTip)];
           renderAddBrowseV3ModalMessage(addBrowseV3ModalShownConflicts);
         }
 
@@ -13659,11 +14036,15 @@
             var disabledTip = config
               ? getBrowseV3ObjectTypeBlockedTip(config, ot, excludeConfigId)
               : '';
+            var disabledTipHtml = config && disabledTip
+              ? getBrowseV3ObjectTypeBlockedTipHtml(config, ot, excludeConfigId)
+              : '';
             return {
               id: ot,
               label: ot,
               disabled: !!disabledTip,
-              disabledTip: disabledTip || undefined
+              disabledTip: disabledTip || undefined,
+              disabledTipHtml: disabledTipHtml || undefined
             };
           });
         }
@@ -13678,11 +14059,15 @@
             var disabledTip = config
               ? getBrowseV3UserGroupBlockedTip(config, ug.id, excludeConfigId)
               : '';
+            var disabledTipHtml = config && disabledTip
+              ? getBrowseV3UserGroupBlockedTipHtml(config, ug.id, excludeConfigId)
+              : '';
             return {
               id: ug.id,
               label: ug.label,
               disabled: !!disabledTip,
-              disabledTip: disabledTip || undefined
+              disabledTip: disabledTip || undefined,
+              disabledTipHtml: disabledTipHtml || undefined
             };
           });
         }
@@ -13750,23 +14135,74 @@
         function renderBrowseV3DetailValidation(config) {
           var messageEl = document.getElementById('sv-browse-v3-validation-message');
           if (!messageEl || !config) return;
-          var conflicts = findBrowseV3ConfigConflicts(config, config.id).map(function (c) {
-            return formatBrowseV3SlotConflictTip(c.slot, c.otherName);
+          var messages = findBrowseV3ConfigConflicts(config, config.id).map(function (c) {
+            return formatBrowseV3SlotConflictTipHtml(c.slot, c.otherNames);
           });
-          if (!conflicts.length) {
+          if (!messages.length) {
             messageEl.hidden = true;
             messageEl.innerHTML = '';
             messageEl.className = 'form-section__validation';
             return;
           }
-          messageEl.className = 'form-section__validation form-section__validation--error';
-          if (conflicts.length === 1) messageEl.textContent = conflicts[0];
+          messageEl.className = 'form-section__validation form-section__validation--warning';
+          if (messages.length === 1) messageEl.innerHTML = messages[0];
           else {
             messageEl.innerHTML = '<ul class="form-section__validation-list">' +
-              conflicts.map(function (m) { return '<li>' + escapeHtml(m) + '</li>'; }).join('') +
+              messages.map(function (m) { return '<li>' + m + '</li>'; }).join('') +
               '</ul>';
           }
           messageEl.hidden = false;
+        }
+
+        function canRemoveBrowseV3UserGroup(config, ugId) {
+          var groups = config.userGroups || [];
+          if (groups.indexOf(ugId) === -1) return false;
+          if (groups.length > 1) return true;
+          // Last chip → empty = everyone. Block when any OT already has an everyone table.
+          return !browseV3EmptyWouldConflictWithEveryone(config);
+        }
+
+        function browseV3EmptyWouldConflictWithEveryone(config) {
+          var objectTypes = config.objectTypes || [];
+          if (!objectTypes.length) return false;
+          for (var i = 0; i < objectTypes.length; i++) {
+            var occupants = findBrowseV3SlotOccupants(
+              objectTypes[i],
+              '__all__',
+              config.id
+            );
+            if (occupants.length) return true;
+          }
+          return false;
+        }
+
+        function getBrowseV3LastUserGroupBlockedReasons(config) {
+          if ((config.userGroups || []).length !== 1) return [];
+          if (!browseV3EmptyWouldConflictWithEveryone(config)) return [];
+          var tips = [];
+          var seen = {};
+          (config.objectTypes || []).forEach(function (objectType) {
+            var occupants = findBrowseV3SlotOccupants(objectType, '__all__', config.id);
+            if (!occupants.length) return;
+            var names = occupants.map(function (o) { return o.configurationName; });
+            var key = objectType + '\0' + names.join('\0');
+            if (seen[key]) return;
+            seen[key] = true;
+            tips.push({
+              slot: { objectType: objectType, scope: '__all__' },
+              otherNames: names
+            });
+          });
+          return tips;
+        }
+
+        function getBrowseV3LastUserGroupBlockedTip(config) {
+          var reasons = getBrowseV3LastUserGroupBlockedReasons(config);
+          if (!reasons.length) return '';
+          return reasons.map(function (r) {
+            return 'You can\'t remove the last user group. ' +
+              formatBrowseV3SlotConflictTip(r.slot, r.otherNames);
+          }).join(' ');
         }
 
         function renderBrowseV3UserGroupsUi(config) {
@@ -13776,16 +14212,34 @@
             config.userGroups,
             getBrowseUserGroupLabel,
             function (id) {
-              var prev = config.userGroups.slice();
+              if (!canRemoveBrowseV3UserGroup(config, id)) return;
               config.userGroups = config.userGroups.filter(function (x) { return x !== id; });
-              if (!validateBrowseV3ConfigState(config, config.id)) {
-                config.userGroups = prev;
-                return;
-              }
               renderBrowseV3UserGroupsUi(config);
               markUnsaved();
+            },
+            {
+              canRemove: function (id) {
+                return canRemoveBrowseV3UserGroup(config, id);
+              }
             }
           );
+          var blockedTip = getBrowseV3LastUserGroupBlockedTip(config);
+          if (blockedTip) {
+            document.querySelectorAll('#sv-browse-v3-user-groups-chips .chip').forEach(function (chip) {
+              if (chip.querySelector('.chip__remove')) return;
+              chip.classList.add('chip--locked');
+              chip.setAttribute('tabindex', '0');
+              chip.setAttribute('aria-description', blockedTip);
+              chip.addEventListener('mouseenter', function () {
+                showCatalogDisabledTip(blockedTip, chip, { placement: 'right', delay: 500 });
+              });
+              chip.addEventListener('mouseleave', hideCatalogDisabledTip);
+              chip.addEventListener('focus', function () {
+                showCatalogDisabledTip(blockedTip, chip, { placement: 'right', delay: 0 });
+              });
+              chip.addEventListener('blur', hideCatalogDisabledTip);
+            });
+          }
           renderBrowseV3DetailValidation(config);
           renderTree();
         }
@@ -13799,6 +14253,11 @@
               config.objectTypes = config.objectTypes.filter(function (x) { return x !== value; });
               renderBrowseV3ObjectTypesUi(config);
               markUnsaved();
+            },
+            {
+              canRemove: function () {
+                return (config.objectTypes || []).length > 1;
+              }
             }
           );
           renderBrowseV3UserGroupsUi(config);
@@ -13808,7 +14267,7 @@
           if (!isBrowseV3ConfigComplete(config)) return true;
           var message = getBrowseV3ConflictMessage(config, excludeConfigId);
           if (message) {
-            showToast(message, 'error');
+            showToast(message, 'info');
             return false;
           }
           return true;
@@ -13861,7 +14320,7 @@
           var messageEl = document.getElementById('sv-browse-validation-message');
           if (!messageEl || !config) return;
           var conflicts = findBrowseConfigConflicts(config, config.id).map(function (c) {
-            return formatBrowseSlotConflictTip(c.slot, c.otherName);
+            return formatBrowseSlotConflictTipHtml(c.slot, c.otherNames);
           });
           if (!conflicts.length) {
             messageEl.hidden = true;
@@ -13869,56 +14328,68 @@
             messageEl.className = 'form-section__validation';
             return;
           }
-          messageEl.className = 'form-section__validation form-section__validation--error';
+          messageEl.className = 'form-section__validation form-section__validation--warning';
           if (conflicts.length === 1) {
-            messageEl.textContent = conflicts[0];
+            messageEl.innerHTML = conflicts[0];
           } else {
             messageEl.innerHTML = '<ul class="form-section__validation-list">' +
-              conflicts.map(function (m) { return '<li>' + escapeHtml(m) + '</li>'; }).join('') +
+              conflicts.map(function (m) { return '<li>' + m + '</li>'; }).join('') +
               '</ul>';
           }
           messageEl.hidden = false;
         }
 
-        function renderStringChips(chipsHost, values, onRemove) {
+        function renderStringChips(chipsHost, values, onRemove, options) {
           if (!chipsHost) return;
+          options = options || {};
+          var canRemoveChip = typeof options.canRemove === 'function'
+            ? options.canRemove
+            : function () { return true; };
           chipsHost.innerHTML = '';
           (values || []).forEach(function (value) {
             var chip = document.createElement('span');
             chip.className = 'chip';
             chip.appendChild(document.createTextNode(value));
-            var rm = document.createElement('button');
-            rm.type = 'button';
-            rm.className = 'chip__remove';
-            rm.setAttribute('aria-label', 'Remove ' + value);
-            rm.textContent = '×';
-            rm.addEventListener('click', function (e) {
-              e.stopPropagation();
-              onRemove(value);
-            });
-            chip.appendChild(rm);
+            if (canRemoveChip(value)) {
+              var rm = document.createElement('button');
+              rm.type = 'button';
+              rm.className = 'chip__remove';
+              rm.setAttribute('aria-label', 'Remove ' + value);
+              rm.textContent = '×';
+              rm.addEventListener('click', function (e) {
+                e.stopPropagation();
+                onRemove(value);
+              });
+              chip.appendChild(rm);
+            }
             chipsHost.appendChild(chip);
           });
         }
 
-        function renderIdChips(chipsHost, ids, labelFor, onRemove) {
+        function renderIdChips(chipsHost, ids, labelFor, onRemove, options) {
           if (!chipsHost) return;
+          options = options || {};
+          var canRemoveChip = typeof options.canRemove === 'function'
+            ? options.canRemove
+            : function () { return true; };
           chipsHost.innerHTML = '';
           (ids || []).forEach(function (id) {
             var label = labelFor(id);
             var chip = document.createElement('span');
             chip.className = 'chip';
             chip.appendChild(document.createTextNode(label));
-            var rm = document.createElement('button');
-            rm.type = 'button';
-            rm.className = 'chip__remove';
-            rm.setAttribute('aria-label', 'Remove ' + label);
-            rm.textContent = '×';
-            rm.addEventListener('click', function (e) {
-              e.stopPropagation();
-              onRemove(id);
-            });
-            chip.appendChild(rm);
+            if (canRemoveChip(id)) {
+              var rm = document.createElement('button');
+              rm.type = 'button';
+              rm.className = 'chip__remove';
+              rm.setAttribute('aria-label', 'Remove ' + label);
+              rm.textContent = '×';
+              rm.addEventListener('click', function (e) {
+                e.stopPropagation();
+                onRemove(id);
+              });
+              chip.appendChild(rm);
+            }
             chipsHost.appendChild(chip);
           });
         }
@@ -13948,9 +14419,12 @@
           }
         }
 
-        function showCatalogDisabledTip(text, target) {
+        function showCatalogDisabledTip(text, target, options) {
           hideCatalogDisabledTip();
           if (!text || !target) return;
+          options = options || {};
+          var placement = options.placement || 'below';
+          var delay = typeof options.delay === 'number' ? options.delay : 500;
           catalogDisabledTipTimer = setTimeout(function () {
             catalogDisabledTipTimer = null;
             var tip = document.getElementById('catalog-disabled-tip');
@@ -13960,18 +14434,27 @@
             tip.classList.remove('is-visible');
             var margin = 8;
             var targetRect = target.getBoundingClientRect();
-            tip.style.left = targetRect.left + 'px';
-            tip.style.top = (targetRect.bottom + margin) + 'px';
+            if (placement === 'right') {
+              tip.style.left = (targetRect.right + margin) + 'px';
+              tip.style.top = targetRect.top + 'px';
+            } else {
+              tip.style.left = targetRect.left + 'px';
+              tip.style.top = (targetRect.bottom + margin) + 'px';
+            }
             var tipRect = tip.getBoundingClientRect();
             if (tipRect.right > window.innerWidth - margin) {
-              tip.style.left = Math.max(margin, window.innerWidth - tipRect.width - margin) + 'px';
+              if (placement === 'right') {
+                tip.style.left = Math.max(margin, targetRect.left - tipRect.width - margin) + 'px';
+              } else {
+                tip.style.left = Math.max(margin, window.innerWidth - tipRect.width - margin) + 'px';
+              }
               tipRect = tip.getBoundingClientRect();
             }
             if (tipRect.bottom > window.innerHeight - margin) {
-              tip.style.top = Math.max(margin, targetRect.top - tipRect.height - margin) + 'px';
+              tip.style.top = Math.max(margin, window.innerHeight - tipRect.height - margin) + 'px';
             }
             tip.classList.add('is-visible');
-          }, 500);
+          }, delay);
         }
 
         function bindCatalogTypeaheadTipScroll(menu) {
@@ -14059,11 +14542,15 @@
             var disabledTip = config
               ? getBrowseObjectTypeBlockedTip(config, ot, excludeConfigId)
               : '';
+            var disabledTipHtml = config && disabledTip
+              ? getBrowseObjectTypeBlockedTipHtml(config, ot, excludeConfigId)
+              : '';
             return {
               id: ot,
               label: ot,
               disabled: !!disabledTip,
-              disabledTip: disabledTip || undefined
+              disabledTip: disabledTip || undefined,
+              disabledTipHtml: disabledTipHtml || undefined
             };
           });
         }
@@ -14078,11 +14565,15 @@
             var disabledTip = config
               ? getBrowseUserGroupBlockedTip(config, ug.id, excludeConfigId)
               : '';
+            var disabledTipHtml = config && disabledTip
+              ? getBrowseUserGroupBlockedTipHtml(config, ug.id, excludeConfigId)
+              : '';
             return {
               id: ug.id,
               label: ug.label,
               disabled: !!disabledTip,
-              disabledTip: disabledTip || undefined
+              disabledTip: disabledTip || undefined,
+              disabledTipHtml: disabledTipHtml || undefined
             };
           });
         }
@@ -14104,9 +14595,18 @@
           }, null);
         }
 
+        function getAddBrowseAllBlockedTipsHtml() {
+          if (!addBrowseDraft.objectTypes.length) return [];
+          return getBrowseAllModeBlockedTipsHtml({
+            objectTypes: addBrowseDraft.objectTypes.slice(),
+            userGroupsMode: 'all',
+            userGroups: []
+          }, null);
+        }
+
         function showAddBrowseBlockedPick(item) {
-          if (!item || !item.disabledTip) return;
-          addBrowseModalShownConflicts = [item.disabledTip];
+          if (!item || (!item.disabledTip && !item.disabledTipHtml)) return;
+          addBrowseModalShownConflicts = [item.disabledTipHtml || escapeHtml(item.disabledTip)];
           renderAddBrowseModalMessage(addBrowseModalShownConflicts);
         }
 
@@ -14241,9 +14741,15 @@
             config.userGroups,
             getBrowseUserGroupLabel,
             function (id) {
+              if (!canRemoveBrowseSpecificUserGroup(config.userGroups, id)) return;
               config.userGroups = config.userGroups.filter(function (x) { return x !== id; });
               renderBrowseUserGroupsUi(config);
               markUnsaved();
+            },
+            {
+              canRemove: function () {
+                return (config.userGroups || []).length > 1;
+              }
             }
           );
           renderBrowseDetailValidation(config);
@@ -14259,6 +14765,11 @@
               config.objectTypes = config.objectTypes.filter(function (x) { return x !== value; });
               renderBrowseObjectTypesUi(config);
               markUnsaved();
+            },
+            {
+              canRemove: function () {
+                return (config.objectTypes || []).length > 1;
+              }
             }
           );
           renderBrowseUserGroupsUi(config);
@@ -14334,7 +14845,7 @@
           if (!config) return;
           normalizeBrowseConfig(config);
           document.getElementById('sv-browse-title').textContent = config.configurationName;
-          document.getElementById('sv-browse-subtitle').textContent = 'Browse table';
+          document.getElementById('sv-browse-subtitle').textContent = 'Browse tables V1';
           document.getElementById('sv-browse-config-name').value = config.configurationName;
           renderBrowseObjectTypesUi(config);
           renderColumnsField(document.getElementById('sv-browse-columns'), config);
@@ -14355,9 +14866,9 @@
           if (!cat) return;
           document.getElementById('sv-category-title').textContent = cat.label;
           if (cat.kind === 'browse-table') {
-            document.getElementById('sv-category-subtitle').textContent = 'Browse table';
+            document.getElementById('sv-category-subtitle').textContent = 'Browse tables V1';
             document.getElementById('sv-category-description').textContent =
-              'Select a browse table configuration in the sidebar, or use Add to create one. Each object type and user group combination can only be configured once; specific user groups take precedence over All.';
+              'Select a browse table configuration in the sidebar, or use Add to create one. Choose All user groups or Specific (at least one group). Leaving Specific empty reverts to All. When only one specific group remains, it cannot be removed — switch to All instead. Each object type + scope combination can only be configured once.';
           } else if (cat.kind === 'browse-table-v2') {
             document.getElementById('sv-category-subtitle').textContent = 'Browse tables V2';
             document.getElementById('sv-category-description').textContent =
@@ -14365,7 +14876,7 @@
           } else if (cat.kind === 'browse-table-v3') {
             document.getElementById('sv-category-subtitle').textContent = 'Browse tables V3';
             document.getElementById('sv-category-description').textContent =
-              'Optional user groups in the create modal (empty = everyone). Create is blocked when the object type + user group combination already exists.';
+              'Optional user groups in the create modal (empty = everyone). Create is blocked when the object type + user group combination already exists. After create, the last user group cannot be removed when an everyone table already covers the same object type.';
           } else {
             document.getElementById('sv-category-subtitle').textContent = 'Reference table';
             document.getElementById('sv-category-description').textContent =
@@ -14391,8 +14902,26 @@
                 var cfgSel = selected.type === 'sv-config' &&
                   selected.categoryId === cat.id &&
                   selected.configId === cfg.id ? ' is-selected' : '';
-                html += '<li><div class="tree-item' + cfgSel + '"' +
+                var warnClass = '';
+                var warnLine = '';
+                var warnTip = '';
+                if (cat.kind === 'browse-table') {
+                  warnTip = getBrowseConfigTreeWarnTip(cfg);
+                } else if (cat.kind === 'browse-table-v2') {
+                  warnTip = getBrowseV2ConfigTreeWarnTip(cfg);
+                } else if (cat.kind === 'browse-table-v3') {
+                  warnTip = getBrowseV3ConfigTreeWarnTip(cfg);
+                }
+                if (warnTip) {
+                  warnClass = ' is-conflict-warn';
+                  var tipAttr = escapeHtml(warnTip).replace(/\n/g, '&#10;');
+                  warnLine =
+                    '<span class="tree-item__status-line" data-conflict-tip="' + tipAttr +
+                    '" role="img" tabindex="0" aria-label="' + tipAttr + '"></span>';
+                }
+                html += '<li><div class="tree-item' + cfgSel + warnClass + '"' +
                   ' data-type="sv-config" data-category-id="' + cat.id + '" data-id="' + cfg.id + '">' +
+                  warnLine +
                   '<span class="tree-item__toggle is-hidden"></span>' +
                   '<span class="tree-item__label">' + escapeHtml(cfg.configurationName) + '</span></div></li>';
               });
@@ -14405,7 +14934,7 @@
 
         function ensureSelection() {
           if (selected.type === 'sv-config' || selected.type === 'sv-category') return;
-          selected = { type: 'sv-config', categoryId: 'browse-table', configId: 'bt-table-1' };
+          selected = { type: 'sv-config', categoryId: 'browse-table', configId: 'bt-shoes-everyone' };
         }
 
         function updateDetail() {
@@ -14438,13 +14967,13 @@
             var cat = findCategory(selected.categoryId);
             if (!cat) return [];
             if (cat.kind === 'browse-table') {
-              return [{ mode: 'browse-table', label: 'Browse table' }];
+              return [{ mode: 'browse-table', label: 'Browse tables V1' }];
             }
             if (cat.kind === 'browse-table-v2') {
-              return [{ mode: 'browse-table-v2', label: 'Browse table' }];
+              return [{ mode: 'browse-table-v2', label: 'Browse tables V2' }];
             }
             if (cat.kind === 'browse-table-v3') {
-              return [{ mode: 'browse-table-v3', label: 'Browse table' }];
+              return [{ mode: 'browse-table-v3', label: 'Browse tables V3' }];
             }
             return [{ mode: 'reference-table', label: 'Reference table' }];
           }
@@ -14452,17 +14981,17 @@
             var catFolder = findCategory(selected.categoryId);
             if (!catFolder) return [];
             if (catFolder.kind === 'browse-table') {
-              return [{ mode: 'browse-table', label: 'Browse table' }];
+              return [{ mode: 'browse-table', label: 'Browse tables V1' }];
             }
             if (catFolder.kind === 'browse-table-v2') {
-              return [{ mode: 'browse-table-v2', label: 'Browse table' }];
+              return [{ mode: 'browse-table-v2', label: 'Browse tables V2' }];
             }
             if (catFolder.kind === 'browse-table-v3') {
-              return [{ mode: 'browse-table-v3', label: 'Browse table' }];
+              return [{ mode: 'browse-table-v3', label: 'Browse tables V3' }];
             }
             return [{ mode: 'reference-table', label: 'Reference table' }];
           }
-          return [{ mode: 'browse-table', label: 'Browse table' }];
+          return [{ mode: 'browse-table', label: 'Browse tables V1' }];
         }
 
         function isAddEnabled() {
@@ -14707,7 +15236,7 @@
             }
             var conflictV3 = getBrowseV3ConflictMessage(draftV3, null);
             if (conflictV3) {
-              showToast(conflictV3, 'error');
+              showToast(conflictV3, 'info');
               return false;
             }
             var isDuplicateV3 = browseModalPreset && browseModalPreset.kind === 'duplicate';
@@ -14791,7 +15320,7 @@
           }
           function renderSuggestions() {
             var suggestions = getSuggestions(input.value);
-            if (!input.value.trim()) {
+            if (!suggestions.length) {
               hideCatalogTypeahead(menu, input);
               highlightRef.val = -1;
               return;
@@ -14805,10 +15334,7 @@
             }, onBlockedPick);
           }
           input.addEventListener('input', renderSuggestions);
-          input.addEventListener('focus', function () {
-            if (!input.value.trim()) return;
-            renderSuggestions();
-          });
+          input.addEventListener('focus', renderSuggestions);
           input.addEventListener('blur', function () {
             setTimeout(function () { hideCatalogTypeahead(menu, input); }, 150);
           });
@@ -14986,7 +15512,7 @@
               if (!radio.checked) return;
               var prevMode = addBrowseDraft.userGroupsMode;
               if (radio.value === 'all') {
-                var allTips = getAddBrowseAllBlockedTips();
+                var allTips = getAddBrowseAllBlockedTipsHtml();
                 if (allTips.length) {
                   document.querySelectorAll('#add-sv-ug-mode input[type="radio"]').forEach(function (r) {
                     r.checked = prevMode === r.value;
@@ -15228,6 +15754,9 @@
             document.getElementById('sv-browse-v3-object-types-typeahead'),
             function (query) {
               var cfg = getActiveBrowseV3Config();
+              // Always check uniqueness — empty groups = everyone, so an OT that
+              // already has an everyone table must stay disabled (no Product+Category
+              // everyone alongside Product everyone).
               return getBrowseV3ObjectTypeSuggestions(
                 query,
                 cfg ? cfg.objectTypes : [],
@@ -15240,10 +15769,6 @@
               var cfg = getActiveBrowseV3Config();
               if (!cfg || item.disabled || cfg.objectTypes.indexOf(item.id) !== -1) return;
               cfg.objectTypes.push(item.id);
-              if (!validateBrowseV3ConfigState(cfg, cfg.id)) {
-                cfg.objectTypes.pop();
-                return;
-              }
               document.getElementById('sv-browse-v3-object-types-input').value = '';
               hideCatalogTypeahead(
                 document.getElementById('sv-browse-v3-object-types-typeahead'),
@@ -15271,10 +15796,6 @@
               var cfg = getActiveBrowseV3Config();
               if (!cfg || item.disabled || cfg.userGroups.indexOf(item.id) !== -1) return;
               cfg.userGroups.push(item.id);
-              if (!validateBrowseV3ConfigState(cfg, cfg.id)) {
-                cfg.userGroups.pop();
-                return;
-              }
               document.getElementById('sv-browse-v3-user-groups-input').value = '';
               hideCatalogTypeahead(
                 document.getElementById('sv-browse-v3-user-groups-typeahead'),
@@ -15314,8 +15835,7 @@
               renderAddBrowseV3Modal();
               syncAddBrowseV3ModalSubmit();
             },
-            function () { syncAddBrowseV3ModalSubmit(); },
-            showAddBrowseV3BlockedPick
+            function () { syncAddBrowseV3ModalSubmit(); }
           );
 
           bindBrowseTypeahead(
@@ -15342,8 +15862,7 @@
               renderAddBrowseV3Modal();
               syncAddBrowseV3ModalSubmit();
             },
-            function () { syncAddBrowseV3ModalSubmit(); },
-            showAddBrowseV3BlockedPick
+            function () { syncAddBrowseV3ModalSubmit(); }
           );
 
           var columnsFieldV3 = document.getElementById('sv-browse-v3-columns');

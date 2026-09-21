@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browse tables — post-creation edge cases</title>
+  <style>
+    :root {
+      --text: #323130;
+      --muted: #605e5c;
+      --border: #e0e0e0;
+      --bg: #f3f2f1;
+      --card: #ffffff;
+      --accent: #0078d4;
+      --accent-soft: #e1f5fe;
+      --danger: #a4262c;
+      --danger-soft: #fde7e9;
+      --ok: #0b6a0b;
+      --ok-soft: #dff6dd;
+      --radius: 2px;
+      --font: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 6px;
+    }
+    .lede {
+      color: var(--muted);
+      margin: 0 0 20px;
+      font-size: 13px;
+    }
+    .picker {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .picker label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .picker select {
+      width: 100%;
+      font: inherit;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+    }
+    .scenario-meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .instruction {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      min-height: 72px;
+    }
+    .instruction.is-done {
+      background: var(--ok-soft);
+      border-left-color: var(--ok);
+    }
+    .instruction__step {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .instruction__text {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+    .instruction__hint {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .world {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .world strong { color: var(--text); }
+    .modal-stage {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      padding: 28px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .modal {
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      font-size: 18px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal__close {
+      border: 0;
+      background: transparent;
+      font-size: 18px;
+      color: var(--muted);
+      cursor: default;
+      line-height: 1;
+    }
+    .modal__body { padding: 16px 20px 8px; }
+    .field { margin-bottom: 16px; }
+    .field__label {
+      display: block;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .req { color: var(--danger); margin-right: 2px; }
+    .field__input {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #8a8886;
+      padding: 6px 0;
+      font: inherit;
+      outline: none;
+      background: transparent;
+    }
+    .field__input:focus { border-bottom-color: var(--accent); }
+    .field__hint {
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .chip-field {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #8a8886;
+      padding: 4px 0 6px;
+      position: relative;
+      min-height: 32px;
+    }
+    .chip-field:focus-within { border-bottom-color: var(--accent); }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f3f2f1;
+      border-radius: 2px;
+      padding: 2px 6px;
+      font-size: 13px;
+    }
+    .chip button {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .chip-field input {
+      flex: 1;
+      min-width: 80px;
+      border: 0;
+      outline: none;
+      font: inherit;
+      padding: 4px 0;
+    }
+    .typeahead {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      z-index: 5;
+      margin: 0;
+      padding: 4px 0;
+      list-style: none;
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      max-height: 180px;
+      overflow: auto;
+    }
+    .typeahead[hidden] { display: none; }
+    .typeahead button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .typeahead button:hover:not(:disabled) { background: #f3f3f3; }
+    .typeahead button:disabled {
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+    .disabled-tip {
+      position: fixed;
+      z-index: 40;
+      max-width: 280px;
+      padding: 8px 10px;
+      background: #323130;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.35;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
+    .disabled-tip.is-visible { opacity: 1; }
+    .disabled-tip[hidden] { display: none; }
+    .modal__msg {
+      margin: 0 0 16px;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: var(--radius);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .modal__msg strong {
+      font-weight: 600;
+    }
+    .modal__msg.is-error {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+    .modal__msg.is-warning {
+      background: #fffbf5;
+      border: 1px solid #ede0d4;
+      color: #444;
+    }
+    .modal__msg[hidden] { display: none; }
+    .modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #f3f2f1;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      font: inherit;
+      padding: 6px 16px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn--ghost {
+      background: transparent;
+      color: var(--text);
+    }
+    .btn--primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn--primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #323130;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      z-index: 20;
+      max-width: 90vw;
+    }
+    .toast[hidden] { display: none; }
+    .toast.is-error { background: var(--danger); }
+    .toast.is-warning { background: #8a6116; }
+    .toast.is-ok { background: var(--ok); }
+    .complete-banner {
+      background: var(--ok-soft);
+      border: 1px solid #9fd4a0;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+    .complete-banner[hidden] { display: none; }
+    .links {
+      margin-top: 20px;
+      font-size: 12px;
+    }
+    .links a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Browse tables — post-creation edge cases</h1>
+    <p class="lede">
+      Option B after create: edit an existing table. Invalid OT + scope drafts show a warning; Save stays disabled. Create-time behaviour lives in Browse tables V3.
+    </p>
+
+    <div class="picker">
+      <label for="scenario-select">Scenario</label>
+      <select id="scenario-select"></select>
+      <div class="scenario-meta" id="scenario-meta"></div>
+    </div>
+
+    <div class="world" id="world"></div>
+
+    <div class="instruction" id="instruction">
+      <div class="instruction__step" id="instruction-step">Step 1</div>
+      <p class="instruction__text" id="instruction-text">Loading…</p>
+      <p class="instruction__hint" id="instruction-hint"></p>
+    </div>
+
+    <div class="complete-banner" id="complete-banner" hidden>
+      <strong>Scenario complete.</strong>
+      <span id="complete-text"></span>
+      Pick another scenario to continue.
+    </div>
+
+    <div class="modal-stage">
+      <div class="modal" role="dialog" aria-labelledby="modal-title">
+        <div class="modal__header">
+          <span id="modal-title">Edit browse table</span>
+          <button type="button" class="modal__close" tabindex="-1" aria-hidden="true">×</button>
+        </div>
+        <div class="modal__body">
+          <div class="modal__msg is-warning" id="modal-msg" hidden></div>
+          <p class="field__hint" style="margin-top:0;margin-bottom:16px;">You must specify 1 or more object types for this table to be displayed. It will be visible to all users unless you select specific user groups.</p>
+          <div class="field">
+            <label class="field__label" for="config-name"><span class="req">*</span> Configuration name</label>
+            <input class="field__input" id="config-name" value="Browse table" autocomplete="off">
+          </div>
+          <div class="field">
+            <span class="field__label"><span class="req">*</span> Object types</span>
+            <div class="chip-field" id="ot-field">
+              <span id="ot-chips"></span>
+              <input type="text" id="ot-input" placeholder="Search" autocomplete="off" aria-label="Search object types">
+              <ul class="typeahead" id="ot-menu" role="listbox" hidden></ul>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field__label">User groups</span>
+            <div class="chip-field" id="ug-field">
+              <span id="ug-chips"></span>
+              <input type="text" id="ug-input" placeholder="Search" autocomplete="off" aria-label="Search user groups">
+              <ul class="typeahead" id="ug-menu" role="listbox" hidden></ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="btn-cancel">Cancel</button>
+          <span id="btn-save-wrap" style="display:inline-flex">
+            <button type="button" class="btn btn--primary" id="btn-save">Save</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <p class="links">
+      <a href="browse-tables-decision.html">Overview</a> ·
+      <a href="CREATE-MODAL.md">Create modal rule</a> ·
+      <a href="index.html">Full prototype (Browse tables V3)</a>
+    </p>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="disabled-tip" id="disabled-tip" role="tooltip" hidden></div>
+
+  <script>
+    var OBJECT_TYPES = ['Product', 'Category', 'Asset', 'Brand'];
+    var USER_GROUPS = [
+      { id: 'buyer-group', label: 'Buyer group' },
+      { id: 'enrichment-group', label: 'Enrichment group' },
+      { id: 'data-stewards', label: 'Data stewards' },
+      { id: 'marketing', label: 'Marketing' }
+    ];
+
+    var WORLD = [
+      { name: 'Table for shoes (everyone)', objectTypes: ['Product'], userGroups: [] },
+      { name: 'Product buyer view', objectTypes: ['Product'], userGroups: ['buyer-group'] },
+      { name: 'Product enrichment', objectTypes: ['Product'], userGroups: ['enrichment-group'] },
+      { name: 'Category default', objectTypes: ['Category'], userGroups: [] }
+    ];
+
+    var draft = { name: 'Browse table', objectTypes: [], userGroups: [] };
+    var editingName = null;
+    var stepIndex = 0;
+    var currentScenario = null;
+
+    var scenarios = [
+      {
+        id: 'remove-last',
+        label: 'Cannot clear last group when everyone exists',
+        blurb: 'Editing Product enrichment. Shoes already owns Product for everyone.',
+        title: 'Edit browse table',
+        startDraft: {
+          name: 'Product enrichment',
+          objectTypes: ['Product'],
+          userGroups: ['enrichment-group']
+        },
+        steps: [
+          {
+            text: 'Check the Enrichment group chip',
+            hint: 'No × — clearing would become everyone and clash with the shoes table.',
+            check: function () {
+              var chip = document.querySelector('#ug-chips .chip');
+              var hasRemove = chip && chip.querySelector('button');
+              return draft.userGroups.length === 1 && !hasRemove;
+            }
+          }
+        ],
+        complete: 'Last group stays locked while an everyone table owns the same object type.'
+      },
+      {
+        id: 'buyer-blocked',
+        label: 'Cannot add Buyer — already used for Product',
+        blurb: 'Editing Product enrichment. Buyer is taken by Product buyer view.',
+        title: 'Edit browse table',
+        startDraft: {
+          name: 'Product enrichment',
+          objectTypes: ['Product'],
+          userGroups: ['enrichment-group']
+        },
+        steps: [
+          {
+            text: 'Open User groups and try Buyer group',
+            hint: 'Buyer should be disabled. Hover for a tooltip naming Product buyer view.',
+            check: function () {
+              return window.__lastAction === 'ug-blocked-buyer-group' || window.__sawBuyerDisabled;
+            }
+          }
+        ],
+        complete: 'Duplicate Product + Buyer was prevented while editing.'
+      },
+      {
+        id: 'multi-ot',
+        label: 'Cannot add Product to Category everyone',
+        blurb: 'Editing Category default (everyone). Product already has an everyone table.',
+        title: 'Edit browse table',
+        startDraft: {
+          name: 'Category default',
+          objectTypes: ['Category'],
+          userGroups: []
+        },
+        steps: [
+          {
+            text: 'Open Object types and try Product',
+            hint: 'Product should be disabled. Hover for a tooltip naming the shoes table.',
+            check: function () {
+              return window.__lastAction === 'ot-blocked-Product' || window.__sawProductDisabled;
+            }
+          }
+        ],
+        complete: 'Multi-OT everyone conflict blocked at pick — no Product+Category everyone beside Product everyone.'
+      },
+      {
+        id: 'shoes-add-buyer',
+        label: 'Everyone table cannot also take Buyer',
+        blurb: 'Editing shoes (everyone). Adding Buyer would duplicate Product buyer view — or change scope.',
+        title: 'Edit browse table',
+        startDraft: {
+          name: 'Table for shoes (everyone)',
+          objectTypes: ['Product'],
+          userGroups: []
+        },
+        steps: [
+          {
+            text: 'Open User groups and try Buyer group',
+            hint: 'Buyer disabled — Product + Buyer already exists. Hover for the tooltip.',
+            check: function () {
+              return window.__lastAction === 'ug-blocked-buyer-group' || window.__sawBuyerDisabled;
+            }
+          }
+        ],
+        complete: 'Scoped group that collides stayed unavailable on an everyone table.'
+      },
+      {
+        id: 'hint',
+        label: 'Conditions hint explains OT + empty groups',
+        blurb: 'On an existing everyone table, confirm the grey Conditions hint.',
+        title: 'Edit browse table',
+        startDraft: {
+          name: 'Table for shoes (everyone)',
+          objectTypes: ['Product'],
+          userGroups: []
+        },
+        steps: [
+          {
+            text: 'Read the conditions hint',
+            hint: 'It should say you must specify 1 or more object types, and that the table is visible to all users unless you select groups.',
+            check: function () { return window.__lastAction === 'hint-acked'; }
+          }
+        ],
+        complete: 'Hint remains the post-create explanation for required OT and empty = everyone.'
+      }
+    ];
+
+    function ugLabel(id) {
+      var g = USER_GROUPS.find(function (x) { return x.id === id; });
+      return g ? g.label : id;
+    }
+
+    function slotsFor(objectTypes, userGroups) {
+      var slots = [];
+      objectTypes.forEach(function (ot) {
+        if (!userGroups.length) slots.push({ ot: ot, scope: '__all__' });
+        else userGroups.forEach(function (g) { slots.push({ ot: ot, scope: g }); });
+      });
+      return slots;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function boldName(str) {
+      return '<strong>' + escapeHtml(str) + '</strong>';
+    }
+
+    /** @returns {{ html: string, text: string }|null} */
+    function findConflict(objectTypes, userGroups) {
+      var mine = slotsFor(objectTypes, userGroups);
+      for (var i = 0; i < mine.length; i++) {
+        var tables = [];
+        var seen = {};
+        for (var w = 0; w < WORLD.length; w++) {
+          if (editingName && WORLD[w].name === editingName) continue;
+          var theirs = slotsFor(WORLD[w].objectTypes, WORLD[w].userGroups);
+          for (var j = 0; j < theirs.length; j++) {
+            if (mine[i].ot === theirs[j].ot && mine[i].scope === theirs[j].scope) {
+              if (!seen[WORLD[w].name]) {
+                seen[WORLD[w].name] = true;
+                tables.push(WORLD[w].name);
+              }
+              break;
+            }
+          }
+        }
+        if (!tables.length) continue;
+        var ot = mine[i].ot;
+        var tableText = tables.length === 1
+          ? tables[0]
+          : tables.length === 2
+            ? tables[0] + ' and ' + tables[1]
+            : tables.slice(0, -1).join(', ') + ', and ' + tables[tables.length - 1];
+        var tableHtml = tables.length === 1
+          ? boldName(tables[0])
+          : tables.length === 2
+            ? boldName(tables[0]) + ' and ' + boldName(tables[1])
+            : tables.slice(0, -1).map(boldName).join(', ') + ', and ' + boldName(tables[tables.length - 1]);
+        var verb = tables.length > 1 ? ' have' : ' has';
+        if (mine[i].scope === '__all__') {
+          return {
+            html: tableHtml + verb + ' already been configured for ' + boldName(ot) + ' for all users.',
+            text: tableText + verb + ' already been configured for ' + ot + ' for all users.'
+          };
+        }
+        var ug = USER_GROUPS.find(function (g) { return g.id === mine[i].scope; });
+        var ugLabel = ug ? ug.label : 'that user group';
+        return {
+          html: tableHtml + verb + ' already been configured for ' + boldName(ot) +
+            ' for ' + boldName(ugLabel) + '.',
+          text: tableText + verb + ' already been configured for ' + ot +
+            ' for ' + ugLabel + '.'
+        };
+      }
+      return null;
+    }
+
+    function draftConflict() {
+      return findConflict(draft.objectTypes, draft.userGroups);
+    }
+
+    function setModalWarning(conflict) {
+      var msg = document.getElementById('modal-msg');
+      if (conflict) {
+        msg.hidden = false;
+        msg.className = 'modal__msg is-warning';
+        msg.innerHTML = conflict.html;
+      } else {
+        msg.hidden = true;
+        msg.innerHTML = '';
+      }
+    }
+
+    function showToast(msg, kind) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast' + (kind ? ' is-' + kind : '');
+      el.hidden = false;
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(function () { el.hidden = true; }, 2200);
+    }
+
+    function renderChips(hostId, values, labelFn, onRemove, canRemove) {
+      var host = document.getElementById(hostId);
+      host.innerHTML = '';
+      values.forEach(function (v) {
+        var chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.appendChild(document.createTextNode(labelFn(v)));
+        var allowRemove = typeof canRemove === 'function' ? canRemove(v) : true;
+        if (allowRemove) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = '×';
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            onRemove(v);
+          });
+          chip.appendChild(btn);
+        }
+        host.appendChild(chip);
+      });
+    }
+
+    function renderOtChips() {
+      renderChips('ot-chips', draft.objectTypes, function (x) { return x; }, function (v) {
+        draft.objectTypes = draft.objectTypes.filter(function (x) { return x !== v; });
+        syncUi();
+        advanceIfReady();
+      });
+    }
+
+    function emptyWouldConflictWithEveryone() {
+      if (!draft.objectTypes.length) return false;
+      return draft.objectTypes.some(function (ot) {
+        return WORLD.some(function (w) {
+          if (editingName && w.name === editingName) return false;
+          return w.objectTypes.indexOf(ot) !== -1 && !w.userGroups.length;
+        });
+      });
+    }
+
+    function renderUgChips() {
+      renderChips(
+        'ug-chips',
+        draft.userGroups,
+        ugLabel,
+        function (v) {
+          draft.userGroups = draft.userGroups.filter(function (x) { return x !== v; });
+          if (!draft.userGroups.length && draftConflict()) {
+            window.__lastAction = 'ug-removed-to-everyone';
+          }
+          syncUi();
+          advanceIfReady();
+        },
+        function () {
+          if (draft.userGroups.length > 1) return true;
+          return !emptyWouldConflictWithEveryone();
+        }
+      );
+    }
+
+    function showDisabledTip(text, target) {
+      hideDisabledTip();
+      if (!text || !target) return;
+      showDisabledTip._timer = setTimeout(function () {
+        showDisabledTip._timer = null;
+        var tip = document.getElementById('disabled-tip');
+        tip.textContent = text;
+        tip.hidden = false;
+        tip.classList.remove('is-visible');
+        var margin = 8;
+        var rect = target.getBoundingClientRect();
+        tip.style.left = rect.left + 'px';
+        tip.style.top = (rect.bottom + margin) + 'px';
+        var tipRect = tip.getBoundingClientRect();
+        if (tipRect.right > window.innerWidth - margin) {
+          tip.style.left = Math.max(margin, window.innerWidth - tipRect.width - margin) + 'px';
+          tipRect = tip.getBoundingClientRect();
+        }
+        if (tipRect.bottom > window.innerHeight - margin) {
+          tip.style.top = Math.max(margin, rect.top - tipRect.height - margin) + 'px';
+        }
+        tip.classList.add('is-visible');
+      }, 400);
+    }
+
+    function hideDisabledTip() {
+      clearTimeout(showDisabledTip._timer);
+      showDisabledTip._timer = null;
+      var tip = document.getElementById('disabled-tip');
+      tip.classList.remove('is-visible');
+      tip.hidden = true;
+      tip.textContent = '';
+    }
+
+    function bindTypeahead(inputId, menuId, getItems, onPick) {
+      var input = document.getElementById(inputId);
+      var menu = document.getElementById(menuId);
+
+      function renderMenu() {
+        var q = input.value.trim().toLowerCase();
+        var items = getItems(q || ' ');
+        menu.innerHTML = '';
+        hideDisabledTip();
+        if (!items.length) {
+          menu.hidden = true;
+          return;
+        }
+        items.forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.disabled = !!item.disabled;
+          btn.appendChild(document.createTextNode(item.label));
+          if (item.disabled && item.tipText) {
+            btn.setAttribute('aria-describedby', 'disabled-tip');
+            btn.addEventListener('mouseenter', function () {
+              if (item.id === 'buyer-group') window.__sawBuyerDisabled = true;
+              if (item.id === 'Product') window.__sawProductDisabled = true;
+              window.__lastAction = (item.kind === 'ot' ? 'ot-blocked-' : 'ug-blocked-') + item.id;
+              showDisabledTip(item.tipText, btn);
+              advanceIfReady();
+            });
+            btn.addEventListener('mouseleave', hideDisabledTip);
+          }
+          btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+          btn.addEventListener('click', function () {
+            if (item.disabled) return;
+            onPick(item);
+            input.value = '';
+            menu.hidden = true;
+            hideDisabledTip();
+            syncUi();
+            advanceIfReady();
+          });
+          menu.appendChild(btn);
+        });
+        menu.hidden = false;
+      }
+
+      input.addEventListener('input', renderMenu);
+      input.addEventListener('focus', renderMenu);
+      input.addEventListener('blur', function () {
+        setTimeout(function () {
+          menu.hidden = true;
+          hideDisabledTip();
+        }, 150);
+      });
+      menu.addEventListener('scroll', hideDisabledTip);
+    }
+
+    function otSuggestions(q) {
+      var qq = q === ' ' ? '' : q;
+      return OBJECT_TYPES.filter(function (ot) {
+        if (draft.objectTypes.indexOf(ot) !== -1) return false;
+        if (!qq) return true;
+        return ot.toLowerCase().indexOf(qq) !== -1;
+      }).map(function (ot) {
+        var conflict = findConflict(draft.objectTypes.concat([ot]), draft.userGroups);
+        if (ot === 'Product' && conflict) window.__sawProductDisabled = true;
+        return {
+          id: ot,
+          label: ot,
+          kind: 'ot',
+          disabled: !!conflict,
+          tipText: conflict ? conflict.text : undefined
+        };
+      });
+    }
+
+    function ugSuggestions(q) {
+      var qq = q === ' ' ? '' : q;
+      return USER_GROUPS.filter(function (ug) {
+        if (draft.userGroups.indexOf(ug.id) !== -1) return false;
+        if (!qq) return true;
+        return ug.label.toLowerCase().indexOf(qq) !== -1;
+      }).map(function (ug) {
+        var conflict = null;
+        if (draft.objectTypes.length) {
+          conflict = findConflict(draft.objectTypes, draft.userGroups.concat([ug.id]));
+        }
+        if (ug.id === 'buyer-group' && conflict) window.__sawBuyerDisabled = true;
+        return {
+          id: ug.id,
+          label: ug.label,
+          disabled: !!conflict,
+          tipText: conflict ? conflict.text : undefined
+        };
+      });
+    }
+
+    function syncUi() {
+      document.getElementById('config-name').value = draft.name;
+      document.getElementById('modal-title').textContent =
+        currentScenario && currentScenario.title ? currentScenario.title : 'Edit browse table';
+      renderOtChips();
+      renderUgChips();
+
+      var conflict = draftConflict();
+      var incomplete = !draft.name.trim() || !draft.objectTypes.length;
+      if (conflict && draft.objectTypes.length) setModalWarning(conflict);
+      else setModalWarning(null);
+      document.getElementById('btn-save').disabled = incomplete || !!conflict;
+    }
+
+    function resetDraft() {
+      window.__lastAction = '';
+      window.__sawBuyerDisabled = false;
+      window.__sawProductDisabled = false;
+      if (currentScenario.startDraft) {
+        draft = {
+          name: currentScenario.startDraft.name,
+          objectTypes: currentScenario.startDraft.objectTypes.slice(),
+          userGroups: currentScenario.startDraft.userGroups.slice()
+        };
+        editingName = currentScenario.startDraft.name;
+      } else {
+        draft = { name: 'Browse table', objectTypes: [], userGroups: [] };
+        editingName = null;
+      }
+      document.getElementById('ot-input').value = '';
+      document.getElementById('ug-input').value = '';
+      syncUi();
+    }
+
+    function renderInstruction() {
+      var box = document.getElementById('instruction');
+      var banner = document.getElementById('complete-banner');
+      var steps = currentScenario.steps;
+
+      if (stepIndex >= steps.length) {
+        box.className = 'instruction is-done';
+        document.getElementById('instruction-step').textContent = 'Done';
+        document.getElementById('instruction-text').textContent = 'Scenario complete';
+        document.getElementById('instruction-hint').textContent = 'Choose another scenario from the dropdown.';
+        banner.hidden = false;
+        document.getElementById('complete-text').textContent = ' ' + currentScenario.complete;
+        return;
+      }
+
+      banner.hidden = true;
+      box.className = 'instruction';
+      var step = steps[stepIndex];
+      document.getElementById('instruction-step').textContent =
+        'Step ' + (stepIndex + 1) + ' of ' + steps.length;
+      document.getElementById('instruction-text').textContent = step.text;
+      document.getElementById('instruction-hint').textContent = step.hint || '';
+
+      /* Hint-ack scenario: show a confirm control on first step */
+      if (currentScenario.id === 'hint' && stepIndex === 0) {
+        document.getElementById('instruction-hint').innerHTML =
+          (step.hint || '') +
+          ' <button type="button" id="ack-hint" class="btn btn--primary" style="margin-top:8px;padding:4px 12px;font-size:12px">I’ve read the hint</button>';
+        document.getElementById('ack-hint').addEventListener('click', function () {
+          window.__lastAction = 'hint-acked';
+          advanceIfReady();
+        });
+      }
+    }
+
+    function advanceIfReady() {
+      if (stepIndex >= currentScenario.steps.length) return;
+      if (currentScenario.steps[stepIndex].check()) {
+        stepIndex += 1;
+        renderInstruction();
+        if (stepIndex >= currentScenario.steps.length) showToast('Scenario complete', 'ok');
+      }
+    }
+
+    function renderWorld() {
+      document.getElementById('world').innerHTML =
+        '<strong>Already configured:</strong> ' +
+        WORLD.map(function (c) {
+          var scope = c.userGroups.length
+            ? c.userGroups.map(ugLabel).join(', ')
+            : 'everyone';
+          return c.name + ' (' + c.objectTypes.join(', ') + ' · ' + scope + ')';
+        }).join(' · ');
+    }
+
+    function loadScenario(id) {
+      currentScenario = scenarios.find(function (s) { return s.id === id; }) || scenarios[0];
+      stepIndex = 0;
+      document.getElementById('scenario-meta').textContent = currentScenario.blurb;
+      resetDraft();
+      renderInstruction();
+    }
+
+    document.getElementById('config-name').addEventListener('input', function () {
+      draft.name = this.value;
+      syncUi();
+    });
+
+    document.getElementById('btn-save').addEventListener('click', function () {
+      if (this.disabled) return;
+      window.__lastAction = 'save-ok';
+      showToast('Browse table saved', 'ok');
+      advanceIfReady();
+    });
+
+    document.getElementById('btn-save-wrap').addEventListener('click', function () {
+      if (!document.getElementById('btn-save').disabled) return;
+      window.__lastAction = 'save-blocked';
+      var conflict = draftConflict();
+      if (conflict) {
+        setModalWarning(conflict);
+        showToast(conflict.text, 'warning');
+      } else {
+        setModalWarning(null);
+        showToast('Complete required fields', 'error');
+      }
+      advanceIfReady();
+    });
+
+    bindTypeahead('ot-input', 'ot-menu', otSuggestions, function (item) {
+      draft.objectTypes.push(item.id);
+    });
+    bindTypeahead('ug-input', 'ug-menu', ugSuggestions, function (item) {
+      draft.userGroups.push(item.id);
+    });
+
+    var sel = document.getElementById('scenario-select');
+    sel.innerHTML = scenarios.map(function (s) {
+      return '<option value="' + s.id + '">' + s.label + '</option>';
+    }).join('');
+    sel.addEventListener('change', function () { loadScenario(sel.value); });
+
+    renderWorld();
+    loadScenario(scenarios[0].id);
+  </script>
+</body>
+</html>

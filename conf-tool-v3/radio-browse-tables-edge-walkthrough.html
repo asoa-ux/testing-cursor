@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browse tables — radio edge cases</title>
+  <style>
+    :root {
+      --text: #323130;
+      --muted: #605e5c;
+      --border: #e0e0e0;
+      --bg: #f3f2f1;
+      --card: #ffffff;
+      --accent: #0078d4;
+      --accent-soft: #e1f5fe;
+      --danger: #a4262c;
+      --danger-soft: #fde7e9;
+      --ok: #0b6a0b;
+      --ok-soft: #dff6dd;
+      --warn-bg: #fffbf5;
+      --warn-border: #ede0d4;
+      --radius: 2px;
+      --font: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 6px;
+    }
+    .lede {
+      color: var(--muted);
+      margin: 0 0 20px;
+      font-size: 13px;
+    }
+    .picker {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .picker label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .picker select {
+      width: 100%;
+      font: inherit;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+    }
+    .scenario-meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .instruction {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      min-height: 72px;
+    }
+    .instruction.is-done {
+      background: var(--ok-soft);
+      border-left-color: var(--ok);
+    }
+    .instruction__step {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .instruction__text {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+    .instruction__hint {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .world {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .world strong { color: var(--text); }
+    .modal-stage {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      padding: 28px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .modal {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal__close {
+      border: 0;
+      background: transparent;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--muted);
+      cursor: default;
+    }
+    .modal__body { padding: 16px 20px 20px; }
+    .modal__msg {
+      margin: 0 0 16px;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: var(--radius);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .modal__msg strong { font-weight: 600; }
+    .modal__msg.is-warning {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      color: #444;
+    }
+    .modal__msg[hidden] { display: none; }
+    .field { margin-bottom: 14px; }
+    .field__label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .req { color: var(--danger); margin-right: 2px; }
+    .field__input {
+      width: 100%;
+      font: inherit;
+      padding: 8px 10px;
+      border: 0;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+    }
+    .field__hint {
+      margin: 0 0 16px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .chip-field {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      min-height: 36px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: #f3f2f1;
+      border-radius: 2px;
+      font-size: 12px;
+    }
+    .chip button {
+      border: 0;
+      background: transparent;
+      padding: 0 2px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      color: var(--muted);
+    }
+    .chip-field input {
+      flex: 1;
+      min-width: 80px;
+      border: 0;
+      font: inherit;
+      padding: 4px 0;
+      outline: none;
+    }
+    .typeahead {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 2px);
+      margin: 0;
+      padding: 4px 0;
+      list-style: none;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      z-index: 5;
+      max-height: 180px;
+      overflow: auto;
+    }
+    .typeahead[hidden] { display: none; }
+    .typeahead button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .typeahead button:hover:not(:disabled) { background: #f3f3f3; }
+    .typeahead button:disabled {
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+    .radio-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .radio-stack__option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .radio-stack__option.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .radio-stack__option input { margin-top: 2px; }
+    .ug-specific {
+      margin-top: 10px;
+      margin-left: 22px;
+    }
+    .ug-specific[hidden] { display: none; }
+    .modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #f3f2f1;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      font: inherit;
+      padding: 6px 16px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn--ghost {
+      background: transparent;
+      color: var(--text);
+    }
+    .btn--primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn--primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #323130;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      z-index: 20;
+      max-width: 90vw;
+    }
+    .toast.is-error { background: var(--danger); }
+    .toast.is-warning { background: #8a6116; }
+    .toast.is-ok { background: var(--ok); }
+    .toast[hidden] { display: none; }
+    .disabled-tip {
+      position: fixed;
+      z-index: 40;
+      max-width: 280px;
+      padding: 8px 10px;
+      background: #323130;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.35;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
+    .disabled-tip.is-visible { opacity: 1; }
+    .disabled-tip[hidden] { display: none; }
+    .complete-banner {
+      background: var(--ok-soft);
+      border: 1px solid #9fd4a0;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+    .complete-banner[hidden] { display: none; }
+    .links {
+      margin-top: 20px;
+      font-size: 12px;
+    }
+    .links a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Browse tables — radio edge cases</h1>
+    <p class="lede">
+      Option A uniqueness edges only: second All, Specific→All when taken, duplicate OT+group, multi-OT All.
+      Last specific chip has no × — switch to All is the only clear path (and may be blocked).
+    </p>
+
+    <div class="picker">
+      <label for="scenario-select">Scenario</label>
+      <select id="scenario-select"></select>
+      <div class="scenario-meta" id="scenario-meta"></div>
+    </div>
+
+    <div class="world" id="world"></div>
+
+    <div class="instruction" id="instruction">
+      <div class="instruction__step" id="instruction-step">Step 1</div>
+      <p class="instruction__text" id="instruction-text">Loading…</p>
+      <p class="instruction__hint" id="instruction-hint"></p>
+    </div>
+
+    <div class="complete-banner" id="complete-banner" hidden>
+      <strong>Scenario complete.</strong>
+      <span id="complete-text"></span>
+      Pick another scenario to continue.
+    </div>
+
+    <div class="modal-stage">
+      <div class="modal" role="dialog" aria-labelledby="modal-title">
+        <div class="modal__header">
+          <span id="modal-title">New browse table</span>
+          <button type="button" class="modal__close" tabindex="-1" aria-hidden="true">×</button>
+        </div>
+        <div class="modal__body">
+          <div class="modal__msg is-warning" id="modal-msg" hidden></div>
+          <p class="field__hint">
+            You must specify 1 or more object types for this table to be displayed.
+            Choose All user groups, or Specific user groups with at least one group.
+          </p>
+          <div class="field">
+            <label class="field__label" for="config-name"><span class="req">*</span> Configuration name</label>
+            <input class="field__input" id="config-name" value="Browse table" autocomplete="off">
+          </div>
+          <div class="field">
+            <span class="field__label"><span class="req">*</span> Object types</span>
+            <div class="chip-field" id="ot-field">
+              <span id="ot-chips"></span>
+              <input type="text" id="ot-input" placeholder="Search" autocomplete="off" aria-label="Search object types">
+              <ul class="typeahead" id="ot-menu" role="listbox" hidden></ul>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field__label"><span class="req">*</span> User groups</span>
+            <div class="radio-stack" id="ug-mode" role="radiogroup" aria-label="User groups scope">
+              <label class="radio-stack__option" id="opt-all">
+                <input type="radio" name="ug-mode" value="all" id="radio-all">
+                <span>All user groups</span>
+              </label>
+              <label class="radio-stack__option" id="opt-specific">
+                <input type="radio" name="ug-mode" value="specific" id="radio-specific">
+                <span>Specific user groups</span>
+              </label>
+            </div>
+            <div class="ug-specific" id="ug-specific" hidden>
+              <div class="chip-field" id="ug-field">
+                <span id="ug-chips"></span>
+                <input type="text" id="ug-input" placeholder="Search" autocomplete="off" aria-label="Search user groups">
+                <ul class="typeahead" id="ug-menu" role="listbox" hidden></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="btn-cancel">Cancel</button>
+          <span id="btn-primary-wrap" style="display:inline-flex">
+            <button type="button" class="btn btn--primary" id="btn-primary">Create</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <p class="links">
+      <a href="browse-tables-decision.html">Overview</a> ·
+      <a href="browse-tables-edge-walkthrough.html">Typeahead (Option B) walkthrough</a> ·
+      <a href="index.html">Full prototype (Browse table)</a>
+    </p>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="disabled-tip" id="disabled-tip" role="tooltip" hidden></div>
+
+  <script>
+    var OBJECT_TYPES = ['Product', 'Category', 'Asset', 'Brand'];
+    var USER_GROUPS = [
+      { id: 'buyer-group', label: 'Buyer group' },
+      { id: 'enrichment-group', label: 'Enrichment group' },
+      { id: 'data-stewards', label: 'Data stewards' },
+      { id: 'marketing', label: 'Marketing' }
+    ];
+
+    /* mode: 'all' | 'specific' — empty groups only valid with all */
+    var WORLD = [
+      { name: 'Table for shoes (everyone)', objectTypes: ['Product'], mode: 'all', userGroups: [] },
+      { name: 'Product buyer view', objectTypes: ['Product'], mode: 'specific', userGroups: ['buyer-group'] },
+      { name: 'Product enrichment', objectTypes: ['Product'], mode: 'specific', userGroups: ['enrichment-group'] },
+      { name: 'Category default', objectTypes: ['Category'], mode: 'all', userGroups: [] }
+    ];
+
+    var draft = {
+      name: 'Browse table',
+      objectTypes: [],
+      mode: null,
+      userGroups: []
+    };
+    var editingName = null;
+    var stepIndex = 0;
+    var currentScenario = null;
+
+    var scenarios = [
+      {
+        id: 'create-all-blocked',
+        label: '1. Cannot create a second Product All',
+        blurb: 'Shoes already owns Product · All. Creating another All must fail.',
+        title: 'New browse table',
+        isCreate: true,
+        startDraft: { name: 'Another everyone', objectTypes: [], mode: null, userGroups: [] },
+        steps: [
+          {
+            text: 'Select object type Product',
+            hint: '',
+            check: function () { return draft.objectTypes.indexOf('Product') !== -1; }
+          },
+          {
+            text: 'Try All user groups (hover or select), or Create while All is chosen',
+            hint: 'All should be disabled with a tip naming shoes — or Create stays blocked with a warning.',
+            check: function () {
+              return window.__sawAllDisabled ||
+                window.__lastAction === 'all-blocked' ||
+                (draft.mode === 'all' && window.__lastAction === 'create-blocked');
+            }
+          }
+        ],
+        complete: 'Second Product · All was blocked at create.'
+      },
+      {
+        id: 'switch-all-blocked',
+        label: '2. Specific → All when All already exists',
+        blurb: 'Editing Product enrichment. Becoming everyone would clash with shoes.',
+        title: 'Edit browse table',
+        isCreate: false,
+        startDraft: {
+          name: 'Product enrichment',
+          objectTypes: ['Product'],
+          mode: 'specific',
+          userGroups: ['enrichment-group']
+        },
+        steps: [
+          {
+            text: 'Try to switch to All user groups',
+            hint: 'Last chip has no × — All is the only way to clear Specific. Here All is blocked (shoes). Hover or click All.',
+            check: function () {
+              return window.__lastAction === 'all-blocked' || window.__sawAllDisabled;
+            }
+          }
+        ],
+        complete: 'Becoming everyone via All was blocked while another All table exists.'
+      },
+      {
+        id: 'buyer-blocked',
+        label: '3. Cannot add a taken group',
+        blurb: 'Editing Product enrichment. Buyer is already used on Product buyer view.',
+        title: 'Edit browse table',
+        isCreate: false,
+        startDraft: {
+          name: 'Product enrichment',
+          objectTypes: ['Product'],
+          mode: 'specific',
+          userGroups: ['enrichment-group']
+        },
+        steps: [
+          {
+            text: 'Open Specific groups and try Buyer group',
+            hint: 'Buyer should be disabled. Hover for a tooltip naming Product buyer view.',
+            check: function () {
+              return window.__lastAction === 'ug-blocked-buyer-group' || window.__sawBuyerDisabled;
+            }
+          }
+        ],
+        complete: 'Duplicate Product + Buyer was prevented in Specific.'
+      },
+      {
+        id: 'multi-ot-all',
+        label: '4. Multi-OT All — one OT already taken',
+        blurb: 'Editing Category default (All). Adding Product claims Product·All too — shoes already has it.',
+        title: 'Edit browse table',
+        isCreate: false,
+        startDraft: {
+          name: 'Category default',
+          objectTypes: ['Category'],
+          mode: 'all',
+          userGroups: []
+        },
+        steps: [
+          {
+            text: 'Try to add object type Product',
+            hint: 'Product may be disabled, or adding it shows a warning and Save stays off.',
+            check: function () {
+              return window.__sawOtDisabled ||
+                (draft.objectTypes.indexOf('Product') !== -1 &&
+                  document.getElementById('btn-primary').disabled);
+            }
+          }
+        ],
+        complete: 'Multi-OT All conflict surfaced — All is claimed per object type.'
+      }
+    ];
+
+    function ugLabel(id) {
+      var g = USER_GROUPS.find(function (x) { return x.id === id; });
+      return g ? g.label : id;
+    }
+
+    function slotsFor(objectTypes, mode, userGroups) {
+      var slots = [];
+      if (mode !== 'all' && mode !== 'specific') return slots;
+      objectTypes.forEach(function (ot) {
+        if (mode === 'all') slots.push({ ot: ot, scope: '__all__' });
+        else userGroups.forEach(function (g) { slots.push({ ot: ot, scope: g }); });
+      });
+      return slots;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function boldName(str) {
+      return '<strong>' + escapeHtml(str) + '</strong>';
+    }
+
+    function findConflict(objectTypes, mode, userGroups) {
+      var mine = slotsFor(objectTypes, mode, userGroups);
+      for (var i = 0; i < mine.length; i++) {
+        var tables = [];
+        var seen = {};
+        for (var w = 0; w < WORLD.length; w++) {
+          if (editingName && WORLD[w].name === editingName) continue;
+          var theirs = slotsFor(WORLD[w].objectTypes, WORLD[w].mode, WORLD[w].userGroups);
+          for (var j = 0; j < theirs.length; j++) {
+            if (mine[i].ot === theirs[j].ot && mine[i].scope === theirs[j].scope) {
+              if (!seen[WORLD[w].name]) {
+                seen[WORLD[w].name] = true;
+                tables.push(WORLD[w].name);
+              }
+              break;
+            }
+          }
+        }
+        if (!tables.length) continue;
+        var ot = mine[i].ot;
+        var tableText = tables.length === 1
+          ? tables[0]
+          : tables.length === 2
+            ? tables[0] + ' and ' + tables[1]
+            : tables.slice(0, -1).join(', ') + ', and ' + tables[tables.length - 1];
+        var tableHtml = tables.length === 1
+          ? boldName(tables[0])
+          : tables.length === 2
+            ? boldName(tables[0]) + ' and ' + boldName(tables[1])
+            : tables.slice(0, -1).map(boldName).join(', ') + ', and ' + boldName(tables[tables.length - 1]);
+        var verb = tables.length > 1 ? ' have' : ' has';
+        if (mine[i].scope === '__all__') {
+          return {
+            html: tableHtml + verb + ' already been configured for ' + boldName(ot) + ' for all users.',
+            text: tableText + verb + ' already been configured for ' + ot + ' for all users.'
+          };
+        }
+        var ug = USER_GROUPS.find(function (g) { return g.id === mine[i].scope; });
+        var ugLabel = ug ? ug.label : 'that user group';
+        return {
+          html: tableHtml + verb + ' already been configured for ' + boldName(ot) +
+            ' for ' + boldName(ugLabel) + '.',
+          text: tableText + verb + ' already been configured for ' + ot +
+            ' for ' + ugLabel + '.'
+        };
+      }
+      return null;
+    }
+
+    function draftConflict() {
+      return findConflict(draft.objectTypes, draft.mode, draft.userGroups);
+    }
+
+    function allModeBlocked() {
+      if (!draft.objectTypes.length) return null;
+      return findConflict(draft.objectTypes, 'all', []);
+    }
+
+    function isIncomplete() {
+      if (!draft.name.trim() || !draft.objectTypes.length) return true;
+      if (draft.mode !== 'all' && draft.mode !== 'specific') return true;
+      if (draft.mode === 'specific' && !draft.userGroups.length) return true;
+      return false;
+    }
+
+    function setModalWarning(conflict) {
+      var msg = document.getElementById('modal-msg');
+      if (conflict) {
+        msg.hidden = false;
+        msg.className = 'modal__msg is-warning';
+        msg.innerHTML = conflict.html;
+      } else {
+        msg.hidden = true;
+        msg.innerHTML = '';
+      }
+    }
+
+    function showToast(msg, kind) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast' + (kind ? ' is-' + kind : '');
+      el.hidden = false;
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(function () { el.hidden = true; }, 2200);
+    }
+
+    function showDisabledTip(text, target) {
+      hideDisabledTip();
+      if (!text || !target) return;
+      showDisabledTip._timer = setTimeout(function () {
+        showDisabledTip._timer = null;
+        var tip = document.getElementById('disabled-tip');
+        tip.textContent = text;
+        tip.hidden = false;
+        tip.classList.remove('is-visible');
+        var margin = 8;
+        var rect = target.getBoundingClientRect();
+        tip.style.left = rect.left + 'px';
+        tip.style.top = (rect.bottom + margin) + 'px';
+        var tipRect = tip.getBoundingClientRect();
+        if (tipRect.right > window.innerWidth - margin) {
+          tip.style.left = Math.max(margin, window.innerWidth - tipRect.width - margin) + 'px';
+          tipRect = tip.getBoundingClientRect();
+        }
+        if (tipRect.bottom > window.innerHeight - margin) {
+          tip.style.top = Math.max(margin, rect.top - tipRect.height - margin) + 'px';
+        }
+        tip.classList.add('is-visible');
+      }, 400);
+    }
+
+    function hideDisabledTip() {
+      clearTimeout(showDisabledTip._timer);
+      showDisabledTip._timer = null;
+      var tip = document.getElementById('disabled-tip');
+      tip.classList.remove('is-visible');
+      tip.hidden = true;
+      tip.textContent = '';
+    }
+
+    function renderChips(hostId, values, labelFn, onRemove, allowRemove) {
+      var host = document.getElementById(hostId);
+      host.innerHTML = '';
+      values.forEach(function (v) {
+        var chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.appendChild(document.createTextNode(labelFn(v)));
+        if (allowRemove) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = '×';
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            onRemove(v);
+          });
+          chip.appendChild(btn);
+        }
+        host.appendChild(chip);
+      });
+    }
+
+    function renderOtChips() {
+      renderChips('ot-chips', draft.objectTypes, function (x) { return x; }, function (v) {
+        draft.objectTypes = draft.objectTypes.filter(function (x) { return x !== v; });
+        syncUi();
+        advanceIfReady();
+      }, true);
+    }
+
+    function renderUgChips() {
+      var allowRemove = draft.userGroups.length > 1;
+      renderChips('ug-chips', draft.userGroups, ugLabel, function (v) {
+        if (draft.userGroups.length <= 1) return;
+        draft.userGroups = draft.userGroups.filter(function (x) { return x !== v; });
+        syncUi();
+        advanceIfReady();
+      }, allowRemove);
+    }
+
+    function bindTypeahead(inputId, menuId, getItems, onPick) {
+      var input = document.getElementById(inputId);
+      var menu = document.getElementById(menuId);
+
+      function renderMenu() {
+        var q = input.value.trim().toLowerCase();
+        var items = getItems(q || ' ');
+        menu.innerHTML = '';
+        hideDisabledTip();
+        if (!items.length) {
+          menu.hidden = true;
+          return;
+        }
+        items.forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.disabled = !!item.disabled;
+          btn.appendChild(document.createTextNode(item.label));
+          if (item.disabled && item.tipText) {
+            btn.addEventListener('mouseenter', function () {
+              if (item.id === 'buyer-group') window.__sawBuyerDisabled = true;
+              if (item.kind === 'ot') window.__sawOtDisabled = true;
+              window.__lastAction = item.kind === 'ot'
+                ? 'ot-blocked-' + item.id
+                : 'ug-blocked-' + item.id;
+              showDisabledTip(item.tipText, btn);
+              advanceIfReady();
+            });
+            btn.addEventListener('mouseleave', hideDisabledTip);
+          }
+          btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+          btn.addEventListener('click', function () {
+            if (item.disabled) return;
+            onPick(item);
+            input.value = '';
+            menu.hidden = true;
+            hideDisabledTip();
+            syncUi();
+            advanceIfReady();
+          });
+          menu.appendChild(btn);
+        });
+        menu.hidden = false;
+      }
+
+      input.addEventListener('input', renderMenu);
+      input.addEventListener('focus', renderMenu);
+      input.addEventListener('blur', function () {
+        setTimeout(function () {
+          menu.hidden = true;
+          hideDisabledTip();
+        }, 150);
+      });
+      menu.addEventListener('scroll', hideDisabledTip);
+    }
+
+    function otSuggestions(q) {
+      var qq = q === ' ' ? '' : q;
+      return OBJECT_TYPES.filter(function (ot) {
+        if (draft.objectTypes.indexOf(ot) !== -1) return false;
+        if (!qq) return true;
+        return ot.toLowerCase().indexOf(qq) !== -1;
+      }).map(function (ot) {
+        var conflict = null;
+        if (draft.mode === 'all' || draft.mode === 'specific') {
+          var nextOts = draft.objectTypes.concat([ot]);
+          conflict = findConflict(nextOts, draft.mode, draft.userGroups);
+        }
+        if (conflict) window.__sawOtDisabled = true;
+        return {
+          id: ot,
+          label: ot,
+          kind: 'ot',
+          disabled: !!conflict,
+          tipText: conflict ? conflict.text : undefined
+        };
+      });
+    }
+
+    function ugSuggestions(q) {
+      var qq = q === ' ' ? '' : q;
+      return USER_GROUPS.filter(function (ug) {
+        if (draft.userGroups.indexOf(ug.id) !== -1) return false;
+        if (!qq) return true;
+        return ug.label.toLowerCase().indexOf(qq) !== -1;
+      }).map(function (ug) {
+        var conflict = null;
+        if (draft.mode === 'specific' && draft.objectTypes.length) {
+          conflict = findConflict(
+            draft.objectTypes,
+            'specific',
+            draft.userGroups.concat([ug.id])
+          );
+        }
+        if (ug.id === 'buyer-group' && conflict) window.__sawBuyerDisabled = true;
+        return {
+          id: ug.id,
+          label: ug.label,
+          kind: 'ug',
+          disabled: !!conflict,
+          tipText: conflict ? conflict.text : undefined
+        };
+      });
+    }
+
+    function syncRadios() {
+      var allBlocked = allModeBlocked();
+      var radioAll = document.getElementById('radio-all');
+      var radioSpecific = document.getElementById('radio-specific');
+      var optAll = document.getElementById('opt-all');
+
+      radioAll.disabled = !!allBlocked && draft.mode !== 'all';
+      optAll.classList.toggle('is-disabled', radioAll.disabled);
+
+      radioAll.checked = draft.mode === 'all';
+      radioSpecific.checked = draft.mode === 'specific';
+
+      document.getElementById('ug-specific').hidden = draft.mode !== 'specific';
+
+      if (radioAll.disabled && allBlocked) {
+        optAll.onmouseenter = function () {
+          showDisabledTip(allBlocked.text, optAll);
+          window.__sawAllDisabled = true;
+          advanceIfReady();
+        };
+        optAll.onmouseleave = hideDisabledTip;
+      } else {
+        optAll.onmouseenter = null;
+        optAll.onmouseleave = null;
+      }
+    }
+
+    function syncUi() {
+      document.getElementById('config-name').value = draft.name;
+      document.getElementById('modal-title').textContent =
+        currentScenario && currentScenario.title ? currentScenario.title : 'New browse table';
+      document.getElementById('btn-primary').textContent =
+        currentScenario && currentScenario.isCreate === false ? 'Save' : 'Create';
+
+      renderOtChips();
+      renderUgChips();
+      syncRadios();
+
+      var conflict = draftConflict();
+      var incomplete = isIncomplete();
+      if (conflict && !incomplete) setModalWarning(conflict);
+      else if (conflict && draft.mode === 'all') setModalWarning(conflict);
+      else setModalWarning(null);
+
+      document.getElementById('btn-primary').disabled = incomplete || !!conflict;
+    }
+
+    function resetDraft() {
+      window.__lastAction = '';
+      window.__sawBuyerDisabled = false;
+      window.__sawAllDisabled = false;
+      window.__sawOtDisabled = false;
+      if (currentScenario.startDraft) {
+        draft = {
+          name: currentScenario.startDraft.name,
+          objectTypes: currentScenario.startDraft.objectTypes.slice(),
+          mode: currentScenario.startDraft.mode,
+          userGroups: currentScenario.startDraft.userGroups.slice()
+        };
+        editingName = currentScenario.isCreate === false
+          ? currentScenario.startDraft.name
+          : null;
+      } else {
+        draft = { name: 'Browse table', objectTypes: [], mode: null, userGroups: [] };
+        editingName = null;
+      }
+      document.getElementById('ot-input').value = '';
+      document.getElementById('ug-input').value = '';
+      syncUi();
+    }
+
+    function renderInstruction() {
+      var box = document.getElementById('instruction');
+      var banner = document.getElementById('complete-banner');
+      var steps = currentScenario.steps;
+
+      if (stepIndex >= steps.length) {
+        box.className = 'instruction is-done';
+        document.getElementById('instruction-step').textContent = 'Done';
+        document.getElementById('instruction-text').textContent = 'Scenario complete';
+        document.getElementById('instruction-hint').textContent = 'Choose another scenario from the dropdown.';
+        banner.hidden = false;
+        document.getElementById('complete-text').textContent = ' ' + currentScenario.complete;
+        return;
+      }
+
+      banner.hidden = true;
+      box.className = 'instruction';
+      var step = steps[stepIndex];
+      document.getElementById('instruction-step').textContent =
+        'Step ' + (stepIndex + 1) + ' of ' + steps.length;
+      document.getElementById('instruction-text').textContent = step.text;
+      document.getElementById('instruction-hint').textContent = step.hint || '';
+    }
+
+    function advanceIfReady() {
+      if (stepIndex >= currentScenario.steps.length) return;
+      if (currentScenario.steps[stepIndex].check()) {
+        stepIndex += 1;
+        renderInstruction();
+        if (stepIndex >= currentScenario.steps.length) showToast('Scenario complete', 'ok');
+      }
+    }
+
+    function renderWorld() {
+      document.getElementById('world').innerHTML =
+        '<strong>Already configured:</strong> ' +
+        WORLD.map(function (c) {
+          var scope = c.mode === 'all'
+            ? 'All'
+            : c.userGroups.map(ugLabel).join(', ');
+          return c.name + ' (' + c.objectTypes.join(', ') + ' · ' + scope + ')';
+        }).join(' · ');
+    }
+
+    function loadScenario(id) {
+      currentScenario = scenarios.find(function (s) { return s.id === id; }) || scenarios[0];
+      stepIndex = 0;
+      document.getElementById('scenario-meta').textContent = currentScenario.blurb;
+      resetDraft();
+      renderInstruction();
+    }
+
+    document.getElementById('config-name').addEventListener('input', function () {
+      draft.name = this.value;
+      syncUi();
+    });
+
+    document.getElementById('radio-all').addEventListener('change', function () {
+      if (!this.checked) return;
+      if (this.disabled) return;
+      var blocked = allModeBlocked();
+      if (blocked && draft.mode !== 'all') {
+        window.__lastAction = 'all-blocked';
+        setModalWarning(blocked);
+        showToast(blocked.text, 'warning');
+        this.checked = false;
+        if (draft.mode === 'specific') document.getElementById('radio-specific').checked = true;
+        advanceIfReady();
+        syncUi();
+        return;
+      }
+      draft.mode = 'all';
+      draft.userGroups = [];
+      window.__lastAction = 'mode-all';
+      syncUi();
+      advanceIfReady();
+    });
+
+    document.getElementById('radio-specific').addEventListener('change', function () {
+      if (!this.checked) return;
+      draft.mode = 'specific';
+      window.__lastAction = 'mode-specific';
+      syncUi();
+      advanceIfReady();
+    });
+
+    document.getElementById('btn-primary').addEventListener('click', function () {
+      if (this.disabled) return;
+      var isCreate = !(currentScenario && currentScenario.isCreate === false);
+      window.__lastAction = isCreate ? 'create-ok' : 'save-ok';
+      showToast(isCreate ? 'Browse table created' : 'Browse table saved', 'ok');
+      advanceIfReady();
+    });
+
+    document.getElementById('btn-primary-wrap').addEventListener('click', function () {
+      if (!document.getElementById('btn-primary').disabled) return;
+      var isCreate = !(currentScenario && currentScenario.isCreate === false);
+      window.__lastAction = isCreate ? 'create-blocked' : 'save-blocked';
+      var conflict = draftConflict();
+      if (conflict) {
+        setModalWarning(conflict);
+        showToast(conflict.text, 'warning');
+      } else if (draft.mode === 'specific' && !draft.userGroups.length) {
+        setModalWarning(null);
+        showToast('Select at least one user group, or choose All user groups.', 'error');
+      } else {
+        setModalWarning(null);
+        showToast('Complete required fields', 'error');
+      }
+      advanceIfReady();
+    });
+
+    bindTypeahead('ot-input', 'ot-menu', otSuggestions, function (item) {
+      draft.objectTypes.push(item.id);
+    });
+    bindTypeahead('ug-input', 'ug-menu', ugSuggestions, function (item) {
+      draft.userGroups.push(item.id);
+    });
+
+    var sel = document.getElementById('scenario-select');
+    sel.innerHTML = scenarios.map(function (s) {
+      return '<option value="' + s.id + '">' + s.label + '</option>';
+    }).join('');
+    sel.addEventListener('change', function () { loadScenario(sel.value); });
+
+    renderWorld();
+    loadScenario(scenarios[0].id);
+  </script>
+</body>
+</html>
