@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Attribute control rules, Figma import</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&family=Noto+Sans+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#eef3f4;font-family:'Noto Sans',Arial,sans-serif;color:#37464f;font-size:14px;line-height:1.45}
+.page{width:1440px;padding:56px;margin:0 auto}
+.doc-h{font-size:34px;font-weight:900;color:#004f5f;margin:0 0 6px;letter-spacing:-0.3px}
+.doc-sub{font-size:15px;color:#5f6b72;margin:0 0 40px;max-width:760px}
+.sec{margin-bottom:56px}
+.sec-h{font-size:22px;font-weight:700;color:#004f5f;margin:0 0 4px}
+.sec-sub{font-size:14px;color:#5f6b72;margin:0 0 20px}
+.grid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.card{width:420px;background:#ffffff;border:1px solid #d6dadb;border-radius:8px;overflow:visible}
+.card.wide{width:420px}
+.card-head{padding:14px 18px;border-bottom:1px solid #d6dadb;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card-title{font-weight:700;color:#004f5f;font-size:14px}
+.card-meta{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.rules-id{font-size:12px;font-weight:700;color:#5f6b72}
+.card-body{padding:20px 18px 22px;border-left:4px solid #33727e;border-radius:0 0 0 8px}
+.card-note{padding:10px 18px;font-size:12px;color:#5f6b72;border-top:1px solid #d6dadb;background:#f7fafb;border-radius:0 0 8px 8px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.tag.spec{background:#ccdbdf;color:#004f5f}
+.tag.assumed{background:#f9d452;color:#37464f}
+.tag.gap{background:#f05123;color:#ffffff}
+.flabel{font-weight:700;margin-bottom:8px;color:#37464f}
+.input{display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 10px;border:1px solid #aeb5b8;border-radius:4px;background:#ffffff;width:100%}
+.input.focus{border-color:#00abc1;box-shadow:0 0 0 2px #cceef2}
+.input.error{border-color:#f05123;box-shadow:0 0 0 2px #fde0d6}
+.input.area{align-items:flex-start;min-height:96px}
+.input.area.short{min-height:60px}
+.input.sq{width:72px;justify-content:center;border-radius:0;border-left:0;border-right:0}
+.input.chips{flex-wrap:wrap;gap:6px;padding:5px 8px}
+.val{flex:1;color:#37464f}
+.mono{font-family:'Noto Sans Mono',Menlo,Consolas,monospace;letter-spacing:0.5px}
+.ph{flex:1;color:#869095}
+.icon{display:flex;flex-shrink:0}
+.help{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:#869095;margin-top:6px}
+.help .good{color:#33727e;font-weight:600}
+.help .bad{color:#f05123;font-weight:600}
+.opt{display:flex;align-items:center;gap:8px;padding:3px 0}
+.cb{width:17px;height:17px;border:1.5px solid #869095;border-radius:3px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cb.on{background:#33727e;border-color:#33727e}
+.rb{width:17px;height:17px;border:1.5px solid #869095;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rb.on{border-color:#33727e}
+.dot{width:9px;height:9px;border-radius:50%;background:#33727e}
+.hopts{display:flex;gap:24px;flex-wrap:wrap}
+.cols{display:flex;gap:20px}
+.col{flex:1;display:flex;flex-direction:column}
+.chip{display:inline-flex;align-items:center;gap:4px;background:#ccdbdf;color:#004f5f;border-radius:3px;padding:2px 4px 2px 8px;font-size:13px;font-weight:600}
+.chip-x{display:flex;padding:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #33727e;color:#004f5f;border-radius:4px;padding:7px 14px;font-weight:600;background:#fff;white-space:nowrap}
+.btn.icon{min-width:38px;height:38px;padding:0 10px;border-color:#aeb5b8;color:#37464f}
+.spin{display:flex}
+.spin .btn:first-child{border-radius:4px 0 0 4px}
+.spin .btn:last-child{border-radius:0 4px 4px 0}
+.hrow{display:flex;gap:8px;align-items:center}
+.hrow.add{margin-top:12px}
+.swatch{width:46px;height:38px;border:1px solid #aeb5b8;border-radius:4px;padding:3px;display:flex}
+.swatch span{flex:1;border-radius:2px}
+.elist{display:flex;flex-direction:column;gap:8px}
+.li{display:flex;gap:8px}
+.row-gap{margin-top:12px}
+.menu{margin-top:4px;background:#fff;border:1px solid #d6dadb;border-radius:4px;padding:4px 0;box-shadow:0 6px 18px rgba(0,79,95,0.18)}
+.mi{padding:7px 12px}
+.mi.act{background:#cceef2}
+.mi.add{color:#004f5f;font-weight:600;border-top:1px solid #d6dadb}
+.u{text-decoration:underline}
+.cal{width:240px;margin-top:4px;background:#fff;border:1px solid #d6dadb;border-radius:6px;padding:10px;box-shadow:0 6px 18px rgba(0,79,95,0.18)}
+.cal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#004f5f}
+.nav{width:24px;text-align:center;font-size:18px;color:#5f6b72}
+.cal-grid{display:flex;flex-wrap:wrap}
+.cd{width:31px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:4px}
+.cd.h{color:#869095;font-weight:600}
+.cd.sel{background:#004f5f;color:#fff;font-weight:700}
+.rt{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d6dadb;font-size:13px}
+.rt th{background:#004f5f;color:#fff;text-align:left;padding:10px 12px;font-weight:600}
+.rt td{padding:9px 12px;border-bottom:1px solid #d6dadb;vertical-align:top}
+.rt tr.grp td{background:#f7fafb;color:#004f5f;font-weight:700;padding-top:14px}
+.rt tr.act td{background:#cceef2}
+.legend{display:flex;gap:24px;margin-top:12px;font-size:13px;color:#5f6b72}
+.legend span{display:flex;gap:8px;align-items:center}
+/* screen */
+.screen{width:1280px;background:#fff;border:1px solid #d6dadb;border-radius:8px;overflow:hidden}
+.s-top{background:#004f5f;padding:28px 40px 24px}
+.s-h1{font-size:36px;font-weight:900;color:#fff;letter-spacing:-0.3px}
+.s-sub{color:#ccdbdf;font-size:15px;margin-top:6px}
+.s-body{padding:22px 40px 40px}
+.s-h2{font-weight:700;color:#004f5f;margin-bottom:10px}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.preset{border:1px solid #aeb5b8;border-radius:999px;padding:6px 14px;font-size:13px;background:#fff}
+.preset.on{background:#004f5f;border-color:#004f5f;color:#fff}
+.s-grid{display:flex;gap:28px;align-items:flex-start}
+.panel{width:340px;flex-shrink:0;border:1px solid #d6dadb;border-radius:6px;padding:20px}
+.p-h{font-size:17px;font-weight:700;color:#004f5f;margin-bottom:14px}
+.fld{margin-bottom:16px}
+.fl{font-weight:600;font-size:13px;margin-bottom:6px}
+.hint{font-size:12px;color:#869095;margin-top:4px}
+.seg{display:flex;border:1px solid #aeb5b8;border-radius:4px;overflow:hidden}
+.segi{flex:1;text-align:center;padding:7px 8px;font-size:13px}
+.segi.on{background:#004f5f;color:#fff;font-weight:700}
+.range{display:flex;align-items:center;gap:12px}
+.track{flex:1;height:4px;background:#d6dadb;border-radius:2px;position:relative}
+.fill{position:absolute;left:0;top:0;height:4px;background:#33727e;border-radius:2px}
+.thumb{position:absolute;top:-6px;width:16px;height:16px;border-radius:50%;background:#33727e;margin-left:-4px}
+.rv{color:#004f5f}
+.sw-row{display:flex;gap:10px;align-items:center}
+.sw{width:38px;height:22px;border-radius:11px;background:#aeb5b8;position:relative;flex-shrink:0}
+.sw .knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.sw.on{background:#33727e}
+.sw.on .knob{left:19px}
+.sw-l{font-weight:600;font-size:13px}
+.result{flex:1}
+.v-l{font-size:13px;color:#5f6b72}
+.v-name{font-size:42px;font-weight:900;color:#004f5f;letter-spacing:-0.5px;line-height:1.1;margin:2px 0 8px}
+.v-rule{font-size:14px;color:#5f6b72;margin-bottom:18px;display:flex;gap:8px;align-items:center}
+.v-rule b{color:#37464f}
+.fcard{border:1px solid #d6dadb;border-left:4px solid #33727e;border-radius:6px;padding:22px}
+.fc-top{font-size:12px;color:#869095;margin:-6px 0 14px}
+.t-h{font-weight:700;color:#004f5f;margin:22px 0 10px}
+.facts{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:#5f6b72;margin-bottom:12px}
+.facts b{color:#37464f}
+.steps{border-left:2px solid #d6dadb}
+.step{display:flex;gap:10px;align-items:flex-start;padding:5px 0 5px 0;color:#869095;font-size:13px;margin-left:-6px}
+.sdot{width:10px;height:10px;border-radius:50%;border:2px solid #d6dadb;background:#fff;margin-top:5px;flex-shrink:0}
+.step.hit{color:#37464f;font-weight:600}
+.step.hit .sdot{background:#33727e;border-color:#33727e}
+.sres{font-weight:400}
+</style></head>
+<body><div class="page">
+<h1 class="doc-h">Attribute control rules</h1>
+<p class="doc-sub">Every control the rule set can render, with the rule that picks it and its source in the spec. Built as static layers for import into Figma.</p>
+
+<div class="sec"><h2 class="sec-h">Configurator screen</h2><p class="sec-sub">The prototype in its starting state: a yes/no list of values renders as radio buttons.</p><div class="screen">
+  <div class="s-top"><div class="s-h1">Attribute control rules</div><div class="s-sub">Set up an attribute and see which edit control the UI renders for it, and the rule that picked it.</div></div>
+  <div class="s-body">
+    <div class="s-h2">Start from an example</div>
+    <div class="presets"><span class="preset on">Yes / No flag</span><span class="preset">Available colors</span><span class="preset">Country of origin</span><span class="preset">Certifications</span><span class="preset">Target markets</span><span class="preset">Marketing description</span><span class="preset">Supplier item code</span><span class="preset">Search keywords</span><span class="preset">GTIN</span><span class="preset">Launch date</span><span class="preset">Pack quantity</span><span class="preset">Brand color</span></div>
+    <div class="s-grid">
+      <div class="panel">
+        <div class="p-h">Attribute setup</div>
+        <div class="fld"><div class="fl">Attribute name</div><div class="input"><span class="val">Contains allergens</span></div></div>
+        <div class="fld"><div class="fl">Validation base type</div><div class="input"><span class="val">List of Values</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="#37464f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></div>
+        <div class="fld"><div class="fl">Values per attribute</div><div class="seg"><div class="segi on">One value</div><div class="segi">Multiple values</div></div></div>
+        <div class="fld"><div class="fl">Values in the list</div><div class="range"><div class="track"><div class="fill" style="width:2%"></div><div class="thumb" style="left:2%"></div></div><b class="rv">2</b></div><div class="hint">Thresholds in the rules: 3, 5, 25.</div></div>
+        <div class="fld"><div class="sw-row"><span class="sw"><span class="knob"></span></span><span class="sw-l">Users can add new values</span></div></div>
+      </div>
+      <div class="result">
+        <div class="v-l">Rendered control</div>
+        <div class="v-name">Radio buttons</div>
+        <div class="v-rule">Rule <b>L3</b>: One value, 2 to 3 options <span class="tag spec">In spec</span></div>
+        <div class="fcard"><div class="fc-top">Edit view preview</div><div class="flabel">Contains allergens</div><div class="hopts"><div class="opt"><span class="rb"></span><span>Yes</span></div><div class="opt"><span class="rb"></span><span>No</span></div></div><div class="help"><span>2 values, pick one</span><span class=""></span></div></div>
+        <div class="t-h">Why this control</div>
+        <div class="facts"><span>Base type: <b>List of Values</b></span><span>Values: <b>One</b></span><span>Options in list: <b>2</b></span><span>Users can add: <b>No</b></span></div>
+        <div class="steps"><div class="step"><span class="sdot"></span><span>L1 One value, up to 25 options, users can add <span class="sres">does not match</span></span></div><div class="step"><span class="sdot"></span><span>L2 One value, 1 option <span class="sres">does not match</span></span></div><div class="step hit"><span class="sdot"></span><span>L3 One value, 2 to 3 options <span class="sres">matches, renders radio buttons</span></span></div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="sec"><h2 class="sec-h">Lists of values</h2><p class="sec-sub">Control depends on single or multiple selection, number of options and whether users can add values.</p><div class="grid"><div class="card">
+  <div class="card-head"><div class="card-title">Radio buttons</div><div class="card-meta"><span class="rules-id">L3</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Contains allergens</div><div class="hopts"><div class="opt"><span class="rb"></span><span>Yes</span></div><div class="opt"><span class="rb on"><span class="dot"></span></span><span>No</span></div></div><div class="help"><span>2 values, pick one</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Single checkbox</div><div class="card-meta"><span class="rules-id">L2</span><span class="tag gap">Gap filled</span></div></div>
+  <div class="card-body"><div class="flabel">Fragile</div><div class="hopts"><div class="opt"><span class="cb on"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Yes</span></div></div><div class="help"><span>Only one value exists, so it works as an on/off choice</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Dropdown, closed</div><div class="card-meta"><span class="rules-id">L4</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Size</div><div class="input" style="width:300px"><span class="ph">Select a value</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="#37464f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="help"><span>8 values</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Dropdown, open</div><div class="card-meta"><span class="rules-id">L4</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Size</div><div class="input focus" style="width:300px"><span class="val">M</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="#37464f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="menu"><div class="mi">XS</div><div class="mi">S</div><div class="mi act">M</div><div class="mi">L</div><div class="mi">XL</div><div class="mi">XXL</div></div></div>
+  
+</div><div class="card wide">
+  <div class="card-head"><div class="card-title">Checkboxes in columns</div><div class="card-meta"><span class="rules-id">L9</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Available colors</div><div class="cols"><div class="col"><div class="opt"><span class="cb on"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Black</span></div><div class="opt"><span class="cb"></span><span>White</span></div><div class="opt"><span class="cb"></span><span>Red</span></div></div><div class="col"><div class="opt"><span class="cb"></span><span>Blue</span></div><div class="opt"><span class="cb"></span><span>Green</span></div><div class="opt"><span class="cb"></span><span>Yellow</span></div></div><div class="col"><div class="opt"><span class="cb on"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Grey</span></div><div class="opt"><span class="cb on"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Navy</span></div></div></div><div class="help"><span>8 values, pick any</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Checkboxes in columns, can add values</div><div class="card-meta"><span class="rules-id">L7</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Certifications</div><div class="cols"><div class="col"><div class="opt"><span class="cb on"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>FSC</span></div><div class="opt"><span class="cb"></span><span>Fairtrade</span></div><div class="opt"><span class="cb"></span><span>EU Ecolabel</span></div></div><div class="col"><div class="opt"><span class="cb"></span><span>Nordic Swan</span></div><div class="opt"><span class="cb on"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>B Corp</span></div></div></div><div class="hrow add"><div class="input" style="width:240px"><span class="ph">New value</span></div><div class="btn">Add value</div></div><div class="help"><span>5 values, pick any</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Typeahead</div><div class="card-meta"><span class="rules-id">L5</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Country of origin</div><div class="input focus"><span class="val">Den</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="#869095" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="#869095" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="menu"><div class="mi act"><b class="u">Den</b>mark</div></div><div class="help"><span>60 values</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Typeahead, can add values</div><div class="card-meta"><span class="rules-id">L6, L1</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Manufacturer</div><div class="input focus"><span class="val">Nordtex</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="#869095" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="#869095" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="menu"><div class="mi act"><b class="u">Nord</b>ic Textiles A/S</div><div class="mi add">Add “Nordtex” as a new value</div></div><div class="help"><span>48 values. Type a new value to add it</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Typeahead with selected values shown</div><div class="card-meta"><span class="rules-id">L10</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Target markets</div><div class="input chips focus"><span class="chip">Denmark<span class="chip-x"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span><span class="chip">Germany<span class="chip-x"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span><span class="chip">Sweden<span class="chip-x"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span><span class="ph">Type to add a value</span></div><div class="help"><span>40 values, 3 selected</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Typeahead with selected values shown, can add</div><div class="card-meta"><span class="rules-id">L11, L8</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Sales channels</div><div class="input chips focus"><span class="chip">Webshop<span class="chip-x"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span><span class="chip">Marketplace<span class="chip-x"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span><span class="val">Pop-up</span></div><div class="menu"><div class="mi add">Add “Pop-up” as a new value</div></div><div class="help"><span>32 values, 2 selected. Type a new value to add it</span><span class=""></span></div></div>
+  
+</div></div></div>
+
+<div class="sec"><h2 class="sec-h">Text, numbers and masked input</h2><p class="sec-sub">Text, Numeric Text, URL, Regular Expressions, Fraction, Number, Number Range, GLN and GTIN.</p><div class="grid"><div class="card">
+  <div class="card-head"><div class="card-title">Text field, grows with content</div><div class="card-meta"><span class="rules-id">T5</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Product name</div><div class="input focus"><span class="val">Organic cotton t-shirt</span></div><div class="help"><span>Up to 64 characters</span><span class="">22 / 64</span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Text area, grows with content</div><div class="card-meta"><span class="rules-id">T4</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Marketing description</div><div class="input area"><span class="val">Soft, breathable organic cotton in a relaxed fit. Pre-washed to keep its shape, with reinforced seams for everyday wear.</span></div><div class="help"><span>Up to 1000 characters</span><span class="">131 / 1000</span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Masked text field</div><div class="card-meta"><span class="rules-id">T3</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Supplier item code</div><div class="input"><span class="val mono">SE-4821</span></div><div class="help"><span>Format AA-9999</span><span class="">6 of 6</span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Masked text field, GS1 valid</div><div class="card-meta"><span class="rules-id">G2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">GTIN</div><div class="input"><span class="val mono">05701234567899</span></div><div class="help"><span>Format 14 digits</span><span class="good">Check digit valid</span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Masked text field, error</div><div class="card-meta"><span class="rules-id">G2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">GTIN</div><div class="input error"><span class="val mono">05701234567891</span></div><div class="help"><span>Format 14 digits</span><span class="bad">Check digit invalid</span></div></div>
+  <div class="card-note">Error state shown when the check digit fails.</div>
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Editable list</div><div class="card-meta"><span class="rules-id">T2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Search keywords</div><div class="elist"><div class="li"><div class="input"><span class="val">t-shirt</span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div><div class="li"><div class="input"><span class="val">organic</span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div><div class="li"><div class="input"><span class="val">summer</span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div></div><div class="row-gap"><div class="btn">Add item</div></div><div class="help"><span>Add as many items as needed</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Masked editable list</div><div class="card-meta"><span class="rules-id">T1</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Alternative item codes</div><div class="elist"><div class="li"><div class="input"><span class="val mono">SE-4821</span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div><div class="li"><div class="input"><span class="val mono">DK-1177</span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div></div><div class="row-gap"><div class="btn">Add item</div></div><div class="help"><span>Each item uses format AA-9999</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Text area, expression</div><div class="card-meta"><span class="rules-id">X2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Validation pattern</div><div class="input area short"><span class="val mono">^[A-Z]{2}-\d{4}$</span></div><div class="help"><span></span><span class="good">Valid expression</span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Text field, number range</div><div class="card-meta"><span class="rules-id">N2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Operating temperature</div><div class="input"><span class="val">-10-40</span></div><div class="help"><span>Enter as minimum-maximum</span><span class=""></span></div></div>
+  
+</div></div></div>
+
+<div class="sec"><h2 class="sec-h">Pickers</h2><p class="sec-sub">ISO date, ISO Date and Time, Integer and Color.</p><div class="grid"><div class="card">
+  <div class="card-head"><div class="card-title">Date picker, closed</div><div class="card-meta"><span class="rules-id">D2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Launch date</div><div class="input" style="width:240px"><span class="val">2026-10-15</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="#37464f" stroke-width="1.4"/><path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke="#37464f" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="help"><span>Stored as ISO 8601, YYYY-MM-DD</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Date picker, open</div><div class="card-meta"><span class="rules-id">D2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Launch date</div><div class="input focus" style="width:240px"><span class="val">2026-10-15</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="#37464f" stroke-width="1.4"/><path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke="#37464f" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="cal"><div class="cal-top"><span class="nav">‹</span><b>October 2026</b><span class="nav">›</span></div><div class="cal-grid"><span class="cd h">Mo</span><span class="cd h">Tu</span><span class="cd h">We</span><span class="cd h">Th</span><span class="cd h">Fr</span><span class="cd h">Sa</span><span class="cd h">Su</span><span class="cd"></span><span class="cd"></span><span class="cd"></span><span class="cd">1</span><span class="cd">2</span><span class="cd">3</span><span class="cd">4</span><span class="cd">5</span><span class="cd">6</span><span class="cd">7</span><span class="cd">8</span><span class="cd">9</span><span class="cd">10</span><span class="cd">11</span><span class="cd">12</span><span class="cd">13</span><span class="cd">14</span><span class="cd sel">15</span><span class="cd">16</span><span class="cd">17</span><span class="cd">18</span><span class="cd">19</span><span class="cd">20</span><span class="cd">21</span><span class="cd">22</span><span class="cd">23</span><span class="cd">24</span><span class="cd">25</span><span class="cd">26</span><span class="cd">27</span><span class="cd">28</span><span class="cd">29</span><span class="cd">30</span><span class="cd">31</span></div></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Date picker with time</div><div class="card-meta"><span class="rules-id">D4</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Available from</div><div class="hrow"><div class="input" style="width:170px"><span class="val">2026-10-15</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="#37464f" stroke-width="1.4"/><path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke="#37464f" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="input" style="width:120px"><span class="val">09:00</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="#37464f" stroke-width="1.4"/><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="#37464f" stroke-width="1.4" stroke-linecap="round"/></svg></span></div></div><div class="help"><span>Stored as ISO 8601 date and time</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Spinner</div><div class="card-meta"><span class="rules-id">I2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Pack quantity</div><div class="spin"><div class="btn icon">−</div><div class="input sq"><span class="val">12</span></div><div class="btn icon">+</div></div><div class="help"><span>Whole numbers only</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Color picker</div><div class="card-meta"><span class="rules-id">C2</span><span class="tag spec">In spec</span></div></div>
+  <div class="card-body"><div class="flabel">Brand color</div><div class="hrow"><div class="swatch"><span style="background:#004f5f"></span></div><div class="input" style="width:130px"><span class="val mono">#004F5F</span></div></div><div class="help"><span>Stored as a hex value</span><span class=""></span></div></div>
+  
+</div><div class="card">
+  <div class="card-head"><div class="card-title">Editable list of date pickers</div><div class="card-meta"><span class="rules-id">D1</span><span class="tag assumed">Assumed</span></div></div>
+  <div class="card-body"><div class="flabel">Promotion dates</div><div class="elist"><div class="li"><div class="input"><span class="val">2026-11-27</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="#37464f" stroke-width="1.4"/><path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke="#37464f" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div><div class="li"><div class="input"><span class="val">2026-12-26</span><span class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="#37464f" stroke-width="1.4"/><path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke="#37464f" stroke-width="1.4" stroke-linecap="round"/></svg></span></div><div class="btn icon"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div></div></div><div class="row-gap"><div class="btn">Add item</div></div></div>
+  
+</div></div></div>
+
+<div class="sec"><h2 class="sec-h">Rule set</h2><p class="sec-sub">Rules run top to bottom within each base type and the first match wins. The highlighted row is the one active in the configurator screen.</p><table class="rt"><thead><tr><th style="width:70px">Rule</th><th>When</th><th>Control</th><th style="width:210px">Source</th></tr></thead><tbody><tr class="grp"><td colspan="4">List of Values</td></tr><tr><td><b>L1</b></td><td>One value, up to 25 options, users can add</td><td>Typeahead, can add values</td><td><span class="tag gap">Gap filled</span></td></tr><tr><td><b>L2</b></td><td>One value, 1 option</td><td>Single checkbox</td><td><span class="tag gap">Gap filled</span></td></tr><tr class="act"><td><b>L3</b></td><td>One value, 2 to 3 options</td><td>Radio buttons</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L4</b></td><td>One value, 4 to 25 options</td><td>Dropdown</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L5</b></td><td>One value, 26 or more options</td><td>Typeahead</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L6</b></td><td>One value, 26 or more options, users can add</td><td>Typeahead, can add values</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L7</b></td><td>Multiple values, 1 to 5 options, users can add</td><td>Checkboxes in columns, can add values</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L8</b></td><td>Multiple values, 6 to 25 options, users can add</td><td>Typeahead with selected values shown, can add values</td><td><span class="tag gap">Gap filled</span></td></tr><tr><td><b>L9</b></td><td>Multiple values, up to 25 options</td><td>Checkboxes in columns</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L10</b></td><td>Multiple values, 26 or more options</td><td>Typeahead with selected values shown</td><td><span class="tag spec">In spec</span></td></tr><tr><td><b>L11</b></td><td>Multiple values, 26 or more options, users can add</td><td>Typeahead with selected values shown, can add values</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">Text, Numeric Text, URL</td></tr><tr><td><b>T1</b></td><td>Multiple values, masked</td><td>Masked editable list</td><td><span class="tag spec">In spec</span> <span class="tag assumed">URL: Assumed</span></td></tr><tr><td><b>T2</b></td><td>Multiple values</td><td>Editable list</td><td><span class="tag spec">In spec</span> <span class="tag assumed">URL: Assumed</span></td></tr><tr><td><b>T3</b></td><td>One value, masked</td><td>Masked text field</td><td><span class="tag spec">In spec</span> <span class="tag assumed">URL: Assumed</span></td></tr><tr><td><b>T4</b></td><td>One value, more than 64 characters</td><td>Text area</td><td><span class="tag spec">In spec</span> <span class="tag assumed">URL: Assumed</span></td></tr><tr><td><b>T5</b></td><td>One value, up to 64 characters or no limit</td><td>Text field</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">Regular Expressions</td></tr><tr><td><b>X1</b></td><td>Multiple values</td><td>Editable list</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>X2</b></td><td>One value</td><td>Text area</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">Fraction</td></tr><tr><td><b>F1</b></td><td>Multiple values</td><td>Masked editable list</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>F2</b></td><td>One value</td><td>Masked text field</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">Number, Number Range</td></tr><tr><td><b>N1</b></td><td>Multiple values</td><td>Editable list</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>N2</b></td><td>One value</td><td>Text field</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">ISO date</td></tr><tr><td><b>D1</b></td><td>Multiple values</td><td>Editable list of date pickers</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>D2</b></td><td>One value</td><td>Date picker</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">ISO Date and Time</td></tr><tr><td><b>D3</b></td><td>Multiple values</td><td>Editable list of date and time pickers</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>D4</b></td><td>One value</td><td>Date picker with time</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">GLN, GTIN</td></tr><tr><td><b>G1</b></td><td>Multiple values</td><td>Masked editable list</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>G2</b></td><td>One value</td><td>Masked text field</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">Integer</td></tr><tr><td><b>I1</b></td><td>Multiple values</td><td>Editable list of spinners</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>I2</b></td><td>One value</td><td>Spinner</td><td><span class="tag spec">In spec</span></td></tr><tr class="grp"><td colspan="4">Color</td></tr><tr><td><b>C1</b></td><td>Multiple values</td><td>Editable list of color pickers</td><td><span class="tag assumed">Assumed</span></td></tr><tr><td><b>C2</b></td><td>One value</td><td>Color picker</td><td><span class="tag spec">In spec</span></td></tr></tbody></table>
+<div class="legend"><span><i class="tag spec">In spec</i> Taken directly from the scenario table</span><span><i class="tag assumed">Assumed</i> Row is elided in the spec, behaviour inferred</span><span><i class="tag gap">Gap filled</i> No row in the spec, a proposal to confirm</span></div></div>
+</div></body></html>
