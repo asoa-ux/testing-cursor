@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Attribute control rules, logic</title>
+</head>
+<body>
+<h1>Attribute control rules</h1>
+
+<h2>Input</h2>
+<form id="cfg" onsubmit="return false">
+  <p>
+    <label for="type">Validation base type</label><br>
+    <select id="type" name="type"></select>
+  </p>
+  <p>
+    <label><input type="checkbox" id="multi" name="multi"> Multiple values</label>
+  </p>
+  <p data-for="lov">
+    <label for="count">Values in the list</label><br>
+    <input type="number" id="count" name="count" min="1" value="2">
+  </p>
+  <p data-for="lov">
+    <label><input type="checkbox" id="allowAdd" name="allowAdd"> Users can add new values</label>
+  </p>
+  <p data-for="chars">
+    <label for="maxChars">Max characters per value (0 = no limit)</label><br>
+    <input type="number" id="maxChars" name="maxChars" min="0" value="0">
+  </p>
+  <p data-for="mask">
+    <label><input type="checkbox" id="mask" name="mask"> Input mask</label>
+  </p>
+</form>
+
+<h2>Output</h2>
+<p>Control: <strong id="control"></strong></p>
+<p>Rule: <span id="rule"></span></p>
+<p>Source: <span id="source"></span></p>
+
+<h3>Evaluation trace</h3>
+<ol id="trace"></ol>
+
+<h2>Rule set</h2>
+<p>Rules run top to bottom within each base type. The first match wins.</p>
+<table border="1" cellpadding="4">
+  <thead><tr><th>Rule</th><th>Base types</th><th>When</th><th>Control</th><th>Source</th></tr></thead>
+  <tbody id="rules"></tbody>
+</table>
+
+<script>
+"use strict";
+
+/* ---------------- Rule data ---------------- */
+
+const LOV = "List of Values";
+const TEXTLIKE = ["Text", "Numeric Text", "URL"];
+
+// Which inputs apply to each base type.
+// mask: "optional" = user can toggle, "fixed" = always masked, "none" = not applicable
+const TYPES = {
+  "Text":                { chars: true,  mask: "optional" },
+  "Numeric Text":        { chars: true,  mask: "optional" },
+  "URL":                 { chars: true,  mask: "optional" },
+  "Regular Expressions": { chars: true,  mask: "none" },
+  "Fraction":            { chars: false, mask: "fixed" },
+  "Number":              { chars: false, mask: "none" },
+  "Number Range":        { chars: false, mask: "none" },
+  "ISO date":            { chars: false, mask: "none" },
+  "ISO Date and Time":   { chars: false, mask: "none" },
+  "GLN":                 { chars: false, mask: "fixed" },
+  "GTIN":                { chars: false, mask: "fixed" },
+  "Integer":             { chars: false, mask: "none" },
+  "Color":               { chars: false, mask: "none" },
+  [LOV]:                 { chars: false, mask: "none", lov: true }
+};
+
+const CONTROLS = {
+  textfield:         "Text field (grows with content)",
+  textarea:          "Text area (grows with content)",
+  masked:            "Masked text field",
+  editableList:      "Editable list",
+  maskedList:        "Masked editable list",
+  datepicker:        "Date picker",
+  datetime:          "Date picker with time",
+  spinner:           "Spinner",
+  color:             "Color picker",
+  radio:             "Radio buttons",
+  dropdown:          "Dropdown",
+  singleCheckbox:    "Single checkbox",
+  checkboxes:        "Checkboxes in columns",
+  checkboxesAdd:     "Checkboxes in columns, can add values",
+  typeahead:         "Typeahead",
+  typeaheadAdd:      "Typeahead, can add values",
+  typeaheadMulti:    "Typeahead with selected values shown",
+  typeaheadMultiAdd: "Typeahead with selected values shown, can add values"
+};
+
+// Source: "spec" = in scenario table, "assumed" = row elided in spec, "gap" = not covered by spec
+const RULES = [
+  // List of Values
+  { id: "L1",  types: [LOV], when: "One value, up to 25 options, users can add",         test: s => !s.multi && s.allowAdd && s.count <= 25, control: "typeaheadAdd",      source: "gap" },
+  { id: "L2",  types: [LOV], when: "One value, 1 option",                                 test: s => !s.multi && s.count === 1,               control: "singleCheckbox",    source: "gap" },
+  { id: "L3",  types: [LOV], when: "One value, 2 to 3 options",                           test: s => !s.multi && s.count <= 3,                control: "radio",             source: "spec" },
+  { id: "L4",  types: [LOV], when: "One value, 4 to 25 options",                          test: s => !s.multi && s.count <= 25,               control: "dropdown",          source: "spec" },
+  { id: "L5",  types: [LOV], when: "One value, 26 or more options",                       test: s => !s.multi && !s.allowAdd,                 control: "typeahead",         source: "spec" },
+  { id: "L6",  types: [LOV], when: "One value, 26 or more options, users can add",        test: s => !s.multi,                                control: "typeaheadAdd",      source: "spec" },
+  { id: "L7",  types: [LOV], when: "Multiple values, 1 to 5 options, users can add",      test: s => s.multi && s.allowAdd && s.count <= 5,   control: "checkboxesAdd",     source: "spec" },
+  { id: "L8",  types: [LOV], when: "Multiple values, 6 to 25 options, users can add",     test: s => s.multi && s.allowAdd && s.count <= 25,  control: "typeaheadMultiAdd", source: "gap" },
+  { id: "L9",  types: [LOV], when: "Multiple values, up to 25 options",                   test: s => s.multi && s.count <= 25,                control: "checkboxes",        source: "spec" },
+  { id: "L10", types: [LOV], when: "Multiple values, 26 or more options",                 test: s => s.multi && !s.allowAdd,                  control: "typeaheadMulti",    source: "spec" },
+  { id: "L11", types: [LOV], when: "Multiple values, 26 or more options, users can add",  test: s => s.multi,                                 control: "typeaheadMultiAdd", source: "spec" },
+
+  // Text, Numeric Text, URL (URL rows are elided in the spec, assumed to follow Text)
+  { id: "T1", types: TEXTLIKE, when: "Multiple values, masked",                    test: s => s.multi && s.mask, control: "maskedList",   source: "spec", sourceByType: { URL: "assumed" } },
+  { id: "T2", types: TEXTLIKE, when: "Multiple values",                            test: s => s.multi,           control: "editableList", source: "spec", sourceByType: { URL: "assumed" } },
+  { id: "T3", types: TEXTLIKE, when: "One value, masked",                          test: s => s.mask,            control: "masked",       source: "spec", sourceByType: { URL: "assumed" } },
+  { id: "T4", types: TEXTLIKE, when: "One value, more than 64 characters",         test: s => s.maxChars > 64,   control: "textarea",     source: "spec", sourceByType: { URL: "assumed" } },
+  { id: "T5", types: TEXTLIKE, when: "One value, up to 64 characters or no limit", test: s => true,              control: "textfield",    source: "spec" },
+
+  { id: "X1", types: ["Regular Expressions"], when: "Multiple values", test: s => s.multi, control: "editableList", source: "assumed" },
+  { id: "X2", types: ["Regular Expressions"], when: "One value",       test: s => true,    control: "textarea",     source: "spec" },
+
+  { id: "F1", types: ["Fraction"], when: "Multiple values", test: s => s.multi, control: "maskedList", source: "assumed" },
+  { id: "F2", types: ["Fraction"], when: "One value",       test: s => true,    control: "masked",     source: "spec" },
+
+  { id: "N1", types: ["Number", "Number Range"], when: "Multiple values", test: s => s.multi, control: "editableList", source: "assumed" },
+  { id: "N2", types: ["Number", "Number Range"], when: "One value",       test: s => true,    control: "textfield",    source: "spec" },
+
+  { id: "D1", types: ["ISO date"],          when: "Multiple values", test: s => s.multi, control: "editableList", source: "assumed" },
+  { id: "D2", types: ["ISO date"],          when: "One value",       test: s => true,    control: "datepicker",   source: "spec" },
+  { id: "D3", types: ["ISO Date and Time"], when: "Multiple values", test: s => s.multi, control: "editableList", source: "assumed" },
+  { id: "D4", types: ["ISO Date and Time"], when: "One value",       test: s => true,    control: "datetime",     source: "spec" },
+
+  { id: "G1", types: ["GLN", "GTIN"], when: "Multiple values", test: s => s.multi, control: "maskedList", source: "assumed" },
+  { id: "G2", types: ["GLN", "GTIN"], when: "One value",       test: s => true,    control: "masked",     source: "spec" },
+
+  { id: "I1", types: ["Integer"], when: "Multiple values", test: s => s.multi, control: "editableList", source: "assumed" },
+  { id: "I2", types: ["Integer"], when: "One value",       test: s => true,    control: "spinner",      source: "spec" },
+
+  { id: "C1", types: ["Color"], when: "Multiple values", test: s => s.multi, control: "editableList", source: "assumed" },
+  { id: "C2", types: ["Color"], when: "One value",       test: s => true,    control: "color",        source: "spec" }
+];
+
+const SOURCE_LABELS = { spec: "In spec", assumed: "Assumed (row elided in spec)", gap: "Gap filled (not covered by spec)" };
+
+/* ---------------- Engine ---------------- */
+
+// Normalise raw input into the values the rules test against.
+function normalise(input) {
+  const t = TYPES[input.type];
+  return {
+    type: input.type,
+    multi: !!input.multi,
+    count: t.lov ? Math.max(1, +input.count || 1) : 0,
+    allowAdd: t.lov ? !!input.allowAdd : false,
+    maxChars: t.chars ? Math.max(0, +input.maxChars || 0) : 0,
+    mask: t.mask === "fixed" ? true : t.mask === "optional" ? !!input.mask : false
+  };
+}
+
+// Returns the matched rule, the control, its source and the full trace.
+function resolveControl(input) {
+  const s = normalise(input);
+  const trace = [];
+  for (const rule of RULES) {
+    if (!rule.types.includes(s.type)) continue;
+    const matched = !!rule.test(s);
+    trace.push({ id: rule.id, when: rule.when, matched });
+    if (matched) {
+      return {
+        input: s,
+        rule: rule.id,
+        when: rule.when,
+        control: rule.control,
+        controlName: CONTROLS[rule.control],
+        source: (rule.sourceByType && rule.sourceByType[s.type]) || rule.source,
+        trace
+      };
+    }
+  }
+  return { input: s, rule: null, control: null, controlName: null, source: null, trace };
+}
+
+/* ---------------- Page wiring ---------------- */
+
+const form = document.getElementById("cfg");
+const typeSelect = document.getElementById("type");
+Object.keys(TYPES).forEach(t => typeSelect.add(new Option(t, t)));
+typeSelect.value = LOV;
+
+function readForm() {
+  return {
+    type: form.type.value,
+    multi: form.multi.checked,
+    count: form.count.value,
+    allowAdd: form.allowAdd.checked,
+    maxChars: form.maxChars.value,
+    mask: form.mask.checked
+  };
+}
+
+function update() {
+  const t = TYPES[form.type.value];
+  document.querySelectorAll("[data-for]").forEach(p => {
+    const k = p.dataset.for;
+    p.hidden = k === "lov" ? !t.lov : k === "chars" ? !t.chars : t.mask !== "optional";
+  });
+
+  const r = resolveControl(readForm());
+  document.getElementById("control").textContent = r.controlName || "No matching rule";
+  document.getElementById("rule").textContent = r.rule ? r.rule + ": " + r.when : "";
+  document.getElementById("source").textContent = r.source ? SOURCE_LABELS[r.source] : "";
+  document.getElementById("trace").replaceChildren(...r.trace.map(step => {
+    const li = document.createElement("li");
+    li.textContent = step.id + " " + step.when + ": " + (step.matched ? "match" : "no match");
+    return li;
+  }));
+}
+
+form.addEventListener("input", update);
+form.addEventListener("change", update);
+
+// Rule table
+const tbody = document.getElementById("rules");
+RULES.forEach(r => {
+  const tr = tbody.insertRow();
+  let src = SOURCE_LABELS[r.source];
+  if (r.sourceByType) src += "; " + Object.entries(r.sourceByType).map(([k, v]) => k + ": " + SOURCE_LABELS[v]).join("; ");
+  [r.id, r.types.join(", "), r.when, CONTROLS[r.control], src].forEach(v => { tr.insertCell().textContent = v; });
+});
+
+update();
+</script>
+</body>
+</html>
