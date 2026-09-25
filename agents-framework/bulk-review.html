@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-/* Tailwind default design tokens: slate neutrals, indigo primary, emerald / amber /
+/* Tailwind default design tokens: slate neutrals, blue primary, emerald / amber /
    rose / violet accents, 14px base type, ring-style shadows. */
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -20,14 +20,16 @@
   --muted: #64748b;
   --line: #e2e8f0;
   --soft-line: #f1f5f9;
-  --blue: #4f46e5;
-  --blue-soft: #eef2ff;
+  --blue: #2563eb;
+  --blue-soft: #eff6ff;
   --green: #059669;
   --green-soft: #ecfdf5;
   --amber: #d97706;
   --amber-soft: #fffbeb;
   --red: #e11d48;
   --red-soft: #fff1f2;
+  /* Blue carries the interface. Violet is reserved for the assistant itself and
+     for anything it generated or is still working on. */
   --violet: #7c3aed;
   --violet-soft: #f5f3ff;
   --ring: 0 1px 2px 0 rgb(15 23 42 / .05);
@@ -40,7 +42,7 @@ html, body { min-width: 1440px; height: 100%; margin: 0; background: #f8fafc; }
 body { display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
 [hidden] { display: none !important; }
 
 .app-header { height: 60px; flex-shrink: 0; padding: 0 24px; background: #fff; color: #334155; display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--line); }
@@ -49,17 +51,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .app-header nav { display: flex; align-self: stretch; gap: 2px; }
 .app-header nav a { display: flex; align-items: center; color: var(--muted); text-decoration: none; padding: 0 12px; border-bottom: 2px solid transparent; font-weight: 500; }
 .app-header nav a:hover { color: #334155; }
-.app-header nav a.active { color: var(--blue); border-color: #6366f1; }
+.app-header nav a.active { color: var(--blue); border-color: #3b82f6; }
 .header-spacer { flex: 1; }
 .assistant-toggle { position: relative; display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: var(--radius); color: #334155; background: #fff; border: 1px solid #cbd5e1; font-weight: 500; box-shadow: var(--ring); }
 .assistant-toggle:hover { background: #f8fafc; }
-.assistant-toggle.active { color: #4338ca; background: var(--blue-soft); border-color: #c7d2fe; }
+.assistant-toggle.active { color: #1d4ed8; background: var(--blue-soft); border-color: #bfdbfe; }
 .assistant-toggle i { font-style: normal; color: var(--violet); }
 /* The badge rides the corner of the button rather than sitting in the label. */
 .assistant-toggle b { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 9999px; background: var(--blue); box-shadow: 0 0 0 2px #fff; }
 .icon-button { width: 30px; height: 30px; color: var(--muted); background: #fff; border: 1px solid #cbd5e1; border-radius: 9999px; }
 .icon-button:hover { background: #f8fafc; }
-.avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9999px; background: #e0e7ff; color: #4338ca; font-size: 12px; font-weight: 600; }
+.avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9999px; background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 600; }
 
 /* App shell: header on top, persistent navigation on the left, one view at a time
    in the centre — chat, the run list, or a run. */
@@ -79,9 +81,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .product-crumbs b { color: #475569; font-weight: 600; }
 .product-state { padding: 2px 9px; border-radius: 9999px; background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; }
 .product-tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.product-tools > button:not(.product-save) { height: 30px; min-width: 30px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: var(--radius); background: #fff; box-shadow: var(--ring); color: #334155; font-weight: 500; }
-.product-tools > button:not(.product-save):hover { background: #f8fafc; }
-.product-tools .product-save { height: 30px; }
+.product-tools > button { height: 30px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: var(--radius); background: #fff; box-shadow: var(--ring); color: #334155; font-weight: 500; }
+.product-tools > button:hover { background: #f8fafc; }
 .product-scroll { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px; }
 .product-shell { max-width: 960px; margin: 0 auto; }
 .product-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
@@ -98,19 +99,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .product-field input, .product-field select, .product-field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: var(--radius); background: #fff; box-shadow: var(--ring); padding: 9px 10px; }
 .product-field input:disabled { color: #64748b; background: #f8fafc; }
 .product-field textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
-.product-save { height: 34px; padding: 0 13px; border: 0; border-radius: var(--radius); background: var(--blue); color: #fff; font-weight: 600; }
 .nav-item { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 8px 10px; border: 0; border-radius: var(--radius); background: transparent; color: #334155; font-weight: 500; }
 .nav-item:hover { background: #f1f5f9; }
-.nav-item.active { background: var(--blue-soft); color: #4338ca; }
+.nav-item.active { background: var(--blue-soft); color: #1d4ed8; }
 .nav-item i { font-style: normal; color: #94a3b8; }
-.nav-item.active i { color: #4338ca; }
+.nav-item.active i { color: #1d4ed8; }
 .nav-group { margin-top: 18px; }
 .nav-group > b { display: block; padding: 0 10px 6px; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
 .nav-run { display: block; width: 100%; text-align: left; padding: 7px 10px; border: 0; border-radius: var(--radius); background: transparent; }
 .nav-run:hover { background: #f1f5f9; }
 .nav-run.active { background: var(--blue-soft); }
 .nav-run span { display: flex; align-items: center; gap: 7px; color: #334155; font-weight: 500; }
-.nav-run.active span { color: #4338ca; }
+.nav-run.active span { color: #1d4ed8; }
 .nav-run small { display: block; padding-left: 14px; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #nav-agents .nav-run small { padding-left: 25px; }
 .nav-avatar { flex-shrink: 0; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: var(--radius); background: var(--violet-soft); color: var(--violet); font-size: 10px; font-style: normal; font-weight: 600; }
@@ -174,13 +174,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .runs-table tbody tr.openable:hover td { background: #f8fafc; }
 .run-name { display: block; color: var(--ink); font-weight: 600; }
 .run-name + small { display: block; margin-top: 4px; color: var(--muted); }
-.run-agent { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; background: var(--violet-soft); box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); color: #6d28d9; font-size: 11px; font-weight: 600; }
+.run-agent { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .18); color: #475569; font-size: 11px; font-weight: 600; }
 .run-progress { width: 150px; }
 .run-progress span { display: block; margin-bottom: 5px; color: #475569; font-size: 12px; }
 .run-progress i { display: block; height: 5px; overflow: hidden; border-radius: 9999px; background: #e2e8f0; }
 .run-progress i::after { content: ""; display: block; width: var(--progress); height: 100%; border-radius: inherit; background: var(--blue); }
 .run-status { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 9999px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.run-status.review { color: #4338ca; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(99 102 241 / .2); }
+.run-status.review { color: #1d4ed8; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .2); }
 .run-status.running { color: #475569; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .18); }
 /* A finished run has nothing to flag, so it reads as plain text. */
 .run-status.completed { padding-left: 0; color: var(--muted); background: transparent; box-shadow: none; }
@@ -251,9 +251,9 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 .tabs { display: flex; align-items: stretch; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto; }
 .tabs button { display: flex; align-items: center; gap: 8px; white-space: nowrap; border: 0; background: transparent; color: var(--muted); padding: 14px 4px 12px; border-bottom: 2px solid transparent; font-weight: 500; }
 .tabs button:hover { color: #334155; }
-.tabs button.active { color: var(--blue); font-weight: 600; border-bottom-color: #6366f1; }
+.tabs button.active { color: var(--blue); font-weight: 600; border-bottom-color: #3b82f6; }
 .tabs button b { font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 9999px; }
-.tabs button.active b { color: #4338ca; background: var(--blue-soft); }
+.tabs button.active b { color: #1d4ed8; background: var(--blue-soft); }
 .tabs .tab-ready { margin-left: auto; }
 .tabs .tab-ready b { color: #047857; background: var(--green-soft); }
 .tabs .tab-ready.active { color: #047857; border-bottom-color: #10b981; }
@@ -262,20 +262,20 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 
 .toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
 .search { width: 250px; height: 34px; display: flex; align-items: center; gap: 7px; border-radius: var(--radius); border: 1px solid #cbd5e1; box-shadow: var(--ring); padding: 0 11px; color: #94a3b8; background: #fff; }
-.search:focus-within { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+.search:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
 .search input { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
 .search input::placeholder { color: #94a3b8; }
 .tool { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: var(--radius); background: #fff; border: 1px solid #cbd5e1; box-shadow: var(--ring); color: #334155; font-weight: 500; }
 .tool:hover { background: #f8fafc; }
-.tool.on { background: var(--blue-soft); border-color: #c7d2fe; color: #4338ca; }
+.tool.on { background: var(--blue-soft); border-color: #bfdbfe; color: #1d4ed8; }
 .tool i { font-style: normal; color: #94a3b8; }
-.tool.on i { color: #4338ca; }
+.tool.on i { color: #1d4ed8; }
 .tool b { min-width: 18px; height: 18px; border-radius: 9999px; background: var(--blue); color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; }
 /* The dropdowns wear the same chrome as the buttons beside them; the native select
    sits inside with its own styling stripped. */
 .tool-select { padding-right: 9px; }
 .tool-select select { appearance: none; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-weight: 500; padding: 0 16px 0 0; background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%), linear-gradient(135deg, #94a3b8 50%, transparent 50%); background-position: right 6px top 14px, right 1px top 14px; background-size: 5px 5px; background-repeat: no-repeat; }
-.tool-select:focus-within { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+.tool-select:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
 .toolbar .spacer { flex: 1; }
 .sel-count { margin-left: auto; color: var(--muted); white-space: nowrap; }
 .sel-count b { color: var(--ink); font-weight: 600; }
@@ -313,8 +313,8 @@ td { padding: 12px; border-bottom: 1px solid var(--soft-line); vertical-align: m
 tbody tr { cursor: pointer; }
 tbody tr:hover { background: #f8fafc; }
 tbody tr.selected { background: var(--blue-soft); }
-tbody tr.focused { box-shadow: inset 3px 0 0 var(--violet); background: var(--violet-soft); }
-tbody tr.selected.focused { background: #eef2ff; }
+tbody tr.focused { box-shadow: inset 3px 0 0 var(--blue); background: var(--blue-soft); }
+tbody tr.selected.focused { background: #eff6ff; }
 tbody tr.is-refining { background: var(--violet-soft); color: #6b7280; }
 tbody tr.is-settled .new-value { color: var(--muted); font-weight: 400; }
 input[type="checkbox"] { accent-color: var(--blue); width: 16px; height: 16px; border-radius: 4px; }
@@ -334,7 +334,7 @@ td small { display: block; color: #94a3b8; margin-top: 2px; font-size: 12px; }
 .score-mid { color: #b45309; background: var(--amber-soft); box-shadow: inset 0 0 0 1px rgb(217 119 6 / .2); }
 .score-low { color: #be123c; background: var(--red-soft); box-shadow: inset 0 0 0 1px rgb(225 29 72 / .2); }
 .score-none { color: #64748b; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .2); }
-.score-human { padding: 0 9px; color: #4338ca; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(99 102 241 / .25); }
+.score-human { padding: 0 9px; color: #1d4ed8; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .25); }
 .delta { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 600; }
 .delta.up { color: var(--green); }
 .delta.flat { color: #94a3b8; }
@@ -379,7 +379,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .assistant-menu-section > b { display: block; padding: 4px 8px 6px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
 .assistant-menu-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px; border: 0; border-radius: var(--radius); background: transparent; text-align: left; }
 .assistant-menu-item:hover { background: #f1f5f9; }
-.assistant-menu-item.active { background: var(--blue-soft); color: #4338ca; }
+.assistant-menu-item.active { background: var(--blue-soft); color: #1d4ed8; }
 .assistant-menu-item > i { flex-shrink: 0; font-style: normal; }
 .assistant-menu-item > span { flex: 1; min-width: 0; }
 .assistant-menu-item .menu-link { color: #94a3b8; font-size: 13px; }
@@ -389,7 +389,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
 .card { flex-shrink: 0; padding: 14px; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .06); }
 .card-kicker { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
-.card-kicker span { color: #6d28d9; background: var(--violet-soft); border-radius: 9999px; padding: 2px 9px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.card-kicker span { color: #475569; background: #f1f5f9; border-radius: 9999px; padding: 2px 9px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .card h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
 .card .card-meta { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
 .card-note { padding: 9px 11px; margin-bottom: 12px; border-radius: var(--radius); background: var(--violet-soft); box-shadow: inset 0 0 0 1px rgb(124 58 237 / .15); color: #5b21b6; line-height: 1.5; font-size: 13px; }
@@ -406,7 +406,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .card-conf > strong { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 9999px; font-size: 16px; font-weight: 600; color: #047857; background: var(--green-soft); box-shadow: inset 0 0 0 1px rgb(5 150 105 / .2); }
 .card-conf.mid > strong { color: #b45309; background: var(--amber-soft); box-shadow: inset 0 0 0 1px rgb(217 119 6 / .2); }
 .card-conf.low > strong { color: #be123c; background: var(--red-soft); box-shadow: inset 0 0 0 1px rgb(225 29 72 / .2); }
-.card-conf.human > strong { color: #4338ca; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(99 102 241 / .25); }
+.card-conf.human > strong { color: #1d4ed8; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .25); }
 .card-conf > strong { flex-shrink: 0; }
 .card-conf b { display: block; font-size: 13px; font-weight: 400; line-height: 1.45; }
 .card-conf span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
@@ -458,13 +458,17 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .dock-welcome b { display: block; color: var(--ink); font-size: 15px; font-weight: 600; }
 .dock-welcome .chat-starters { margin-top: 14px; }
 .dock-welcome .chat-starters button { font-size: 12px; padding: 6px 11px; }
+/* The locked panel reports on a run rather than speaking as the assistant. */
+.dock-welcome.plain { padding: 0 8px; }
+.dock-welcome.plain span { background: #f1f5f9; color: #64748b; }
+.dock-welcome.plain p { margin-top: 6px; font-size: 13px; line-height: 1.5; }
 .msg { padding: 11px 13px; line-height: 1.55; border-radius: var(--radius-lg); font-size: 13px; }
 .msg.agent { background: #f8fafc; box-shadow: inset 0 0 0 1px var(--line); }
 .msg.user { background: var(--blue); color: #fff; margin-left: 32px; }
 .msg p { margin: 0 0 8px; }
 .msg p:last-child { margin: 0; }
 .msg b.head { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 7px; }
-.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 9999px; background: var(--violet-soft); box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); color: #6d28d9; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 9999px; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .2); color: #1d4ed8; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
 .msg.user .chip { background: rgb(255 255 255 / .16); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .3); color: #fff; }
 .msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .msg-actions button { border-radius: var(--radius); border: 1px solid #cbd5e1; background: #fff; box-shadow: var(--ring); color: #334155; padding: 6px 10px; font-size: 12px; font-weight: 500; }
@@ -476,13 +480,13 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 @keyframes blink { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
 .result-list { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .result-list li { padding: 8px 10px; border-radius: var(--radius); background: #fff; box-shadow: 0 0 0 1px var(--line); border-left: 3px solid #cbd5e1; cursor: pointer; }
-.result-list li:hover { box-shadow: 0 0 0 1px #c7d2fe; background: #f8fafc; }
+.result-list li:hover { box-shadow: 0 0 0 1px #bfdbfe; background: #f8fafc; }
 .result-list li.res-revised { border-left-color: var(--violet); }
 .result-list li.res-confirmed { border-left-color: var(--green); }
 .result-list li.res-withdrawn { border-left-color: #f43f5e; }
 .result-list li.res-directed { border-left-color: var(--blue); }
-.res-directed .res-tag { color: #4338ca; }
-.res-score i.human { color: #4338ca; background: var(--blue-soft); }
+.res-directed .res-tag { color: #1d4ed8; }
+.res-score i.human { color: #1d4ed8; background: var(--blue-soft); }
 .res-head { display: flex; align-items: baseline; gap: 6px; }
 .res-head b { flex-shrink: 1; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .res-head em { flex: 1; font-style: normal; color: var(--muted); font-size: 11px; white-space: nowrap; }
@@ -502,9 +506,9 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .composer { position: relative; flex-shrink: 0; border-top: 1px solid var(--line); padding: 10px 12px 8px; background: #fff; }
 .composer .suggestions { position: absolute; left: 12px; right: 12px; bottom: calc(100% - 6px); z-index: 5; display: flex; flex-direction: column; gap: 2px; padding: 5px; border-radius: var(--radius-lg); background: #fff; box-shadow: 0 10px 15px -3px rgb(15 23 42 / .12), 0 0 0 1px rgb(15 23 42 / .08); }
 .composer .suggestions button { text-align: left; border-radius: var(--radius); border: 0; background: transparent; color: #334155; padding: 7px 9px; font-size: 13px; font-weight: 500; }
-.composer .suggestions button:hover { background: var(--violet-soft); color: #6d28d9; }
+.composer .suggestions button:hover { background: var(--blue-soft); color: #1d4ed8; }
 .composer-box { border-radius: var(--radius-lg); border: 1px solid #cbd5e1; box-shadow: var(--ring); background: #fff; padding: 8px 8px 6px; }
-.composer-box:focus-within { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+.composer-box:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
 .composer-context { display: flex; align-items: center; gap: 6px; padding: 0 2px; }
 .composer textarea, .chat-composer textarea { display: block; width: 100%; height: 26px; max-height: 92px; resize: none; overflow-y: auto; border: 0; outline: 0; padding: 3px 3px 0; line-height: 1.45; background: transparent; }
 .composer textarea:disabled { background: transparent; color: #94a3b8; }
@@ -514,8 +518,8 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .composer-add { flex-shrink: 0; width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--radius); border: 0; background: transparent; color: var(--muted); font-size: 19px; line-height: 1; padding: 0; }
 .composer-add:disabled { color: #cbd5e1; cursor: not-allowed; }
 .composer-add:hover { background: #f1f5f9; color: #334155; }
-.composer-send { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius); background: var(--violet); border: 0; color: #fff; font-size: 15px; line-height: 1; padding: 0; }
-.composer-send:not(:disabled):hover { background: #6d28d9; }
+.composer-send { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius); background: var(--blue); border: 0; color: #fff; font-size: 15px; line-height: 1; padding: 0; }
+.composer-send:not(:disabled):hover { background: #1d4ed8; }
 .composer-send:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
 .ai-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 7px 0 0; color: var(--muted); font-size: 12px; }
 .ai-note span { background: #e2e8f0; color: #475569; border-radius: 3px; padding: 0 5px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
@@ -577,9 +581,9 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     <span class="product-crumbs">Products <em>/</em> <b id="toolbar-category">Outdoor</b></span>
     <span class="product-state" id="toolbar-status">Active</span>
     <div class="product-tools">
-      <button type="button">Preview</button>
-      <button type="button" aria-label="More actions">⋯</button>
-      <button class="product-save" type="submit" form="product-form">Save changes</button>
+      <button type="button" id="product-approve">Approve</button>
+      <button type="submit" form="product-form" id="product-submit">Submit</button>
+      <button type="button" id="product-export">Export</button>
     </div>
   </div>
   <div class="product-scroll">
@@ -857,7 +861,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         </div>
       </div>
       <div class="thread" id="dock-thread"></div>
-      <div class="composer">
+      <div class="composer" id="dock-composer">
         <div class="suggestions" id="dock-suggest" hidden></div>
         <div class="composer-box">
           <textarea id="dock-input" rows="1" placeholder="Ask anything…"></textarea>
@@ -2158,18 +2162,20 @@ function renderDock() {
   const locked = state.view === "detail" && openStatus !== "review";
   const open = state.view !== "chat" && state.assistantOpen;
   const attention = RUNS.filter((run) => statusOf(run) === "review").length;
+  const menuOpen = state.assistantMenuOpen && state.view === "product";
   $("dock").hidden = !open;
   $("assistant").hidden = !inRun;
   $("dock-chat").hidden = inRun;
   $("assistant-toggle").className = open ? "assistant-toggle active" : "assistant-toggle";
-  /* The header badge is a nudge to open the panel. Once it is open, the work
-     still lives in the menu until the review is actually finished. */
+  /* A badge belongs to something closed: it says there is work inside. Opening
+     it makes the badge redundant, and closing it again brings the badge back
+     until the review is actually finished. */
   $("assistant-badge").hidden = open || attention === 0;
-  $("menu-badge").hidden = attention === 0;
+  $("menu-badge").hidden = menuOpen || attention === 0;
   $("assistant-menu-trigger").hidden = state.view !== "product";
-  $("assistant-menu").hidden = !state.assistantMenuOpen || state.view !== "product";
-  $("assistant-menu-trigger").setAttribute("aria-expanded", String(state.assistantMenuOpen && state.view === "product"));
-  if (!inRun) renderDockChat(locked, openStatus);
+  $("assistant-menu").hidden = !menuOpen;
+  $("assistant-menu-trigger").setAttribute("aria-expanded", String(menuOpen));
+  if (!inRun) renderDockChat(locked, openStatus, openRun);
 }
 
 function showProduct() {
@@ -2401,10 +2407,26 @@ function paintThread(host, messages) {
 
 /* On a product the rail can switch between general help and named agents. Once
    you enter the run workspace it resolves back to the general conversation. */
-function renderDockChat(locked, runStatus) {
+function renderDockChat(locked, runStatus, run) {
   const target = state.view === "product" ? state.dockChatWith : "general";
   const agent = agentById(target);
   const suggest = $("dock-suggest");
+
+  /* A run you cannot act on has no conversation at all: the panel explains where
+     the run stands and, when it is over, points at the agent behind it. */
+  $("dock-composer").hidden = Boolean(locked);
+  if (locked) {
+    $("dock-avatar").textContent = "✦";
+    $("dock-title").textContent = "AI assistant";
+    $("dock-subtitle").hidden = true;
+    const host = $("dock-thread");
+    host.textContent = "";
+    host.className = "thread empty";
+    host.append(lockedState(runStatus, run));
+    renderAssistantMenu();
+    return;
+  }
+
   suggest.textContent = "";
   starterPrompts(agent).forEach((prompt) => {
     const button = document.createElement("button");
@@ -2418,31 +2440,21 @@ function renderDockChat(locked, runStatus) {
   $("dock-title").textContent = agent ? agent.name : "AI assistant";
   $("dock-subtitle").textContent = agent ? agent.note : "";
   $("dock-subtitle").hidden = !agent;
-  $("dock-input").disabled = Boolean(locked);
-  $("dock-add").disabled = Boolean(locked);
-  if (locked) {
-    suggest.hidden = true;
-    $("dock-send").disabled = true;
-    $("dock-input").value = "";
-    $("dock-input").placeholder = "";
-    $("dock-hint").textContent = runStatus === "running"
-      ? "This run is still analysing — nothing to discuss yet"
-      : "This review is finished — run the agent again from Agents";
-  } else {
-    $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
-    $("dock-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
-  }
+  $("dock-input").disabled = false;
+  $("dock-add").disabled = false;
+  $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
+  $("dock-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
 
   const messages = thread(target);
   const host = $("dock-thread");
   paintThread(host, messages);
   /* An untouched panel still greets you rather than showing an empty column. */
   host.className = messages.length ? "thread" : "thread empty";
-  if (!messages.length) host.append(dockWelcome(agent, locked));
+  if (!messages.length) host.append(dockWelcome(agent));
   renderAssistantMenu();
 }
 
-function dockWelcome(agent, locked) {
+function dockWelcome(agent) {
   const welcome = document.createElement("div");
   welcome.className = "dock-welcome";
   const mark = document.createElement("span");
@@ -2454,19 +2466,51 @@ function dockWelcome(agent, locked) {
   ask.textContent = agent ? agent.ask : "How can I help?";
   welcome.append(mark, line, ask);
 
-  if (!locked) {
-    const chips = document.createElement("div");
-    chips.className = "chat-starters";
-    starterPrompts(agent).slice(0, 2).forEach((prompt) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = prompt;
-      button.addEventListener("click", () => sendChat(prompt, "dock"));
-      chips.append(button);
-    });
-    welcome.append(chips);
-  }
+  const chips = document.createElement("div");
+  chips.className = "chat-starters";
+  starterPrompts(agent).slice(0, 2).forEach((prompt) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = prompt;
+    button.addEventListener("click", () => sendChat(prompt, "dock"));
+    chips.append(button);
+  });
+  welcome.append(chips);
   return welcome;
+}
+
+function lockedState(runStatus, run) {
+  const agent = run ? agentByName(run.agent) : null;
+  const block = document.createElement("div");
+  block.className = "dock-welcome plain";
+  const mark = document.createElement("span");
+  mark.textContent = runStatus === "running" ? "◷" : "✓";
+  const heading = document.createElement("b");
+  const body = document.createElement("p");
+
+  if (runStatus === "running") {
+    heading.textContent = "This run is still working";
+    body.textContent = (run ? run.agent : "The agent") + " is still analysing. There is nothing to discuss until it proposes changes.";
+    block.append(mark, heading, body);
+    return block;
+  }
+
+  heading.textContent = "This review is finished";
+  body.textContent = "Every change in this run has been decided. To look at these products again, run "
+    + (agent ? agent.name : "the agent") + " once more.";
+  block.append(mark, heading, body);
+
+  if (agent) {
+    const actions = document.createElement("div");
+    actions.className = "chat-starters";
+    const open = document.createElement("button");
+    open.type = "button";
+    open.textContent = "Open " + agent.name;
+    open.addEventListener("click", () => showChat(agent.id));
+    actions.append(open);
+    block.append(actions);
+  }
+  return block;
 }
 
 function renderChat() {
@@ -2798,8 +2842,7 @@ $("back-button").addEventListener("click", () => {
   if (state.view !== "product") showProduct();
 });
 
-$("product-form").addEventListener("submit", (event) => {
-  event.preventDefault();
+function keepProductFields() {
   const product = PRODUCT;
   product.name = $("product-name").value.trim() || product.name;
   product.status = $("product-status").value;
@@ -2808,7 +2851,20 @@ $("product-form").addEventListener("submit", (event) => {
   product.attribute = $("product-attribute").value.trim();
   product.description = $("product-description").value.trim();
   renderProduct();
-  notify("Product details saved.");
+}
+
+$("product-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  keepProductFields();
+  notify("Product submitted.");
+});
+$("product-approve").addEventListener("click", () => {
+  keepProductFields();
+  notify("Product approved.");
+});
+$("product-export").addEventListener("click", () => {
+  keepProductFields();
+  notify("Product exported.");
 });
 
 $("dock-input").addEventListener("input", (event) => {
