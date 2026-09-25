@@ -1,0 +1,2913 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bulk review — attribute changes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* Tailwind default design tokens: slate neutrals, indigo primary, emerald / amber /
+   rose / violet accents, 14px base type, ring-style shadows. */
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.45;
+  --navy: #1e293b;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --soft-line: #f1f5f9;
+  --blue: #4f46e5;
+  --blue-soft: #eef2ff;
+  --green: #059669;
+  --green-soft: #ecfdf5;
+  --amber: #d97706;
+  --amber-soft: #fffbeb;
+  --red: #e11d48;
+  --red-soft: #fff1f2;
+  --violet: #7c3aed;
+  --violet-soft: #f5f3ff;
+  --ring: 0 1px 2px 0 rgb(15 23 42 / .05);
+  --shadow: 0 1px 3px 0 rgb(15 23 42 / .1), 0 1px 2px -1px rgb(15 23 42 / .1);
+  --radius: 6px;
+  --radius-lg: 8px;
+}
+* { box-sizing: border-box; }
+html, body { min-width: 1440px; height: 100%; margin: 0; background: #f8fafc; }
+body { display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.app-header { height: 60px; flex-shrink: 0; padding: 0 24px; background: #fff; color: #334155; display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--line); }
+.app-header > .back-button { margin-right: -12px; font-size: 15px; }
+.brand { color: var(--ink); font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+.app-header nav { display: flex; align-self: stretch; gap: 2px; }
+.app-header nav a { display: flex; align-items: center; color: var(--muted); text-decoration: none; padding: 0 12px; border-bottom: 2px solid transparent; font-weight: 500; }
+.app-header nav a:hover { color: #334155; }
+.app-header nav a.active { color: var(--blue); border-color: #6366f1; }
+.header-spacer { flex: 1; }
+.assistant-toggle { position: relative; display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: var(--radius); color: #334155; background: #fff; border: 1px solid #cbd5e1; font-weight: 500; box-shadow: var(--ring); }
+.assistant-toggle:hover { background: #f8fafc; }
+.assistant-toggle.active { color: #4338ca; background: var(--blue-soft); border-color: #c7d2fe; }
+.assistant-toggle i { font-style: normal; color: var(--violet); }
+/* The badge rides the corner of the button rather than sitting in the label. */
+.assistant-toggle b { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 9999px; background: var(--blue); box-shadow: 0 0 0 2px #fff; }
+.icon-button { width: 30px; height: 30px; color: var(--muted); background: #fff; border: 1px solid #cbd5e1; border-radius: 9999px; }
+.icon-button:hover { background: #f8fafc; }
+.avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9999px; background: #e0e7ff; color: #4338ca; font-size: 12px; font-weight: 600; }
+
+/* App shell: header on top, persistent navigation on the left, one view at a time
+   in the centre — chat, the run list, or a run. */
+.app-body { flex: 1; min-height: 0; display: flex; }
+.app-content { flex: 1; min-width: 0; min-height: 0; display: flex; }
+.view-col { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+/* Docked to the edge of the window, so it is a rail rather than a floating card. */
+.dock { width: 400px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-left: 1px solid var(--line); }
+.dock[hidden] { display: none; }
+.dock > .assistant { flex: 1; min-height: 0; border-radius: 0; box-shadow: none; }
+.dock > .assistant[hidden] { display: none; }
+.app-nav { width: 240px; flex-shrink: 0; overflow: auto; padding: 14px 12px; background: #fff; border-right: 1px solid var(--line); }
+.product-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.product-toolbar { display: flex; align-items: center; gap: 12px; flex-shrink: 0; height: 48px; padding: 0 20px; background: #fff; border-bottom: 1px solid var(--line); }
+.product-crumbs { color: var(--muted); font-size: 12px; }
+.product-crumbs em { font-style: normal; margin: 0 5px; color: #cbd5e1; }
+.product-crumbs b { color: #475569; font-weight: 600; }
+.product-state { padding: 2px 9px; border-radius: 9999px; background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; }
+.product-tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.product-tools > button:not(.product-save) { height: 30px; min-width: 30px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: var(--radius); background: #fff; box-shadow: var(--ring); color: #334155; font-weight: 500; }
+.product-tools > button:not(.product-save):hover { background: #f8fafc; }
+.product-tools .product-save { height: 30px; }
+.product-scroll { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px; }
+.product-shell { max-width: 960px; margin: 0 auto; }
+.product-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.product-image { width: 72px; height: 72px; display: grid; place-items: center; flex-shrink: 0; border-radius: var(--radius-lg); background: #e2e8f0; color: #64748b; font-size: 20px; font-weight: 600; }
+.product-heading h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.02em; }
+.product-heading p { margin: 0; color: var(--muted); }
+.product-form { overflow: hidden; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
+.product-form > header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.product-form > header h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.product-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 20px; }
+.product-field { display: flex; flex-direction: column; gap: 6px; }
+.product-field.full { grid-column: 1 / -1; }
+.product-field label { color: #475569; font-size: 12px; font-weight: 600; }
+.product-field input, .product-field select, .product-field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: var(--radius); background: #fff; box-shadow: var(--ring); padding: 9px 10px; }
+.product-field input:disabled { color: #64748b; background: #f8fafc; }
+.product-field textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+.product-save { height: 34px; padding: 0 13px; border: 0; border-radius: var(--radius); background: var(--blue); color: #fff; font-weight: 600; }
+.nav-item { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 8px 10px; border: 0; border-radius: var(--radius); background: transparent; color: #334155; font-weight: 500; }
+.nav-item:hover { background: #f1f5f9; }
+.nav-item.active { background: var(--blue-soft); color: #4338ca; }
+.nav-item i { font-style: normal; color: #94a3b8; }
+.nav-item.active i { color: #4338ca; }
+.nav-group { margin-top: 18px; }
+.nav-group > b { display: block; padding: 0 10px 6px; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.nav-run { display: block; width: 100%; text-align: left; padding: 7px 10px; border: 0; border-radius: var(--radius); background: transparent; }
+.nav-run:hover { background: #f1f5f9; }
+.nav-run.active { background: var(--blue-soft); }
+.nav-run span { display: flex; align-items: center; gap: 7px; color: #334155; font-weight: 500; }
+.nav-run.active span { color: #4338ca; }
+.nav-run small { display: block; padding-left: 14px; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#nav-agents .nav-run small { padding-left: 25px; }
+.nav-avatar { flex-shrink: 0; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: var(--radius); background: var(--violet-soft); color: var(--violet); font-size: 10px; font-style: normal; font-weight: 600; }
+/* Blue means there is something to know, grey means work in flight, pale grey
+   means finished and quiet. */
+.nav-dot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 9999px; background: #cbd5e1; }
+.nav-dot.review { background: var(--blue); }
+.nav-dot.running { background: #94a3b8; animation: blink 1.4s infinite; }
+/* A finished run flags nothing; the space is kept so rows stay aligned. */
+.nav-dot.completed { visibility: hidden; }
+.nav-more { display: block; width: 100%; text-align: left; padding: 6px 10px; border: 0; background: transparent; color: var(--blue); font-size: 13px; font-weight: 500; }
+.nav-more:hover { text-decoration: underline; }
+.header-search { width: 320px; }
+
+/* The chat is a centred thread. A header appears only when you opened a named agent. */
+.chat-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.chat-head { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: #fff; border-bottom: 1px solid var(--line); }
+.chat-head b { display: block; font-weight: 600; }
+.chat-head small { display: block; color: var(--muted); font-size: 12px; }
+.chat-head small[hidden] { display: none; }
+.chat-head #chat-clear { margin-left: auto; }
+.chat-avatar { width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-size: 14px; font-style: normal; font-weight: 600; }
+.chat-scroll { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; justify-content: center; padding: 28px; }
+.chat-scroll.has-thread { justify-content: flex-start; }
+.chat-welcome { text-align: center; color: var(--muted); }
+.chat-welcome span { display: inline-grid; place-items: center; width: 42px; height: 42px; margin-bottom: 14px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-size: 19px; }
+.chat-welcome span.agent { font-size: 16px; font-weight: 600; }
+.chat-welcome p { margin: 0; font-size: 19px; }
+.chat-welcome b { display: block; color: var(--ink); font-size: 19px; font-weight: 600; }
+.chat-starters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+.chat-starters button { border-radius: 9999px; border: 1px solid #cbd5e1; background: #fff; box-shadow: var(--ring); color: #334155; padding: 7px 13px; font-size: 13px; }
+.chat-starters button:hover { background: #f8fafc; }
+.agent-link { border: 0; background: transparent; padding: 0; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: #cbd5e1; }
+.agent-link:hover { color: var(--blue); text-decoration-color: currentColor; }
+.chat-thread { width: 100%; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.chat-thread:empty { display: none; }
+.chat-thread .msg { max-width: 82%; }
+.chat-thread .msg.user { margin-left: auto; }
+.chat-composer { flex-shrink: 0; width: 100%; max-width: 720px; margin: 0 auto; padding: 0 28px 20px; }
+
+.runs-page { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 24px 28px; overflow: auto; }
+.runs-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+.runs-heading h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.02em; }
+.runs-heading p { margin: 0; color: var(--muted); }
+.runs-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 220px)); gap: 12px; margin-bottom: 16px; }
+.runs-summary div { padding: 15px 18px; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
+.runs-summary strong { display: block; font-size: 22px; font-weight: 600; }
+.runs-summary span { color: var(--muted); font-size: 13px; }
+.runs-panel { overflow: hidden; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
+.runs-toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.runs-toolbar #runs-filter-clear { margin-left: auto; }
+.runs-toolbar h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.runs-toolbar span { color: var(--muted); font-size: 13px; }
+.runs-table { min-width: 980px; table-layout: auto; }
+.runs-table th, .runs-table td { padding: 13px 16px; }
+.runs-table th:nth-child(n) { width: auto; }
+.runs-table th:nth-child(1) { width: 230px; }
+.runs-table th:nth-child(5) { width: 180px; }
+.runs-table th:last-child { width: 72px; }
+.runs-table tbody tr.openable { cursor: pointer; }
+.runs-table tbody tr.openable:hover td { background: #f8fafc; }
+.run-name { display: block; color: var(--ink); font-weight: 600; }
+.run-name + small { display: block; margin-top: 4px; color: var(--muted); }
+.run-agent { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; background: var(--violet-soft); box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); color: #6d28d9; font-size: 11px; font-weight: 600; }
+.run-progress { width: 150px; }
+.run-progress span { display: block; margin-bottom: 5px; color: #475569; font-size: 12px; }
+.run-progress i { display: block; height: 5px; overflow: hidden; border-radius: 9999px; background: #e2e8f0; }
+.run-progress i::after { content: ""; display: block; width: var(--progress); height: 100%; border-radius: inherit; background: var(--blue); }
+.run-status { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 9999px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.run-status.review { color: #4338ca; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(99 102 241 / .2); }
+.run-status.running { color: #475569; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .18); }
+/* A finished run has nothing to flag, so it reads as plain text. */
+.run-status.completed { padding-left: 0; color: var(--muted); background: transparent; box-shadow: none; }
+.run-open { border: 0; background: transparent; color: var(--blue); font-weight: 600; }
+.run-muted { color: var(--muted); }
+
+/* The assistant is a full-height second column of the page, so the page chrome
+   (crumbs, title, tiles) lives inside the left column rather than above both. */
+main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 16px 28px 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.page-col { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.page-col > .crumbs, .page-col > .title-row, .page-col > .summary-strip { flex-shrink: 0; }
+.crumbs { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+.crumbs button { border: 0; background: transparent; padding: 0; color: var(--blue); font-size: inherit; }
+.crumbs button:hover { text-decoration: underline; }
+.crumbs span { padding: 0 7px; color: #cbd5e1; }
+.title-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+.title-row h1 { display: flex; align-items: center; gap: 10px; font-size: 24px; line-height: 1.2; margin: 0 0 4px; font-weight: 600; letter-spacing: -.02em; }
+.title-row h1 .run-status { font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.title-row p { color: var(--muted); margin: 0; }
+.title-actions { display: flex; align-items: flex-end; gap: 18px; }
+.finish-review { height: 36px; padding: 0 14px; border-radius: var(--radius); border: 1px solid transparent; background: var(--green); color: #fff; box-shadow: var(--ring); font-weight: 600; }
+.finish-review:hover:not(:disabled) { background: #047857; }
+.finish-review:disabled { color: #94a3b8; background: #e2e8f0; cursor: not-allowed; }
+.progress-card { width: 250px; }
+.progress-card > div:first-child { display: flex; align-items: baseline; gap: 5px; }
+.progress-card strong { font-size: 16px; font-weight: 600; }
+.progress-card span, .progress-card small { color: var(--muted); }
+.progress { height: 6px; background: #e2e8f0; border-radius: 9999px; margin: 7px 0; overflow: hidden; }
+.progress i { display: block; width: 0%; height: 100%; border-radius: 9999px; background: #10b981; transition: width .3s; }
+.progress-card small { font-size: 12px; }
+
+.summary-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); margin-bottom: 16px; overflow: hidden; }
+.summary-strip > div { padding: 14px 18px; border-right: 1px solid var(--soft-line); }
+.summary-strip > div:last-child { border-right: 0; }
+.summary-strip strong { display: block; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+.summary-strip span { display: block; margin: 2px 0; font-weight: 500; }
+.summary-strip small { color: var(--muted); font-size: 12px; }
+/* Confirmations are transient: a toast that fades itself out rather than a banner
+   the user has to clear. It carries the undo for as long as it is on screen. */
+.toast { position: fixed; z-index: 60; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; max-width: min(720px, calc(100vw - 48px)); padding: 11px 12px 11px 16px; border-radius: var(--radius-lg); background: #0f172a; color: #e2e8f0; box-shadow: 0 10px 25px -5px rgb(15 23 42 / .35), 0 8px 10px -6px rgb(15 23 42 / .3); animation: toast-in .18s ease-out; }
+.toast[hidden] { display: none; }
+.toast > span { display: grid; place-items: center; flex-shrink: 0; width: 20px; height: 20px; border-radius: 9999px; background: var(--green); color: #fff; font-size: 12px; }
+.toast em { font-style: normal; font-size: 13px; line-height: 1.45; }
+.toast button { flex-shrink: 0; border: 0; background: transparent; color: #e2e8f0; font-weight: 500; }
+.toast #notice-undo { border-radius: var(--radius); padding: 6px 11px; background: rgb(255 255 255 / .12); font-size: 13px; }
+.toast #notice-undo:hover { background: rgb(255 255 255 / .2); }
+.toast-close { width: 26px; height: 26px; border-radius: var(--radius); color: #94a3b8; font-size: 17px; line-height: 1; padding: 0; }
+.toast-close:hover { background: rgb(255 255 255 / .12); color: #fff; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Runs with no queue to work through — still analysing, or already closed — get a
+   state card instead of the review table. */
+.run-state { flex: 1; min-height: 0; display: grid; place-items: center; padding: 40px 20px; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
+.run-state-card { max-width: 520px; text-align: center; }
+.run-state-card b { display: block; font-size: 16px; font-weight: 600; }
+.run-state-card p { margin: 6px 0 0; color: var(--muted); line-height: 1.55; }
+
+.archive-bar { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); color: #334155; }
+.archive-bar strong { font-size: 14px; font-weight: 600; }
+.archive-bar span { color: var(--muted); font-size: 13px; }
+#archive-panel th:nth-child(1) { width: 200px; }
+#archive-panel th:nth-child(5), #archive-panel th:nth-child(6) { width: 120px; }
+#archive-panel th:nth-child(7) { width: 130px; }
+
+.review-panel { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); overflow: hidden; }
+.review-panel > .tabs, .review-panel > .toolbar, .review-panel > .filter-row, .review-panel > .ready-bar, .review-panel > .tab-note, .review-panel > .table-footer { flex-shrink: 0; }
+.tab-note { padding: 10px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); color: #475569; font-size: 13px; }
+.tabs { display: flex; align-items: stretch; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs button { display: flex; align-items: center; gap: 8px; white-space: nowrap; border: 0; background: transparent; color: var(--muted); padding: 14px 4px 12px; border-bottom: 2px solid transparent; font-weight: 500; }
+.tabs button:hover { color: #334155; }
+.tabs button.active { color: var(--blue); font-weight: 600; border-bottom-color: #6366f1; }
+.tabs button b { font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 9999px; }
+.tabs button.active b { color: #4338ca; background: var(--blue-soft); }
+.tabs .tab-ready { margin-left: auto; }
+.tabs .tab-ready b { color: #047857; background: var(--green-soft); }
+.tabs .tab-ready.active { color: #047857; border-bottom-color: #10b981; }
+.tabs .tab-dismissed b { color: #475569; background: #f1f5f9; }
+.tabs .tab-dismissed.active { color: #334155; border-bottom-color: #94a3b8; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search { width: 250px; height: 34px; display: flex; align-items: center; gap: 7px; border-radius: var(--radius); border: 1px solid #cbd5e1; box-shadow: var(--ring); padding: 0 11px; color: #94a3b8; background: #fff; }
+.search:focus-within { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+.search input { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
+.search input::placeholder { color: #94a3b8; }
+.tool { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: var(--radius); background: #fff; border: 1px solid #cbd5e1; box-shadow: var(--ring); color: #334155; font-weight: 500; }
+.tool:hover { background: #f8fafc; }
+.tool.on { background: var(--blue-soft); border-color: #c7d2fe; color: #4338ca; }
+.tool i { font-style: normal; color: #94a3b8; }
+.tool.on i { color: #4338ca; }
+.tool b { min-width: 18px; height: 18px; border-radius: 9999px; background: var(--blue); color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; }
+/* The dropdowns wear the same chrome as the buttons beside them; the native select
+   sits inside with its own styling stripped. */
+.tool-select { padding-right: 9px; }
+.tool-select select { appearance: none; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-weight: 500; padding: 0 16px 0 0; background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%), linear-gradient(135deg, #94a3b8 50%, transparent 50%); background-position: right 6px top 14px, right 1px top 14px; background-size: 5px 5px; background-repeat: no-repeat; }
+.tool-select:focus-within { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+.toolbar .spacer { flex: 1; }
+.sel-count { margin-left: auto; color: var(--muted); white-space: nowrap; }
+.sel-count b { color: var(--ink); font-weight: 600; }
+.act { height: 34px; padding: 0 13px; border-radius: var(--radius); background: #fff; border: 1px solid #cbd5e1; box-shadow: var(--ring); font-weight: 500; }
+.act:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.act-approve { color: #047857; border-color: #a7f3d0; }
+.act-approve:not(:disabled):hover { background: var(--green-soft); }
+.act-reject { color: #be123c; border-color: #fecdd3; }
+.act-reject:not(:disabled):hover { background: var(--red-soft); }
+.act-undo { color: #475569; }
+.act-undo:not(:disabled):hover { background: #f1f5f9; }
+
+.filter-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); }
+.filter-row label { display: flex; align-items: center; gap: 7px; color: #475569; font-size: 13px; font-weight: 500; }
+.filter-row select { height: 32px; min-width: 130px; border-radius: var(--radius); background: #fff; border: 1px solid #cbd5e1; box-shadow: var(--ring); color: #334155; padding: 0 9px; font-weight: 400; }
+.filter-row select:disabled { background: #f1f5f9; color: #94a3b8; }
+.filter-row .clear { margin-left: auto; background: transparent; border: 0; color: var(--blue); font-weight: 500; }
+.ready-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--green-soft); border-bottom: 1px solid #a7f3d0; color: #065f46; }
+.ready-bar strong { font-size: 14px; font-weight: 600; }
+.ready-bar span { color: #047857; }
+.ready-bar button { margin-left: auto; border-radius: var(--radius); background: var(--green); border: 1px solid transparent; box-shadow: var(--ring); color: #fff; padding: 8px 14px; font-weight: 500; }
+.ready-bar button:hover { background: #047857; }
+
+.table-wrap { flex: 1; min-height: 0; overflow: auto; }
+table { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
+th { position: sticky; top: 0; z-index: 1; height: 40px; padding: 0 12px; text-align: left; color: var(--muted); background: #f8fafc; border-bottom: 1px solid var(--line); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; white-space: nowrap; }
+th:nth-child(2) { width: 195px; }
+th:nth-child(3) { width: 108px; }
+th:nth-child(4), th:nth-child(5) { width: 130px; }
+th:nth-child(6) { width: 120px; }
+th:nth-child(7) { width: 100px; }
+th:nth-child(8) { width: 98px; }
+th.check, td.check { width: 42px; padding-left: 16px; }
+td { padding: 12px; border-bottom: 1px solid var(--soft-line); vertical-align: middle; color: #334155; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: #f8fafc; }
+tbody tr.selected { background: var(--blue-soft); }
+tbody tr.focused { box-shadow: inset 3px 0 0 var(--violet); background: var(--violet-soft); }
+tbody tr.selected.focused { background: #eef2ff; }
+tbody tr.is-refining { background: var(--violet-soft); color: #6b7280; }
+tbody tr.is-settled .new-value { color: var(--muted); font-weight: 400; }
+input[type="checkbox"] { accent-color: var(--blue); width: 16px; height: 16px; border-radius: 4px; }
+input[type="checkbox"]:disabled { cursor: not-allowed; }
+.product-name { display: block; color: var(--ink); font-weight: 600; }
+td small { display: block; color: #94a3b8; margin-top: 2px; font-size: 12px; }
+.attribute { font-weight: 500; }
+.old-value { color: #94a3b8; text-decoration: line-through; text-decoration-color: #cbd5e1; }
+.new-value { color: var(--ink); font-weight: 600; }
+.new-value.retracted { color: #94a3b8; font-weight: 400; font-style: italic; }
+.evidence { white-space: nowrap; color: #475569; font-size: 13px; }
+.evidence.conflict { color: #b45309; }
+.evidence.weak { color: #92400e; }
+.evidence.working { color: #6d28d9; }
+.score { display: inline-grid; place-items: center; min-width: 38px; height: 22px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+.score-high { color: #047857; background: var(--green-soft); box-shadow: inset 0 0 0 1px rgb(5 150 105 / .2); }
+.score-mid { color: #b45309; background: var(--amber-soft); box-shadow: inset 0 0 0 1px rgb(217 119 6 / .2); }
+.score-low { color: #be123c; background: var(--red-soft); box-shadow: inset 0 0 0 1px rgb(225 29 72 / .2); }
+.score-none { color: #64748b; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .2); }
+.score-human { padding: 0 9px; color: #4338ca; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(99 102 241 / .25); }
+.delta { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 600; }
+.delta.up { color: var(--green); }
+.delta.flat { color: #94a3b8; }
+.status { font-size: 12px; font-weight: 500; text-transform: capitalize; padding: 2px 9px; border-radius: 9999px; background: #f1f5f9; color: #475569; white-space: nowrap; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .15); }
+.status-approved { background: var(--green-soft); color: #047857; box-shadow: inset 0 0 0 1px rgb(5 150 105 / .2); }
+.status-rejected { background: var(--red-soft); color: #be123c; box-shadow: inset 0 0 0 1px rgb(225 29 72 / .2); }
+.status-refining { background: var(--violet-soft); color: #6d28d9; box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); }
+.status-withdrawn { background: #f1f5f9; color: #475569; }
+.status-written { background: var(--green); color: #fff; box-shadow: none; }
+.pulse { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; background: currentColor; margin-right: 5px; animation: pulse 1.1s infinite; }
+@keyframes pulse { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+.group-row { cursor: pointer; background: #f8fafc; }
+.group-row:hover { background: #f1f5f9; }
+.group-row td { padding: 8px 12px; border-bottom: 1px solid var(--line); border-top: 1px solid var(--line); }
+.group-row .check { padding-left: 16px; }
+.group-head { display: flex; align-items: center; gap: 8px; }
+.group-head .caret { display: grid; place-items: center; width: 22px; height: 22px; flex-shrink: 0; margin-left: -4px; border-radius: var(--radius); color: #475569; font-size: 17px; line-height: 1; }
+.group-row:hover .caret { background: #e2e8f0; color: var(--ink); }
+.group-head b { font-weight: 600; color: var(--ink); }
+.group-head span { color: var(--muted); font-size: 12px; }
+tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
+.empty-state b { color: var(--ink); font-size: 15px; }
+.table-footer { display: flex; align-items: center; min-height: 44px; padding: 10px 16px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); background: #f8fafc; }
+
+.assistant { min-height: 0; overflow: hidden; display: flex; flex-direction: column; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
+.assistant > header { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.assistant > header i { font-style: normal; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; background: var(--violet); color: #fff; font-size: 13px; }
+.assistant > header h2 { font-size: 14px; font-weight: 600; margin: 0; }
+.assistant > header small { display: block; color: var(--muted); font-size: 12px; }
+.assistant > header button { border: 0; background: transparent; color: #94a3b8; font-size: 18px; }
+.assistant > header > .head-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+#assistant-close { margin-left: auto; }
+#dock-expand { font-size: 14px; }
+/* The menu opens the panel's own navigation, so it leads the header. */
+.assistant-menu-trigger { position: relative; flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius); font-size: 15px !important; }
+.assistant-menu-trigger:hover { background: #f1f5f9; color: #475569; }
+/* Badges only say "something needs you", never how much. */
+.attention-badge { width: 8px; height: 8px; flex-shrink: 0; border-radius: 9999px; background: var(--blue); }
+.assistant-menu-trigger .attention-badge { position: absolute; top: 3px; right: 3px; box-shadow: 0 0 0 2px #fff; }
+.assistant-menu { position: absolute; z-index: 20; top: 48px; left: 12px; right: 12px; max-height: calc(100% - 70px); overflow: auto; padding: 7px; border-radius: var(--radius-lg); background: #fff; box-shadow: 0 12px 28px rgb(15 23 42 / .18), 0 0 0 1px rgb(15 23 42 / .08); }
+.assistant-menu-section + .assistant-menu-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.assistant-menu-section > b { display: block; padding: 4px 8px 6px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+.assistant-menu-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px; border: 0; border-radius: var(--radius); background: transparent; text-align: left; }
+.assistant-menu-item:hover { background: #f1f5f9; }
+.assistant-menu-item.active { background: var(--blue-soft); color: #4338ca; }
+.assistant-menu-item > i { flex-shrink: 0; font-style: normal; }
+.assistant-menu-item > span { flex: 1; min-width: 0; }
+.assistant-menu-item .menu-link { color: #94a3b8; font-size: 13px; }
+.assistant-menu-item strong { display: block; font-size: 13px; font-weight: 600; }
+.assistant-menu-item small { display: block; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+#dock-chat { position: relative; }
+
+.card { flex-shrink: 0; padding: 14px; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .06); }
+.card-kicker { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+.card-kicker span { color: #6d28d9; background: var(--violet-soft); border-radius: 9999px; padding: 2px 9px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.card h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+.card .card-meta { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.card-note { padding: 9px 11px; margin-bottom: 12px; border-radius: var(--radius); background: var(--violet-soft); box-shadow: inset 0 0 0 1px rgb(124 58 237 / .15); color: #5b21b6; line-height: 1.5; font-size: 13px; }
+.card-change { border-radius: var(--radius); box-shadow: 0 0 0 1px var(--line); margin-bottom: 12px; background: #fff; overflow: hidden; }
+.card-change label { display: block; background: #f8fafc; border-bottom: 1px solid var(--line); padding: 8px 11px; font-weight: 600; font-size: 13px; }
+.card-change > div { padding: 8px 11px; }
+.card-change > div + div { border-top: 1px solid var(--soft-line); }
+.card-change span { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.card-change p { margin: 2px 0 0; }
+.removed { color: #94a3b8; text-decoration: line-through; }
+.added { color: #047857; font-weight: 600; }
+.added.retracted { color: #94a3b8; font-weight: 400; font-style: italic; text-decoration: none; }
+.card-conf { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.card-conf > strong { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 9999px; font-size: 16px; font-weight: 600; color: #047857; background: var(--green-soft); box-shadow: inset 0 0 0 1px rgb(5 150 105 / .2); }
+.card-conf.mid > strong { color: #b45309; background: var(--amber-soft); box-shadow: inset 0 0 0 1px rgb(217 119 6 / .2); }
+.card-conf.low > strong { color: #be123c; background: var(--red-soft); box-shadow: inset 0 0 0 1px rgb(225 29 72 / .2); }
+.card-conf.human > strong { color: #4338ca; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(99 102 241 / .25); }
+.card-conf > strong { flex-shrink: 0; }
+.card-conf b { display: block; font-size: 13px; font-weight: 400; line-height: 1.45; }
+.card-conf span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.card h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; color: var(--muted); }
+.card section { margin-bottom: 14px; }
+.card section p { margin: 0; color: #475569; line-height: 1.55; font-size: 13px; }
+.src { display: flex; gap: 9px; padding: 7px 0; border-bottom: 1px solid var(--soft-line); font-size: 13px; }
+.src:last-child { border: 0; }
+.src i { font-style: normal; display: grid; place-items: center; width: 20px; height: 20px; flex-shrink: 0; border-radius: 9999px; background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 600; }
+.history { border-left: 2px solid #ddd6fe; padding-left: 12px; }
+.history div { padding-bottom: 10px; }
+.history div:last-child { padding: 0; }
+.history b { display: block; font-size: 13px; font-weight: 600; }
+.history span { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
+.history q { display: block; margin-top: 5px; color: #6d28d9; font-style: italic; font-size: 12px; }
+.card-actions { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.card-actions button { flex: 1; height: 34px; border-radius: var(--radius); background: #fff; border: 1px solid #cbd5e1; box-shadow: var(--ring); font-weight: 500; font-size: 13px; }
+.card-actions .approve { color: #fff; background: var(--green); border-color: transparent; }
+.card-actions .approve:hover { background: #047857; }
+.card-actions .reject { color: #be123c; border-color: #fecdd3; }
+.card-actions .reject:hover { background: var(--red-soft); }
+.card-actions .undo { color: #475569; }
+.card-actions .undo:hover { background: #f1f5f9; }
+.card-locked { display: flex; gap: 8px; padding: 9px 11px; margin-top: 12px; border-radius: var(--radius); background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .15); color: #475569; line-height: 1.5; font-size: 13px; }
+.sel-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.sel-stats div { padding: 9px 11px; border-radius: var(--radius); background: #f8fafc; box-shadow: inset 0 0 0 1px var(--line); }
+.sel-stats b { display: block; font-size: 17px; font-weight: 600; }
+.sel-stats span { color: var(--muted); font-size: 11px; }
+.sel-stats .high b { color: #047857; }
+.sel-stats .mid b { color: #b45309; }
+.sel-stats .low b { color: #be123c; }
+.sel-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.sel-flags span { padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: var(--amber-soft); color: #b45309; box-shadow: inset 0 0 0 1px rgb(217 119 6 / .2); }
+.sel-flags span.weak { background: #fff7ed; color: #9a3412; box-shadow: inset 0 0 0 1px rgb(234 88 12 / .2); }
+.sel-flags span.refined { background: var(--violet-soft); color: #6d28d9; box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); }
+.sel-list { max-height: 152px; overflow: auto; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--line); background: #fff; margin-bottom: 12px; }
+.sel-list div { display: flex; align-items: center; gap: 8px; padding: 7px 11px; border-bottom: 1px solid var(--soft-line); font-size: 13px; }
+.sel-list div:last-child { border: 0; }
+.sel-list div:hover { background: #f8fafc; }
+.sel-list b { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel-list em { font-style: normal; color: var(--muted); font-size: 11px; }
+
+.thread { flex: 1; min-height: 90px; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.thread.empty { justify-content: center; }
+.dock-welcome { text-align: center; color: var(--muted); }
+.dock-welcome span { display: inline-grid; place-items: center; width: 36px; height: 36px; margin-bottom: 12px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-size: 17px; }
+.dock-welcome span.agent { font-size: 14px; font-weight: 600; }
+.dock-welcome p { margin: 0; font-size: 15px; }
+.dock-welcome b { display: block; color: var(--ink); font-size: 15px; font-weight: 600; }
+.dock-welcome .chat-starters { margin-top: 14px; }
+.dock-welcome .chat-starters button { font-size: 12px; padding: 6px 11px; }
+.msg { padding: 11px 13px; line-height: 1.55; border-radius: var(--radius-lg); font-size: 13px; }
+.msg.agent { background: #f8fafc; box-shadow: inset 0 0 0 1px var(--line); }
+.msg.user { background: var(--blue); color: #fff; margin-left: 32px; }
+.msg p { margin: 0 0 8px; }
+.msg p:last-child { margin: 0; }
+.msg b.head { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 7px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 9999px; background: var(--violet-soft); box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); color: #6d28d9; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.msg.user .chip { background: rgb(255 255 255 / .16); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .3); color: #fff; }
+.msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.msg-actions button { border-radius: var(--radius); border: 1px solid #cbd5e1; background: #fff; box-shadow: var(--ring); color: #334155; padding: 6px 10px; font-size: 12px; font-weight: 500; }
+.msg-actions button:hover { background: #f8fafc; }
+.working { display: flex; align-items: center; gap: 8px; color: #6d28d9; font-weight: 500; }
+.dots span { display: inline-block; width: 5px; height: 5px; margin-right: 3px; border-radius: 9999px; background: var(--violet); animation: blink 1.2s infinite; }
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+.result-list { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.result-list li { padding: 8px 10px; border-radius: var(--radius); background: #fff; box-shadow: 0 0 0 1px var(--line); border-left: 3px solid #cbd5e1; cursor: pointer; }
+.result-list li:hover { box-shadow: 0 0 0 1px #c7d2fe; background: #f8fafc; }
+.result-list li.res-revised { border-left-color: var(--violet); }
+.result-list li.res-confirmed { border-left-color: var(--green); }
+.result-list li.res-withdrawn { border-left-color: #f43f5e; }
+.result-list li.res-directed { border-left-color: var(--blue); }
+.res-directed .res-tag { color: #4338ca; }
+.res-score i.human { color: #4338ca; background: var(--blue-soft); }
+.res-head { display: flex; align-items: baseline; gap: 6px; }
+.res-head b { flex-shrink: 1; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-head em { flex: 1; font-style: normal; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.res-tag { flex-shrink: 0; font-size: 11px; font-weight: 600; color: #475569; }
+.res-revised .res-tag { color: #6d28d9; }
+.res-confirmed .res-tag { color: #047857; }
+.res-withdrawn .res-tag { color: #be123c; }
+.res-values { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; font-size: 13px; }
+.res-values s { color: var(--muted); text-decoration-color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-values i { font-style: normal; color: #94a3b8; }
+.res-values b { font-weight: 600; color: var(--ink); }
+.res-score { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.res-score b { color: var(--ink); font-weight: 600; }
+.res-score i { font-style: normal; font-size: 11px; font-weight: 600; border-radius: 9999px; padding: 1px 6px; }
+.res-score i.up { color: #047857; background: var(--green-soft); }
+.res-score i.flat { color: #475569; background: #f1f5f9; }
+.composer { position: relative; flex-shrink: 0; border-top: 1px solid var(--line); padding: 10px 12px 8px; background: #fff; }
+.composer .suggestions { position: absolute; left: 12px; right: 12px; bottom: calc(100% - 6px); z-index: 5; display: flex; flex-direction: column; gap: 2px; padding: 5px; border-radius: var(--radius-lg); background: #fff; box-shadow: 0 10px 15px -3px rgb(15 23 42 / .12), 0 0 0 1px rgb(15 23 42 / .08); }
+.composer .suggestions button { text-align: left; border-radius: var(--radius); border: 0; background: transparent; color: #334155; padding: 7px 9px; font-size: 13px; font-weight: 500; }
+.composer .suggestions button:hover { background: var(--violet-soft); color: #6d28d9; }
+.composer-box { border-radius: var(--radius-lg); border: 1px solid #cbd5e1; box-shadow: var(--ring); background: #fff; padding: 8px 8px 6px; }
+.composer-box:focus-within { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+.composer-context { display: flex; align-items: center; gap: 6px; padding: 0 2px; }
+.composer textarea, .chat-composer textarea { display: block; width: 100%; height: 26px; max-height: 92px; resize: none; overflow-y: auto; border: 0; outline: 0; padding: 3px 3px 0; line-height: 1.45; background: transparent; }
+.composer textarea:disabled { background: transparent; color: #94a3b8; }
+.composer textarea::placeholder, .chat-composer textarea::placeholder { color: #94a3b8; }
+.composer-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.composer-row small { flex: 1; min-width: 0; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer-add { flex-shrink: 0; width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--radius); border: 0; background: transparent; color: var(--muted); font-size: 19px; line-height: 1; padding: 0; }
+.composer-add:disabled { color: #cbd5e1; cursor: not-allowed; }
+.composer-add:hover { background: #f1f5f9; color: #334155; }
+.composer-send { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius); background: var(--violet); border: 0; color: #fff; font-size: 15px; line-height: 1; padding: 0; }
+.composer-send:not(:disabled):hover { background: #6d28d9; }
+.composer-send:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+.ai-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+.ai-note span { background: #e2e8f0; color: #475569; border-radius: 3px; padding: 0 5px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+
+@media (max-width: 1520px) {
+  main { padding-inline: 18px; }
+  main { grid-template-columns: minmax(0, 1fr) 360px; }
+}
+
+/* Short viewports: give the table and assistant the vertical room instead of the page chrome. */
+@media (max-height: 860px) {
+  main { padding-top: 12px; }
+  .crumbs { margin-bottom: 9px; }
+  .title-row { margin-bottom: 11px; }
+  .title-row h1 { font-size: 21px; }
+  .summary-strip > div { padding: 9px 14px; }
+  .summary-strip strong { font-size: 17px; }
+}
+@media (max-height: 720px) {
+  .summary-strip { display: none; }
+  .title-row .progress-card { width: 210px; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <button class="icon-button back-button" type="button" id="back-button" aria-label="Back to the main application">←</button>
+  <b class="brand" id="app-brand">Focus View</b>
+  <label class="search header-search"><span>⌕</span><input placeholder="Search products, runs or agents" /></label>
+  <div class="header-spacer"></div>
+  <button class="assistant-toggle active" type="button" id="assistant-toggle"><i>✦</i> AI assistant<b id="assistant-badge" hidden></b></button>
+  <button class="icon-button" aria-label="Help">?</button>
+  <div class="avatar">AK</div>
+</header>
+
+<div class="app-body">
+<aside class="app-nav" id="app-nav" hidden>
+  <button class="nav-item" type="button" id="nav-chat"><i>▣</i> Chat</button>
+
+  <div class="nav-group">
+    <b>Agents</b>
+    <div id="nav-agents"></div>
+    <button class="nav-more" type="button">View all agents</button>
+  </div>
+
+  <div class="nav-group">
+    <b>Agent runs</b>
+    <div id="nav-runs"></div>
+    <button class="nav-more" type="button" id="nav-all-runs">View all agent runs</button>
+  </div>
+</aside>
+
+<div class="app-content">
+<div class="view-col">
+
+<section class="product-view" id="product-view">
+  <div class="product-toolbar">
+    <span class="product-crumbs">Products <em>/</em> <b id="toolbar-category">Outdoor</b></span>
+    <span class="product-state" id="toolbar-status">Active</span>
+    <div class="product-tools">
+      <button type="button">Preview</button>
+      <button type="button" aria-label="More actions">⋯</button>
+      <button class="product-save" type="submit" form="product-form">Save changes</button>
+    </div>
+  </div>
+  <div class="product-scroll">
+  <div class="product-shell">
+    <div class="product-heading">
+      <div class="product-image" id="product-image">AT</div>
+      <div>
+        <h1 id="product-title">Alpine Trekking Pole</h1>
+        <p id="product-meta">TR-4410 · Outdoor</p>
+      </div>
+    </div>
+    <form class="product-form" id="product-form">
+      <header>
+        <h2>Product details</h2>
+      </header>
+      <div class="product-fields">
+        <div class="product-field full"><label for="product-name">Product name</label><input id="product-name"></div>
+        <div class="product-field"><label for="product-sku">SKU</label><input id="product-sku" disabled></div>
+        <div class="product-field"><label for="product-status">Status</label><select id="product-status"><option>Active</option><option>Draft</option><option>Archived</option></select></div>
+        <div class="product-field"><label for="product-category">Category</label><input id="product-category"></div>
+        <div class="product-field"><label for="product-brand">Brand</label><input id="product-brand"></div>
+        <div class="product-field"><label for="product-attribute">Material</label><input id="product-attribute"></div>
+        <div class="product-field full"><label for="product-description">Description</label><textarea id="product-description"></textarea></div>
+      </div>
+    </form>
+  </div>
+  </div>
+</section>
+
+<section class="chat-view" id="chat-view" hidden>
+  <header class="chat-head">
+    <i class="chat-avatar" id="chat-avatar">✦</i>
+    <div>
+      <b id="chat-title">AI assistant</b>
+      <small id="chat-subtitle" hidden></small>
+    </div>
+    <button class="ghost" type="button" id="chat-clear" hidden>Clear conversation</button>
+  </header>
+  <div class="chat-scroll" id="chat-scroll">
+    <div class="chat-welcome" id="chat-welcome">
+      <span id="welcome-avatar">✦</span>
+      <p id="welcome-line">Good morning Alex,</p>
+      <b id="welcome-ask">How can I help?</b>
+      <div class="chat-starters" id="chat-starters"></div>
+    </div>
+    <div class="chat-thread" id="chat-thread"></div>
+  </div>
+  <div class="chat-composer">
+    <div class="composer-box">
+      <textarea id="chat-input" rows="1" placeholder="Ask me anything about your catalog and agent runs…"></textarea>
+      <div class="composer-row">
+        <button class="composer-add" type="button" aria-label="Attach">+</button>
+        <small id="chat-hint">Answers reference your agent runs</small>
+        <button class="composer-send" type="button" id="chat-send" aria-label="Send" disabled>↑</button>
+      </div>
+    </div>
+    <p class="ai-note"><span>AI</span> Uses AI. Verify results.</p>
+  </div>
+</section>
+
+<section class="runs-page" id="runs-view" hidden>
+  <div class="runs-heading">
+    <div>
+      <h1>Agent runs</h1>
+      <p>Review proposed changes and finalize completed runs.</p>
+    </div>
+  </div>
+  <div class="runs-summary">
+    <div><strong id="runs-review-count">0</strong><span>Need review</span></div>
+    <div><strong id="runs-progress-count">0</strong><span>In progress</span></div>
+    <div><strong id="runs-completed-count">0</strong><span>Review complete</span></div>
+  </div>
+  <section class="runs-panel">
+    <div class="runs-toolbar">
+      <h2>All runs</h2>
+      <span id="runs-total"></span>
+    </div>
+    <table class="runs-table">
+      <thead>
+        <tr><th>Run</th><th>Scope</th><th>Proposed changes</th><th>Attention</th><th>Review progress</th><th>Owner</th><th>Started</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody id="run-rows"></tbody>
+    </table>
+  </section>
+</section>
+
+<main id="page">
+ <div class="page-col">
+  <div class="crumbs"><button type="button" id="runs-back">Agent runs</button> <span>/</span> <em id="crumb-run" style="font-style:normal"></em></div>
+
+  <section class="title-row">
+    <div>
+      <h1>
+        <span id="run-heading">#1842</span>
+        <span class="run-status review" id="run-status">Needs review</span>
+      </h1>
+      <p><button class="agent-link" type="button" id="run-agent-label"></button><span id="run-when"></span></p>
+    </div>
+    <div class="title-actions">
+      <div class="progress-card" id="progress-card">
+        <div><strong id="progress-pct">0%</strong><span id="progress-unit">reviewed</span></div>
+        <div class="progress"><i id="progress-bar"></i></div>
+        <small id="progress-label">0 of 12 decided</small>
+      </div>
+      <button class="finish-review" type="button" id="finish-review" disabled>Finish review</button>
+    </div>
+  </section>
+
+  <section class="summary-strip" id="summary-strip">
+    <div><strong id="summary-analysed">0</strong><span>Products analysed</span><small id="summary-untouched">0 left unchanged</small></div>
+    <div><strong id="summary-total">0</strong><span>Changes proposed</span><small id="summary-affected">across 0 products</small></div>
+    <div><strong id="summary-high">0</strong><span id="summary-high-label">High confidence</span><small id="summary-high-note">Score 90–100</small></div>
+    <div><strong id="summary-review">0</strong><span id="summary-review-label">Need review</span><small id="summary-review-note">Score below 90</small></div>
+  </section>
+
+    <section class="run-state" id="run-state" hidden>
+      <div class="run-state-card">
+        <b id="run-state-title"></b>
+        <p id="run-state-text"></p>
+      </div>
+    </section>
+
+    <section class="review-panel" id="archive-panel" hidden>
+      <div class="archive-bar">
+        <strong id="archive-summary"></strong>
+        <span id="archive-when"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th><th>Attribute</th><th>Current value</th><th>Final value</th>
+              <th>Evidence</th><th>Confidence</th><th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="archive-rows"></tbody>
+        </table>
+      </div>
+      <footer class="table-footer"><span id="archive-footer"></span></footer>
+    </section>
+
+    <section class="review-panel" id="review-panel">
+      <div class="tabs" id="tabs"></div>
+
+      <div class="toolbar">
+        <label class="search"><span>⌕</span><input id="search" placeholder="Search product, SKU or attribute" /></label>
+        <span class="tool tool-select" id="sort-tool">
+          <i>⇅</i>
+          <select id="sort" aria-label="Sort">
+            <option value="score-desc">Confidence ↓</option>
+            <option value="score-asc">Confidence ↑</option>
+            <option value="product">Product A–Z</option>
+            <option value="attribute">Attribute A–Z</option>
+          </select>
+        </span>
+        <span class="tool tool-select" id="group-tool">
+          <i>▦</i>
+          <select id="group-by" aria-label="Group by">
+            <option value="none">No grouping</option>
+            <option value="product">By product</option>
+            <option value="attribute">By attribute</option>
+            <option value="category">By category</option>
+            <option value="status">By status</option>
+            <option value="evidence">By evidence</option>
+            <option value="confidence">By confidence</option>
+          </select>
+        </span>
+        <button class="tool" type="button" id="filter-toggle"><i>⚟</i> Filter <b id="filter-badge" hidden></b></button>
+        <div class="spacer"></div>
+        <button class="act act-approve" type="button" id="act-approve" disabled>✓ Approve</button>
+        <button class="act act-reject" type="button" id="act-reject" disabled>× Reject</button>
+        <button class="act act-undo" type="button" id="act-undo" disabled>↩ Undo</button>
+      </div>
+
+      <div class="filter-row" id="filter-row" hidden>
+        <label>Confidence
+          <select id="score-filter"><option>Any</option><option>90–100</option><option>60–89</option><option>Below 60</option></select>
+        </label>
+        <label>Status
+          <select id="status-filter"><option>All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Refining</option><option>Withdrawn</option></select>
+        </label>
+        <label>Evidence
+          <select id="issue-filter"><option>Any</option><option>Conflicting</option><option>Weak</option><option>Clean</option></select>
+        </label>
+        <label>Refinement
+          <select id="refined-filter"><option>Any</option><option>Refined only</option><option>Never refined</option></select>
+        </label>
+        <button class="clear" type="button" id="clear-filters">Reset filters</button>
+      </div>
+
+      <div class="ready-bar" id="ready-bar" hidden>
+        <strong id="ready-count"></strong>
+        <span>Approved changes will be written when you approve the run. Decisions remain reversible until then.</span>
+      </div>
+
+      <div class="tab-note" id="tab-note" hidden></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="check"><input type="checkbox" id="select-all" aria-label="Select all visible" /></th>
+              <th>Product</th><th>Attribute</th><th>Current value</th><th>Proposed value</th>
+              <th>Evidence</th><th id="score-head">Confidence</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty-state" id="empty" hidden><b>No matching changes</b><span id="empty-hint">Try adjusting your filters.</span></div>
+      </div>
+
+      <footer class="table-footer">
+        <span id="footer-range"></span>
+        <span class="sel-count" id="sel-count">No rows selected</span>
+      </footer>
+    </section>
+ </div>
+
+</main>
+
+</div>
+
+<!-- One right-hand rail, shared by every view: the review assistant while you are
+     inside a run, the agent conversation everywhere else. -->
+<aside class="dock" id="dock" hidden>
+    <section class="assistant" id="assistant">
+      <header>
+        <i>✦</i>
+        <div><h2 id="assistant-name">Agent assistant</h2><small id="assistant-status">idle</small></div>
+        <button type="button" id="assistant-close" aria-label="Hide assistant">×</button>
+      </header>
+      <div class="thread" id="thread"></div>
+      <div class="composer">
+        <div class="suggestions" id="composer-suggest" hidden>
+          <button type="button" data-suggest="Use 8 mm instead.">Set the value myself</button>
+          <button type="button" data-suggest="Only use manufacturer or supplier sources. Ignore retailer listings.">Primary sources only</button>
+          <button type="button" data-suggest="Keep the existing value whenever two or more sources conflict.">Keep values on conflict</button>
+          <button type="button" data-suggest="Re-check the conflicting sources and prefer the most recent document.">Prefer newest source</button>
+        </div>
+        <div class="composer-box">
+          <div class="composer-context" id="composer-context"></div>
+          <textarea id="instruction" rows="1" placeholder="Ask anything…"></textarea>
+          <div class="composer-row">
+            <button class="composer-add" type="button" id="composer-add" aria-label="Instruction presets">+</button>
+            <small id="composer-hint">Nothing selected</small>
+            <button class="composer-send" type="button" id="composer-send" aria-label="Send for refinement" disabled>↑</button>
+          </div>
+        </div>
+        <p class="ai-note"><span>AI</span> Uses AI. Verify results.</p>
+      </div>
+    </section>
+
+    <section class="assistant" id="dock-chat">
+      <header>
+        <button class="assistant-menu-trigger" type="button" id="assistant-menu-trigger" aria-label="Choose an agent or run" aria-expanded="false">☰<b class="attention-badge" id="menu-badge" hidden></b></button>
+        <i id="dock-avatar">✦</i>
+        <div><h2 id="dock-title">AI assistant</h2><small id="dock-subtitle" hidden></small></div>
+        <div class="head-actions">
+          <button type="button" id="dock-expand" aria-label="Open full chat" title="Open full chat">⤢</button>
+          <button type="button" id="dock-close" aria-label="Hide chat">×</button>
+        </div>
+      </header>
+      <div class="assistant-menu" id="assistant-menu" hidden>
+        <div class="assistant-menu-section">
+          <b>Chat</b>
+          <div id="assistant-menu-chats"></div>
+        </div>
+        <div class="assistant-menu-section">
+          <b>Agents</b>
+          <div id="assistant-menu-agents"></div>
+        </div>
+        <div class="assistant-menu-section">
+          <b>Agent runs</b>
+          <div id="assistant-menu-runs"></div>
+        </div>
+      </div>
+      <div class="thread" id="dock-thread"></div>
+      <div class="composer">
+        <div class="suggestions" id="dock-suggest" hidden></div>
+        <div class="composer-box">
+          <textarea id="dock-input" rows="1" placeholder="Ask anything…"></textarea>
+          <div class="composer-row">
+            <button class="composer-add" type="button" id="dock-add" aria-label="Suggested questions">+</button>
+            <small id="dock-hint">Ask about your catalog or agent runs</small>
+            <button class="composer-send" type="button" id="dock-send" aria-label="Send" disabled>↑</button>
+          </div>
+        </div>
+        <p class="ai-note"><span>AI</span> Uses AI. Verify results.</p>
+      </div>
+    </section>
+</aside>
+
+</div>
+</div>
+
+<div class="toast" id="notice" role="status" hidden>
+  <span>✓</span>
+  <em id="notice-text"></em>
+  <button type="button" id="notice-undo" hidden>↩ Undo</button>
+  <button class="toast-close" type="button" id="notice-dismiss" aria-label="Dismiss">×</button>
+</div>
+
+<script>
+const CHANGES = [
+  { id: 1, sku: "TR-4410", product: "Alpine Trekking Pole", category: "Outdoor", attribute: "Material", current: "Aluminium", proposed: "7075 aluminium alloy", confidence: 97, evidence: 3, issue: null, sources: ["Supplier specification", "Product packaging", "Brand website"], rationale: "All three sources identify the same aluminium grade." },
+  { id: 2, sku: "KT-2028", product: "Precision Chef Knife", category: "Kitchen", attribute: "Blade length", current: "—", proposed: "20 cm", confidence: 94, evidence: 2, issue: null, sources: ["Supplier specification", "Product packaging"], rationale: "The measurement is stated consistently in both primary sources." },
+  { id: 3, sku: "LG-1182", product: "Harbor Pendant Light", category: "Lighting", attribute: "Bulb included", current: "No", proposed: "Yes", confidence: 91, evidence: 3, issue: "conflict", sources: ["Supplier feed: Yes", "Brand website: Yes", "Retail listing: No"], rationale: "Two sources support the proposal, but one retailer listing conflicts." },
+  { id: 4, sku: "FN-9031", product: "Lena Dining Chair", category: "Furniture", attribute: "Seat material", current: "Polyester", proposed: "Recycled polyester", confidence: 88, evidence: 2, issue: null, sources: ["Brand website", "Sustainability report"], rationale: "The brand page specifies recycled content; the report confirms the collection." },
+  { id: 5, sku: "EL-6624", product: "Arc USB-C Charger", category: "Electronics", attribute: "Power output", current: "45 W", proposed: "65 W", confidence: 82, evidence: 3, issue: "conflict", refinedValue: "65 W (USB-PD 3.0)", sources: ["Technical sheet: 65 W", "Packaging: 65 W", "Distributor feed: 45 W"], rationale: "Recent primary sources say 65 W, while the distributor feed appears outdated." },
+  { id: 6, sku: "BT-1099", product: "Calm Body Wash", category: "Beauty", attribute: "Volume", current: "500 ml", proposed: "450 ml", confidence: 76, evidence: 1, issue: "weak", sources: ["Retail listing"], rationale: "Only one third-party listing contains the proposed volume." },
+  { id: 7, sku: "TR-8842", product: "Summit Daypack", category: "Outdoor", attribute: "Water resistance", current: "Waterproof", proposed: "Water-resistant", confidence: 71, evidence: 2, issue: "conflict", refinedValue: "Water-resistant (IPX4)", sources: ["Brand website: Water-resistant", "Legacy catalog: Waterproof"], rationale: "The current brand terminology conflicts with the legacy catalog." },
+  { id: 8, sku: "HM-3301", product: "Cloud Cotton Sheet", category: "Home", attribute: "Thread count", current: "400", proposed: "300", confidence: 64, evidence: 1, issue: "weak", refinedValue: "300 (single-ply)", sources: ["Marketplace listing"], rationale: "The proposal relies on one marketplace listing and needs confirmation." },
+  { id: 9, sku: "PT-7750", product: "Grain-Free Adult Kibble", category: "Pet", attribute: "Protein", current: "28%", proposed: "30%", confidence: 58, evidence: 2, issue: "conflict", refinedValue: "30% (dry matter)", sources: ["Packaging image: 30%", "Supplier feed: 28%"], rationale: "The packaging image may be newer, but the sources disagree." },
+  { id: 10, sku: "SP-4107", product: "Core Yoga Mat", category: "Sport", attribute: "Thickness", current: "6 mm", proposed: "8 mm", confidence: 52, evidence: 1, issue: "weak", sources: ["Retail listing"], rationale: "A single retail listing supports the change; no primary source was found." },
+  { id: 11, sku: "CH-5520", product: "Junior Cycle Helmet", category: "Sport", attribute: "Certification", current: "EN 1078", proposed: "EN 1078 + CPSC", confidence: 43, evidence: 1, issue: "weak", refinedValue: "EN 1078", sources: ["Distributor notes"], rationale: "The added certification appears only in unstructured distributor notes." },
+  { id: 12, sku: "GD-3012", product: "Cedar Planter Box", category: "Garden", attribute: "Wood species", current: "Cedar", proposed: "Western red cedar", confidence: 34, evidence: 1, issue: "weak", refinedValue: "Western red cedar (Thuja plicata)", sources: ["Generated description"], rationale: "The proposal was inferred from copy rather than a verified specification." }
+];
+
+/* The record you are working on when the assistant reaches you. */
+const PRODUCT = {
+  sku: CHANGES[0].sku,
+  name: CHANGES[0].product,
+  category: CHANGES[0].category,
+  status: "Active",
+  brand: "Northline",
+  attributeLabel: CHANGES[0].attribute,
+  attribute: CHANGES[0].current,
+  description: "Lightweight adjustable trekking pole built for long-distance trails and mixed terrain."
+};
+
+/* Other runs are summary-only in this focused prototype. The active run uses the
+   live review state below; historical and running rows provide navigation context. */
+const RUNS = [
+  { id: 1842, name: "Attribute enrichment", agent: "Content Optimizer", products: 45, changes: 12, attention: "4 conflicts · 5 weak", owner: "Alex Kim", started: "Today, 09:42", ago: "20 minutes ago", status: "review" },
+  { id: 1843, name: "Category normalization", agent: "Taxonomy Mapper", products: 2480, changes: null, attention: "—", owner: "Maya Chen", started: "Today, 10:18", ago: "2 hours ago", status: "running", progress: 64 },
+  { id: 1841, name: "Dimensions cleanup", agent: "Data Quality", products: 860, changes: 10, written: 8, attention: "10 reviewed", owner: "Alex Kim", started: "Yesterday, 15:06", completed: "Yesterday, 17:40", ago: "Yesterday", status: "completed", progress: 100 }
+];
+
+/* Agents are counterparts you talk to directly. A run is something an agent
+   produced; the two are navigated separately. */
+const AGENTS = [
+  {
+    id: "content", name: "Content Optimizer", note: "Attributes and descriptions",
+    ask: "What should I work on?",
+    hint: "Can enrich attributes, rewrite descriptions and start a run",
+    starters: ["What did you change in your last run?", "Enrich the fabric attribute across outerwear", "Why is the evidence weak on some products?"]
+  },
+  {
+    id: "taxonomy", name: "Taxonomy Mapper", note: "Categories and hierarchy",
+    ask: "Where should this sit?",
+    hint: "Can remap categories and flag misplaced products",
+    starters: ["How is the category remap going?", "Which products sit in the wrong category?", "Map new arrivals to the winter tree"]
+  },
+  {
+    id: "quality", name: "Data Quality", note: "Dimensions and formats",
+    ask: "What looks wrong?",
+    hint: "Can normalise units, formats and missing values",
+    starters: ["What did the dimensions cleanup fix?", "Find products with missing weights", "Normalise all sizes to centimetres"]
+  },
+  {
+    id: "media", name: "Media Tagger", note: "Images and alt text",
+    ask: "What needs tagging?",
+    hint: "Can tag imagery and write alt text",
+    starters: ["How many products have no alt text?", "Tag the spring lookbook images"]
+  }
+];
+const agentById = (id) => AGENTS.find((agent) => agent.id === id) || null;
+const agentByName = (name) => AGENTS.find((agent) => agent.name === name) || null;
+
+/* A finished run keeps its decided rows so it can still be read back. */
+const ARCHIVE = {
+  1841: [
+    { sku: "FN-2210", product: "Oak Coffee Table", attribute: "Width", current: "120 cm", final: "118 cm", evidence: "● 3 sources", score: 94, outcome: "written" },
+    { sku: "FN-3380", product: "Steel Shelf Unit", attribute: "Height", current: "180cm", final: "180 cm", evidence: "● 2 sources", score: 97, outcome: "written" },
+    { sku: "BG-1145", product: "Canvas Tote Bag", attribute: "Depth", current: "—", final: "12 cm", evidence: "● 2 sources", score: 88, outcome: "written" },
+    { sku: "HM-7702", product: "Ceramic Vase", attribute: "Height", current: "30 cm", final: "30 cm", evidence: "⚠ Conflicting", score: 51, outcome: "rejected" },
+    { sku: "LG-6031", product: "Studio Desk Lamp", attribute: "Base diameter", current: "—", final: "16 cm", evidence: "● 3 sources", score: 91, outcome: "written" },
+    { sku: "HM-4408", product: "Wool Area Rug", attribute: "Length", current: "200 cm", final: "200 cm", evidence: "○ Weak", score: 47, outcome: "rejected" },
+    { sku: "FN-5590", product: "Walnut Bar Stool", attribute: "Seat height", current: "65 cm", final: "66 cm", evidence: "● 2 sources", score: 85, outcome: "written" },
+    { sku: "HM-2267", product: "Gallery Picture Frame", attribute: "Depth", current: "2 cm", final: "1.8 cm", evidence: "● 2 sources", score: 90, outcome: "written" },
+    { sku: "ST-8814", product: "Stackable Storage Bin", attribute: "Volume", current: "40 L", final: "42 L", evidence: "● 2 sources", score: 87, outcome: "written" },
+    { sku: "TX-3325", product: "Cotton Bath Towel", attribute: "Length", current: "130 cm", final: "140 cm", evidence: "● 3 sources", score: 93, outcome: "written" }
+  ]
+};
+
+/* The run being reviewed. Its agent is named wherever the run speaks for itself. */
+const ACTIVE_RUN = RUNS.find((run) => run.id === 1842);
+
+const OUTCOMES = {
+  confirmed: { label: "Confirmed", note: "The agent found more support for the same value." },
+  revised: { label: "Revised", note: "The agent proposed a more precise value." },
+  directed: { label: "Set by you", note: "You supplied this value, so it no longer rests on the agent's evidence." },
+  withdrawn: { label: "Withdrawn", note: "The agent retracted the proposal and kept the current value." },
+  unchanged: { label: "No improvement", note: "The agent could not find better evidence. This one needs a human." }
+};
+
+/* Every change lands in exactly one bucket, so the tab counts always add up to the
+   run total. "All changes" is the only overlapping view. */
+const TABS = [
+  { id: "all", label: "All changes", count: () => CHANGES.length },
+  { id: "good", label: "Good to go", count: () => tabCount("good") },
+  { id: "conflict", label: "Conflicting sources", count: () => tabCount("conflict") },
+  { id: "weak", label: "Weak evidence", count: () => tabCount("weak") },
+  { id: "approved", label: "Approved", cls: "tab-ready", count: () => tabCount("approved") },
+  { id: "dismissed", label: "Dismissed", cls: "tab-dismissed", count: () => tabCount("dismissed") }
+];
+
+const TAB_NOTES = {
+  conflict: "Sources disagree on the proposed value. Refining with a source preference often resolves them.",
+  weak: "The proposal rests on a single or low-quality source.",
+  dismissed: "Rejected by you, or retracted by the agent after refinement."
+};
+
+const EMPTY_HINTS = {
+  good: "Nothing is problem-free right now. Refining weak or conflicting changes can promote them here.",
+  conflict: "No unresolved source conflicts left.",
+  weak: "No unresolved thin-evidence changes left.",
+  approved: "Approve some changes and they will queue up here.",
+  dismissed: "Nothing has been rejected or retracted yet."
+};
+
+const REFINE_DELAY = 4200;
+
+const state = {
+  view: "product",
+  openRunId: 1842,
+  chatWith: "general",
+  dockChatWith: "general",
+  chats: {},
+  assistantMenuOpen: false,
+  runCompleted: false,
+  tab: "all",
+  query: "",
+  sort: "score-desc",
+  groupBy: "none",
+  collapsedGroups: new Set(),
+  score: "Any",
+  status: "All statuses",
+  issue: "Any",
+  refined: "Any",
+  filterOpen: false,
+  selected: new Set(),
+  focused: null,
+  panelMode: null,
+  decisions: {},
+  history: {},
+  written: new Set(),
+  undoable: null,
+  toastTimer: null,
+  revisions: {},
+  batches: [],
+  thread: [{ role: "agent", kind: "intro" }],
+  /* The product comes first; the assistant is opened deliberately. */
+  assistantOpen: false
+};
+
+const $ = (id) => document.getElementById(id);
+const decisionOf = (id) => state.decisions[id] || "pending";
+const changeById = (id) => CHANGES.find((item) => item.id === id);
+const proposedOf = (change) => (state.revisions[change.id] ? state.revisions[change.id].value : change.proposed);
+const confidenceOf = (change) => (state.revisions[change.id] ? state.revisions[change.id].score : change.confidence);
+/* Rows mid-refinement, already live, or in a finished review are locked. */
+const actionable = (ids) => ids.filter((id) => !state.runCompleted && decisionOf(id) !== "refining" && !isWritten(id));
+
+/* A decision stands until the change is written back to the catalog; after that the
+   data is live and only a new run can change it. Everything before that is reversible. */
+function isWritten(id) { return state.written.has(id); }
+const canApprove = (id) => !state.runCompleted && !isWritten(id) && ["pending", "rejected"].includes(decisionOf(id));
+const canReject = (id) => !state.runCompleted && !isWritten(id) && ["pending", "approved"].includes(decisionOf(id));
+const canUndo = (id) => !state.runCompleted && !isWritten(id) && ["approved", "rejected"].includes(decisionOf(id));
+const canRefine = (id) => !state.runCompleted && !isWritten(id) && decisionOf(id) !== "refining";
+const countWhere = (ids, test) => ids.filter(test).length;
+const uniqueProductCount = () => new Set(CHANGES.map((change) => change.sku)).size;
+/* The run looked at more products than it changed; the rest came back clean and
+   never reach this screen. Everything else on the page is derived, so this is the
+   one figure the run itself has to report. */
+const PRODUCTS_ANALYSED = 45;
+const untouchedProductCount = () => PRODUCTS_ANALYSED - uniqueProductCount();
+
+function band(score) {
+  if (score >= 90) return { key: "high", label: "High confidence" };
+  if (score >= 60) return { key: "mid", label: "Needs review" };
+  return { key: "low", label: "Low confidence" };
+}
+
+/* ---------- filtering ---------- */
+
+/* A pass that confirmed or sharpened the value — or a value you supplied yourself —
+   counts as having settled the original evidence problem. */
+const resolvedByAgent = (change) => {
+  const revision = state.revisions[change.id];
+  return Boolean(revision && ["confirmed", "revised", "directed"].includes(revision.outcome));
+};
+
+/* Human-set values are marked wherever the confidence score is shown. */
+const isHumanSet = (change) => Boolean(state.revisions[change.id] && state.revisions[change.id].human);
+
+/* Evidence quality is a property of the change, not of your decision, so a change
+   only moves between these three buckets when refinement settles its problem.
+   Approving or rejecting leaves it where it is and flips its status instead. */
+function evidenceBucket(change) {
+  if (change.issue === "conflict" && !resolvedByAgent(change)) return "conflict";
+  if (change.issue === "weak" && !resolvedByAgent(change)) return "weak";
+  return "good";
+}
+
+/* Approved and Dismissed are decision queues that cut across the evidence buckets. */
+function inTab(change, tabId) {
+  if (tabId === "all") return true;
+  if (tabId === "approved") return decisionOf(change.id) === "approved";
+  if (tabId === "dismissed") return ["rejected", "withdrawn"].includes(decisionOf(change.id));
+  return evidenceBucket(change) === tabId;
+}
+
+const tabCount = (tabId) => CHANGES.filter((change) => inTab(change, tabId)).length;
+
+function matchesTab(change) {
+  return inTab(change, state.tab);
+}
+
+function matchesScore(change) {
+  const score = confidenceOf(change);
+  if (state.score === "90–100") return score >= 90;
+  if (state.score === "60–89") return score >= 60 && score < 90;
+  if (state.score === "Below 60") return score < 60;
+  return true;
+}
+
+function matchesIssue(change) {
+  if (state.issue === "Conflicting") return change.issue === "conflict";
+  if (state.issue === "Weak") return change.issue === "weak";
+  if (state.issue === "Clean") return !change.issue;
+  return true;
+}
+
+function matchesRefined(change) {
+  const refined = Boolean(state.revisions[change.id]);
+  if (state.refined === "Refined only") return refined;
+  if (state.refined === "Never refined") return !refined;
+  return true;
+}
+
+function activeFilterCount() {
+  let count = 0;
+  if (state.score !== "Any") count += 1;
+  if (state.status !== "All statuses") count += 1;
+  if (state.issue !== "Any") count += 1;
+  if (state.refined !== "Any") count += 1;
+  return count;
+}
+
+function sortRows(rows) {
+  const sorted = rows.slice();
+  if (state.sort === "score-desc") sorted.sort((a, b) => confidenceOf(b) - confidenceOf(a));
+  if (state.sort === "score-asc") sorted.sort((a, b) => confidenceOf(a) - confidenceOf(b));
+  if (state.sort === "product") sorted.sort((a, b) => a.product.localeCompare(b.product));
+  if (state.sort === "attribute") sorted.sort((a, b) => a.attribute.localeCompare(b.attribute));
+  return sorted;
+}
+
+function visibleChanges() {
+  const query = state.query.trim().toLowerCase();
+  const rows = CHANGES.filter((change) => {
+    const haystack = (change.sku + " " + change.product + " " + change.attribute).toLowerCase();
+    /* The decision tabs already pin the status; everywhere else the filter applies. */
+    const statusPinned = state.tab === "approved" || state.tab === "dismissed";
+    const statusOk = statusPinned || state.status === "All statuses" || decisionOf(change.id) === state.status.toLowerCase();
+    return haystack.includes(query) && matchesTab(change) && matchesScore(change) && matchesIssue(change) && matchesRefined(change) && statusOk;
+  });
+  return sortRows(rows);
+}
+
+/* The toast carries the undo for the action that just happened, because approving
+   clears the selection and the toolbar Undo would have nothing to work with.
+   It stays longer when there is something to undo, so the offer is not missed. */
+const TOAST_MS = 5000;
+const TOAST_UNDO_MS = 9000;
+
+function notify(message, undoIds) {
+  const toast = $("notice");
+  state.undoable = undoIds && undoIds.length ? undoIds.slice() : null;
+  $("notice-text").textContent = message;
+  $("notice-undo").hidden = !state.undoable;
+  toast.hidden = false;
+  /* Restart the entrance animation so back-to-back actions still register visually. */
+  toast.style.animation = "none";
+  void toast.offsetWidth;
+  toast.style.animation = "";
+  clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(dismissToast, state.undoable ? TOAST_UNDO_MS : TOAST_MS);
+}
+
+function dismissToast() {
+  clearTimeout(state.toastTimer);
+  $("notice").hidden = true;
+  state.undoable = null;
+}
+
+/* After deciding one change, land on the next still-pending row in the current
+   table order so review can proceed without picking the next one by hand.
+   Bulk of several rows is left alone — that is a batch, not a queue. */
+function nextPendingAfter(fromId) {
+  const rows = visibleChanges();
+  const start = rows.findIndex((change) => change.id === fromId);
+  if (!rows.length) return null;
+  for (let step = 1; step <= rows.length; step += 1) {
+    const change = rows[(Math.max(start, 0) + step) % rows.length];
+    if (decisionOf(change.id) === "pending") return change.id;
+  }
+  return null;
+}
+
+function applyDecision(decision, ids) {
+  const targets = ids.filter(decision === "approved" ? canApprove : canReject);
+  if (!targets.length) return;
+  const queue = targets.length === 1 || (state.panelMode === "single" && targets.includes(state.focused));
+  const fromId = targets.length === 1 ? targets[0] : state.focused;
+  targets.forEach((id) => { state.decisions[id] = decision; });
+  const skipped = ids.length - targets.length;
+  notify(targets.length.toLocaleString() + " " + (targets.length === 1 ? "change" : "changes") + " " +
+    (decision === "approved" ? "approved" : "rejected") + "." +
+    (skipped ? " " + skipped + " already " + decision + " or written back — left untouched." : ""), targets);
+  targets.forEach((id) => state.selected.delete(id));
+  if (queue) {
+    const next = nextPendingAfter(fromId);
+    state.focused = next;
+    state.panelMode = next ? "single" : null;
+  } else if (state.panelMode === "bulk" && state.selected.size === 0) {
+    state.panelMode = state.focused ? "single" : null;
+  }
+  render();
+}
+
+/* Undo puts the change back in the queue rather than recording a third state, so the
+   row simply returns to pending and can be decided again. */
+function undoDecision(ids) {
+  const targets = ids.filter(canUndo);
+  if (!targets.length) return;
+  targets.forEach((id) => { delete state.decisions[id]; });
+  notify(targets.length.toLocaleString() + " " + (targets.length === 1 ? "decision" : "decisions") + " undone. " +
+    (targets.length === 1 ? "The change is" : "They are") + " pending again.");
+  render();
+}
+
+function finishReview() {
+  const undecided = CHANGES.filter((change) => !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id)));
+  if (undecided.length || state.runCompleted) return;
+  const approved = CHANGES.filter((change) => decisionOf(change.id) === "approved").map((change) => change.id);
+  approved.forEach((id) => state.written.add(id));
+  state.runCompleted = true;
+  ACTIVE_RUN.completed = "Just now";
+  ACTIVE_RUN.written = approved.length;
+  /* The run stays open, now read-only, so you can see what you just committed. */
+  state.selected.clear();
+  state.focused = null;
+  state.panelMode = null;
+  render();
+  notify("Review finished. " + approved.length + " " +
+    (approved.length === 1 ? "change was" : "changes were") + " written to the catalog.");
+}
+
+/* ---------- refinement ---------- */
+
+/* Refinement is a conversation, not a toolbar action: whatever the panel is showing
+   is what the composer sends — the ticked rows, or the change you are inspecting. */
+function refineTargets() {
+  if (state.selected.size) return actionable([...state.selected]);
+  if (state.focused && canRefine(state.focused)) return [state.focused];
+  return [];
+}
+
+/* The composer is a prompt, not just a search hint: an instruction that names the
+   value outright ("use 8 mm instead") settles the change rather than re-running it.
+   Sourcing rules such as "use supplier sources" are steering, not a value. */
+function dictatedValue(instruction) {
+  const text = instruction.trim().replace(/\s+/g, " ");
+  const match = text.match(/\b(?:use|set(?:\s+it)?(?:\s+to)?|change(?:\s+it)?\s+to|make\s+it|should\s+be|replace\s+with)\s+(.+)$/i);
+  if (!match) return null;
+  const value = match[1]
+    .replace(/\s+instead\b.*$/i, "")
+    .replace(/[.;,]+$/, "")
+    .replace(/^["“'‘]+|["”'’]+$/g, "")
+    .trim();
+  if (!value) return null;
+  if (/\b(sources?|listings?|documents?|data|records?|feeds?)\b/i.test(value)) return null;
+  if (value.split(" ").length > 8) return null;
+  return value;
+}
+
+function outcomeFor(change, instruction) {
+  const text = instruction.toLowerCase();
+  const wantsPrimary = /primary|manufacturer|supplier|official/.test(text);
+  const keepExisting = /keep|existing/.test(text);
+  if (dictatedValue(instruction)) return "directed";
+  if (keepExisting && change.issue === "conflict") return "withdrawn";
+  if (wantsPrimary && change.issue === "weak" && change.evidence < 2) return "withdrawn";
+  if (change.refinedValue) return "revised";
+  if (change.issue === "weak") return "unchanged";
+  return "confirmed";
+}
+
+function scoreAfter(change, outcome) {
+  const base = change.confidence;
+  if (outcome === "confirmed") return Math.min(99, base + 8 + (change.id % 4));
+  if (outcome === "revised") return Math.min(97, Math.max(base, 68) + 7 + (change.id % 3));
+  return base;
+}
+
+function sendRefinement(instruction, ids) {
+  const batch = { id: state.batches.length + 1, instruction: instruction, ids: ids.slice(), status: "running", summary: null };
+  state.batches.push(batch);
+  ids.forEach((id) => { state.decisions[id] = "refining"; });
+  state.thread.push({ role: "user", kind: "instruction", text: instruction, count: ids.length });
+  state.thread.push({ role: "agent", kind: "batch", batchId: batch.id });
+  state.selected.clear();
+  state.panelMode = null;
+  $("instruction").value = "";
+  autoGrow();
+  render();
+  setTimeout(() => resolveBatch(batch), REFINE_DELAY);
+}
+
+function resolveBatch(batch) {
+  const summary = { confirmed: 0, revised: 0, withdrawn: 0, unchanged: 0 };
+  /* Each pass keeps its own before/after snapshot so an older reply in the thread
+     still shows what that pass did, even after the row is refined again. */
+  batch.results = [];
+  batch.ids.forEach((id) => {
+    const change = changeById(id);
+    if (!change) return;
+    const outcome = outcomeFor(change, batch.instruction);
+    const previous = state.revisions[id];
+    summary[outcome] += 1;
+    const dictated = outcome === "directed" ? dictatedValue(batch.instruction) : null;
+    state.revisions[id] = {
+      pass: (previous ? previous.pass : 1) + 1,
+      outcome: outcome,
+      batchId: batch.id,
+      instruction: batch.instruction,
+      human: outcome === "directed",
+      previousValue: previous ? previous.value : change.proposed,
+      previousScore: previous ? previous.score : change.confidence,
+      value: dictated || (outcome === "revised" ? change.refinedValue : outcome === "withdrawn" ? change.current : (previous ? previous.value : change.proposed)),
+      /* A value you supplied is not something the agent can be uncertain about. */
+      score: outcome === "directed" ? 100 : scoreAfter(change, outcome)
+    };
+    const revision = state.revisions[id];
+    /* The card is the only place iterations are shown, so the full chain lives here. */
+    if (!state.history[id]) state.history[id] = [];
+    state.history[id].push({
+      outcome: outcome,
+      instruction: batch.instruction,
+      value: outcome === "withdrawn" ? change.current : revision.value,
+      score: revision.score
+    });
+    batch.results.push({
+      id: id,
+      outcome: outcome,
+      from: revision.previousValue,
+      to: outcome === "withdrawn" ? change.current : revision.value,
+      fromScore: revision.previousScore,
+      toScore: revision.score
+    });
+    state.decisions[id] = outcome === "withdrawn" ? "withdrawn" : "pending";
+  });
+  batch.status = "done";
+  batch.summary = summary;
+  render();
+}
+
+/* ---------- table ---------- */
+
+function renderTabs() {
+  const host = $("tabs");
+  host.textContent = "";
+  TABS.forEach((tab) => {
+    const total = tab.count();
+    if (tab.hideWhenEmpty && total === 0) return;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = (tab.cls ? tab.cls + " " : "") + (state.tab === tab.id ? "active" : "");
+    const label = document.createElement("span");
+    label.textContent = tab.label;
+    const count = document.createElement("b");
+    count.textContent = total.toLocaleString();
+    button.append(label, count);
+    button.addEventListener("click", () => {
+      state.tab = tab.id;
+      state.selected.clear();
+      state.panelMode = state.focused ? "single" : null;
+      render();
+    });
+    host.append(button);
+  });
+}
+
+function focusRow(id) {
+  state.focused = id;
+  state.panelMode = "single";
+  render();
+}
+
+function toggleRow(id, checked) {
+  if (checked) state.selected.add(id);
+  else state.selected.delete(id);
+  state.panelMode = state.selected.size ? "bulk" : (state.focused ? "single" : null);
+  render();
+}
+
+function groupKey(change) {
+  const by = state.groupBy;
+  if (by === "product") return change.sku;
+  if (by === "attribute") return change.attribute;
+  if (by === "category") return change.category;
+  if (by === "status") return decisionOf(change.id);
+  if (by === "evidence") return change.issue || "clean";
+  if (by === "confidence") return band(confidenceOf(change)).key;
+  return "all";
+}
+
+function groupLabel(change) {
+  const by = state.groupBy;
+  if (by === "product") return change.product + " · " + change.sku;
+  if (by === "attribute") return change.attribute;
+  if (by === "category") return change.category;
+  if (by === "status") return decisionOf(change.id);
+  if (by === "evidence") return change.issue === "conflict" ? "Conflicting sources" : change.issue === "weak" ? "Weak evidence" : "Clean evidence";
+  if (by === "confidence") return band(confidenceOf(change)).label;
+  return "";
+}
+
+function groupedRows(rows) {
+  const groups = [];
+  const index = new Map();
+  rows.forEach((change) => {
+    const key = groupKey(change);
+    if (!index.has(key)) {
+      const group = { key: key, label: groupLabel(change), rows: [] };
+      index.set(key, group);
+      groups.push(group);
+    }
+    index.get(key).rows.push(change);
+  });
+  return groups;
+}
+
+function appendChangeRow(body, change) {
+  const decision = decisionOf(change.id);
+  const revision = state.revisions[change.id];
+  const refining = decision === "refining";
+  const written = isWritten(change.id);
+  const score = confidenceOf(change);
+
+  const tr = document.createElement("tr");
+  if (state.groupBy !== "none") tr.classList.add("grouped");
+  if (state.selected.has(change.id)) tr.classList.add("selected");
+  if (state.focused === change.id) tr.classList.add("focused");
+  if (refining) tr.classList.add("is-refining");
+  if (decision === "approved" || decision === "rejected" || decision === "withdrawn") tr.classList.add("is-settled");
+  tr.addEventListener("click", (event) => {
+    if (event.target.tagName === "INPUT") return;
+    focusRow(change.id);
+  });
+
+  const checkCell = document.createElement("td");
+  checkCell.className = "check";
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = state.selected.has(change.id);
+  box.disabled = refining || written || state.runCompleted;
+  if (written || state.runCompleted) box.title = "This review is finished.";
+  box.setAttribute("aria-label", "Select " + change.product);
+  box.addEventListener("change", () => toggleRow(change.id, box.checked));
+  checkCell.append(box);
+
+  const productCell = document.createElement("td");
+  const name = document.createElement("span");
+  name.className = "product-name";
+  name.textContent = change.product;
+  const meta = document.createElement("small");
+  meta.textContent = change.sku + " · " + change.category;
+  productCell.append(name, meta);
+
+  const attributeCell = document.createElement("td");
+  attributeCell.className = "attribute";
+  attributeCell.textContent = change.attribute;
+
+  const currentCell = document.createElement("td");
+  currentCell.className = "old-value";
+  currentCell.textContent = change.current;
+
+  const proposedCell = document.createElement("td");
+  proposedCell.className = "new-value";
+  if (decision === "withdrawn") {
+    proposedCell.classList.add("retracted");
+    proposedCell.textContent = "Proposal retracted";
+  } else {
+    proposedCell.textContent = proposedOf(change);
+  }
+
+  /* This column always answers "how good is the evidence", never "what did the last
+     pass do" — refinement shows up as a moved score, and in the card's history. */
+  const evidenceCell = document.createElement("td");
+  const evidence = document.createElement("span");
+  const bucket = evidenceBucket(change);
+  if (refining) {
+    evidence.className = "evidence working";
+    evidence.innerHTML = '<span class="pulse"></span>Re-analysing';
+  } else if (bucket === "conflict") {
+    evidence.className = "evidence conflict";
+    evidence.textContent = "⚠ Conflicting";
+  } else if (bucket === "weak") {
+    evidence.className = "evidence weak";
+    evidence.textContent = "○ Weak";
+  } else {
+    evidence.className = "evidence";
+    evidence.textContent = "● " + change.evidence + " sources";
+  }
+  evidenceCell.append(evidence);
+
+  const scoreCell = document.createElement("td");
+  if (refining) {
+    const pending = document.createElement("span");
+    pending.className = "score score-none";
+    pending.textContent = "—";
+    scoreCell.append(pending);
+  } else if (isHumanSet(change)) {
+    const pill = document.createElement("span");
+    pill.className = "score score-human";
+    pill.textContent = "✎ Set by you";
+    pill.title = "You supplied this value during review, so there is no agent score.";
+    scoreCell.append(pill);
+  } else {
+    const pill = document.createElement("span");
+    pill.className = "score score-" + band(score).key;
+    pill.textContent = score;
+    scoreCell.append(pill);
+    if (revision) {
+      const diff = score - revision.previousScore;
+      const delta = document.createElement("small");
+      delta.className = "delta " + (diff > 0 ? "up" : "flat");
+      delta.textContent = diff > 0 ? "+" + diff : "±0";
+      scoreCell.append(delta);
+    }
+  }
+
+  const statusCell = document.createElement("td");
+  const status = document.createElement("span");
+  status.className = "status status-" + decision + (written ? " status-written" : "");
+  status.textContent = written ? "⌁ written back" : decision;
+  if (written) status.title = "Live in the catalog — this one can no longer be undone.";
+  statusCell.append(status);
+
+  tr.append(checkCell, productCell, attributeCell, currentCell, proposedCell, evidenceCell, scoreCell, statusCell);
+  body.append(tr);
+}
+
+function appendGroupRow(body, group) {
+  const collapsed = state.collapsedGroups.has(group.key);
+  const selectable = actionable(group.rows.map((row) => row.id));
+  const selectedCount = selectable.filter((id) => state.selected.has(id)).length;
+  const allSelected = selectable.length > 0 && selectedCount === selectable.length;
+
+  const tr = document.createElement("tr");
+  tr.className = "group-row";
+  tr.addEventListener("click", (event) => {
+    if (event.target.tagName === "INPUT") return;
+    if (state.collapsedGroups.has(group.key)) state.collapsedGroups.delete(group.key);
+    else state.collapsedGroups.add(group.key);
+    render();
+  });
+
+  const checkCell = document.createElement("td");
+  checkCell.className = "check";
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = allSelected;
+  box.indeterminate = !allSelected && selectedCount > 0;
+  box.disabled = selectable.length === 0;
+  box.setAttribute("aria-label", "Select group " + group.label);
+  box.addEventListener("change", () => {
+    selectable.forEach((id) => { allSelected ? state.selected.delete(id) : state.selected.add(id); });
+    state.panelMode = state.selected.size ? "bulk" : (state.focused ? "single" : null);
+    render();
+  });
+  checkCell.append(box);
+
+  const cell = document.createElement("td");
+  cell.colSpan = 7;
+  const head = document.createElement("div");
+  head.className = "group-head";
+  const caret = document.createElement("span");
+  caret.className = "caret";
+  caret.textContent = collapsed ? "▸" : "▾";
+  const title = document.createElement("b");
+  title.textContent = group.label;
+  const count = document.createElement("span");
+  count.textContent = group.rows.length + " " + (group.rows.length === 1 ? "change" : "changes");
+  head.append(caret, title, count);
+  cell.append(head);
+  tr.append(checkCell, cell);
+  body.append(tr);
+}
+
+function renderRows(rows) {
+  const body = $("rows");
+  body.textContent = "";
+
+  if (state.groupBy === "none") {
+    rows.forEach((change) => appendChangeRow(body, change));
+    return;
+  }
+
+  groupedRows(rows).forEach((group) => {
+    appendGroupRow(body, group);
+    if (!state.collapsedGroups.has(group.key)) {
+      group.rows.forEach((change) => appendChangeRow(body, change));
+    }
+  });
+}
+
+/* ---------- assistant card ---------- */
+
+function cardKicker(label) {
+  const wrap = document.createElement("div");
+  wrap.className = "card-kicker";
+  const text = document.createElement("span");
+  text.textContent = label;
+  wrap.append(text);
+  return wrap;
+}
+
+function renderSingleCard(host, change) {
+  const decision = decisionOf(change.id);
+  const revision = state.revisions[change.id];
+  const score = confidenceOf(change);
+
+  host.append(cardKicker("Inspecting change"));
+
+  const title = document.createElement("h3");
+  title.textContent = change.product;
+  const meta = document.createElement("p");
+  meta.className = "card-meta";
+  meta.textContent = change.sku + " · " + change.category + " · " + (isWritten(change.id) ? "written back" : decision);
+  host.append(title, meta);
+
+  if (state.selected.size) {
+    const back = document.createElement("div");
+    back.className = "card-note";
+    back.textContent = state.selected.size + " " + (state.selected.size === 1 ? "row is" : "rows are") + " still ticked. ";
+    const link = document.createElement("button");
+    link.type = "button";
+    link.style.cssText = "border:0;background:transparent;color:#46309d;font-weight:600;padding:0;text-decoration:underline";
+    link.textContent = "View selection";
+    link.addEventListener("click", () => { state.panelMode = "bulk"; render(); });
+    back.append(link);
+    host.append(back);
+  }
+
+  if (decision === "refining") {
+    const note = document.createElement("div");
+    note.className = "card-note";
+    note.textContent = "The agent is re-analysing this change. It will come back with a new value and score.";
+    host.append(note);
+  } else if (revision) {
+    const note = document.createElement("div");
+    note.className = "card-note";
+    note.textContent = OUTCOMES[revision.outcome].note;
+    host.append(note);
+  }
+
+  const card = document.createElement("div");
+  card.className = "card-change";
+  const label = document.createElement("label");
+  label.textContent = change.attribute;
+  const currentRow = document.createElement("div");
+  currentRow.innerHTML = "<span>Current</span>";
+  const currentValue = document.createElement("p");
+  currentValue.className = "removed";
+  currentValue.textContent = change.current;
+  currentRow.append(currentValue);
+  const proposedRow = document.createElement("div");
+  proposedRow.innerHTML = "<span>Proposed</span>";
+  const proposedValue = document.createElement("p");
+  proposedValue.className = "added" + (decision === "withdrawn" ? " retracted" : "");
+  proposedValue.textContent = decision === "withdrawn" ? "Retracted — current value kept" : proposedOf(change);
+  proposedRow.append(proposedValue);
+  card.append(label, currentRow, proposedRow);
+  host.append(card);
+
+  /* The score sits next to the reasoning that produced it; the band is already
+     carried by the colour, so repeating it in words adds nothing. */
+  const human = isHumanSet(change);
+  const conf = document.createElement("div");
+  conf.className = "card-conf " + (human ? "human" : band(score).key);
+  const big = document.createElement("strong");
+  big.textContent = decision === "refining" ? "…" : human ? "✎" : score;
+  const confText = document.createElement("div");
+  const confWhy = document.createElement("b");
+  confWhy.textContent = human
+    ? "You set this value during review — it no longer rests on the agent's evidence."
+    : change.rationale;
+  confText.append(confWhy);
+  if (revision) {
+    const confNote = document.createElement("span");
+    confNote.textContent = human
+      ? "The agent had proposed " + revision.previousValue + " at confidence " + revision.previousScore + "."
+      : "Recalculated after refinement, was " + revision.previousScore + ".";
+    confText.append(confNote);
+  }
+  conf.append(big, confText);
+  host.append(conf);
+
+  const iterations = state.history[change.id] || [];
+  if (iterations.length) {
+    const section = document.createElement("section");
+    const heading = document.createElement("h4");
+    heading.textContent = "History";
+    const history = document.createElement("div");
+    history.className = "history";
+
+    const first = document.createElement("div");
+    first.innerHTML = "<b>Original proposal</b><span>" + change.proposed + " · confidence " + change.confidence + "</span>";
+    history.append(first);
+
+    iterations.forEach((entry) => {
+      const step = document.createElement("div");
+      const label = document.createElement("b");
+      label.textContent = OUTCOMES[entry.outcome].label;
+      const value = document.createElement("span");
+      value.textContent = (entry.outcome === "withdrawn" ? "Kept current value" : entry.value) + " · confidence " + entry.score;
+      const quote = document.createElement("q");
+      quote.textContent = entry.instruction;
+      step.append(label, value, quote);
+      history.append(step);
+    });
+
+    section.append(heading, history);
+    host.append(section);
+  }
+
+  const evidence = document.createElement("section");
+  const evidenceHeading = document.createElement("h4");
+  evidenceHeading.textContent = "Evidence (" + change.sources.length + ")";
+  evidence.append(evidenceHeading);
+  change.sources.forEach((source, index) => {
+    const row = document.createElement("div");
+    row.className = "src";
+    const badge = document.createElement("i");
+    badge.textContent = index + 1;
+    const text = document.createElement("span");
+    text.textContent = source;
+    row.append(badge, text);
+    evidence.append(row);
+  });
+  host.append(evidence);
+
+  if (isWritten(change.id)) {
+    const locked = document.createElement("div");
+    locked.className = "card-locked";
+    locked.textContent = "Written to the catalog. The product data is live, so this decision can no longer be undone here.";
+    host.append(locked);
+    return;
+  }
+
+  /* Only the moves that still mean something for this change are offered. */
+  const buttons = [];
+  if (canApprove(change.id)) buttons.push(["approve", "Approve", () => applyDecision("approved", [change.id])]);
+  if (canReject(change.id)) buttons.push(["reject", "Reject", () => applyDecision("rejected", [change.id])]);
+  if (canUndo(change.id)) buttons.push(["undo", "↩ Undo " + decision, () => undoDecision([change.id])]);
+
+  if (buttons.length) {
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    buttons.forEach(([cls, label, handler]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = cls;
+      button.textContent = label;
+      button.addEventListener("click", handler);
+      actions.append(button);
+    });
+    host.append(actions);
+  }
+}
+
+function renderBulkCard(host) {
+  const ids = [...state.selected];
+  const items = ids.map(changeById).filter(Boolean);
+  const counts = { high: 0, mid: 0, low: 0 };
+  let conflicts = 0;
+  let weak = 0;
+  let refined = 0;
+
+  items.forEach((change) => {
+    counts[band(confidenceOf(change)).key] += 1;
+    if (change.issue === "conflict") conflicts += 1;
+    if (change.issue === "weak") weak += 1;
+    if (state.revisions[change.id]) refined += 1;
+  });
+
+  host.append(cardKicker("Selection"));
+
+  const title = document.createElement("h3");
+  title.textContent = items.length.toLocaleString() + " " + (items.length === 1 ? "change" : "changes") + " selected";
+  const meta = document.createElement("p");
+  meta.className = "card-meta";
+  meta.textContent = "Approve or reject them in the toolbar, or write an instruction below to send them back to the agent.";
+  host.append(title, meta);
+
+  const stats = document.createElement("div");
+  stats.className = "sel-stats";
+  [["high", "90–100"], ["mid", "60–89"], ["low", "Below 60"]].forEach(([key, label]) => {
+    const cell = document.createElement("div");
+    cell.className = key;
+    cell.innerHTML = "<b>" + counts[key] + "</b><span>" + label + "</span>";
+    stats.append(cell);
+  });
+  host.append(stats);
+
+  if (conflicts || weak || refined) {
+    const flags = document.createElement("div");
+    flags.className = "sel-flags";
+    if (conflicts) { const f = document.createElement("span"); f.textContent = "⚠ " + conflicts + " conflicting"; flags.append(f); }
+    if (weak) { const f = document.createElement("span"); f.className = "weak"; f.textContent = "○ " + weak + " weak evidence"; flags.append(f); }
+    if (refined) { const f = document.createElement("span"); f.className = "refined"; f.textContent = "✦ " + refined + " already refined"; flags.append(f); }
+    host.append(flags);
+  }
+
+  const list = document.createElement("div");
+  list.className = "sel-list";
+  items.forEach((change) => {
+    const row = document.createElement("div");
+    const name = document.createElement("b");
+    name.textContent = change.product;
+    const attribute = document.createElement("em");
+    attribute.textContent = change.attribute;
+    row.append(name, attribute);
+    row.addEventListener("click", () => focusRow(change.id));
+    list.append(row);
+  });
+  host.append(list);
+
+  /* Counts on the buttons say up front how many of the selected rows each move touches. */
+  const buttons = [
+    ["approve", "Approve", countWhere(ids, canApprove), () => applyDecision("approved", ids)],
+    ["reject", "Reject", countWhere(ids, canReject), () => applyDecision("rejected", ids)],
+    ["undo", "↩ Undo", countWhere(ids, canUndo), () => undoDecision(ids)]
+  ].filter(([, , eligible]) => eligible > 0);
+
+  const written = countWhere(ids, isWritten);
+  if (written) {
+    const locked = document.createElement("div");
+    locked.className = "card-locked";
+    locked.textContent = written + " of these " + (written === 1 ? "is" : "are") + " already written to the catalog and will be skipped.";
+    host.append(locked);
+  }
+
+  if (buttons.length) {
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    buttons.forEach(([cls, label, eligible, handler]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = cls;
+      button.textContent = label + " " + eligible;
+      button.addEventListener("click", handler);
+      actions.append(button);
+    });
+    host.append(actions);
+  }
+}
+
+/* The context card lives at the end of the conversation, below the run summary and
+   any refinement batches, so the panel reads as one continuous thread. */
+function appendCard(thread) {
+  const mode = state.panelMode;
+  const card = document.createElement("div");
+  card.className = "card";
+
+  if (mode === "bulk" && state.selected.size) {
+    renderBulkCard(card);
+    thread.append(card);
+    return;
+  }
+  if (mode === "single" && state.focused) {
+    const change = changeById(state.focused);
+    if (change) {
+      renderSingleCard(card, change);
+      thread.append(card);
+    }
+  }
+}
+
+/* ---------- assistant thread ---------- */
+
+/* The reply lists the rows themselves rather than a tally of outcomes, so the value
+   and score movement is readable without leaving the panel. Clicking opens the change. */
+function resultList(batch) {
+  const list = document.createElement("ul");
+  list.className = "result-list";
+
+  batch.results.forEach((result) => {
+    const change = changeById(result.id);
+    if (!change) return;
+    const item = document.createElement("li");
+    item.className = "res-" + result.outcome;
+
+    const top = document.createElement("div");
+    top.className = "res-head";
+    const name = document.createElement("b");
+    name.textContent = change.product;
+    const attribute = document.createElement("em");
+    attribute.textContent = change.attribute;
+    const outcome = document.createElement("span");
+    outcome.className = "res-tag";
+    outcome.textContent = OUTCOMES[result.outcome].label;
+    top.append(name, attribute, outcome);
+
+    const values = document.createElement("div");
+    values.className = "res-values";
+    const from = document.createElement("s");
+    from.textContent = result.from;
+    const arrow = document.createElement("i");
+    arrow.textContent = "→";
+    const to = document.createElement("b");
+    to.textContent = result.outcome === "withdrawn" ? result.to + " (kept)" : result.to;
+    values.append(from, arrow, to);
+
+    const score = document.createElement("div");
+    score.className = "res-score";
+    if (result.outcome === "directed") {
+      score.innerHTML = "<span>Confidence " + result.fromScore + " → <b>not scored</b></span>";
+      const badge = document.createElement("i");
+      badge.className = "human";
+      badge.textContent = "✎ your value";
+      score.append(badge);
+    } else {
+      const delta = result.toScore - result.fromScore;
+      score.innerHTML = "<span>Confidence " + result.fromScore + " → <b>" + result.toScore + "</b></span>";
+      const badge = document.createElement("i");
+      badge.className = delta > 0 ? "up" : "flat";
+      badge.textContent = delta > 0 ? "+" + delta : "±0";
+      score.append(badge);
+    }
+
+    item.append(top, values, score);
+    item.addEventListener("click", () => focusRow(result.id));
+    list.append(item);
+  });
+
+  return list;
+}
+
+function renderThread() {
+  const host = $("thread");
+  host.textContent = "";
+
+  state.thread.forEach((message) => {
+    const block = document.createElement("div");
+    block.className = "msg " + message.role;
+
+    if (message.kind === "intro") {
+      const text = document.createElement("p");
+      text.textContent = "I analysed " + PRODUCTS_ANALYSED + " products and proposed " + CHANGES.length + " attribute changes on " + uniqueProductCount() + " of them. " + CHANGES.filter((change) => change.issue === "conflict").length + " have conflicting sources and " + CHANGES.filter((change) => change.issue === "weak").length + " rest on weak evidence — those are worth your attention first.";
+      block.append(text);
+    }
+
+    if (message.kind === "instruction") {
+      const chipRow = document.createElement("div");
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = message.count + " " + (message.count === 1 ? "change" : "changes") + " attached";
+      chipRow.append(chip);
+      const text = document.createElement("p");
+      text.textContent = message.text;
+      block.append(chipRow, text);
+    }
+
+    if (message.kind === "batch") {
+      const batch = state.batches.find((item) => item.id === message.batchId);
+      if (!batch) return;
+      if (batch.status === "running") {
+        const working = document.createElement("div");
+        working.className = "working";
+        const dots = document.createElement("span");
+        dots.className = "dots";
+        dots.innerHTML = "<span></span><span></span><span></span>";
+        const label = document.createElement("span");
+        label.textContent = "Re-analysing " + batch.ids.length + " " + (batch.ids.length === 1 ? "change" : "changes") + "…";
+        working.append(dots, label);
+        block.append(working);
+      } else {
+        const tally = Object.keys(batch.summary)
+          .filter((key) => batch.summary[key])
+          .map((key) => batch.summary[key] + " " + OUTCOMES[key].label.toLowerCase())
+          .join(" · ");
+        const text = document.createElement("p");
+        text.textContent = "Here is what came back — " + tally + ".";
+        block.append(text);
+        block.append(resultList(batch));
+      }
+    }
+
+    host.append(block);
+  });
+
+  appendCard(host);
+  host.scrollTop = host.scrollHeight;
+}
+
+function renderComposer() {
+  const selected = refineTargets();
+  const context = $("composer-context");
+  context.textContent = "";
+
+  if (selected.length) {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    const single = selected.length === 1 ? changeById(selected[0]) : null;
+    chip.textContent = single
+      ? "✦ " + single.product + " · " + single.attribute
+      : "✦ " + selected.length + " changes attached";
+    context.append(chip);
+  }
+
+  const field = $("instruction");
+  const hasInstruction = Boolean(field.value.trim());
+  field.disabled = selected.length === 0;
+  field.placeholder = selected.length === 0
+    ? "Pick a row to send it back to the agent…"
+    : "Re-check with a rule, or give the value to use…";
+  $("composer-send").disabled = selected.length === 0 || !hasInstruction;
+  /* The chip already states the count, so only explain when there is nothing attached. */
+  $("composer-hint").textContent = selected.length === 0 ? "Nothing attached" : "";
+
+  const running = state.batches.filter((batch) => batch.status === "running");
+  $("assistant-name").textContent = ACTIVE_RUN.agent;
+  $("assistant-status").textContent = running.length
+    ? "Run #" + ACTIVE_RUN.id + " · re-analysing " + running.reduce((total, batch) => total + batch.ids.length, 0) + " changes"
+    : "Run #" + ACTIVE_RUN.id + " · idle";
+}
+
+function syncFilterInputs() {
+  $("score-filter").value = state.score;
+  $("status-filter").value = state.status;
+  $("issue-filter").value = state.issue;
+  $("refined-filter").value = state.refined;
+}
+
+/* ---------- run navigation ---------- */
+
+const STATUS_LABELS = { review: "Needs review", running: "In progress", completed: "Review complete" };
+
+function currentRunStatus() {
+  return state.runCompleted ? "completed" : "review";
+}
+
+const statusOf = (run) => (run.id === ACTIVE_RUN.id ? currentRunStatus() : run.status);
+
+function runWhen(run) {
+  return statusOf(run) === "completed" && run.completed ? run.started + " – " + run.completed : run.started;
+}
+
+/* The sidebar only needs a sense of recency; the run header keeps the clock time. */
+function runAgo(run) {
+  return statusOf(run) === "completed" && run.completed === "Just now" ? "Just now" : run.ago;
+}
+
+function renderRuns() {
+  const body = $("run-rows");
+  body.textContent = "";
+  const decided = CHANGES.filter((change) => ["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
+
+  RUNS.forEach((run) => {
+    const current = run.id === ACTIVE_RUN.id;
+    const statusKey = statusOf(run);
+    const progress = current ? Math.round((decided / CHANGES.length) * 100) : run.progress;
+    const tr = document.createElement("tr");
+    tr.className = "openable";
+
+    const runCell = document.createElement("td");
+    const name = document.createElement("span");
+    name.className = "run-name";
+    name.textContent = run.name + " #" + run.id;
+    const agent = document.createElement("small");
+    const agentChip = document.createElement("span");
+    agentChip.className = "run-agent";
+    agentChip.textContent = "✦ " + run.agent;
+    agent.append(agentChip);
+    runCell.append(name, agent);
+
+    const scope = document.createElement("td");
+    scope.textContent = run.products.toLocaleString() + " products";
+    const changes = document.createElement("td");
+    changes.textContent = run.changes === null ? "Calculating…" : run.changes.toLocaleString();
+    const attention = document.createElement("td");
+    attention.textContent = statusKey === "completed" ? run.changes + " reviewed" : run.attention;
+
+    const progressCell = document.createElement("td");
+    if (statusKey === "running") {
+      progressCell.className = "run-muted";
+      progressCell.textContent = "—";
+    } else {
+      const progressWrap = document.createElement("div");
+      progressWrap.className = "run-progress";
+      const progressLabel = document.createElement("span");
+      progressLabel.textContent = progress + "% reviewed";
+      const bar = document.createElement("i");
+      bar.style.setProperty("--progress", progress + "%");
+      progressWrap.append(progressLabel, bar);
+      progressCell.append(progressWrap);
+    }
+
+    const owner = document.createElement("td");
+    owner.textContent = run.owner;
+    const started = document.createElement("td");
+    started.className = "run-muted";
+    started.textContent = run.started;
+    const status = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = "run-status " + statusKey;
+    badge.textContent = STATUS_LABELS[statusKey];
+    status.append(badge);
+
+    /* Every run opens; what you can do inside depends on where the run has got to. */
+    const action = document.createElement("td");
+    const open = document.createElement("button");
+    open.type = "button";
+    open.className = "run-open";
+    open.textContent = statusKey === "review" ? "Review" : "View";
+    open.addEventListener("click", (event) => { event.stopPropagation(); showDetail(run.id); });
+    action.append(open);
+    tr.addEventListener("click", () => showDetail(run.id));
+
+    tr.append(runCell, scope, changes, attention, progressCell, owner, started, status, action);
+    body.append(tr);
+  });
+
+  const statuses = RUNS.map(statusOf);
+  $("runs-review-count").textContent = statuses.filter((status) => status === "review").length;
+  $("runs-progress-count").textContent = statuses.filter((status) => status === "running").length;
+  $("runs-completed-count").textContent = statuses.filter((status) => status === "completed").length;
+  $("runs-total").textContent = RUNS.length + " runs";
+}
+
+/* One view occupies the centre at a time; the navigation reflects which. */
+function setView(view) {
+  state.view = view;
+  $("product-view").hidden = view !== "product";
+  $("chat-view").hidden = view !== "chat";
+  $("runs-view").hidden = view !== "runs";
+  $("page").hidden = view !== "detail";
+  $("app-nav").hidden = view === "product";
+  /* The product record is its own workspace; the assistant only takes over the
+     window once you step into its full-screen views, and back returns to it. */
+  $("app-brand").textContent = view === "product" ? "Focus View" : "AI assistant";
+  $("back-button").setAttribute("aria-label", view === "product" ? "Back to the main application" : "Back to the product");
+  $("back-button").title = view === "product" ? "Back to the main application" : "Back to the product";
+  $("assistant-toggle").hidden = view === "chat";
+  $("nav-chat").className = view === "chat" && state.chatWith === "general" ? "nav-item active" : "nav-item";
+  renderDock();
+  renderNav();
+}
+
+/* The rail is only in the way on the full chat view, where the conversation is
+   already the page. Elsewhere it stays available and remembers its own state. */
+function renderDock() {
+  /* The review assistant only makes sense inside the run you are reviewing;
+     any other page gets the ordinary conversation. */
+  const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
+  const openStatus = statusOf(openRun);
+  const inRun = state.view === "detail" && openStatus === "review";
+  /* A run with nothing to decide has nothing to talk about: the agent is either
+     still working or already done. New work starts from the Agents section. */
+  const locked = state.view === "detail" && openStatus !== "review";
+  const open = state.view !== "chat" && state.assistantOpen;
+  const attention = RUNS.filter((run) => statusOf(run) === "review").length;
+  $("dock").hidden = !open;
+  $("assistant").hidden = !inRun;
+  $("dock-chat").hidden = inRun;
+  $("assistant-toggle").className = open ? "assistant-toggle active" : "assistant-toggle";
+  /* The header badge is a nudge to open the panel. Once it is open, the work
+     still lives in the menu until the review is actually finished. */
+  $("assistant-badge").hidden = open || attention === 0;
+  $("menu-badge").hidden = attention === 0;
+  $("assistant-menu-trigger").hidden = state.view !== "product";
+  $("assistant-menu").hidden = !state.assistantMenuOpen || state.view !== "product";
+  $("assistant-menu-trigger").setAttribute("aria-expanded", String(state.assistantMenuOpen && state.view === "product"));
+  if (!inRun) renderDockChat(locked, openStatus);
+}
+
+function showProduct() {
+  setView("product");
+  renderProduct();
+}
+
+/* Talking to an agent is its own destination, with its own thread. */
+function showChat(agentId) {
+  state.chatWith = agentId || "general";
+  setView("chat");
+  renderChat();
+}
+
+function showRuns() {
+  setView("runs");
+  renderRuns();
+}
+
+function showDetail(runId) {
+  state.openRunId = runId || ACTIVE_RUN.id;
+  state.assistantMenuOpen = false;
+  setView("detail");
+  render();
+}
+
+function renderNav() {
+  const agents = $("nav-agents");
+  agents.textContent = "";
+  AGENTS.forEach((agent) => {
+    const open = state.view === "chat" && state.chatWith === agent.id;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = open ? "nav-run active" : "nav-run";
+    const title = document.createElement("span");
+    title.innerHTML = '<i class="nav-avatar">' + agent.name.charAt(0) + "</i>";
+    title.append(agent.name);
+    const note = document.createElement("small");
+    note.textContent = (state.chats[agent.id] || []).length ? "Conversation open" : agent.note;
+    button.append(title, note);
+    button.addEventListener("click", () => showChat(agent.id));
+    agents.append(button);
+  });
+
+  const runs = $("nav-runs");
+  runs.textContent = "";
+  RUNS.forEach((run) => {
+    const status = statusOf(run);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = state.view === "detail" && state.openRunId === run.id ? "nav-run active" : "nav-run";
+    const title = document.createElement("span");
+    title.innerHTML = '<i class="nav-dot ' + status + '"></i>';
+    title.append("#" + run.id);
+    const note = document.createElement("small");
+    note.textContent = run.agent + ", " + runAgo(run);
+    button.append(title, note);
+    button.addEventListener("click", () => showDetail(run.id));
+    runs.append(button);
+  });
+}
+
+function renderProduct() {
+  const product = PRODUCT;
+  const initials = product.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("");
+
+  $("product-image").textContent = initials;
+  $("product-title").textContent = product.name;
+  $("product-meta").textContent = product.sku + " · " + product.category;
+  $("toolbar-category").textContent = product.category;
+  $("toolbar-status").textContent = product.status;
+  $("product-name").value = product.name;
+  $("product-sku").value = product.sku;
+  $("product-status").value = product.status;
+  $("product-category").value = product.category;
+  $("product-brand").value = product.brand;
+  $("product-attribute").value = product.attribute;
+  $("product-description").value = product.description;
+  document.querySelector('label[for="product-attribute"]').textContent = product.attributeLabel;
+}
+
+function renderAssistantMenu() {
+  /* The menu mirrors the full-screen navigation: general chat, then agents,
+     then the runs those agents produced. */
+  const chatHost = $("assistant-menu-chats");
+  const agentHost = $("assistant-menu-agents");
+  chatHost.textContent = "";
+  agentHost.textContent = "";
+
+  const chats = [{ id: "general", name: "AI assistant", note: "General product help", icon: "✦", host: chatHost }]
+    .concat(AGENTS.map((agent) => ({ id: agent.id, name: agent.name, note: agent.note, icon: agent.name.charAt(0), host: agentHost })));
+
+  chats.forEach((chat) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = state.dockChatWith === chat.id ? "assistant-menu-item active" : "assistant-menu-item";
+    const icon = document.createElement("i");
+    icon.className = chat.id === "general" ? "" : "nav-avatar";
+    icon.textContent = chat.icon;
+    const copy = document.createElement("span");
+    copy.innerHTML = "<strong></strong><small></small>";
+    copy.querySelector("strong").textContent = chat.name;
+    copy.querySelector("small").textContent = chat.note;
+    button.append(icon, copy);
+    button.addEventListener("click", () => {
+      state.dockChatWith = chat.id;
+      state.assistantMenuOpen = false;
+      renderDock();
+    });
+    chat.host.append(button);
+  });
+
+  const runHost = $("assistant-menu-runs");
+  runHost.textContent = "";
+  RUNS.forEach((run) => {
+    const status = statusOf(run);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "assistant-menu-item";
+    const dot = document.createElement("i");
+    dot.className = "nav-dot " + status;
+    const copy = document.createElement("span");
+    copy.innerHTML = "<strong></strong><small></small>";
+    copy.querySelector("strong").textContent = "#" + run.id;
+    copy.querySelector("small").textContent = run.agent + ", " + runAgo(run);
+    /* A run leaves the panel behind for the full-screen workspace. */
+    const link = document.createElement("i");
+    link.className = "menu-link";
+    link.textContent = "↗";
+    button.append(dot, copy, link);
+    button.addEventListener("click", () => showDetail(run.id));
+    runHost.append(button);
+  });
+}
+
+const thread = (key) => (state.chats[key] = state.chats[key] || []);
+const runsBy = (agent) => RUNS.filter((run) => run.agent === agent.name);
+
+/* An agent answers for its own work; the general assistant answers across all of them.
+   Replies can carry an action so a conversation can hand off to a run. */
+function agentReply(agent, question) {
+  const text = question.toLowerCase();
+  const mine = runsBy(agent);
+  const latest = mine[0];
+  if (latest && /run|change|last|review|did|going|progress/.test(text)) {
+    const status = statusOf(latest);
+    if (status === "running") {
+      return { text: "I'm still working through " + latest.name.toLowerCase() + " #" + latest.id +
+        " across " + latest.products.toLocaleString() + " products. I'll flag anything that needs you when I'm done.", run: latest.id };
+    }
+    if (status === "completed") {
+      return { text: "My last run, " + latest.name.toLowerCase() + " #" + latest.id + ", is closed. You kept " +
+        latest.written + " of " + latest.changes + " changes.", run: latest.id };
+    }
+    return { text: "My last run, #" + latest.id + ", proposed " + latest.changes + " changes on " +
+      latest.products + " products. " + latest.attention + " need a closer look before you finish the review.", run: latest.id };
+  }
+  if (/weak|conflict|evidence|why|confiden/.test(text)) {
+    return { text: "Where sources disagree or only one listing backs a value, I keep the score low rather than guess. " +
+      "Tell me which source to trust, or give me the value outright, and I'll apply it." };
+  }
+  if (/^(run|start|enrich|tag|map|normalis|normaliz|find|fix|clean)/.test(text) || /\b(run|start) (a|the|another)\b/.test(text)) {
+    return { text: "I can start that as a run. I'll analyse the matching products and come back with proposed changes for you to review — nothing is written until you finish the review." };
+  }
+  return { text: agent.note + " is my remit. Ask me about my runs, why a value looks the way it does, or give me something to work on." };
+}
+
+function generalReply(question) {
+  const text = question.toLowerCase();
+  const needsReview = RUNS.filter((run) => statusOf(run) === "review");
+  if (/run|review|pending|waiting|todo/.test(text) && needsReview.length) {
+    const run = needsReview[0];
+    return { text: run.agent + " finished " + run.name.toLowerCase() + " #" + run.id + " and proposed " +
+      run.changes + " changes — " + run.attention + ".", run: run.id };
+  }
+  if (/agent|who/.test(text)) {
+    return { text: "You have " + AGENTS.length + " agents: " + AGENTS.map((agent) => agent.name).join(", ") +
+      ". Pick one on the left to talk to it directly." };
+  }
+  return { text: "I can summarise your agent runs, point you at what needs review, or hand you to the right agent. Try asking what needs review." };
+}
+
+/* The same conversation is typed into two places, so both composers reset together. */
+function sendChat(preset, source) {
+  const field = $(source === "dock" ? "dock-input" : "chat-input");
+  if (field.disabled) return;
+  const question = (preset || field.value).trim();
+  if (!question) return;
+  const target = source === "dock"
+    ? (state.view === "product" ? state.dockChatWith : "general")
+    : state.chatWith;
+  const agent = agentById(target);
+  const messages = thread(target);
+  messages.push({ role: "user", text: question });
+  messages.push(Object.assign({ role: "agent" }, agent ? agentReply(agent, question) : generalReply(question)));
+  ["chat-input", "dock-input"].forEach((id) => { $(id).value = ""; $(id).style.height = "26px"; });
+  ["chat-send", "dock-send"].forEach((id) => { $(id).disabled = true; });
+  renderChat();
+}
+
+const starterPrompts = (agent) => agent
+  ? agent.starters
+  : ["What needs my review?", "Which agents do I have?", "What is running right now?"];
+
+/* Messages render identically wherever the conversation is shown. */
+function paintThread(host, messages) {
+  host.textContent = "";
+  messages.forEach((message) => {
+    const block = document.createElement("div");
+    block.className = "msg " + message.role;
+    const text = document.createElement("p");
+    text.textContent = message.text;
+    block.append(text);
+    if (message.run) {
+      const run = RUNS.find((item) => item.id === message.run);
+      const actions = document.createElement("div");
+      actions.className = "msg-actions";
+      const open = document.createElement("button");
+      open.type = "button";
+      open.textContent = "Open " + run.name.toLowerCase() + " #" + run.id;
+      open.addEventListener("click", () => showDetail(run.id));
+      actions.append(open);
+      block.append(actions);
+    }
+    host.append(block);
+  });
+  host.scrollTop = host.scrollHeight;
+}
+
+/* On a product the rail can switch between general help and named agents. Once
+   you enter the run workspace it resolves back to the general conversation. */
+function renderDockChat(locked, runStatus) {
+  const target = state.view === "product" ? state.dockChatWith : "general";
+  const agent = agentById(target);
+  const suggest = $("dock-suggest");
+  suggest.textContent = "";
+  starterPrompts(agent).forEach((prompt) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = prompt;
+    button.addEventListener("click", () => { suggest.hidden = true; sendChat(prompt, "dock"); });
+    suggest.append(button);
+  });
+
+  $("dock-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
+  $("dock-title").textContent = agent ? agent.name : "AI assistant";
+  $("dock-subtitle").textContent = agent ? agent.note : "";
+  $("dock-subtitle").hidden = !agent;
+  $("dock-input").disabled = Boolean(locked);
+  $("dock-add").disabled = Boolean(locked);
+  if (locked) {
+    suggest.hidden = true;
+    $("dock-send").disabled = true;
+    $("dock-input").value = "";
+    $("dock-input").placeholder = "";
+    $("dock-hint").textContent = runStatus === "running"
+      ? "This run is still analysing — nothing to discuss yet"
+      : "This review is finished — run the agent again from Agents";
+  } else {
+    $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
+    $("dock-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
+  }
+
+  const messages = thread(target);
+  const host = $("dock-thread");
+  paintThread(host, messages);
+  /* An untouched panel still greets you rather than showing an empty column. */
+  host.className = messages.length ? "thread" : "thread empty";
+  if (!messages.length) host.append(dockWelcome(agent, locked));
+  renderAssistantMenu();
+}
+
+function dockWelcome(agent, locked) {
+  const welcome = document.createElement("div");
+  welcome.className = "dock-welcome";
+  const mark = document.createElement("span");
+  mark.textContent = agent ? agent.name.charAt(0) : "✦";
+  if (agent) mark.className = "agent";
+  const line = document.createElement("p");
+  line.textContent = agent ? agent.name : "Good morning Alex,";
+  const ask = document.createElement("b");
+  ask.textContent = agent ? agent.ask : "How can I help?";
+  welcome.append(mark, line, ask);
+
+  if (!locked) {
+    const chips = document.createElement("div");
+    chips.className = "chat-starters";
+    starterPrompts(agent).slice(0, 2).forEach((prompt) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = prompt;
+      button.addEventListener("click", () => sendChat(prompt, "dock"));
+      chips.append(button);
+    });
+    welcome.append(chips);
+  }
+  return welcome;
+}
+
+function renderChat() {
+  const agent = agentById(state.chatWith);
+  const messages = thread(state.chatWith);
+
+  /* Only a named agent gets a name; the general chat stays the AI assistant. */
+  $("chat-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
+  $("chat-title").textContent = agent ? agent.name : "AI assistant";
+  $("chat-subtitle").textContent = agent ? agent.note : "";
+  $("chat-subtitle").hidden = !agent;
+  $("chat-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
+  $("chat-input").placeholder = agent
+    ? "Message " + agent.name + "…"
+    : "Ask me anything about your catalog and agent runs…";
+  $("welcome-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
+  $("welcome-avatar").className = agent ? "agent" : "";
+  $("welcome-line").textContent = agent ? agent.name : "Good morning Alex,";
+  $("welcome-ask").textContent = agent ? agent.ask : "How can I help?";
+  $("chat-clear").hidden = !messages.length;
+
+  const starters = $("chat-starters");
+  starters.textContent = "";
+  starterPrompts(agent).forEach((prompt) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = prompt;
+    button.addEventListener("click", () => sendChat(prompt));
+    starters.append(button);
+  });
+
+  paintThread($("chat-thread"), messages);
+  $("chat-welcome").hidden = messages.length > 0;
+  $("chat-scroll").className = messages.length ? "chat-scroll has-thread" : "chat-scroll";
+  $("chat-scroll").scrollTop = $("chat-scroll").scrollHeight;
+  if (state.view !== "detail") renderDockChat(false, null);
+  renderNav();
+}
+
+/* A run still analysing has nothing to show yet, so it reports progress instead. */
+function renderRunState(run) {
+  $("run-state-title").textContent = run.agent + " is still analysing";
+  $("run-state-text").textContent = "Proposed changes appear here for review once this run finishes.";
+}
+
+/* A finished run is the same table, read only: what was decided and what went live. */
+const evidenceLabel = (change) => {
+  const bucket = evidenceBucket(change);
+  if (bucket === "conflict") return "⚠ Conflicting";
+  if (bucket === "weak") return "○ Weak";
+  return "● " + change.evidence + " sources";
+};
+
+/* A finished review is a record wherever it came from, so the run you just closed
+   is flattened into the same rows as one closed yesterday. */
+function archiveRows(run) {
+  if (run.id !== ACTIVE_RUN.id) return ARCHIVE[run.id] || [];
+  return CHANGES.map((change) => {
+    const decision = decisionOf(change.id);
+    return {
+      sku: change.sku,
+      product: change.product,
+      attribute: change.attribute,
+      current: change.current,
+      final: proposedOf(change),
+      evidence: evidenceLabel(change),
+      score: confidenceOf(change),
+      outcome: decision === "approved" ? "written" : decision === "withdrawn" ? "withdrawn" : "rejected"
+    };
+  });
+}
+
+function renderArchive(run) {
+  const rows = archiveRows(run);
+  const body = $("archive-rows");
+  body.textContent = "";
+
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    const written = row.outcome === "written";
+
+    const productCell = document.createElement("td");
+    const name = document.createElement("span");
+    name.className = "product-name";
+    name.textContent = row.product;
+    const meta = document.createElement("small");
+    meta.textContent = row.sku;
+    productCell.append(name, meta);
+
+    const attribute = document.createElement("td");
+    attribute.className = "attribute";
+    attribute.textContent = row.attribute;
+
+    const current = document.createElement("td");
+    current.className = written ? "old-value" : "";
+    current.textContent = row.current;
+
+    const final = document.createElement("td");
+    final.className = written ? "new-value" : "new-value retracted";
+    final.textContent = written ? row.final : row.outcome === "withdrawn" ? "Proposal withdrawn" : "Proposal rejected";
+
+    const evidence = document.createElement("td");
+    const evidenceTag = document.createElement("span");
+    evidenceTag.className = "evidence" + (row.evidence.startsWith("⚠") ? " conflict" : row.evidence.startsWith("○") ? " weak" : "");
+    evidenceTag.textContent = row.evidence;
+    evidence.append(evidenceTag);
+
+    const score = document.createElement("td");
+    const pill = document.createElement("span");
+    pill.className = "score score-" + band(row.score).key;
+    pill.textContent = row.score;
+    score.append(pill);
+
+    const outcome = document.createElement("td");
+    const status = document.createElement("span");
+    status.className = written ? "status status-approved status-written" : "status status-rejected";
+    status.textContent = written ? "⌁ written back" : row.outcome;
+    outcome.append(status);
+
+    tr.append(productCell, attribute, current, final, evidence, score, outcome);
+    body.append(tr);
+  });
+
+  const written = rows.filter((row) => row.outcome === "written").length;
+  const products = new Set(rows.map((row) => row.product)).size;
+
+  $("archive-summary").textContent = written + " of " + rows.length + " changes written to the catalog";
+  $("archive-when").textContent = "· review finished " + run.completed.toLowerCase() + " by " + run.owner;
+  $("archive-footer").textContent = rows.length + " " + (rows.length === 1 ? "change" : "changes") + " · read only";
+
+  /* The tiles report the outcome once a review is closed, not the proposal quality. */
+  $("summary-analysed").textContent = run.products.toLocaleString();
+  $("summary-untouched").textContent = (run.products - products).toLocaleString() + " left unchanged";
+  $("summary-total").textContent = rows.length;
+  $("summary-affected").textContent = "across " + products.toLocaleString() + " products";
+  $("summary-high").textContent = written;
+  $("summary-high-label").textContent = "Written to catalog";
+  $("summary-high-note").textContent = "Applied to your products";
+  $("summary-review").textContent = rows.length - written;
+  $("summary-review-label").textContent = "Not applied";
+  $("summary-review-note").textContent = "Rejected or withdrawn";
+}
+
+/* ---------- render ---------- */
+
+function setAction(id, label, eligible, selectedTotal, reason) {
+  const button = $(id);
+  button.textContent = eligible ? label + " " + eligible : label;
+  button.disabled = eligible === 0;
+  button.title = eligible ? "" : selectedTotal ? reason : "Select rows first.";
+}
+
+function render() {
+  const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
+  const openStatus = statusOf(openRun);
+  /* What a run shows follows its status, not which run it happens to be: a review
+     you just finished reads exactly like one finished yesterday. */
+  const reviewing = openStatus === "review";
+
+  /* Header chrome is shared by every run; only the body below it differs. */
+  $("crumb-run").textContent = "#" + openRun.id;
+  $("run-heading").textContent = "#" + openRun.id;
+  $("run-agent-label").textContent = openRun.agent;
+  $("run-when").textContent = ", " + runWhen(openRun);
+  $("run-status").className = "run-status " + openStatus;
+  $("run-status").textContent = STATUS_LABELS[openStatus];
+  /* Nothing is pending on a finished run, so the header carries no badge. */
+  $("run-status").hidden = openStatus === "completed";
+  $("run-state").hidden = openStatus !== "running";
+  $("archive-panel").hidden = openStatus !== "completed";
+  $("review-panel").hidden = !reviewing;
+  $("summary-strip").hidden = openStatus === "running";
+  $("finish-review").hidden = !reviewing;
+  renderDock();
+  renderNav();
+
+  if (!reviewing) {
+    const running = openStatus === "running";
+    if (running) renderRunState(openRun);
+    else renderArchive(openRun);
+    $("progress-card").hidden = running;
+    if (!running) {
+      $("progress-pct").textContent = "100%";
+      $("progress-bar").style.width = "100%";
+      $("progress-unit").textContent = "reviewed";
+      $("progress-label").textContent = "All changes decided";
+    }
+    return;
+  }
+
+  $("progress-card").hidden = false;
+  $("progress-unit").textContent = "reviewed";
+  const rows = visibleChanges();
+  const selectable = actionable(rows.map((row) => row.id));
+  const allSelected = selectable.length > 0 && selectable.every((id) => state.selected.has(id));
+  const selectedHere = selectable.filter((id) => state.selected.has(id)).length;
+  const selectedTotal = state.selected.size;
+  const readyCount = CHANGES.filter((change) => decisionOf(change.id) === "approved" && !isWritten(change.id)).length;
+  const decided = CHANGES.filter((change) => ["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
+  const tab = TABS.find((item) => item.id === state.tab) || TABS[0];
+  const filters = activeFilterCount();
+
+  renderTabs();
+  renderRows(rows);
+  const focusedRow = document.querySelector("#rows tr.focused");
+  if (focusedRow) focusedRow.scrollIntoView({ block: "nearest" });
+  renderThread();
+
+  $("group-tool").className = state.groupBy === "none" ? "tool tool-select" : "tool tool-select on";
+  $("filter-row").hidden = !state.filterOpen;
+  $("filter-toggle").className = state.filterOpen || filters ? "tool on" : "tool";
+  $("filter-badge").hidden = filters === 0;
+  $("filter-badge").textContent = filters;
+  $("status-filter").disabled = state.tab === "approved" || state.tab === "dismissed";
+
+  $("sel-count").innerHTML = selectedTotal
+    ? "<b>" + selectedTotal.toLocaleString() + "</b> selected" + (selectedHere !== selectedTotal ? " · " + selectedHere + " here" : "")
+    : "No rows selected";
+  /* Each action is offered for the rows it can actually change, so approving a
+     selection that is already approved is not on the table. */
+  const selectedIds = [...state.selected];
+  setAction("act-approve", "✓ Approve", countWhere(selectedIds, canApprove), selectedTotal, "Every selected change is already approved or written back.");
+  setAction("act-reject", "× Reject", countWhere(selectedIds, canReject), selectedTotal, "Every selected change is already rejected or written back.");
+  setAction("act-undo", "↩ Undo", countWhere(selectedIds, canUndo), selectedTotal, "Nothing to undo — pick rows you have already approved or rejected.");
+
+  $("select-all").checked = allSelected;
+  $("select-all").indeterminate = !allSelected && selectedHere > 0;
+  $("score-head").textContent = state.sort === "score-asc" ? "Confidence ↑" : state.sort === "score-desc" ? "Confidence ↓" : "Confidence";
+
+  $("ready-bar").hidden = state.tab !== "approved" || readyCount === 0;
+  $("ready-count").textContent = readyCount.toLocaleString() + " " + (readyCount === 1 ? "change" : "changes") + " ready";
+  const tabTotal = tab.count();
+  $("footer-range").textContent = rows.length === tabTotal
+    ? tabTotal + " " + (tabTotal === 1 ? "change" : "changes")
+    : rows.length + " of " + tabTotal + " " + (tabTotal === 1 ? "change" : "changes");
+  const highConfidence = CHANGES.filter((change) => confidenceOf(change) >= 90).length;
+  $("summary-analysed").textContent = PRODUCTS_ANALYSED.toLocaleString();
+  $("summary-untouched").textContent = untouchedProductCount().toLocaleString() + " left unchanged";
+  $("summary-affected").textContent = "across " + uniqueProductCount().toLocaleString() + " products";
+  $("summary-total").textContent = CHANGES.length;
+  $("summary-high").textContent = highConfidence;
+  $("summary-high-label").textContent = "High confidence";
+  $("summary-high-note").textContent = "Score 90–100";
+  $("summary-review").textContent = CHANGES.length - highConfidence;
+  $("summary-review-label").textContent = "Need review";
+  $("summary-review-note").textContent = "Score below 90";
+  $("empty").hidden = rows.length > 0;
+  $("empty-hint").textContent = EMPTY_HINTS[state.tab] || "Try adjusting your filters.";
+  $("tab-note").hidden = !TAB_NOTES[state.tab] || rows.length === 0;
+  $("tab-note").textContent = TAB_NOTES[state.tab] || "";
+
+  const percent = Math.round((decided / CHANGES.length) * 100);
+  $("progress-pct").textContent = percent + "%";
+  $("progress-bar").style.width = percent + "%";
+  $("progress-label").textContent = decided.toLocaleString() + " of " + CHANGES.length.toLocaleString() + " decided";
+  $("finish-review").disabled = decided !== CHANGES.length;
+  $("finish-review").title = decided !== CHANGES.length
+    ? (CHANGES.length - decided) + " changes still need a decision."
+    : "Write the approved changes to the catalog and close this review.";
+
+  renderComposer();
+}
+
+/* ---------- events ---------- */
+
+$("search").addEventListener("input", (event) => { state.query = event.target.value; render(); });
+$("sort").addEventListener("change", (event) => { state.sort = event.target.value; render(); });
+$("group-by").addEventListener("change", (event) => {
+  state.groupBy = event.target.value;
+  state.collapsedGroups = new Set();
+  render();
+});
+$("filter-toggle").addEventListener("click", () => { state.filterOpen = !state.filterOpen; render(); });
+$("score-filter").addEventListener("change", (event) => { state.score = event.target.value; render(); });
+$("status-filter").addEventListener("change", (event) => { state.status = event.target.value; render(); });
+$("issue-filter").addEventListener("change", (event) => { state.issue = event.target.value; render(); });
+$("refined-filter").addEventListener("change", (event) => { state.refined = event.target.value; render(); });
+$("clear-filters").addEventListener("click", () => {
+  state.query = "";
+  state.score = "Any";
+  state.status = "All statuses";
+  state.issue = "Any";
+  state.refined = "Any";
+  $("search").value = "";
+  syncFilterInputs();
+  render();
+});
+
+$("select-all").addEventListener("change", () => {
+  const selectable = actionable(visibleChanges().map((row) => row.id));
+  const allSelected = selectable.length > 0 && selectable.every((id) => state.selected.has(id));
+  selectable.forEach((id) => { allSelected ? state.selected.delete(id) : state.selected.add(id); });
+  state.panelMode = state.selected.size ? "bulk" : (state.focused ? "single" : null);
+  render();
+});
+
+$("act-approve").addEventListener("click", () => applyDecision("approved", [...state.selected]));
+$("act-reject").addEventListener("click", () => applyDecision("rejected", [...state.selected]));
+$("act-undo").addEventListener("click", () => undoDecision([...state.selected]));
+$("finish-review").addEventListener("click", finishReview);
+$("nav-chat").addEventListener("click", () => showChat());
+/* From a run you can step sideways into a conversation with the agent behind it. */
+$("run-agent-label").addEventListener("click", () => {
+  const run = RUNS.find((item) => item.id === state.openRunId) || ACTIVE_RUN;
+  const agent = agentByName(run.agent);
+  if (agent) showChat(agent.id);
+});
+$("nav-all-runs").addEventListener("click", showRuns);
+$("runs-back").addEventListener("click", showRuns);
+$("chat-clear").addEventListener("click", () => { state.chats[state.chatWith] = []; renderChat(); });
+$("chat-input").addEventListener("input", (event) => {
+  const field = event.target;
+  field.style.height = "26px";
+  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  $("chat-send").disabled = !field.value.trim();
+});
+$("chat-input").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendChat();
+  }
+});
+
+$("chat-send").addEventListener("click", () => sendChat());
+
+/* Inside the assistant, back is a way out of it; on the product it belongs to
+   the surrounding application. */
+$("back-button").addEventListener("click", () => {
+  if (state.view !== "product") showProduct();
+});
+
+$("product-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const product = PRODUCT;
+  product.name = $("product-name").value.trim() || product.name;
+  product.status = $("product-status").value;
+  product.category = $("product-category").value.trim();
+  product.brand = $("product-brand").value.trim();
+  product.attribute = $("product-attribute").value.trim();
+  product.description = $("product-description").value.trim();
+  renderProduct();
+  notify("Product details saved.");
+});
+
+$("dock-input").addEventListener("input", (event) => {
+  const field = event.target;
+  field.style.height = "26px";
+  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  $("dock-send").disabled = !field.value.trim();
+});
+$("dock-input").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendChat(null, "dock");
+  }
+});
+$("dock-send").addEventListener("click", () => sendChat(null, "dock"));
+$("dock-add").addEventListener("click", (event) => {
+  event.stopPropagation();
+  if ($("dock-add").disabled) return;
+  $("dock-suggest").hidden = !$("dock-suggest").hidden;
+});
+$("assistant-menu-trigger").addEventListener("click", (event) => {
+  event.stopPropagation();
+  state.assistantMenuOpen = !state.assistantMenuOpen;
+  renderDock();
+});
+/* The rail is a preview of the conversation; expanding hands it to the full view. */
+$("dock-expand").addEventListener("click", () => {
+  const target = state.view === "product" ? state.dockChatWith : "general";
+  showChat(target === "general" ? null : target);
+});
+$("dock-close").addEventListener("click", () => { state.assistantOpen = false; renderDock(); });
+$("notice-dismiss").addEventListener("click", dismissToast);
+$("notice-undo").addEventListener("click", () => undoDecision(state.undoable || []));
+/* Reading the message should not race the timer away. */
+$("notice").addEventListener("mouseenter", () => clearTimeout(state.toastTimer));
+$("notice").addEventListener("mouseleave", () => {
+  clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(dismissToast, 2500);
+});
+
+$("assistant-toggle").addEventListener("click", () => {
+  state.assistantOpen = !state.assistantOpen;
+  renderDock();
+  if (state.view === "detail") render();
+});
+$("assistant-close").addEventListener("click", () => { state.assistantOpen = false; renderDock(); });
+
+/* Keeps the field one row tall until the instruction actually wraps. */
+function autoGrow() {
+  const field = $("instruction");
+  field.style.height = "26px";
+  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+}
+
+$("instruction").addEventListener("input", () => { autoGrow(); renderComposer(); });
+$("instruction").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    if (!$("composer-send").disabled) $("composer-send").click();
+  }
+});
+
+$("composer-add").addEventListener("click", (event) => {
+  event.stopPropagation();
+  $("composer-suggest").hidden = !$("composer-suggest").hidden;
+});
+document.addEventListener("click", (event) => {
+  ["composer-suggest", "dock-suggest"].forEach((id) => {
+    if (!$(id).hidden && !$(id).contains(event.target)) $(id).hidden = true;
+  });
+  if (state.assistantMenuOpen && !$("assistant-menu").contains(event.target)) {
+    state.assistantMenuOpen = false;
+    renderDock();
+  }
+});
+document.querySelectorAll("[data-suggest]").forEach((button) => {
+  button.addEventListener("click", () => {
+    $("instruction").value = button.dataset.suggest;
+    $("composer-suggest").hidden = true;
+    autoGrow();
+    renderComposer();
+    $("instruction").focus();
+  });
+});
+$("composer-send").addEventListener("click", () => {
+  const instruction = $("instruction").value.trim();
+  const ids = refineTargets();
+  if (!instruction || !ids.length) return;
+  sendRefinement(instruction, ids);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  if (state.panelMode === "single") { state.focused = null; state.panelMode = state.selected.size ? "bulk" : null; render(); }
+  else if (state.panelMode === "bulk") { state.selected.clear(); state.panelMode = null; render(); }
+});
+
+syncFilterInputs();
+showProduct();
+</script>
+</body>
+</html>
