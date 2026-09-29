@@ -3050,28 +3050,28 @@
           </div>
           <div class="detail-view" id="view-branding-assets-folder" data-view="branding-assets-folder">
             <header class="detail-header">
-              <h1 class="detail__title">All branding assets</h1>
+              <h1 class="detail__title">All branding</h1>
             </header>
             <hr class="detail__divider">
             <div class="order-section">
-              <span class="order-section__label">Branding assets</span>
+              <span class="order-section__label">Branding</span>
               <div class="order-panel">
                 <ul class="order-list" id="system-branding-assets-list"></ul>
-                <p class="order-list__empty is-hidden" id="system-branding-assets-empty">No branding assets yet.</p>
+                <p class="order-list__empty is-hidden" id="system-branding-assets-empty">No branding yet.</p>
               </div>
             </div>
           </div>
           <div class="detail-view" id="view-branding-asset" data-view="branding-asset">
             <header class="detail-header">
-              <h1 class="detail__title" id="branding-asset-title">Branding asset</h1>
-              <p class="detail__subtitle" id="branding-asset-subtitle">Branding asset</p>
+              <h1 class="detail__title" id="branding-asset-title">Branding</h1>
+              <p class="detail__subtitle" id="branding-asset-subtitle">Branding</p>
             </header>
             <hr class="detail__divider">
             <section class="form-section">
               <h2 class="form-section__heading">Basic information</h2>
               <div class="form-row">
                 <span class="form-row__label">Type</span>
-                <span class="form-row__value" id="branding-asset-type">Branding asset</span>
+                <span class="form-row__value" id="branding-asset-type">Branding</span>
               </div>
               <div class="form-row" id="branding-asset-name-row">
                 <label class="form-row__label" for="branding-asset-name"><span class="required">*</span> Name</label>
@@ -3079,8 +3079,8 @@
               </div>
             </section>
             <section class="form-section" aria-labelledby="branding-asset-branding-heading">
-              <h2 class="form-section__heading" id="branding-asset-branding-heading">Branding</h2>
-              <p class="form-section__hint" id="branding-asset-branding-hint" hidden>This logo is shown to every user, unless a more specific branding asset matches their user groups.</p>
+              <h2 class="form-section__heading" id="branding-asset-branding-heading">Appearance</h2>
+              <p class="form-section__hint" id="branding-asset-branding-hint" hidden>This logo is shown to every user, unless a more specific branding matches their user groups.</p>
               <div class="form-row form-row--stacked">
                 <div class="form-row__label-row">
                   <span class="form-row__label" id="branding-asset-branding-logo-label"><span class="required" id="branding-asset-logo-required">*</span> Logo</span>
@@ -3101,19 +3101,19 @@
                     </div>
                     <div class="config-group-logo-upload__meta">
                       <span class="config-group-logo-upload__meta-text" id="branding-asset-logo-meta-text"></span>
-                      <button type="button" class="text-btn" id="branding-asset-logo-clear">Remove</button>
+                      <button type="button" class="text-btn" id="branding-asset-logo-clear">Replace</button>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="form-row">
+              <div class="form-row" id="branding-asset-bg-row" hidden>
                 <label class="form-row__label" for="branding-asset-bg-hex">Logo background color</label>
                 <div class="config-group-branding__hex-field">
                   <input type="text" id="branding-asset-bg-hex" class="underline-input" value="#FFFFFF" autocomplete="off" spellcheck="false" aria-label="Logo background color">
                   <input type="color" class="config-group-branding__color-swatch" id="branding-asset-bg" value="#ffffff" aria-label="Pick logo background color">
                 </div>
               </div>
-              <div class="form-row">
+              <div class="form-row" id="branding-asset-actions-row" hidden>
                 <span class="form-row__label" aria-hidden="true"></span>
                 <div class="config-group-branding__actions">
                   <button type="button" class="text-btn config-group-branding__preview-link" id="branding-asset-preview-toggle">Preview branding</button>
@@ -3926,7 +3926,7 @@
                 </div>
                 <div class="config-group-logo-upload__meta">
                   <span class="config-group-logo-upload__meta-text" id="add-branding-logo-meta-text"></span>
-                  <button type="button" class="text-btn" id="add-branding-logo-clear">Remove</button>
+                  <button type="button" class="text-btn" id="add-branding-logo-clear">Replace</button>
                 </div>
               </div>
             </div>
@@ -4906,7 +4906,7 @@
           var id = uniqueBrandingAssetId(label || 'branding-asset');
           var rec = {
             id: id,
-            label: label || 'Branding asset',
+            label: label || 'Branding',
             isDefault: false,
             userGroups: normalizeUserGroupLabels(options.userGroups || []),
             brandingLogo: options.brandingLogo || null,
@@ -5052,7 +5052,7 @@
 
         function brandingPayloadFromFields(fields) {
           var hasCustomLogo = !!fields.brandingLogo;
-          var backgroundColor = fields.brandingBackgroundColor || null;
+          var backgroundColor = hasCustomLogo ? (fields.brandingBackgroundColor || null) : null;
           return {
             logoUrl: fields.brandingLogo || APP_DEFAULT_LOGO,
             backgroundColor: backgroundColor,
@@ -5575,6 +5575,7 @@
       }
 
       function syncBrandingHeaderPreviewControls(asset) {
+        var actionsRow = document.getElementById('branding-asset-actions-row');
         var toggleBtn = document.getElementById('branding-asset-preview-toggle');
         var resetBtn = document.getElementById('branding-asset-reset-default');
         var bar = document.getElementById('branding-preview-bar');
@@ -5583,19 +5584,21 @@
         var isDefault = !!(asset && ConfigurationStore.isDefaultBrandingAsset(asset.id));
         var fields = asset ? ConfigurationStore.getEffectiveBrandingAssetFields(asset.id) : null;
         var hasCustomLogo = !!(fields && fields.brandingLogo);
-        var canPreview = !!(asset && (!isDefault || hasCustomLogo));
+        var canPreview = !!(asset && hasCustomLogo);
 
         if (isActive && !canPreview) {
           closeBrandingHeaderPreview();
           return;
         }
 
+        if (actionsRow) actionsRow.hidden = !canPreview;
         if (toggleBtn) {
           toggleBtn.textContent = isActive ? 'Close branding preview' : 'Preview branding';
           toggleBtn.disabled = !canPreview;
+          toggleBtn.hidden = !canPreview;
         }
         if (resetBtn) {
-          resetBtn.hidden = !isDefault;
+          resetBtn.hidden = !(isDefault && hasCustomLogo);
           resetBtn.disabled = !(isDefault && hasCustomLogo);
         }
         if (bar) bar.hidden = !isActive;
@@ -5618,10 +5621,7 @@
 
       function openBrandingHeaderPreview(assetId) {
         if (!assetId || !ConfigurationStore.findBrandingAsset(assetId)) return;
-        if (ConfigurationStore.isDefaultBrandingAsset(assetId) &&
-            !ConfigurationStore.getEffectiveBrandingAssetFields(assetId).brandingLogo) {
-          return;
-        }
+        if (!ConfigurationStore.getEffectiveBrandingAssetFields(assetId).brandingLogo) return;
         brandingHeaderPreviewAssetId = assetId;
         var asset = ConfigurationStore.findBrandingAsset(assetId);
         syncBrandingHeaderPreviewControls(asset);
@@ -10811,7 +10811,7 @@
           labelName.textContent = 'Name';
           nameInput.value = '';
         } else if (mode === 'branding-asset') {
-          titleEl.textContent = 'Add branding asset';
+          titleEl.textContent = 'Add branding';
           labelName.textContent = 'Name';
           nameInput.value = '';
           if (brandingField) brandingField.classList.remove('is-hidden');
@@ -11376,10 +11376,7 @@
           if (clearLogoBtn && !clearLogoBtn._brandingAddBound) {
             clearLogoBtn._brandingAddBound = true;
             clearLogoBtn.addEventListener('click', function () {
-              addBrandingDraft.brandingLogo = null;
-              addBrandingDraft.brandingLogoMeta = null;
-              renderAddBrandingModal();
-              syncAddBrandingModalSubmit();
+              if (upload) upload.click();
             });
           }
 
@@ -11583,8 +11580,8 @@
           var conditionsHeading = document.getElementById('branding-asset-conditions-heading');
           var logoRequired = document.getElementById('branding-asset-logo-required');
 
-          if (typeEl) typeEl.textContent = isDefault ? 'Default branding' : 'Branding asset';
-          if (subtitle) subtitle.textContent = isDefault ? 'Default branding' : 'Branding asset';
+          if (typeEl) typeEl.textContent = 'Branding';
+          if (subtitle) subtitle.textContent = 'Branding';
           if (nameInput) {
             nameInput.value = asset.label;
             nameInput.disabled = false;
@@ -11668,7 +11665,7 @@
             previewImg.alt = asset.label + ' logo';
             var previewWrap = previewImg.closest('.config-group-logo-upload__preview');
             if (previewWrap) {
-              if (branding.brandingBackgroundColor) {
+              if (hasCustomLogo && branding.brandingBackgroundColor) {
                 previewWrap.classList.remove('config-group-logo-upload__preview--checkered');
                 previewWrap.style.backgroundColor = branding.brandingBackgroundColor;
               } else {
@@ -11691,17 +11688,14 @@
             }
           }
           if (clearLogoBtn) {
-            if (isDefault && !hasCustomLogo) {
-              clearLogoBtn.textContent = 'Replace';
-              clearLogoBtn.disabled = false;
-            } else {
-              clearLogoBtn.textContent = 'Remove';
-              clearLogoBtn.disabled = !hasCustomLogo;
-            }
+            clearLogoBtn.textContent = 'Replace';
+            clearLogoBtn.disabled = !showLogo;
           }
 
-          var bgDisabled = !showLogo;
+          var bgRow = document.getElementById('branding-asset-bg-row');
+          var bgDisabled = !hasCustomLogo;
           var bgHex = displayBrandingBgHex(bgDisabled ? null : branding.brandingBackgroundColor);
+          if (bgRow) bgRow.hidden = bgDisabled;
           if (bgHexInput) {
             bgHexInput.value = bgHex;
             bgHexInput.disabled = bgDisabled;
@@ -11990,25 +11984,12 @@
           if (clearLogoBtn) {
             clearLogoBtn.addEventListener('click', function () {
               if (selected.type !== 'branding-asset') return;
-              var branding = ConfigurationStore.getEffectiveBrandingAssetFields(selected.assetId);
-              if (ConfigurationStore.isDefaultBrandingAsset(selected.assetId) && !branding.brandingLogo) {
-                openLogoPicker();
-                return;
-              }
-              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
-                brandingLogo: null,
-                brandingLogoMeta: null,
-                brandingBackgroundColor: null
-              });
-              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
-              renderBrandingAssetBranding(asset);
-              refreshBrandingHeaderIfPreviewing(selected.assetId);
-              markUnsaved();
+              if (clearLogoBtn.disabled) return;
+              openLogoPicker();
             });
           }
 
           function brandingAssetAllowsBackground(assetId) {
-            if (ConfigurationStore.isDefaultBrandingAsset(assetId)) return true;
             return !!ConfigurationStore.getEffectiveBrandingAssetFields(assetId).brandingLogo;
           }
 
@@ -12126,7 +12107,7 @@
           html += '</ul></li>';
           html += '</ul></li>';
           html += '<li data-expanded="' + treeState.brandingAssetsExpanded + '">';
-          html += treeItem('branding-assets-folder', 'branding-assets', 'Branding assets', treeState.brandingAssetsExpanded, true);
+          html += treeItem('branding-assets-folder', 'branding-assets', 'Branding', treeState.brandingAssetsExpanded, true);
           html += '<ul class="tree-children' + (treeState.brandingAssetsExpanded ? '' : ' is-collapsed') + '">';
           html += renderBrandingAssetBranch();
           html += '</ul></li>';
@@ -12234,7 +12215,7 @@
             return [{ mode: 'configuration-group', label: 'Configuration group' }];
           }
           if (selected.type === 'branding-assets-folder' || selected.type === 'branding-asset') {
-            return [{ mode: 'branding-asset', label: 'Branding asset' }];
+            return [{ mode: 'branding-asset', label: 'Branding' }];
           }
           return [];
         }
@@ -12245,7 +12226,7 @@
 
         function getAddDisabledTip() {
           if (isAddEnabled()) return '';
-          return 'Select Configuration groups or Branding assets in the sidebar to add an item.';
+          return 'Select Configuration groups or Branding in the sidebar to add an item.';
         }
 
         function getRemoveDisabledTip() {
@@ -12256,19 +12237,19 @@
           }
           if (selected.type === 'branding-asset' &&
               ConfigurationStore.isDefaultBrandingAsset(selected.assetId)) {
-            return 'Default branding asset cannot be removed';
+            return 'Default branding cannot be removed';
           }
           if (selected.type === 'configuration-group') {
             return 'The selected configuration group cannot be removed.';
           }
           if (selected.type === 'branding-asset') {
-            return 'The selected branding asset cannot be removed.';
+            return 'The selected branding cannot be removed.';
           }
           if (selected.type === 'main-settings' || selected.type === 'system-root' ||
               selected.type === 'quick-links') {
-            return 'Select a configuration group or branding asset in the sidebar to remove it.';
+            return 'Select a configuration group or branding in the sidebar to remove it.';
           }
-          return 'Select a configuration group or branding asset to remove it.';
+          return 'Select a configuration group or branding to remove it.';
         }
 
         function canRemove() {
@@ -12318,7 +12299,7 @@
           renderBrandingAssetsFolderView();
           updateToolbarButtons();
           markUnsaved();
-          showToast('Branding asset "' + name + '" added', 'success');
+          showToast('Branding "' + name + '" added', 'success');
           return true;
         }
 
@@ -12333,7 +12314,7 @@
             var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
             if (!asset || ConfigurationStore.isDefaultBrandingAsset(asset.id)) return;
             document.getElementById('delete-modal-message').textContent =
-              'Are you sure you want to delete the branding asset "' + asset.label + '"?';
+              'Are you sure you want to delete the branding "' + asset.label + '"?';
             cascade.classList.add('is-hidden');
             document.getElementById('delete-modal-overlay').classList.add('is-open');
             pendingSystemDelete = true;
@@ -12376,7 +12357,7 @@
             renderTree();
             updateToolbarButtons();
             markUnsaved();
-            showToast('Branding asset removed', 'success');
+            showToast('Branding removed', 'success');
             return true;
           }
           if (!pendingDeleteGroupId) return false;
