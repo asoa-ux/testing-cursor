@@ -172,16 +172,13 @@
     return state.viewConfig[type] || state.viewConfig.product;
   }
 
-  function tableFields(type) {
+  function tableFields() {
     if (isNamedViews()) return (state.viewFields || ALL_FIELDS.all).slice();
-    return viewCfg(type).fields.slice();
+    return ((state.viewConfig.all && state.viewConfig.all.fields) || []).slice();
   }
 
   function cardFields(type) {
-    var list;
-    if (isNamedViews()) list = state.viewFields || ALL_FIELDS.all;
-    else if (state.tab === "all") list = viewCfg("all").fields;
-    else list = viewCfg(type).fields;
+    var list = isNamedViews() ? (state.viewFields || ALL_FIELDS.all) : tableFields();
     var skip = { name: true, path: true, identity: true, type: true };
     var allowed = ALL_FIELDS[type] || [];
     var fields = (list || []).filter(function (k) {
@@ -430,10 +427,11 @@
     viewMode: "table",
     sort: { key: "", dir: "asc", key2: "" },
     savedId: null,
-    savedLayout: "tabs",
+    savedLayout: "off",
     typePlacement: "filters",
     startMode: "empty",
     customizeMode: "session",
+    phase: 1,
     viewId: "view-default",
     workingSearch: null,
     sessionDrafts: {},
@@ -756,9 +754,12 @@
       });
     });
     var html = '<header class="facets-head"><strong>Filters</strong>' +
-      '<button type="button" class="icon-quiet" id="btn-facets-config" aria-label="Add filters" aria-pressed="' + String(facetUi.open) + '">' +
-      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.1" stroke="currentColor" stroke-width="1.3"/><path d="M8 2.4v1.4M8 12.2v1.4M2.4 8h1.4M12.2 8h1.4M4.1 4.1l1 1M10.9 10.9l1 1M11.9 4.1l-1 1M5.1 10.9l-1 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
-      "</button></header>";
+      (savedSearchesOn()
+        ? '<button type="button" class="icon-quiet" id="btn-facets-config" aria-label="Add filters" aria-pressed="' + String(facetUi.open) + '">' +
+          '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.1" stroke="currentColor" stroke-width="1.3"/><path d="M8 2.4v1.4M8 12.2v1.4M2.4 8h1.4M12.2 8h1.4M4.1 4.1l1 1M10.9 10.9l1 1M11.9 4.1l-1 1M5.1 10.9l-1 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
+          "</button>"
+        : "") +
+      "</header>";
     if (chips.length) {
       html += '<div class="chip-block"><button type="button" class="linkish" id="clear-all">Clear all</button><div class="chips">';
       chips.forEach(function (c) {
@@ -782,7 +783,9 @@
       html += '<div class="facets-empty">' +
         (noHits
           ? "<p>No filters to show</p><span>There are no matching items, so there is nothing to refine. Change or clear the search.</span>"
-          : "<p>No filters to show</p><span>Use the gear to add filters, or search for items that have attributes to refine.</span>") +
+          : "<p>No filters to show</p><span>" + (savedSearchesOn()
+            ? "Use the gear to add filters, or search for items that have attributes to refine."
+            : "Search for items that have attributes to refine.") + "</span>") +
         "</div>";
     }
     document.getElementById("facets").innerHTML = html;
@@ -1055,7 +1058,11 @@
   }
 
   function isTabsLayout() {
-    return state.savedLayout === "tabs";
+    return savedSearchesOn() && state.savedLayout === "tabs";
+  }
+
+  function savedSearchesOn() {
+    return state.phase >= 3;
   }
 
   function isNamedViews() {
@@ -1154,13 +1161,44 @@
     if (current) state.viewFields = current.fields.slice();
   }
 
-  function setTypePlacement(placement) {
-    if (state.typePlacement === placement) return;
+  function phaseHint(phase) {
+    if (phase === 2) return "Phase 1, with Views instead of Customize.";
+    if (phase === 3) return "Phase 2, with saved searches as tabs and configurable filters.";
+    return "Super types in Filters. No items until there is a criterion. Customize. No saved searches.";
+  }
+
+  function applyPhase(phase) {
+    phase = Number(phase);
+    if (state.phase === phase) return;
+    state.phase = phase;
+    state.typePlacement = "filters";
+    state.startMode = "empty";
     var tab = state.tab;
     var facets = cloneFacets(state.facets);
-    state.typePlacement = placement;
     applyScopeToMode(tab, facets);
     syncFacetConfigForMode();
+    var views = phase >= 2;
+    if (views && state.customizeMode !== "views") syncMatchingNamedViews();
+    state.customizeMode = views ? "views" : "session";
+    state.savedLayout = phase >= 3 ? "tabs" : "off";
+    if (viewUi.open) {
+      viewUi.open = false;
+      document.getElementById("view-popover").classList.remove("is-open");
+    }
+    if (customize.open && views) {
+      customize.open = false;
+      customize.draft = null;
+      document.getElementById("customize-modal").classList.remove("is-open");
+    }
+    if (!savedSearchesOn()) {
+      savedUi.open = false;
+      document.getElementById("saved-popover").classList.remove("is-open");
+      tabUi.menu = false;
+      tabUi.infoId = null;
+      document.getElementById("tab-menu").hidden = true;
+      document.getElementById("tab-info").hidden = true;
+      if (facetUi.open) closeFacetPicker(false);
+    }
     render();
   }
 
@@ -1310,14 +1348,10 @@
     var el = document.getElementById("session-tabs");
     var tabs = isTabsLayout();
     document.querySelector(".app").classList.toggle("saved-as-tabs", tabs);
-    document.getElementById("lab-saved-menu").classList.toggle("on", !tabs);
-    document.getElementById("lab-saved-tabs").classList.toggle("on", tabs);
-    document.getElementById("lab-start-empty").classList.toggle("on", state.startMode !== "all");
-    document.getElementById("lab-start-all").classList.toggle("on", state.startMode === "all");
-    document.getElementById("lab-custom-session").classList.toggle("on", !isNamedViews());
-    document.getElementById("lab-custom-views").classList.toggle("on", isNamedViews());
-    document.getElementById("lab-type-tabs").classList.toggle("on", !isTypeFilters());
-    document.getElementById("lab-type-filters").classList.toggle("on", isTypeFilters());
+    [1, 2, 3].forEach(function (n) {
+      document.getElementById("lab-phase-" + n).classList.toggle("on", state.phase === n);
+    });
+    document.getElementById("lab-phase-hint").textContent = phaseHint(state.phase);
     el.hidden = !tabs;
     if (!tabs) {
       tabUi.infoId = null;
@@ -1679,6 +1713,8 @@
     var saving = !emptyIdle && savedUi.open && savedUi.anchor === "toolbar";
     var btn = document.getElementById("btn-saved");
     var loaded = loadedSavedSearch();
+    btn.hidden = !savedSearchesOn();
+    document.getElementById("toolbar-split-saved").hidden = !savedSearchesOn();
     document.getElementById("btn-saved-label").textContent = "Save search";
     document.getElementById("btn-saved-caret").hidden = !loaded;
     btn.disabled = emptyIdle;
@@ -1815,7 +1851,7 @@
         html += '<button type="button" class="search-suggest-item" data-recent-i="' + i + '">' + escapeHtml(q) + "</button>";
       });
     }
-    if (saved.length && !isTabsLayout()) {
+    if (saved.length && savedSearchesOn() && !isTabsLayout()) {
       html += '<p class="search-suggest-label">Saved searches</p>';
       saved.forEach(function (s) {
         html += '<button type="button" class="search-suggest-item" data-saved="' + s.id + '">' + escapeHtml(s.name) + "</button>";
@@ -2404,7 +2440,7 @@
   function closeCustomize(apply) {
     if (apply && customize.draft) {
       if (isNamedViews()) state.viewFields = (customize.draft.fields || []).slice();
-      else state.viewConfig = cloneConfig(customize.draft);
+      else state.viewConfig.all.fields = (customize.draft.fields || []).slice();
       ensureSort();
     }
     customize.open = false;
@@ -2418,21 +2454,14 @@
     if (state.detailsOpen) return;
     if (facetUi.open) closeFacetPicker(false);
     customize.open = true;
-    customize.type = state.tab !== "all" ? state.tab : "all";
+    customize.type = "all";
     customize.folder = "system";
     customize.groupsOpen = false;
     customize.pane = "browse";
     customize.query = "";
-    if (isNamedViews()) {
-      customize.type = "all";
-      customize.draft = { fields: (state.viewFields || ALL_FIELDS.all).slice() };
-    } else {
-      if (isTypeFilters()) {
-        var selectedTypes = state.facets.type || [];
-        customize.type = selectedTypes.length === 1 ? selectedTypes[0] : "all";
-      }
-      customize.draft = cloneConfig(state.viewConfig);
-    }
+    customize.draft = {
+      fields: (isNamedViews() ? (state.viewFields || ALL_FIELDS.all) : state.viewConfig.all.fields).slice(),
+    };
     renderCustomize();
     document.getElementById("customize-modal").classList.add("is-open");
     document.getElementById("btn-customize").classList.add("pressed");
@@ -2471,11 +2500,10 @@
 
   function draftCfg() {
     if (!customize.draft) return { fields: [] };
-    if (isNamedViews()) return customize.draft;
-    return customize.draft[customize.type] || { fields: [] };
+    return customize.draft;
   }
 
-  function selectedPanelHtml(fields, allMode) {
+  function selectedPanelHtml(fields) {
     var selectedRows = fields.map(function (k, i) {
       var onCard = k !== "name" && k !== "path" && k !== "identity" && k !== "type";
       return '<li class="pick-row selected-row' + (onCard ? " on-card" : "") + '" data-field="' + k + '">' +
@@ -2484,12 +2512,9 @@
         '<button type="button" data-move="down" ' + (i === fields.length - 1 ? "disabled" : "") + " aria-label=\"Move down\">↓</button>" +
         '<button type="button" data-remove="' + k + '" aria-label="Remove">✕</button></li>';
     }).join("");
-    var warn = allMode
-      ? "These columns appear in the All table. Matching attributes also appear on cards for each type (up to " + CARD_MAX_ATTRS + ")."
-      : "Name is the card title. The first " + CARD_MAX_ATTRS + " other selected fields appear on search cards. Extra fields still appear in the table.";
-    if (isNamedViews()) {
-      warn = "Name is the card title. Other selected fields appear as table columns and, when they apply to a type, on cards.";
-    }
+    var warn = isNamedViews()
+      ? "Name is the card title. Other selected fields appear as table columns and, when they apply to a type, on cards."
+      : "Name is the card title. The first " + CARD_MAX_ATTRS + " other selected fields that apply to an item appear on cards. Extra fields still appear in the table.";
     return '<aside class="picker-selected">' +
       "<header><h3>Selected items</h3></header>" +
       '<p class="picker-warn"><span>⚠</span> ' + warn + "</p>" +
@@ -2521,38 +2546,14 @@
     return matches.map(function (k) { return fieldRow(k, fields.indexOf(k) !== -1); }).join("");
   }
 
-  var CUSTOMIZE_TYPES = ["all", "product", "asset", "classification", "entity"];
-
-  function setCustomizeType(type) {
-    customize.type = type;
-    customize.folder = "system";
-    customize.groupsOpen = false;
-    renderCustomize();
-    if (customize.pane === "search") {
-      var input = document.getElementById("picker-search");
-      if (input) input.focus();
-    }
-  }
-
-  function typeButtonsHtml() {
-    return CUSTOMIZE_TYPES.map(function (t) {
-      return '<button type="button" class="' + (customize.type === t ? "on" : "") + '" data-ctype="' + t + '">' + TYPE_LABELS[t] + "</button>";
-    }).join("");
-  }
-
   function renderCustomize() {
     var title = document.getElementById("customize-title");
-    if (isNamedViews()) {
-      title.textContent = "Add columns to this view";
-    } else {
-      title.innerHTML = 'Add columns to Search for <span id="customize-type-label">' + TYPE_LABELS[customize.type].toUpperCase() + "</span>";
-    }
+    title.textContent = isNamedViews() ? "Add columns to this view" : "Add columns to Search";
     Array.prototype.forEach.call(document.querySelectorAll("#picker-tabs [data-pane]"), function (btn) {
       btn.classList.toggle("on", btn.getAttribute("data-pane") === customize.pane);
     });
-    var allMode = customize.type === "all" && !isNamedViews();
     var fields = draftCfg().fields;
-    var selected = selectedPanelHtml(fields, allMode);
+    var selected = selectedPanelHtml(fields);
     var main;
     if (customize.pane === "search") {
       var matches = searchMatches();
@@ -2590,10 +2591,8 @@
           '<footer class="pick-count">' + available.length + " items</footer>" +
         "</section>";
     }
-    var rail = isNamedViews() ? "" : '<nav class="type-switcher-rail" aria-label="Object type"><span>Object type</span>' + typeButtonsHtml() + "</nav>";
-    var unified = isNamedViews() ? " is-unified" : "";
     document.getElementById("customize-body").innerHTML =
-      '<div class="picker-layout is-column' + unified + (customize.pane === "search" ? " is-search" : "") + '">' + rail + main + selected + "</div>";
+      '<div class="picker-layout is-column is-unified' + (customize.pane === "search" ? " is-search" : "") + '">' + main + selected + "</div>";
   }
 
   function redrawCustomize() {
@@ -2684,6 +2683,7 @@
   }
 
   function openFacetPicker() {
+    if (!savedSearchesOn()) return;
     if (customize.open) closeCustomize(false);
     facetUi.open = true;
     facetUi.draft = state.facetConfig.slice();
@@ -2737,15 +2737,6 @@
   document.getElementById("btn-customize-close").addEventListener("click", function () { closeCustomize(false); });
   document.getElementById("btn-customize-cancel").addEventListener("click", function () { closeCustomize(false); });
   document.getElementById("btn-customize-apply").addEventListener("click", function () { closeCustomize(true); });
-  document.getElementById("btn-customize-reset").addEventListener("click", function () {
-    if (isNamedViews()) {
-      var v = loadedNamedView();
-      customize.draft = { fields: (v ? v.fields : ALL_FIELDS.all).slice() };
-    } else {
-      customize.draft = cloneConfig(DEFAULT_VIEW_CONFIG);
-    }
-    renderCustomize();
-  });
   document.getElementById("btn-facet-close").addEventListener("click", function () { closeFacetPicker(false); });
   document.getElementById("btn-facet-cancel").addEventListener("click", function () { closeFacetPicker(false); });
   document.getElementById("btn-facet-apply").addEventListener("click", function () { closeFacetPicker(true); });
@@ -2794,10 +2785,6 @@
   });
   document.getElementById("customize-modal").addEventListener("click", function (e) {
     if (e.target.id === "customize-modal") closeCustomize(false);
-    var typeBtn = e.target.closest("[data-ctype]");
-    if (typeBtn) {
-      setCustomizeType(typeBtn.getAttribute("data-ctype"));
-    }
   });
   document.getElementById("picker-tabs").addEventListener("click", function (e) {
     var btn = e.target.closest("[data-pane]");
@@ -2961,34 +2948,9 @@
     state.related = null;
     render();
   });
-  document.getElementById("lab-saved-menu").addEventListener("click", function () {
-    setSavedLayout("menu");
-  });
-  document.getElementById("lab-saved-tabs").addEventListener("click", function () {
-    setSavedLayout("tabs");
-  });
-  document.getElementById("lab-start-empty").addEventListener("click", function () {
-    if (state.startMode === "empty") return;
-    state.startMode = "empty";
-    render();
-  });
-  document.getElementById("lab-start-all").addEventListener("click", function () {
-    if (state.startMode === "all") return;
-    state.startMode = "all";
-    render();
-  });
-  document.getElementById("lab-custom-session").addEventListener("click", function () {
-    setCustomizeMode("session");
-  });
-  document.getElementById("lab-custom-views").addEventListener("click", function () {
-    setCustomizeMode("views");
-  });
-  document.getElementById("lab-type-tabs").addEventListener("click", function () {
-    setTypePlacement("tabs");
-  });
-  document.getElementById("lab-type-filters").addEventListener("click", function () {
-    setTypePlacement("filters");
-  });
+  document.getElementById("lab-phase-1").addEventListener("click", function () { applyPhase(1); });
+  document.getElementById("lab-phase-2").addEventListener("click", function () { applyPhase(2); });
+  document.getElementById("lab-phase-3").addEventListener("click", function () { applyPhase(3); });
   document.getElementById("session-tabs").addEventListener("click", function (e) {
     if (e.target.closest("[data-tab-rename]")) return;
     var info = e.target.closest("[data-tab-info]");
@@ -3061,6 +3023,7 @@
   });
   document.getElementById("facets").addEventListener("click", function (e) {
     if (e.target.closest("#btn-facets-config")) {
+      if (!savedSearchesOn()) return;
       if (facetUi.open) closeFacetPicker(false);
       else openFacetPicker();
       return;
@@ -3096,7 +3059,7 @@
   });
   document.getElementById("btn-saved").addEventListener("click", function (e) {
     e.stopPropagation();
-    if (e.currentTarget.disabled) return;
+    if (!savedSearchesOn() || e.currentTarget.disabled) return;
     if (savedUi.open && savedUi.anchor === "toolbar") closeSavedPopover();
     else openSavedPopover("toolbar");
   });

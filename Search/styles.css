@@ -768,7 +768,10 @@ button {
 }
 
 #btn-customize[hidden],
-#btn-view[hidden] {
+#btn-view[hidden],
+#btn-saved[hidden],
+#btn-view-gallery[hidden],
+.toolbar-split[hidden] {
   display: none !important;
 }
 

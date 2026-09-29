@@ -4,27 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search</title>
-    <link rel="stylesheet" href="styles.css?v=tab-accent" />
+    <link rel="stylesheet" href="styles.css?v=no-gallery" />
   </head>
   <body>
     <div class="app">
       <div class="lab-bar">
         <span class="lab-tag">Explore</span>
-        <span>Saved searches as</span>
-        <button type="button" id="lab-saved-menu">Menu</button>
-        <button type="button" id="lab-saved-tabs">Tabs</button>
-        <span class="lab-split"></span>
-        <span>Super types as</span>
-        <button type="button" id="lab-type-tabs">Tabs</button>
-        <button type="button" id="lab-type-filters">Filters</button>
-        <span class="lab-split"></span>
-        <span>No criteria</span>
-        <button type="button" id="lab-start-empty">Empty</button>
-        <button type="button" id="lab-start-all">All items</button>
-        <span class="lab-split"></span>
-        <button type="button" id="lab-custom-session">Customize</button>
-        <button type="button" id="lab-custom-views">Views</button>
-        <span class="lab-hint">Saved-search tabs and Search-in tabs are separate. Views: one column layout for all types.</span>
+        <button type="button" id="lab-phase-1">Phase 1</button>
+        <button type="button" id="lab-phase-2">Phase 2</button>
+        <button type="button" id="lab-phase-3">Phase 3</button>
+        <span class="lab-hint" id="lab-phase-hint"></span>
       </div>
       <header class="topbar">
         <div class="topbar-left">
@@ -78,7 +67,7 @@
           <svg viewBox="0 0 20 20" fill="none"><path d="M6.5 4v12M6.5 4 4 6.5M6.5 4 9 6.5M13.5 16V4M13.5 16 11 13.5M13.5 16l2.5-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Sort
         </button>
-        <span class="toolbar-split" aria-hidden="true"></span>
+        <span class="toolbar-split" id="toolbar-split-saved" aria-hidden="true"></span>
         <button type="button" class="tbtn" id="btn-saved" aria-pressed="false">
           <svg viewBox="0 0 20 20" fill="none"><path d="M5 3.5h10v13l-5-3.2-5 3.2v-13Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
           <span class="tbtn-label">
@@ -127,7 +116,7 @@
               <button type="button" class="view-btn" id="btn-view-cards" aria-label="Card view" title="Card view">
                 <svg viewBox="0 0 20 20" fill="none"><rect x="4" y="3.5" width="12" height="3.4" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="8.3" width="12" height="3.4" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="13.1" width="12" height="3.4" rx="0.6" stroke="currentColor" stroke-width="1.3"/></svg>
               </button>
-              <button type="button" class="view-btn" id="btn-view-gallery" aria-label="Gallery view" title="Gallery view">
+              <button type="button" class="view-btn" id="btn-view-gallery" aria-label="Gallery view" title="Gallery view" hidden>
                 <svg viewBox="0 0 20 20" fill="none"><rect x="3.5" y="3.5" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="10.9" y="3.5" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="3.5" y="10.9" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/><rect x="10.9" y="10.9" width="5.6" height="5.6" rx="0.6" stroke="currentColor" stroke-width="1.3"/></svg>
               </button>
               <button type="button" class="view-btn" id="btn-view-table" aria-label="Table view" title="Table view">
@@ -273,7 +262,7 @@
       <div class="modal-overlay" id="customize-modal">
         <div class="modal picker" role="dialog" aria-modal="true" aria-labelledby="customize-title">
           <header class="dialog-head">
-            <h2 id="customize-title">Add columns to Search for <span id="customize-type-label">PRODUCT</span></h2>
+            <h2 id="customize-title">Add columns to Search</h2>
             <button type="button" class="icon-quiet" id="btn-customize-close" aria-label="Close">✕</button>
           </header>
           <div class="picker-tabs" id="picker-tabs">
@@ -282,7 +271,6 @@
           </div>
           <div class="picker-body" id="customize-body"></div>
           <footer class="dialog-foot picker-foot">
-            <button type="button" class="linkish" id="btn-customize-reset">Restore defaults</button>
             <span class="dialog-foot-spacer"></span>
             <button type="button" class="btn-text" id="btn-customize-cancel">Cancel</button>
             <button type="button" class="btn-apply" id="btn-customize-apply">Apply</button>
@@ -290,6 +278,6 @@
         </div>
       </div>
     </div>
-    <script src="app.js?v=defaults-tabs-filters"></script>
+    <script src="app.js?v=phase3-filters"></script>
   </body>
 </html>
