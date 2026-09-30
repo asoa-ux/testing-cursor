@@ -74,7 +74,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .dock > .assistant { flex: 1; min-height: 0; border-radius: 0; box-shadow: none; }
 .dock > .assistant[hidden] { display: none; }
 .app-nav { width: 240px; flex-shrink: 0; overflow: auto; padding: 14px 12px; background: #fff; border-right: 1px solid var(--line); }
-.product-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.product-view, .products-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.products-scroll { flex: 1; min-height: 0; overflow: auto; background: #fff; }
+.products-table { width: 100%; border-collapse: collapse; }
+.products-table th, .products-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+.products-table th { position: sticky; top: 0; background: #f8fafc; color: var(--muted); font-size: 12px; font-weight: 600; }
+.products-table th.check, .products-table td.check { width: 42px; }
+.products-table tbody tr { cursor: pointer; }
+.products-table tbody tr:hover td { background: #f8fafc; }
+.products-table tbody tr.active td { background: var(--blue-soft); box-shadow: inset 0 1px 0 #dbeafe, inset 0 -1px 0 #dbeafe; }
+.products-table tbody tr.active td:first-child { box-shadow: inset 3px 0 0 var(--blue), inset 0 1px 0 #dbeafe, inset 0 -1px 0 #dbeafe; }
+.products-table .product-name { display: block; font-weight: 600; }
+.products-table .product-note { display: block; color: var(--muted); font-size: 12px; }
+.thread-mark { color: var(--violet); font-size: 12px; font-weight: 600; }
+.thread-mark.quiet { color: var(--muted); font-weight: 500; }
+.products-caption { color: var(--muted); font-size: 12px; }
 .product-toolbar { display: flex; align-items: center; gap: 12px; flex-shrink: 0; height: 48px; padding: 0 20px; background: #fff; border-bottom: 1px solid var(--line); }
 .product-crumbs { color: var(--muted); font-size: 12px; }
 .product-crumbs em { font-style: normal; margin: 0 5px; color: #cbd5e1; }
@@ -105,6 +119,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-item i { font-style: normal; color: #94a3b8; }
 .nav-item.active i { color: #1d4ed8; }
 .nav-group { margin-top: 18px; }
+.assistant-menu-general { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .nav-group > b { display: block; padding: 0 10px 6px; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
 .nav-run { display: block; width: 100%; text-align: left; padding: 7px 10px; border: 0; border-radius: var(--radius); background: transparent; }
 .nav-run:hover { background: #f1f5f9; }
@@ -112,7 +127,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-run span { display: flex; align-items: center; gap: 7px; color: #334155; font-weight: 500; }
 .nav-run.active span { color: #1d4ed8; }
 .nav-run small { display: block; padding-left: 14px; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#nav-agents .nav-run small { padding-left: 25px; }
+#nav-agents .nav-run small, #nav-conversations .nav-run small { padding-left: 25px; }
 .nav-avatar { flex-shrink: 0; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: var(--radius); background: var(--violet-soft); color: var(--violet); font-size: 10px; font-style: normal; font-weight: 600; }
 /* Blue means there is something to know, grey means work in flight, pale grey
    means finished and quiet. */
@@ -123,6 +138,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-dot.completed { visibility: hidden; }
 .nav-more { display: block; width: 100%; text-align: left; padding: 6px 10px; border: 0; background: transparent; color: var(--blue); font-size: 13px; font-weight: 500; }
 .nav-more:hover { text-decoration: underline; }
+.nav-more.active { font-weight: 600; }
 .header-search { width: 320px; }
 
 /* The chat is a centred thread. A header appears only when you opened a named agent. */
@@ -131,7 +147,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .chat-head b { display: block; font-weight: 600; }
 .chat-head small { display: block; color: var(--muted); font-size: 12px; }
 .chat-head small[hidden] { display: none; }
-.chat-head #chat-clear { margin-left: auto; }
+.chat-head #chat-clear { margin-left: auto; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: #94a3b8; }
+.chat-head #chat-clear:hover, #dock-delete:hover { background: #f1f5f9; color: #475569; }
+#dock-delete { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border-radius: var(--radius); }
+.chat-head #chat-clear[hidden], #dock-delete[hidden] { display: none; }
 .chat-avatar { width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-size: 14px; font-style: normal; font-weight: 600; }
 .chat-scroll { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; justify-content: center; padding: 28px; }
 .chat-scroll.has-thread { justify-content: flex-start; }
@@ -151,6 +170,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .chat-thread .msg.user { margin-left: auto; }
 .chat-composer { flex-shrink: 0; width: 100%; max-width: 720px; margin: 0 auto; padding: 0 28px 20px; }
 
+.agents-page { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 24px 28px; overflow: auto; }
+.agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.agent-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 196px; padding: 18px; border: 0; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); text-align: left; }
+.agent-tile:hover { box-shadow: var(--shadow), 0 0 0 1px #bfdbfe; }
+.agent-tile > i { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 8px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-style: normal; font-size: 15px; font-weight: 600; }
+.agent-tile strong { font-size: 15px; font-weight: 600; }
+.agent-tile small { color: var(--muted); font-size: 12px; }
+.agent-tile p { margin: 6px 0 12px; color: #475569; font-size: 13px; line-height: 1.5; }
+.agent-tile .agent-chat { margin-top: auto; color: var(--blue); font-size: 13px; font-weight: 500; }
+.conversation-list { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+.conversation-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border: 0; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); text-align: left; }
+.conversation-row:hover { box-shadow: var(--shadow), 0 0 0 1px #bfdbfe; }
+.conversation-row > i { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-style: normal; font-size: 15px; font-weight: 600; }
+.conversation-row strong { display: block; font-size: 14px; font-weight: 600; }
+.conversation-row small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
 .runs-page { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 24px 28px; overflow: auto; }
 .runs-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
 .runs-heading h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.02em; }
@@ -385,6 +419,13 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .assistant-menu-item .menu-link { color: #94a3b8; font-size: 13px; }
 .assistant-menu-item strong { display: block; font-size: 13px; font-weight: 600; }
 .assistant-menu-item small { display: block; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.assistant-menu-branch { position: relative; }
+.assistant-menu-branch[hidden], .nav-more[hidden] { display: none; }
+.assistant-menu-more { display: flex; align-items: center; width: 100%; margin-top: 2px; padding: 8px; border-radius: var(--radius); color: #334155; font-size: 13px; font-weight: 500; }
+.assistant-menu-more::after { content: "›"; margin-left: auto; color: #94a3b8; font-size: 16px; line-height: 1; }
+.assistant-menu-branch:hover .assistant-menu-more,
+.assistant-menu-branch.open .assistant-menu-more { background: #f1f5f9; }
+.assistant-menu-flyout { display: none; position: fixed; z-index: 40; width: 260px; max-height: 320px; overflow: auto; padding: 7px; border-radius: var(--radius-lg); background: #fff; box-shadow: 0 12px 28px rgb(15 23 42 / .18), 0 0 0 1px rgb(15 23 42 / .08); }
 #dock-chat { position: relative; }
 
 .card { flex-shrink: 0; padding: 14px; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .06); }
@@ -509,7 +550,9 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .composer .suggestions button:hover { background: var(--blue-soft); color: #1d4ed8; }
 .composer-box { border-radius: var(--radius-lg); border: 1px solid #cbd5e1; box-shadow: var(--ring); background: #fff; padding: 8px 8px 6px; }
 .composer-box:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
-.composer-context { display: flex; align-items: center; gap: 6px; padding: 0 2px; }
+.composer-context { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 2px; }
+.composer-context:empty { display: none; }
+.composer-context .chip { margin: 1px 2px 6px; }
 .composer textarea, .chat-composer textarea { display: block; width: 100%; height: 26px; max-height: 92px; resize: none; overflow-y: auto; border: 0; outline: 0; padding: 3px 3px 0; line-height: 1.45; background: transparent; }
 .composer textarea:disabled { background: transparent; color: #94a3b8; }
 .composer textarea::placeholder, .chat-composer textarea::placeholder { color: #94a3b8; }
@@ -558,12 +601,18 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
 <div class="app-body">
 <aside class="app-nav" id="app-nav" hidden>
-  <button class="nav-item" type="button" id="nav-chat"><i>▣</i> Chat</button>
+  <button class="nav-item" type="button" id="nav-general"><i>✦</i> AI assistant</button>
 
   <div class="nav-group">
     <b>Agents</b>
     <div id="nav-agents"></div>
-    <button class="nav-more" type="button">View all agents</button>
+    <button class="nav-more" type="button" id="nav-all-agents">View all agents</button>
+  </div>
+
+  <div class="nav-group">
+    <b>Conversations</b>
+    <div id="nav-conversations"></div>
+    <button class="nav-more" type="button" id="nav-all-conversations">View all conversations</button>
   </div>
 
   <div class="nav-group">
@@ -576,7 +625,32 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 <div class="app-content">
 <div class="view-col">
 
-<section class="product-view" id="product-view">
+<section class="products-view" id="products-view" hidden>
+  <div class="product-toolbar">
+    <span class="product-crumbs">Catalog <em>/</em> <b>Products</b></span>
+    <span class="products-caption" id="products-caption">Check products to attach them to the assistant.</span>
+    <div class="product-tools">
+      <span class="products-caption" id="products-checked">No products checked</span>
+      <button type="button" id="open-focus">Open in Focus View</button>
+    </div>
+  </div>
+  <div class="products-scroll">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th class="check" aria-label="Check"></th>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>Category</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="product-rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="product-view" id="product-view" hidden>
   <div class="product-toolbar">
     <span class="product-crumbs">Products <em>/</em> <b id="toolbar-category">Outdoor</b></span>
     <span class="product-state" id="toolbar-status">Active</span>
@@ -620,7 +694,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
       <b id="chat-title">AI assistant</b>
       <small id="chat-subtitle" hidden></small>
     </div>
-    <button class="ghost" type="button" id="chat-clear" hidden>Clear conversation</button>
+    <button type="button" id="chat-clear" aria-label="Delete conversation" title="Delete conversation" hidden><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.5h9"/><path d="M6.2 4.5V3.2h3.6v1.3"/><path d="M4.7 4.5l.6 8.2h5.4l.6-8.2"/></svg></button>
   </header>
   <div class="chat-scroll" id="chat-scroll">
     <div class="chat-welcome" id="chat-welcome">
@@ -633,6 +707,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
   </div>
   <div class="chat-composer">
     <div class="composer-box">
+      <div class="composer-context" id="chat-context"></div>
       <textarea id="chat-input" rows="1" placeholder="Ask me anything about your catalog and agent runs…"></textarea>
       <div class="composer-row">
         <button class="composer-add" type="button" aria-label="Attach">+</button>
@@ -642,6 +717,26 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     </div>
     <p class="ai-note"><span>AI</span> Uses AI. Verify results.</p>
   </div>
+</section>
+
+<section class="agents-page" id="conversations-view" hidden>
+  <div class="runs-heading">
+    <div>
+      <h1>Conversations</h1>
+      <p>Pick up where you left off.</p>
+    </div>
+  </div>
+  <div class="conversation-list" id="conversation-rows"></div>
+</section>
+
+<section class="agents-page" id="agents-view" hidden>
+  <div class="runs-heading">
+    <div>
+      <h1>Agents</h1>
+      <p>Choose an agent to talk to.</p>
+    </div>
+  </div>
+  <div class="agent-grid" id="agent-tiles"></div>
 </section>
 
 <section class="runs-page" id="runs-view" hidden>
@@ -838,32 +933,49 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
     <section class="assistant" id="dock-chat">
       <header>
-        <button class="assistant-menu-trigger" type="button" id="assistant-menu-trigger" aria-label="Choose an agent or run" aria-expanded="false">☰<b class="attention-badge" id="menu-badge" hidden></b></button>
+        <button class="assistant-menu-trigger" type="button" id="assistant-menu-trigger" aria-label="Agents, conversations and runs" aria-expanded="false">☰<b class="attention-badge" id="menu-badge" hidden></b></button>
         <i id="dock-avatar">✦</i>
         <div><h2 id="dock-title">AI assistant</h2><small id="dock-subtitle" hidden></small></div>
         <div class="head-actions">
+          <button type="button" id="dock-delete" aria-label="Delete conversation" title="Delete conversation" hidden><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.5h9"/><path d="M6.2 4.5V3.2h3.6v1.3"/><path d="M4.7 4.5l.6 8.2h5.4l.6-8.2"/></svg></button>
           <button type="button" id="dock-expand" aria-label="Open full chat" title="Open full chat">⤢</button>
           <button type="button" id="dock-close" aria-label="Hide chat">×</button>
         </div>
       </header>
       <div class="assistant-menu" id="assistant-menu" hidden>
-        <div class="assistant-menu-section">
-          <b>Chat</b>
-          <div id="assistant-menu-chats"></div>
-        </div>
-        <div class="assistant-menu-section">
-          <b>Agents</b>
-          <div id="assistant-menu-agents"></div>
-        </div>
-        <div class="assistant-menu-section">
-          <b>Agent runs</b>
-          <div id="assistant-menu-runs"></div>
+        <div id="assistant-menu-root">
+          <div class="assistant-menu-general" id="assistant-menu-general"></div>
+          <div class="assistant-menu-section">
+            <b>Agents</b>
+            <div id="assistant-menu-agents"></div>
+            <div class="assistant-menu-branch" id="menu-branch-agents">
+              <div class="assistant-menu-more">View all agents</div>
+              <div class="assistant-menu-flyout" id="menu-flyout-agents"></div>
+            </div>
+          </div>
+          <div class="assistant-menu-section">
+            <b>Conversations</b>
+            <div id="assistant-menu-chats"></div>
+            <div class="assistant-menu-branch" id="menu-branch-conversations">
+              <div class="assistant-menu-more">View all conversations</div>
+              <div class="assistant-menu-flyout" id="menu-flyout-conversations"></div>
+            </div>
+          </div>
+          <div class="assistant-menu-section">
+            <b>Agent runs</b>
+            <div id="assistant-menu-runs"></div>
+            <div class="assistant-menu-branch" id="menu-branch-runs">
+              <div class="assistant-menu-more">View all agent runs</div>
+              <div class="assistant-menu-flyout" id="menu-flyout-runs"></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="thread" id="dock-thread"></div>
       <div class="composer" id="dock-composer">
         <div class="suggestions" id="dock-suggest" hidden></div>
         <div class="composer-box">
+          <div class="composer-context" id="dock-context"></div>
           <textarea id="dock-input" rows="1" placeholder="Ask anything…"></textarea>
           <div class="composer-row">
             <button class="composer-add" type="button" id="dock-add" aria-label="Suggested questions">+</button>
@@ -902,17 +1014,15 @@ const CHANGES = [
   { id: 12, sku: "GD-3012", product: "Cedar Planter Box", category: "Garden", attribute: "Wood species", current: "Cedar", proposed: "Western red cedar", confidence: 34, evidence: 1, issue: "weak", refinedValue: "Western red cedar (Thuja plicata)", sources: ["Generated description"], rationale: "The proposal was inferred from copy rather than a verified specification." }
 ];
 
-/* The record you are working on when the assistant reaches you. */
-const PRODUCT = {
-  sku: CHANGES[0].sku,
-  name: CHANGES[0].product,
-  category: CHANGES[0].category,
-  status: "Active",
-  brand: "Northline",
-  attributeLabel: CHANGES[0].attribute,
-  attribute: CHANGES[0].current,
-  description: "Lightweight adjustable trekking pole built for long-distance trails and mixed terrain."
-};
+/* The catalog the table starts from. Focus View edits the active record in place. */
+const PRODUCTS = [
+  { sku: "TR-4410", name: "Alpine Trekking Pole", category: "Outdoor", status: "Active", brand: "Northline", attributeLabel: "Material", attribute: "Aluminium", description: "Lightweight adjustable trekking pole built for long-distance trails and mixed terrain." },
+  { sku: "KT-2028", name: "Precision Chef Knife", category: "Kitchen", status: "Active", brand: "Hearth & Co", attributeLabel: "Blade length", attribute: "—", description: "Forged chef knife for daily prep, with a full tang and a contoured handle." },
+  { sku: "LG-1182", name: "Harbor Pendant Light", category: "Lighting", status: "Draft", brand: "Lumenary", attributeLabel: "Bulb included", attribute: "No", description: "Glass pendant for dining and entry spaces, sold with or without a bulb." },
+  { sku: "FN-9031", name: "Lena Dining Chair", category: "Furniture", status: "Active", brand: "Atelier Lena", attributeLabel: "Seat material", attribute: "Polyester", description: "Stackable dining chair with a stained oak frame and upholstered seat." },
+  { sku: "EL-6624", name: "Arc USB-C Charger", category: "Electronics", status: "Active", brand: "Arc", attributeLabel: "Power output", attribute: "45 W", description: "Compact wall charger for phones and laptops, with a fold-flat plug." }
+];
+const productBySku = (sku) => PRODUCTS.find((product) => product.sku === sku) || PRODUCTS[0];
 
 /* Other runs are summary-only in this focused prototype. The active run uses the
    live review state below; historical and running rows provide navigation context. */
@@ -1008,11 +1118,22 @@ const EMPTY_HINTS = {
 const REFINE_DELAY = 4200;
 
 const state = {
-  view: "product",
+  view: "products",
+  activeSku: "TR-4410",
+  productChecks: new Set(),
+  drafts: {},
+  chatReturn: "products",
   openRunId: 1842,
   chatWith: "general",
   dockChatWith: "general",
-  chats: {},
+  /* Set when a conversation is chosen from the panel. The page stays put. */
+  panelThread: null,
+  chats: {
+    "TR-4410:content": [
+      { role: "user", text: "Why did you change the material?" },
+      { role: "agent", text: "On Alpine Trekking Pole, Material is currently Aluminium. I proposed 7075 aluminium alloy because the supplier specification, packaging, and brand website all name that grade." }
+    ]
+  },
   assistantMenuOpen: false,
   runCompleted: false,
   tab: "all",
@@ -1036,8 +1157,8 @@ const state = {
   revisions: {},
   batches: [],
   thread: [{ role: "agent", kind: "intro" }],
-  /* The product comes first; the assistant is opened deliberately. */
-  assistantOpen: false
+  /* The table starts with the general assistant open, not a named agent. */
+  assistantOpen: true
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1247,8 +1368,8 @@ function finishReview() {
 
 /* ---------- refinement ---------- */
 
-/* Refinement is a conversation, not a toolbar action: whatever the panel is showing
-   is what the composer sends — the ticked rows, or the change you are inspecting. */
+/* A checked selection narrows the run. With nothing checked, the composer stays
+   on the run itself. */
 function refineTargets() {
   if (state.selected.size) return actionable([...state.selected]);
   if (state.focused && canRefine(state.focused)) return [state.focused];
@@ -1292,11 +1413,49 @@ function scoreAfter(change, outcome) {
   return base;
 }
 
+function runContextLabel() {
+  return "Run #" + ACTIVE_RUN.id;
+}
+
+function reviewContextLabel() {
+  const selected = refineTargets();
+  if (!selected.length) return runContextLabel();
+  if (selected.length === 1) {
+    const change = changeById(selected[0]);
+    return change ? "✦ " + change.product + " · " + change.attribute : runContextLabel();
+  }
+  return "✦ " + selected.length + " changes attached";
+}
+
+function runReply(question) {
+  const text = question.toLowerCase();
+  const conflicts = CHANGES.filter((change) => change.issue === "conflict").length;
+  const weak = CHANGES.filter((change) => change.issue === "weak").length;
+  if (/conflict|weak|attention|review|wrong|problem/.test(text)) {
+    return "Run #" + ACTIVE_RUN.id + " proposed " + CHANGES.length + " changes. " + conflicts +
+      " conflict and " + weak + " rest on weak evidence. Check the rows you want to discuss and I’ll attach that selection.";
+  }
+  if (/how many|count|total|what did|summar/.test(text)) {
+    return ACTIVE_RUN.agent + " proposed " + CHANGES.length + " attribute changes across " +
+      ACTIVE_RUN.products + " products in " + ACTIVE_RUN.name.toLowerCase() + ".";
+  }
+  return "This conversation is about run #" + ACTIVE_RUN.id + ", " + ACTIVE_RUN.name.toLowerCase() +
+    ". Check changes to attach a selection, or keep asking about the run as a whole.";
+}
+
+function askAboutRun(instruction) {
+  state.thread.push({ role: "user", kind: "ask", text: instruction, context: runContextLabel() });
+  state.thread.push({ role: "agent", kind: "answer", text: runReply(instruction) });
+  $("instruction").value = "";
+  autoGrow();
+  render();
+}
+
 function sendRefinement(instruction, ids) {
   const batch = { id: state.batches.length + 1, instruction: instruction, ids: ids.slice(), status: "running", summary: null };
   state.batches.push(batch);
   ids.forEach((id) => { state.decisions[id] = "refining"; });
-  state.thread.push({ role: "user", kind: "instruction", text: instruction, count: ids.length });
+  state.thread.push({ role: "user", kind: "instruction", text: instruction, count: ids.length, context: reviewContextLabel() });
   state.thread.push({ role: "agent", kind: "batch", batchId: batch.id });
   state.selected.clear();
   state.panelMode = null;
@@ -1952,15 +2111,22 @@ function renderThread() {
       block.append(text);
     }
 
-    if (message.kind === "instruction") {
+    if (message.kind === "instruction" || message.kind === "ask") {
       const chipRow = document.createElement("div");
       const chip = document.createElement("span");
       chip.className = "chip";
-      chip.textContent = message.count + " " + (message.count === 1 ? "change" : "changes") + " attached";
+      chip.textContent = message.context
+        || (message.count + " " + (message.count === 1 ? "change" : "changes") + " attached");
       chipRow.append(chip);
       const text = document.createElement("p");
       text.textContent = message.text;
       block.append(chipRow, text);
+    }
+
+    if (message.kind === "answer") {
+      const text = document.createElement("p");
+      text.textContent = message.text;
+      block.append(text);
     }
 
     if (message.kind === "batch") {
@@ -1997,28 +2163,16 @@ function renderThread() {
 
 function renderComposer() {
   const selected = refineTargets();
-  const context = $("composer-context");
-  context.textContent = "";
-
-  if (selected.length) {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    const single = selected.length === 1 ? changeById(selected[0]) : null;
-    chip.textContent = single
-      ? "✦ " + single.product + " · " + single.attribute
-      : "✦ " + selected.length + " changes attached";
-    context.append(chip);
-  }
+  paintContext($("composer-context"), reviewContextLabel());
 
   const field = $("instruction");
   const hasInstruction = Boolean(field.value.trim());
-  field.disabled = selected.length === 0;
-  field.placeholder = selected.length === 0
-    ? "Pick a row to send it back to the agent…"
-    : "Re-check with a rule, or give the value to use…";
-  $("composer-send").disabled = selected.length === 0 || !hasInstruction;
-  /* The chip already states the count, so only explain when there is nothing attached. */
-  $("composer-hint").textContent = selected.length === 0 ? "Nothing attached" : "";
+  field.disabled = false;
+  field.placeholder = selected.length
+    ? "Re-check with a rule, or give the value to use…"
+    : "Ask about this run…";
+  $("composer-send").disabled = !hasInstruction;
+  $("composer-hint").textContent = "";
 
   const running = state.batches.filter((batch) => batch.status === "running");
   $("assistant-name").textContent = ACTIVE_RUN.agent;
@@ -2132,19 +2286,26 @@ function renderRuns() {
 
 /* One view occupies the centre at a time; the navigation reflects which. */
 function setView(view) {
+  if (view !== state.view) state.panelThread = null;
   state.view = view;
+  $("products-view").hidden = view !== "products";
   $("product-view").hidden = view !== "product";
   $("chat-view").hidden = view !== "chat";
+  $("conversations-view").hidden = view !== "conversations";
+  $("agents-view").hidden = view !== "agents";
   $("runs-view").hidden = view !== "runs";
   $("page").hidden = view !== "detail";
-  $("app-nav").hidden = view === "product";
-  /* The product record is its own workspace; the assistant only takes over the
-     window once you step into its full-screen views, and back returns to it. */
-  $("app-brand").textContent = view === "product" ? "Focus View" : "AI assistant";
-  $("back-button").setAttribute("aria-label", view === "product" ? "Back to the main application" : "Back to the product");
-  $("back-button").title = view === "product" ? "Back to the main application" : "Back to the product";
+  $("app-nav").hidden = view === "product" || view === "products";
+  /* The product table is home. Focus View is one product from that table, and
+     the assistant only takes over the window in its full-screen views. */
+  $("app-brand").textContent = view === "product" ? "Focus View" : view === "products" ? "Products" : "AI assistant";
+  const backLabel = view === "product" ? "Back to products" : view === "products" ? "Back to the main application" : "Back";
+  $("back-button").setAttribute("aria-label", backLabel);
+  $("back-button").title = backLabel;
   $("assistant-toggle").hidden = view === "chat";
-  $("nav-chat").className = view === "chat" && state.chatWith === "general" ? "nav-item active" : "nav-item";
+  $("nav-all-agents").className = view === "agents" ? "nav-more active" : "nav-more";
+  $("nav-all-conversations").className = view === "conversations" ? "nav-more active" : "nav-more";
+  $("nav-all-runs").className = view === "runs" ? "nav-more active" : "nav-more";
   renderDock();
   renderNav();
 }
@@ -2156,13 +2317,15 @@ function renderDock() {
      any other page gets the ordinary conversation. */
   const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
   const openStatus = statusOf(openRun);
-  const inRun = state.view === "detail" && openStatus === "review";
+  const inRun = state.view === "detail" && openStatus === "review" && !state.panelThread;
   /* A run with nothing to decide has nothing to talk about: the agent is either
      still working or already done. New work starts from the Agents section. */
   const locked = state.view === "detail" && openStatus !== "review";
   const open = state.view !== "chat" && state.assistantOpen;
   const attention = RUNS.filter((run) => statusOf(run) === "review").length;
-  const menuOpen = state.assistantMenuOpen && state.view === "product";
+  /* The review assistant has no conversation switcher; every other panel does. */
+  const showMenu = !inRun;
+  const menuOpen = state.assistantMenuOpen && showMenu;
   $("dock").hidden = !open;
   $("assistant").hidden = !inRun;
   $("dock-chat").hidden = inRun;
@@ -2172,15 +2335,141 @@ function renderDock() {
      until the review is actually finished. */
   $("assistant-badge").hidden = open || attention === 0;
   $("menu-badge").hidden = menuOpen || attention === 0;
-  $("assistant-menu-trigger").hidden = state.view !== "product";
+  $("assistant-menu-trigger").hidden = !showMenu;
   $("assistant-menu").hidden = !menuOpen;
+  if (!menuOpen) {
+    document.querySelectorAll(".assistant-menu-flyout").forEach((flyout) => { flyout.style.display = "none"; });
+    document.querySelectorAll(".assistant-menu-branch.open").forEach((branch) => branch.classList.remove("open"));
+  }
   $("assistant-menu-trigger").setAttribute("aria-expanded", String(menuOpen));
   if (!inRun) renderDockChat(locked, openStatus, openRun);
 }
 
+function activeProduct() {
+  return productBySku(state.activeSku);
+}
+
+function threadKey(agentId, sku) {
+  const agent = !agentId || agentId === "general" ? "general" : agentId;
+  return sku ? sku + ":" + agent : agent;
+}
+
+function perspectiveThreadKey(agentId) {
+  const agent = !agentId || agentId === "general" ? "general" : agentId;
+  return "products:" + agent;
+}
+
+function parseThreadKey(key) {
+  const split = String(key).indexOf(":");
+  if (split === -1) return { perspective: false, sku: null, agentId: key };
+  const context = key.slice(0, split);
+  return {
+    perspective: context === "products",
+    sku: context === "products" ? null : context,
+    agentId: key.slice(split + 1)
+  };
+}
+
+function productThreadKey() {
+  return threadKey(state.dockChatWith, state.activeSku);
+}
+
+function dockThreadKey() {
+  if (state.panelThread && state.view !== "chat") return state.panelThread;
+  if (state.view === "products") return perspectiveThreadKey(state.dockChatWith);
+  if (state.view === "product") return productThreadKey();
+  return threadKey(state.dockChatWith);
+}
+
+function stashDockDraft() {
+  const field = $("dock-input");
+  if (!field) return;
+  state.drafts[dockThreadKey()] = field.value;
+}
+
+function restoreDockDraft() {
+  const field = $("dock-input");
+  if (!field) return;
+  field.value = state.drafts[dockThreadKey()] || "";
+  field.style.height = "26px";
+  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  $("dock-send").disabled = !field.value.trim();
+}
+
+function showProducts() {
+  if (state.view === "product") keepProductFields();
+  stashDockDraft();
+  setView("products");
+  renderProducts();
+  restoreDockDraft();
+}
+
 function showProduct() {
+  stashDockDraft();
   setView("product");
   renderProduct();
+  restoreDockDraft();
+}
+
+function activateProduct(sku) {
+  if (!sku || sku === state.activeSku) return;
+  if (state.view === "product") keepProductFields();
+  stashDockDraft();
+  state.activeSku = sku;
+  if (state.view === "products") renderProducts();
+  if (state.view === "product") renderProduct();
+  renderDock();
+  restoreDockDraft();
+}
+
+function renderProducts() {
+  const body = $("product-rows");
+  body.textContent = "";
+  PRODUCTS.forEach((product) => {
+    const tr = document.createElement("tr");
+    tr.className = product.sku === state.activeSku ? "active" : "";
+    const check = document.createElement("td");
+    check.className = "check";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = state.productChecks.has(product.sku);
+    box.setAttribute("aria-label", "Check " + product.name);
+    box.addEventListener("click", (event) => event.stopPropagation());
+    box.addEventListener("change", () => {
+      if (box.checked) state.productChecks.add(product.sku);
+      else state.productChecks.delete(product.sku);
+      renderProductChecks();
+      renderDock();
+    });
+    check.append(box);
+
+    const name = document.createElement("td");
+    const title = document.createElement("span");
+    title.className = "product-name";
+    title.textContent = product.name;
+    const note = document.createElement("span");
+    note.className = "product-note";
+    note.textContent = product.brand;
+    name.append(title, note);
+
+    const sku = document.createElement("td");
+    sku.textContent = product.sku;
+    const category = document.createElement("td");
+    category.textContent = product.category;
+    const status = document.createElement("td");
+    status.textContent = product.status;
+
+    tr.append(check, name, sku, category, status);
+    tr.addEventListener("click", () => activateProduct(product.sku));
+    body.append(tr);
+  });
+  $("products-caption").textContent = "Check products to attach them to the assistant.";
+  renderProductChecks();
+}
+
+function renderProductChecks() {
+  const count = state.productChecks.size;
+  $("products-checked").textContent = count ? count + " checked" : "No products checked";
 }
 
 /* Talking to an agent is its own destination, with its own thread. */
@@ -2190,7 +2479,74 @@ function showChat(agentId) {
   renderChat();
 }
 
+function showConversations() {
+  state.assistantMenuOpen = false;
+  setView("conversations");
+  renderConversations();
+}
+
+function renderConversations() {
+  const host = $("conversation-rows");
+  host.textContent = "";
+  const started = conversationInstances();
+  if (!started.length) {
+    const empty = document.createElement("p");
+    empty.className = "products-caption";
+    empty.textContent = "No conversations yet.";
+    host.append(empty);
+    return;
+  }
+  started.forEach((key) => {
+    const info = conversationInfo(key);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "conversation-row";
+    const icon = document.createElement("i");
+    icon.textContent = info.icon;
+    const copy = document.createElement("span");
+    const title = document.createElement("strong");
+    title.textContent = info.place;
+    const note = document.createElement("small");
+    note.textContent = info.note;
+    copy.append(title, note);
+    button.append(icon, copy);
+    button.addEventListener("click", () => openConversation(key));
+    host.append(button);
+  });
+}
+
+function showAgents() {
+  state.assistantMenuOpen = false;
+  setView("agents");
+  renderAgents();
+}
+
+function renderAgents() {
+  const host = $("agent-tiles");
+  host.textContent = "";
+  AGENTS.forEach((agent) => {
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = "agent-tile";
+    const avatar = document.createElement("i");
+    avatar.textContent = agent.name.charAt(0);
+    const name = document.createElement("strong");
+    name.textContent = agent.name;
+    const note = document.createElement("small");
+    note.textContent = agent.note;
+    const hint = document.createElement("p");
+    hint.textContent = agent.hint;
+    const chat = document.createElement("span");
+    chat.className = "agent-chat";
+    chat.textContent = "Chat";
+    tile.append(avatar, name, note, hint, chat);
+    tile.addEventListener("click", () => showChat(agent.id));
+    host.append(tile);
+  });
+}
+
 function showRuns() {
+  state.assistantMenuOpen = false;
   setView("runs");
   renderRuns();
 }
@@ -2198,15 +2554,33 @@ function showRuns() {
 function showDetail(runId) {
   state.openRunId = runId || ACTIVE_RUN.id;
   state.assistantMenuOpen = false;
+  state.panelThread = null;
   setView("detail");
   render();
 }
 
+const NAV_LIMIT = 5;
+
+/* The current item stays visible even when it would fall past the cap. */
+function capped(items, current, idOf) {
+  if (items.length <= NAV_LIMIT) return items.slice();
+  const shown = items.slice(0, NAV_LIMIT);
+  if (current == null) return shown;
+  if (shown.some((item) => idOf(item) === current)) return shown;
+  const selected = items.find((item) => idOf(item) === current);
+  if (selected) shown[NAV_LIMIT - 1] = selected;
+  return shown;
+}
+
 function renderNav() {
+  const inConversation = Boolean(activeConversationKey());
+  const counterpart = state.view === "chat" && !inConversation ? (parseThreadKey(state.chatWith).agentId || "general") : null;
+  $("nav-general").className = counterpart === "general" ? "nav-item active" : "nav-item";
   const agents = $("nav-agents");
   agents.textContent = "";
-  AGENTS.forEach((agent) => {
-    const open = state.view === "chat" && state.chatWith === agent.id;
+  const agentCurrent = counterpart && counterpart !== "general" ? counterpart : null;
+  capped(AGENTS, agentCurrent, (agent) => agent.id).forEach((agent) => {
+    const open = agent.id === agentCurrent;
     const button = document.createElement("button");
     button.type = "button";
     button.className = open ? "nav-run active" : "nav-run";
@@ -2220,13 +2594,34 @@ function renderNav() {
     agents.append(button);
   });
 
+  const conversations = $("nav-conversations");
+  conversations.textContent = "";
+  const currentKey = activeConversationKey();
+  capped(conversationInstances(), currentKey, (key) => key).forEach((key) => {
+    const info = conversationInfo(key);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = key === currentKey ? "nav-run active" : "nav-run";
+    const title = document.createElement("span");
+    const icon = document.createElement("i");
+    icon.className = "nav-avatar";
+    icon.textContent = info.icon;
+    title.append(icon, document.createTextNode(info.place));
+    const note = document.createElement("small");
+    note.textContent = info.note;
+    button.append(title, note);
+    button.addEventListener("click", () => openConversation(key));
+    conversations.append(button);
+  });
+
   const runs = $("nav-runs");
   runs.textContent = "";
-  RUNS.forEach((run) => {
+  const runCurrent = state.view === "detail" ? state.openRunId : null;
+  capped(RUNS, runCurrent, (run) => run.id).forEach((run) => {
     const status = statusOf(run);
     const button = document.createElement("button");
     button.type = "button";
-    button.className = state.view === "detail" && state.openRunId === run.id ? "nav-run active" : "nav-run";
+    button.className = run.id === runCurrent ? "nav-run active" : "nav-run";
     const title = document.createElement("span");
     title.innerHTML = '<i class="nav-dot ' + status + '"></i>';
     title.append("#" + run.id);
@@ -2236,10 +2631,14 @@ function renderNav() {
     button.addEventListener("click", () => showDetail(run.id));
     runs.append(button);
   });
+
+  $("nav-all-agents").hidden = AGENTS.length <= NAV_LIMIT;
+  $("nav-all-conversations").hidden = conversationInstances().length <= NAV_LIMIT;
+  $("nav-all-runs").hidden = RUNS.length <= NAV_LIMIT;
 }
 
 function renderProduct() {
-  const product = PRODUCT;
+  const product = activeProduct();
   const initials = product.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("");
 
   $("product-image").textContent = initials;
@@ -2257,58 +2656,173 @@ function renderProduct() {
   document.querySelector('label[for="product-attribute"]').textContent = product.attributeLabel;
 }
 
+function currentConversationKey() {
+  if (state.view === "chat") return state.chatWith;
+  if (state.panelThread) return state.panelThread;
+  if (state.view === "products") return perspectiveThreadKey(state.dockChatWith);
+  if (state.view === "product") return productThreadKey();
+  return "";
+}
+
+/* A started thread is the one selected item. The agent behind it stays unselected. */
+function activeConversationKey() {
+  const key = currentConversationKey();
+  return conversationInstances().indexOf(key) === -1 ? "" : key;
+}
+
+/* Only threads someone has actually sent a message in. Possible pairings stay off the list. */
+function conversationInstances() {
+  return Object.keys(state.chats).filter((key) => (state.chats[key] || []).length);
+}
+
+function conversationInfo(key) {
+  const parsed = parseThreadKey(key);
+  const agent = agentById(parsed.agentId);
+  const who = agent ? agent.name : "AI assistant";
+  const place = parsed.perspective ? "Products" : parsed.sku ? productBySku(parsed.sku).name : "General";
+  const messages = state.chats[key] || [];
+  const last = messages.length ? messages[messages.length - 1].text : "";
+  return {
+    place: place,
+    who: who,
+    note: last ? who + " · " + last : who,
+    icon: agent ? agent.name.charAt(0) : "✦",
+    named: Boolean(agent)
+  };
+}
+
+function openConversation(key) {
+  stashDockDraft();
+  state.assistantMenuOpen = false;
+  const parsed = parseThreadKey(key);
+  const agentId = !parsed.agentId || parsed.agentId === "general" ? "general" : parsed.agentId;
+  state.dockChatWith = agentId;
+
+  /* Inside the assistant, the conversation is the page. Outside it, only the
+     panel changes and the page stays where it is. */
+  const inAssistant = state.view === "chat" || state.view === "conversations" || state.view === "agents" || state.view === "runs";
+  if (inAssistant) {
+    state.chatWith = key;
+    state.chatReturn = parsed.sku ? "product" : "products";
+    if (state.view !== "chat") setView("chat");
+    renderChat();
+    restoreDockDraft();
+    return;
+  }
+
+  state.panelThread = key;
+  state.assistantOpen = true;
+  renderDock();
+  restoreDockDraft();
+  renderNav();
+}
+
+const GENERAL = { id: "general", name: "AI assistant", note: "General product help" };
+
+function menuAgentItem(agent) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = !activeConversationKey() && state.dockChatWith === agent.id ? "assistant-menu-item active" : "assistant-menu-item";
+  const icon = document.createElement("i");
+  icon.className = agent.id === "general" ? "" : "nav-avatar";
+  icon.textContent = agent.id === "general" ? "✦" : agent.name.charAt(0);
+  const copy = document.createElement("span");
+  copy.innerHTML = "<strong></strong><small></small>";
+  copy.querySelector("strong").textContent = agent.name;
+  copy.querySelector("small").textContent = agent.note;
+  button.append(icon, copy);
+  button.addEventListener("click", () => {
+    stashDockDraft();
+    state.dockChatWith = agent.id;
+    if (state.panelThread) {
+      const parsed = parseThreadKey(state.panelThread);
+      state.panelThread = parsed.sku
+        ? threadKey(agent.id, parsed.sku)
+        : parsed.perspective
+          ? perspectiveThreadKey(agent.id)
+          : threadKey(agent.id);
+    }
+    state.assistantMenuOpen = false;
+    renderDock();
+    restoreDockDraft();
+  });
+  return button;
+}
+
+function menuConversationItem(key) {
+  const info = conversationInfo(key);
+  const currentKey = activeConversationKey();
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = key === currentKey ? "assistant-menu-item active" : "assistant-menu-item";
+  const icon = document.createElement("i");
+  icon.className = info.named ? "nav-avatar" : "";
+  icon.textContent = info.icon;
+  const copy = document.createElement("span");
+  copy.innerHTML = "<strong></strong><small></small>";
+  copy.querySelector("strong").textContent = info.place;
+  copy.querySelector("small").textContent = info.note;
+  button.append(icon, copy);
+  button.addEventListener("click", () => openConversation(key));
+  return button;
+}
+
+function menuRunItem(run) {
+  const status = statusOf(run);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "assistant-menu-item";
+  const dot = document.createElement("i");
+  dot.className = "nav-dot " + status;
+  const copy = document.createElement("span");
+  copy.innerHTML = "<strong></strong><small></small>";
+  copy.querySelector("strong").textContent = "#" + run.id;
+  copy.querySelector("small").textContent = run.agent + ", " + runAgo(run);
+  /* A run leaves the panel behind for the full-screen workspace. */
+  const link = document.createElement("i");
+  link.className = "menu-link";
+  link.textContent = "↗";
+  button.append(dot, copy, link);
+  button.addEventListener("click", () => showDetail(run.id));
+  return button;
+}
+
+function fillFlyout(host, nodes) {
+  host.textContent = "";
+  if (!nodes.length) {
+    const empty = document.createElement("p");
+    empty.className = "products-caption";
+    empty.style.padding = "4px 8px";
+    empty.textContent = "Nothing here yet.";
+    host.append(empty);
+    return;
+  }
+  nodes.forEach((node) => host.append(node));
+}
+
 function renderAssistantMenu() {
-  /* The menu mirrors the full-screen navigation: general chat, then agents,
-     then the runs those agents produced. */
-  const chatHost = $("assistant-menu-chats");
+  /* The root lists five of each. The rest are children of View all, opened by hovering. */
   const agentHost = $("assistant-menu-agents");
-  chatHost.textContent = "";
-  agentHost.textContent = "";
-
-  const chats = [{ id: "general", name: "AI assistant", note: "General product help", icon: "✦", host: chatHost }]
-    .concat(AGENTS.map((agent) => ({ id: agent.id, name: agent.name, note: agent.note, icon: agent.name.charAt(0), host: agentHost })));
-
-  chats.forEach((chat) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = state.dockChatWith === chat.id ? "assistant-menu-item active" : "assistant-menu-item";
-    const icon = document.createElement("i");
-    icon.className = chat.id === "general" ? "" : "nav-avatar";
-    icon.textContent = chat.icon;
-    const copy = document.createElement("span");
-    copy.innerHTML = "<strong></strong><small></small>";
-    copy.querySelector("strong").textContent = chat.name;
-    copy.querySelector("small").textContent = chat.note;
-    button.append(icon, copy);
-    button.addEventListener("click", () => {
-      state.dockChatWith = chat.id;
-      state.assistantMenuOpen = false;
-      renderDock();
-    });
-    chat.host.append(button);
-  });
-
+  const chatHost = $("assistant-menu-chats");
   const runHost = $("assistant-menu-runs");
+  agentHost.textContent = "";
+  chatHost.textContent = "";
   runHost.textContent = "";
-  RUNS.forEach((run) => {
-    const status = statusOf(run);
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "assistant-menu-item";
-    const dot = document.createElement("i");
-    dot.className = "nav-dot " + status;
-    const copy = document.createElement("span");
-    copy.innerHTML = "<strong></strong><small></small>";
-    copy.querySelector("strong").textContent = "#" + run.id;
-    copy.querySelector("small").textContent = run.agent + ", " + runAgo(run);
-    /* A run leaves the panel behind for the full-screen workspace. */
-    const link = document.createElement("i");
-    link.className = "menu-link";
-    link.textContent = "↗";
-    button.append(dot, copy, link);
-    button.addEventListener("click", () => showDetail(run.id));
-    runHost.append(button);
-  });
+  $("assistant-menu-general").textContent = "";
+  $("assistant-menu-general").append(menuAgentItem(GENERAL));
+
+  capped(AGENTS, activeConversationKey() ? null : state.dockChatWith, (agent) => agent.id).forEach((agent) => agentHost.append(menuAgentItem(agent)));
+  const currentKey = activeConversationKey();
+  const conversations = conversationInstances();
+  capped(conversations, currentKey, (key) => key).forEach((key) => chatHost.append(menuConversationItem(key)));
+  capped(RUNS, null, (run) => run.id).forEach((run) => runHost.append(menuRunItem(run)));
+
+  fillFlyout($("menu-flyout-agents"), AGENTS.map(menuAgentItem));
+  fillFlyout($("menu-flyout-conversations"), conversations.map(menuConversationItem));
+  fillFlyout($("menu-flyout-runs"), RUNS.map(menuRunItem));
+  $("menu-branch-agents").hidden = AGENTS.length <= NAV_LIMIT;
+  $("menu-branch-conversations").hidden = conversations.length <= NAV_LIMIT;
+  $("menu-branch-runs").hidden = RUNS.length <= NAV_LIMIT;
 }
 
 const thread = (key) => (state.chats[key] = state.chats[key] || []);
@@ -2359,20 +2873,129 @@ function generalReply(question) {
 }
 
 /* The same conversation is typed into two places, so both composers reset together. */
+function productReply(agent, product, question) {
+  const text = question.toLowerCase();
+  const change = CHANGES.find((item) => item.sku === product.sku);
+  if (change && /why|change|material|attribute|evidence|propos|current|value/.test(text)) {
+    return { text: "On " + product.name + ", " + change.attribute + " is currently " + change.current +
+      ". I proposed " + change.proposed + ". " + change.rationale };
+  }
+  const who = agent ? agent.name : "I";
+  return { text: who + " is looking at " + product.name + " (" + product.sku + ") only. " +
+    (change ? "The open proposal is " + change.attribute + ": " + change.current + " → " + change.proposed + "." : "Ask about this product’s attributes, or tell me what to change.") };
+}
+
+/* "Run" means start work. Asking about a run that already exists does not. */
+function wantsRun(question) {
+  const text = question.toLowerCase();
+  if (/\b(last|previous|what did|did you|how is|still|progress|status of|why)\b/.test(text)) return false;
+  return /\b(run|start|kick off|enrich|re-?analy[sz]e|tag|remap|normali[sz]e|clean(?:\s*up)?)\b/.test(text);
+}
+
+const RUN_TITLES = {
+  content: "Attribute pass",
+  taxonomy: "Category pass",
+  quality: "Quality pass",
+  media: "Media pass"
+};
+
+function runTitle(agent, question) {
+  const cleaned = question
+    .replace(/^(please\s+)?(can you\s+)?/i, "")
+    .replace(/^(run|start|kick off)\b\s*/i, "")
+    .replace(/\b(on this|on these|on the selection|for me|please)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .replace(/[.?!]+$/, "")
+    .trim();
+  if (cleaned.length > 2 && cleaned.length <= 48) return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  return RUN_TITLES[agent.id] || "New run";
+}
+
+/* On the products table the run covers whatever is checked. On a product, it covers that product. */
+function runSelection(parsed) {
+  if (state.view === "products" || parsed.perspective) {
+    return PRODUCTS.filter((item) => state.productChecks.has(item.sku));
+  }
+  if (parsed.sku || state.view === "product") {
+    const product = productBySku(parsed.sku || state.activeSku);
+    return product ? [product] : [];
+  }
+  return PRODUCTS.filter((item) => state.productChecks.has(item.sku));
+}
+
+function startSelectionRun(agent, products, question) {
+  const run = {
+    id: RUNS.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+    name: runTitle(agent, question),
+    agent: agent.name,
+    products: products.length,
+    skus: products.map((item) => item.sku),
+    changes: null,
+    attention: "—",
+    owner: "Alex Kim",
+    started: "Just now",
+    ago: "Just now",
+    status: "running",
+    progress: 8
+  };
+  RUNS.unshift(run);
+  const names = products.slice(0, 3).map((item) => item.name).join(", ");
+  const remainder = products.length > 3 ? " and " + (products.length - 3) + " more" : "";
+  return {
+    text: "Started " + run.name.toLowerCase() + " #" + run.id + " on " + products.length +
+      (products.length === 1 ? " product" : " products") + ": " + names + remainder +
+      ". Proposed changes will show up here once the run finishes.",
+    run: run.id
+  };
+}
+
+function runInstruction(agent, products, question) {
+  if (!agent) return { text: "Choose an agent to run this. The selection stays attached." };
+  if (!products.length) return { text: "Check the products this run should cover, then ask me again." };
+  return startSelectionRun(agent, products, question);
+}
+
+function perspectiveReply(agent, products, question) {
+  const subject = agent ? agent.name + " is" : "I’m";
+  if (!products.length) {
+    return { text: subject + " looking at the Products perspective. Check products in the table to attach a selection, or ask about the catalog as a whole." };
+  }
+  const names = products.slice(0, 3).map((product) => product.name).join(", ");
+  const remainder = products.length > 3 ? " and " + (products.length - 3) + " more" : "";
+  return { text: subject + " using " + products.length + (products.length === 1 ? " checked product" : " checked products") +
+    " as context: " + names + remainder + ". Ask about them together, or tell me what you want the agent to do." };
+}
+
 function sendChat(preset, source) {
   const field = $(source === "dock" ? "dock-input" : "chat-input");
   if (field.disabled) return;
   const question = (preset || field.value).trim();
   if (!question) return;
-  const target = source === "dock"
-    ? (state.view === "product" ? state.dockChatWith : "general")
-    : state.chatWith;
-  const agent = agentById(target);
+  const target = source === "dock" ? dockThreadKey() : state.chatWith;
+  const parsed = parseThreadKey(target);
+  const agent = agentById(parsed.agentId);
+  const product = parsed.sku ? productBySku(parsed.sku) : null;
+  const perspectiveProducts = parsed.perspective
+    ? PRODUCTS.filter((item) => state.productChecks.has(item.sku))
+    : [];
   const messages = thread(target);
-  messages.push({ role: "user", text: question });
-  messages.push(Object.assign({ role: "agent" }, agent ? agentReply(agent, question) : generalReply(question)));
-  ["chat-input", "dock-input"].forEach((id) => { $(id).value = ""; $(id).style.height = "26px"; });
-  ["chat-send", "dock-send"].forEach((id) => { $(id).disabled = true; });
+  const context = chatContextLabel(parsed);
+  messages.push(context ? { role: "user", text: question, context: context } : { role: "user", text: question });
+  const reply = wantsRun(question)
+    ? runInstruction(agent, runSelection(parsed), question)
+    : parsed.perspective
+      ? perspectiveReply(agent, perspectiveProducts, question)
+      : product
+        ? productReply(agent, product, question)
+        : (agent ? agentReply(agent, question) : generalReply(question));
+  messages.push(Object.assign({ role: "agent" }, reply));
+  field.value = "";
+  field.style.height = "26px";
+  state.drafts[target] = "";
+  if (source === "dock") $("dock-send").disabled = true;
+  else $("chat-send").disabled = true;
+  if (state.view === "products") renderProducts();
+  if (state.view === "runs") renderRuns();
   renderChat();
 }
 
@@ -2386,6 +3009,14 @@ function paintThread(host, messages) {
   messages.forEach((message) => {
     const block = document.createElement("div");
     block.className = "msg " + message.role;
+    if (message.context) {
+      const chipRow = document.createElement("div");
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = message.context;
+      chipRow.append(chip);
+      block.append(chipRow);
+    }
     const text = document.createElement("p");
     text.textContent = message.text;
     block.append(text);
@@ -2405,16 +3036,49 @@ function paintThread(host, messages) {
   host.scrollTop = host.scrollHeight;
 }
 
-/* On a product the rail can switch between general help and named agents. Once
-   you enter the run workspace it resolves back to the general conversation. */
+/* Nothing checked keeps the ambient scope. A selection replaces it, the same way
+   the review composer swaps the run for the checked changes. */
+function productsContextLabel() {
+  const selected = PRODUCTS.filter((product) => state.productChecks.has(product.sku));
+  if (selected.length === 1) return "✦ " + selected[0].name;
+  if (selected.length > 1) return "✦ " + selected.length + " products attached";
+  return "Products";
+}
+
+function chatContextLabel(parsed) {
+  if (parsed.sku) {
+    const product = productBySku(parsed.sku);
+    return product ? product.name : "";
+  }
+  if (parsed.perspective) return productsContextLabel();
+  return "";
+}
+
+function dockContextLabel() {
+  return chatContextLabel(parseThreadKey(dockThreadKey()));
+}
+
+function paintContext(host, label) {
+  host.textContent = "";
+  if (!label) return;
+  const chip = document.createElement("span");
+  chip.className = "chip";
+  chip.textContent = label;
+  host.append(chip);
+}
+
 function renderDockChat(locked, runStatus, run) {
-  const target = state.view === "product" ? state.dockChatWith : "general";
-  const agent = agentById(target);
+  const target = dockThreadKey();
+  const parsed = parseThreadKey(target);
+  const agent = agentById(parsed.agentId);
+  const product = parsed.sku ? productBySku(parsed.sku) : null;
   const suggest = $("dock-suggest");
 
   /* A run you cannot act on has no conversation at all: the panel explains where
      the run stands and, when it is over, points at the agent behind it. */
   $("dock-composer").hidden = Boolean(locked);
+  $("dock-expand").hidden = Boolean(locked);
+  $("dock-delete").hidden = true;
   if (locked) {
     $("dock-avatar").textContent = "✦";
     $("dock-title").textContent = "AI assistant";
@@ -2438,32 +3102,43 @@ function renderDockChat(locked, runStatus, run) {
 
   $("dock-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   $("dock-title").textContent = agent ? agent.name : "AI assistant";
-  $("dock-subtitle").textContent = agent ? agent.note : "";
-  $("dock-subtitle").hidden = !agent;
+  const inPerspective = parsed.perspective;
+  $("dock-subtitle").textContent = product
+    ? "Working with " + product.name
+    : inPerspective
+      ? "Products perspective"
+      : (agent ? agent.note : "");
+  $("dock-subtitle").hidden = !product && !inPerspective && !agent;
   $("dock-input").disabled = false;
   $("dock-add").disabled = false;
   $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
   $("dock-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
+  paintContext($("dock-context"), dockContextLabel());
 
   const messages = thread(target);
+  $("dock-delete").hidden = !messages.length;
   const host = $("dock-thread");
   paintThread(host, messages);
   /* An untouched panel still greets you rather than showing an empty column. */
   host.className = messages.length ? "thread" : "thread empty";
-  if (!messages.length) host.append(dockWelcome(agent));
+  if (!messages.length) host.append(dockWelcome(agent, product, inPerspective));
   renderAssistantMenu();
 }
 
-function dockWelcome(agent) {
+function dockWelcome(agent, product, inPerspective) {
   const welcome = document.createElement("div");
   welcome.className = "dock-welcome";
   const mark = document.createElement("span");
   mark.textContent = agent ? agent.name.charAt(0) : "✦";
   if (agent) mark.className = "agent";
   const line = document.createElement("p");
-  line.textContent = agent ? agent.name : "Good morning Alex,";
+  line.textContent = product || inPerspective ? "New conversation" : (agent ? agent.name : "Good morning Alex,");
   const ask = document.createElement("b");
-  ask.textContent = agent ? agent.ask : "How can I help?";
+  ask.textContent = product
+    ? (agent ? agent.name : "AI assistant") + " · " + product.name
+    : inPerspective
+      ? (agent ? agent.name : "AI assistant") + " · Products"
+    : (agent ? agent.ask : "How can I help?");
   welcome.append(mark, line, ask);
 
   const chips = document.createElement("div");
@@ -2514,22 +3189,34 @@ function lockedState(runStatus, run) {
 }
 
 function renderChat() {
-  const agent = agentById(state.chatWith);
+  const parsed = parseThreadKey(state.chatWith);
+  const agent = agentById(parsed.agentId);
+  const product = parsed.sku ? productBySku(parsed.sku) : null;
+  const inPerspective = parsed.perspective;
   const messages = thread(state.chatWith);
 
   /* Only a named agent gets a name; the general chat stays the AI assistant. */
   $("chat-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   $("chat-title").textContent = agent ? agent.name : "AI assistant";
-  $("chat-subtitle").textContent = agent ? agent.note : "";
-  $("chat-subtitle").hidden = !agent;
+  $("chat-subtitle").textContent = product
+    ? "Working with " + product.name
+    : inPerspective
+      ? "Products perspective"
+      : (agent ? agent.note : "");
+  $("chat-subtitle").hidden = !product && !inPerspective && !agent;
   $("chat-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
   $("chat-input").placeholder = agent
     ? "Message " + agent.name + "…"
     : "Ask me anything about your catalog and agent runs…";
   $("welcome-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   $("welcome-avatar").className = agent ? "agent" : "";
-  $("welcome-line").textContent = agent ? agent.name : "Good morning Alex,";
-  $("welcome-ask").textContent = agent ? agent.ask : "How can I help?";
+  $("welcome-line").textContent = inPerspective ? "Products perspective" : (product ? "New conversation" : (agent ? agent.name : "Good morning Alex,"));
+  $("welcome-ask").textContent = product
+    ? (agent ? agent.name : "AI assistant") + " · " + product.name
+    : inPerspective
+      ? (agent ? agent.name : "AI assistant") + " · Products"
+      : (agent ? agent.ask : "How can I help?");
+  paintContext($("chat-context"), chatContextLabel(parsed));
   $("chat-clear").hidden = !messages.length;
 
   const starters = $("chat-starters");
@@ -2811,16 +3498,62 @@ $("act-approve").addEventListener("click", () => applyDecision("approved", [...s
 $("act-reject").addEventListener("click", () => applyDecision("rejected", [...state.selected]));
 $("act-undo").addEventListener("click", () => undoDecision([...state.selected]));
 $("finish-review").addEventListener("click", finishReview);
-$("nav-chat").addEventListener("click", () => showChat());
 /* From a run you can step sideways into a conversation with the agent behind it. */
 $("run-agent-label").addEventListener("click", () => {
   const run = RUNS.find((item) => item.id === state.openRunId) || ACTIVE_RUN;
   const agent = agentByName(run.agent);
   if (agent) showChat(agent.id);
 });
+$("nav-general").addEventListener("click", () => showChat("general"));
+$("nav-all-agents").addEventListener("click", showAgents);
+$("nav-all-conversations").addEventListener("click", showConversations);
 $("nav-all-runs").addEventListener("click", showRuns);
+document.querySelectorAll(".assistant-menu-branch").forEach((branch) => {
+  const flyout = branch.querySelector(".assistant-menu-flyout");
+  const show = () => {
+    if (!state.assistantMenuOpen) return;
+    document.querySelectorAll(".assistant-menu-branch.open").forEach((open) => open.classList.remove("open"));
+    document.querySelectorAll(".assistant-menu-flyout").forEach((other) => { if (other !== flyout) other.style.display = "none"; });
+    document.body.appendChild(flyout);
+    branch.classList.add("open");
+    flyout.style.display = "block";
+    const rect = branch.getBoundingClientRect();
+    const width = 260;
+    let left = rect.left - width + 8;
+    if (left < 8) left = rect.right - 8;
+    const height = Math.min(flyout.scrollHeight || 240, 320);
+    let top = rect.top;
+    if (top + height > window.innerHeight - 8) top = Math.max(8, window.innerHeight - 8 - height);
+    flyout.style.left = left + "px";
+    flyout.style.top = top + "px";
+  };
+  const hide = (event) => {
+    const next = event.relatedTarget;
+    if (next && (branch.contains(next) || flyout.contains(next))) return;
+    branch.classList.remove("open");
+    flyout.style.display = "none";
+  };
+  branch.addEventListener("mouseenter", show);
+  branch.addEventListener("mouseleave", hide);
+  flyout.addEventListener("mouseleave", hide);
+});
 $("runs-back").addEventListener("click", showRuns);
-$("chat-clear").addEventListener("click", () => { state.chats[state.chatWith] = []; renderChat(); });
+function deleteConversation(key) {
+  delete state.chats[key];
+  delete state.drafts[key];
+  if (state.panelThread === key) state.panelThread = null;
+}
+
+$("chat-clear").addEventListener("click", () => {
+  deleteConversation(state.chatWith);
+  renderChat();
+});
+$("dock-delete").addEventListener("click", () => {
+  deleteConversation(dockThreadKey());
+  renderDock();
+  renderNav();
+  if (state.view === "conversations") renderConversations();
+});
 $("chat-input").addEventListener("input", (event) => {
   const field = event.target;
   field.style.height = "26px";
@@ -2839,11 +3572,16 @@ $("chat-send").addEventListener("click", () => sendChat());
 /* Inside the assistant, back is a way out of it; on the product it belongs to
    the surrounding application. */
 $("back-button").addEventListener("click", () => {
-  if (state.view !== "product") showProduct();
+  if (state.view === "products") return;
+  if (state.view === "product") showProducts();
+  else if (state.view === "chat") {
+    if (state.chatReturn === "products") showProducts();
+    else showProduct();
+  } else showProduct();
 });
 
 function keepProductFields() {
-  const product = PRODUCT;
+  const product = activeProduct();
   product.name = $("product-name").value.trim() || product.name;
   product.status = $("product-status").value;
   product.category = $("product-category").value.trim();
@@ -2872,6 +3610,7 @@ $("dock-input").addEventListener("input", (event) => {
   field.style.height = "26px";
   field.style.height = Math.min(field.scrollHeight, 92) + "px";
   $("dock-send").disabled = !field.value.trim();
+  state.drafts[dockThreadKey()] = field.value;
 });
 $("dock-input").addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
@@ -2892,8 +3631,12 @@ $("assistant-menu-trigger").addEventListener("click", (event) => {
 });
 /* The rail is a preview of the conversation; expanding hands it to the full view. */
 $("dock-expand").addEventListener("click", () => {
-  const target = state.view === "product" ? state.dockChatWith : "general";
-  showChat(target === "general" ? null : target);
+  stashDockDraft();
+  const onRecord = state.view === "product" || state.view === "products";
+  state.chatReturn = onRecord ? state.view : "products";
+  state.chatWith = dockThreadKey();
+  setView("chat");
+  renderChat();
 });
 $("dock-close").addEventListener("click", () => { state.assistantOpen = false; renderDock(); });
 $("notice-dismiss").addEventListener("click", dismissToast);
@@ -2935,7 +3678,7 @@ document.addEventListener("click", (event) => {
   ["composer-suggest", "dock-suggest"].forEach((id) => {
     if (!$(id).hidden && !$(id).contains(event.target)) $(id).hidden = true;
   });
-  if (state.assistantMenuOpen && !$("assistant-menu").contains(event.target)) {
+  if (state.assistantMenuOpen && !$("assistant-menu").contains(event.target) && !event.target.closest(".assistant-menu-flyout")) {
     state.assistantMenuOpen = false;
     renderDock();
   }
@@ -2951,8 +3694,9 @@ document.querySelectorAll("[data-suggest]").forEach((button) => {
 });
 $("composer-send").addEventListener("click", () => {
   const instruction = $("instruction").value.trim();
+  if (!instruction) return;
   const ids = refineTargets();
-  if (!instruction || !ids.length) return;
+  if (!ids.length) { askAboutRun(instruction); return; }
   sendRefinement(instruction, ids);
 });
 
@@ -2962,8 +3706,14 @@ document.addEventListener("keydown", (event) => {
   else if (state.panelMode === "bulk") { state.selected.clear(); state.panelMode = null; render(); }
 });
 
+$("open-focus").addEventListener("click", () => showProduct());
+$("product-rows").addEventListener("dblclick", (event) => {
+  if (event.target.closest("input")) return;
+  showProduct();
+});
+
 syncFilterInputs();
-showProduct();
+showProducts();
 </script>
 </body>
 </html>
