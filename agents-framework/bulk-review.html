@@ -74,7 +74,37 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .dock > .assistant { flex: 1; min-height: 0; border-radius: 0; box-shadow: none; }
 .dock > .assistant[hidden] { display: none; }
 .app-nav { width: 240px; flex-shrink: 0; overflow: auto; padding: 14px 12px; background: #fff; border-right: 1px solid var(--line); }
-.product-view, .products-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.product-view, .products-view { flex: 1; min-height: 0; display: flex; }
+.products-view { flex-direction: column; }
+.product-view.focus .product-nav { display: none; }
+.product-nav { width: 240px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; padding: 14px 12px; background: #fff; border-right: 1px solid var(--line); }
+.product-nav > b { display: block; padding: 0 10px 8px; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.product-nav-search { display: block; margin: 0 4px 8px; }
+.product-nav-search input { width: 100%; height: 30px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; color: inherit; font: inherit; font-size: 12px; }
+.product-nav-search input:focus { outline: 2px solid #bfdbfe; border-color: #93c5fd; }
+#product-nav { flex: 1; min-height: 0; overflow: auto; }
+.product-nav-empty { margin: 8px 10px; color: var(--muted); font-size: 12px; }
+.product-nav-page { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 4px 0; color: var(--muted); font-size: 11px; }
+.product-nav-page span { display: flex; gap: 4px; }
+.product-nav-step { height: 24px; padding: 0 7px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; color: #334155; font: inherit; font-size: 11px; font-weight: 600; }
+.product-nav-step:disabled { color: #cbd5e1; }
+.product-nav-item { display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: var(--radius); background: transparent; text-align: left; }
+.product-nav-item:hover { background: #f1f5f9; }
+.product-nav-item.active { background: var(--blue-soft); }
+.product-nav-item strong { display: block; color: #334155; font-size: 13px; font-weight: 600; }
+.product-nav-item.active strong { color: #1d4ed8; }
+.product-nav-item small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+.product-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.group-preview { flex-shrink: 0; max-height: 168px; display: flex; flex-direction: column; border-bottom: 1px solid var(--line); background: #fff; }
+.group-preview[hidden] { display: none; }
+.group-preview-bar { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 8px 14px 4px; }
+.group-preview-bar b { font-size: 12px; font-weight: 600; }
+.group-preview-bar span, .group-preview-table td:last-child { color: var(--muted); font-size: 11px; }
+.group-preview-scroll { min-height: 0; overflow: auto; }
+.group-preview-table { width: 100%; border-collapse: collapse; }
+.group-preview-table td { padding: 6px 14px; border-top: 1px solid var(--line); font-size: 12px; }
+.group-preview-table tr { cursor: pointer; }
+.group-preview-table tr:hover td { background: #f8fafc; }
 .products-scroll { flex: 1; min-height: 0; overflow: auto; background: #fff; }
 .products-table { width: 100%; border-collapse: collapse; }
 .products-table th, .products-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); }
@@ -97,6 +127,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .product-tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .product-tools > button { height: 30px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: var(--radius); background: #fff; box-shadow: var(--ring); color: #334155; font-weight: 500; }
 .product-tools > button:hover { background: #f8fafc; }
+.product-tools > button:disabled { color: #94a3b8; background: #f8fafc; box-shadow: none; cursor: not-allowed; }
+.product-tools > button:disabled:hover { background: #f8fafc; }
+.agent-action[aria-expanded="true"] { border-color: #bfdbfe; background: var(--blue-soft); color: #1d4ed8; }
+.agent-menu { position: fixed; z-index: 50; min-width: 260px; padding: 6px; border-radius: var(--radius-lg); background: #fff; box-shadow: 0 12px 28px rgb(15 23 42 / .18), 0 0 0 1px rgb(15 23 42 / .08); }
+.agent-menu[hidden] { display: none; }
+.agent-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-radius: var(--radius); background: transparent; text-align: left; }
+.agent-menu button:hover { background: #f1f5f9; }
+.agent-menu i { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--radius); background: var(--violet-soft); color: var(--violet); font-style: normal; font-size: 12px; font-weight: 600; }
+.agent-menu strong { display: block; font-size: 13px; font-weight: 600; }
+.agent-menu small { display: block; margin-top: 1px; color: var(--muted); font-size: 12px; }
 .product-scroll { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px; }
 .product-shell { max-width: 960px; margin: 0 auto; }
 .product-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
@@ -107,6 +147,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .product-form > header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line); }
 .product-form > header h2 { margin: 0; font-size: 14px; font-weight: 600; }
 .product-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 20px; }
+.product-runs { margin-top: 16px; overflow: hidden; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
+.product-runs[hidden] { display: none; }
+.product-runs > header { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.product-runs > header h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.product-run { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 18px; border: 0; border-top: 1px solid var(--line); background: #fff; text-align: left; font: inherit; }
+#product-run-list > .product-run:first-child { border-top: 0; }
+.product-run:hover { background: #f8fafc; }
+.product-run b { display: block; font-size: 13px; font-weight: 600; }
+.product-run small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+.product-run .run-status { margin-left: auto; }
+.product-run-history { display: block; width: 100%; padding: 10px 18px; border: 0; border-top: 1px solid var(--line); background: #fff; color: var(--blue); font: inherit; font-size: 13px; font-weight: 500; text-align: left; }
+.product-run-history:hover { background: #f8fafc; }
 .product-field { display: flex; flex-direction: column; gap: 6px; }
 .product-field.full { grid-column: 1 / -1; }
 .product-field label { color: #475569; font-size: 12px; font-weight: 600; }
@@ -139,15 +191,22 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-more { display: block; width: 100%; text-align: left; padding: 6px 10px; border: 0; background: transparent; color: var(--blue); font-size: 13px; font-weight: 500; }
 .nav-more:hover { text-decoration: underline; }
 .nav-more.active { font-weight: 600; }
-.header-search { width: 320px; }
+.header-search { width: 240px; }
 
 /* The chat is a centred thread. A header appears only when you opened a named agent. */
 .chat-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.chat-view.with-products { flex-direction: row; }
+.chat-products { width: min(52%, 760px); flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: #fff; }
+.chat-products[hidden] { display: none !important; }
+.chat-products-bar { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.chat-products-bar b { font-size: 13px; font-weight: 600; }
+.chat-products-bar span { color: var(--muted); font-size: 12px; }
+.chat-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .chat-head { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: #fff; border-bottom: 1px solid var(--line); }
 .chat-head b { display: block; font-weight: 600; }
 .chat-head small { display: block; color: var(--muted); font-size: 12px; }
 .chat-head small[hidden] { display: none; }
-.chat-head #chat-clear { margin-left: auto; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: #94a3b8; }
+.chat-head #chat-clear { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: #94a3b8; }
 .chat-head #chat-clear:hover, #dock-delete:hover { background: #f1f5f9; color: #475569; }
 #dock-delete { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border-radius: var(--radius); }
 .chat-head #chat-clear[hidden], #dock-delete[hidden] { display: none; }
@@ -180,10 +239,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .agent-tile p { margin: 6px 0 12px; color: #475569; font-size: 13px; line-height: 1.5; }
 .agent-tile .agent-chat { margin-top: auto; color: var(--blue); font-size: 13px; font-weight: 500; }
 .conversation-list { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
-.conversation-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border: 0; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); text-align: left; }
+.conversation-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px 10px 16px; border: 0; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); text-align: left; }
 .conversation-row:hover { box-shadow: var(--shadow), 0 0 0 1px #bfdbfe; }
-.conversation-row > i { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-style: normal; font-size: 15px; font-weight: 600; }
-.conversation-row strong { display: block; font-size: 14px; font-weight: 600; }
+.conversation-open { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding: 4px 0; border: 0; background: transparent; text-align: left; }
+.conversation-open > i { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-style: normal; font-size: 15px; font-weight: 600; }
+.rename-input { width: 12em; max-width: 100%; border: 0; border-bottom: 1px solid #93c5fd; background: transparent; font: inherit; font-weight: 600; color: inherit; padding: 0; }
+.conversation-row strong { display: block; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.overflow { position: relative; flex-shrink: 0; }
+.overflow[hidden] { display: none; }
+.overflow-trigger { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: #64748b; font-size: 18px; line-height: 1; }
+.overflow-trigger:hover, .overflow-trigger[aria-expanded="true"] { background: #f1f5f9; color: #334155; }
+.overflow-menu { position: fixed; z-index: 40; min-width: 180px; padding: 4px; border-radius: var(--radius); background: #fff; box-shadow: 0 12px 28px rgb(15 23 42 / .18), 0 0 0 1px rgb(15 23 42 / .08); }
+.overflow-menu[hidden] { display: none; }
+.overflow-menu button { display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: var(--radius); background: transparent; color: #334155; font: inherit; font-size: 13px; text-align: left; }
+.overflow-menu button:hover { background: #f1f5f9; }
+.overflow-menu button[data-overflow="delete"] { color: #be123c; }
+.nav-conversation-row { display: flex; align-items: center; }
+.nav-conversation-row .nav-run { flex: 1; min-width: 0; }
 .conversation-row small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
 .runs-page { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 24px 28px; overflow: auto; }
 .runs-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
@@ -275,9 +347,11 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 .archive-bar { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); color: #334155; }
 .archive-bar strong { font-size: 14px; font-weight: 600; }
 .archive-bar span { color: var(--muted); font-size: 13px; }
-#archive-panel th:nth-child(1) { width: 200px; }
-#archive-panel th:nth-child(5), #archive-panel th:nth-child(6) { width: 120px; }
-#archive-panel th:nth-child(7) { width: 130px; }
+.archive-bar .spacer { flex: 1; }
+#archive-panel th.check { width: 42px; }
+#archive-panel th.archive-product { width: 200px; }
+#archive-panel th.archive-narrow { width: 120px; }
+#archive-panel th.archive-outcome { width: 130px; }
 
 .review-panel { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); overflow: hidden; }
 .review-panel > .tabs, .review-panel > .toolbar, .review-panel > .filter-row, .review-panel > .ready-bar, .review-panel > .tab-note, .review-panel > .table-footer { flex-shrink: 0; }
@@ -389,6 +463,7 @@ td small { display: block; color: #94a3b8; margin-top: 2px; font-size: 12px; }
 .group-row:hover .caret { background: #e2e8f0; color: var(--ink); }
 .group-head b { font-weight: 600; color: var(--ink); }
 .group-head span { color: var(--muted); font-size: 12px; }
+.group-head .group-note { margin-left: auto; font-style: normal; font-weight: 400; }
 tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .empty-state b { color: var(--ink); font-size: 15px; }
 .table-footer { display: flex; align-items: center; min-height: 44px; padding: 10px 16px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); background: #f8fafc; }
@@ -400,6 +475,22 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .assistant > header small { display: block; color: var(--muted); font-size: 12px; }
 .assistant > header button { border: 0; background: transparent; color: #94a3b8; font-size: 18px; }
 .assistant > header > .head-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.follow-switch { display: flex; flex-shrink: 0; padding: 2px; border-radius: 8px; background: #e2e8f0; }
+.follow-switch button { height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: #475569; font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.follow-switch button.active { background: #fff; color: #1d4ed8; box-shadow: 0 1px 2px rgb(15 23 42 / .08); }
+.follow-switch button { display: inline-flex; align-items: center; gap: 6px; }
+.follow-info { position: relative; display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 9999px; border: 1px solid currentColor; font-size: 9px; font-style: italic; font-weight: 700; line-height: 1; opacity: .6; cursor: help; }
+.follow-info:hover, .follow-info:focus { opacity: 1; outline: none; }
+.follow-info::after { content: attr(data-tip); position: absolute; z-index: 60; top: calc(100% + 8px); left: 50%; width: 240px; padding: 8px 10px; border-radius: var(--radius); background: #0f172a; color: #fff; font-size: 12px; font-style: normal; font-weight: 400; line-height: 1.4; text-align: left; white-space: normal; transform: translateX(-50%); opacity: 0; pointer-events: none; transition: opacity .12s; }
+.follow-info:hover::after, .follow-info:focus::after { opacity: 1; }
+.mode-bar { flex-shrink: 0; display: flex; align-items: center; justify-content: center; height: 44px; padding: 0 24px; background: #f1f5f9; border-bottom: 1px solid var(--line); }
+.follow-bar { flex-shrink: 0; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+.follow-bar[hidden] { display: none; }
+.linked-product { height: 32px; padding: 0 10px; border: 1px solid #bfdbfe; border-radius: var(--radius); background: #fff; color: #1d4ed8; font: inherit; font-size: 12px; font-weight: 600; text-align: left; white-space: nowrap; }
+.follow-bar .linked-product { width: 100%; }
+.linked-product:hover { background: var(--blue-soft); }
+.chat-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.chat-actions .linked-product[hidden] { display: none; }
 #assistant-close { margin-left: auto; }
 #dock-expand { font-size: 14px; }
 /* The menu opens the panel's own navigation, so it leads the header. */
@@ -414,8 +505,9 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .assistant-menu-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px; border: 0; border-radius: var(--radius); background: transparent; text-align: left; }
 .assistant-menu-item:hover { background: #f1f5f9; }
 .assistant-menu-item.active { background: var(--blue-soft); color: #1d4ed8; }
-.assistant-menu-item > i { flex-shrink: 0; font-style: normal; }
-.assistant-menu-item > span { flex: 1; min-width: 0; }
+.assistant-menu-item > i, .menu-conversation > i { flex-shrink: 0; font-style: normal; }
+.assistant-menu-item > span, .menu-conversation > span { flex: 1; min-width: 0; }
+.menu-conversation { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
 .assistant-menu-item .menu-link { color: #94a3b8; font-size: 13px; }
 .assistant-menu-item strong { display: block; font-size: 13px; font-weight: 600; }
 .assistant-menu-item small { display: block; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
@@ -510,10 +602,53 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .msg p:last-child { margin: 0; }
 .msg b.head { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 7px; }
 .chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 9999px; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .2); color: #1d4ed8; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.chip-remove { width: 14px; height: 14px; margin: 0 -3px 0 1px; padding: 0; border: 0; border-radius: 9999px; background: transparent; color: #1d4ed8; font-size: 13px; line-height: 1; }
+.chip-remove:hover { background: rgb(37 99 235 / .12); }
 .msg.user .chip { background: rgb(255 255 255 / .16); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .3); color: #fff; }
 .msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .msg-actions button { border-radius: var(--radius); border: 1px solid #cbd5e1; background: #fff; box-shadow: var(--ring); color: #334155; padding: 6px 10px; font-size: 12px; font-weight: 500; }
 .msg-actions button:hover { background: #f8fafc; }
+.result-card { margin-top: 10px; border-radius: var(--radius-lg); background: #fff; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.result-head { padding: 10px 12px 8px; }
+.result-head b { display: block; font-size: 14px; font-weight: 600; }
+.result-head small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+.result-columns { display: flex; justify-content: space-between; padding: 6px 12px 6px 34px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 600; }
+.result-product { padding: 8px 12px 4px; border-top: 1px solid var(--line); background: #f8fafc; color: #334155; font-size: 12px; font-weight: 600; }
+.result-row { border-top: 1px solid var(--line); }
+.result-toggle { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0; background: transparent; text-align: left; font: inherit; font-size: 13px; color: var(--ink); }
+.result-toggle:hover { background: #f8fafc; }
+.result-toggle i { width: 14px; color: #94a3b8; font-style: normal; font-size: 12px; }
+.result-toggle > span:nth-child(2) { flex: 1; min-width: 0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-none { min-width: 38px; text-align: center; color: #94a3b8; }
+.result-status { font-size: 11px; font-weight: 600; white-space: nowrap; }
+.result-status.approved { color: #047857; }
+.result-status.rejected { color: #be123c; }
+.result-body { padding: 0 12px 10px 34px; }
+.result-body p { margin: 0 0 6px; }
+.result-value { font-size: 13px; }
+.result-why { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.result-body .msg-actions { margin-top: 8px; }
+.ask-box { flex-shrink: 0; margin: 0 12px 8px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; box-shadow: var(--ring); overflow: hidden; }
+.ask-box[hidden] { display: none !important; }
+.ask-head { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-align: left; }
+.ask-head i { font-style: normal; color: #94a3b8; }
+.ask-body { padding: 2px 14px 12px; border-top: 1px solid var(--line); }
+.ask-body h3 { margin: 10px 0 8px; font-size: 14px; font-weight: 600; }
+.ask-option { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; cursor: pointer; }
+.ask-option input { margin-top: 3px; accent-color: var(--blue); }
+.ask-option b { display: block; font-size: 13px; font-weight: 600; }
+.ask-option small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.ask-other { width: 100%; margin: 2px 0 4px 24px; height: 32px; padding: 0 8px; border: 1px solid #cbd5e1; border-radius: var(--radius); font: inherit; font-size: 13px; }
+.ask-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.ask-discard { border: 0; background: transparent; color: #334155; font: inherit; font-size: 13px; font-weight: 500; padding: 6px 2px; }
+.ask-discard:hover { color: var(--ink); }
+.ask-continue { height: 32px; padding: 0 14px; border: 0; border-radius: var(--radius); background: var(--blue); color: #fff; font: inherit; font-size: 13px; font-weight: 600; }
+.ask-continue:hover { background: #1d4ed8; }
+.ask-continue:disabled { background: #93c5fd; }
+.ask-box .result-card { margin: 8px 0 0; box-shadow: none; }
+.ask-step { display: block; margin-top: 10px; color: var(--muted); font-size: 11px; }
+.ask-step-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ask-step-head h3 { margin: 4px 0 6px; }
 .working { display: flex; align-items: center; gap: 8px; color: #6d28d9; font-weight: 500; }
 .dots span { display: inline-block; width: 5px; height: 5px; margin-right: 3px; border-radius: 9999px; background: var(--violet); animation: blink 1.2s infinite; }
 .dots span:nth-child(2) { animation-delay: .2s; }
@@ -589,9 +724,16 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 </head>
 <body>
 
+<div class="mode-bar">
+  <div class="follow-switch" id="follow-switch" role="group" aria-label="Switch between option A and option B">
+    <button type="button" data-follow="product">A · Follow product <span class="follow-info" tabindex="0" role="img" aria-label="In Details View, changing product starts a new conversation with the assistant or agent you had selected." data-tip="In Details View, changing product starts a new conversation with the assistant or agent you had selected.">i</span></button>
+    <button type="button" data-follow="context">B · Keep conversation <span class="follow-info" tabindex="0" role="img" aria-label="In Details View, the conversation keeps its original context. Remove the chip and the context becomes the current product." data-tip="In Details View, the conversation keeps its original context. Remove the chip and the context becomes the current product.">i</span></button>
+  </div>
+</div>
+
 <header class="app-header">
   <button class="icon-button back-button" type="button" id="back-button" aria-label="Back to the main application">←</button>
-  <b class="brand" id="app-brand">Focus View</b>
+  <b class="brand" id="app-brand">Details View</b>
   <label class="search header-search"><span>⌕</span><input placeholder="Search products, runs or agents" /></label>
   <div class="header-spacer"></div>
   <button class="assistant-toggle active" type="button" id="assistant-toggle"><i>✦</i> AI assistant<b id="assistant-badge" hidden></b></button>
@@ -609,7 +751,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     <button class="nav-more" type="button" id="nav-all-agents">View all agents</button>
   </div>
 
-  <div class="nav-group">
+  <div class="nav-group" id="nav-conversations-section">
     <b>Conversations</b>
     <div id="nav-conversations"></div>
     <button class="nav-more" type="button" id="nav-all-conversations">View all conversations</button>
@@ -627,18 +769,19 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
 <section class="products-view" id="products-view" hidden>
   <div class="product-toolbar">
-    <span class="product-crumbs">Catalog <em>/</em> <b>Products</b></span>
+    <span class="product-crumbs">Catalog <em>/</em> <b>Summer collection perspective</b></span>
     <span class="products-caption" id="products-caption">Check products to attach them to the assistant.</span>
     <div class="product-tools">
       <span class="products-caption" id="products-checked">No products checked</span>
-      <button type="button" id="open-focus">Open in Focus View</button>
+      <button type="button" class="agent-action" id="products-agent" aria-haspopup="menu" aria-expanded="false" disabled title="Check products in the table first.">Agent</button>
+      <button type="button" id="open-focus">Open in Details View</button>
     </div>
   </div>
   <div class="products-scroll">
     <table class="products-table">
       <thead>
         <tr>
-          <th class="check" aria-label="Check"></th>
+          <th class="check"><input type="checkbox" id="check-all-products" aria-label="Check all products"></th>
           <th>Product</th>
           <th>SKU</th>
           <th>Category</th>
@@ -651,10 +794,20 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 </section>
 
 <section class="product-view" id="product-view" hidden>
+  <aside class="product-nav">
+    <b>Products</b>
+    <label class="product-nav-search">
+      <input id="product-nav-search" type="search" placeholder="Search products" aria-label="Search products in this perspective">
+    </label>
+    <div id="product-nav"></div>
+    <div class="product-nav-page" id="product-nav-page"></div>
+  </aside>
+  <div class="product-main">
   <div class="product-toolbar">
-    <span class="product-crumbs">Products <em>/</em> <b id="toolbar-category">Outdoor</b></span>
+    <span class="product-crumbs"><span id="product-crumb">Summer collection perspective</span> <em>/</em> <b id="toolbar-category">Outdoor</b></span>
     <span class="product-state" id="toolbar-status">Active</span>
     <div class="product-tools">
+      <button type="button" class="agent-action" aria-haspopup="menu" aria-expanded="false">Agent</button>
       <button type="button" id="product-approve">Approve</button>
       <button type="submit" form="product-form" id="product-submit">Submit</button>
       <button type="button" id="product-export">Export</button>
@@ -683,18 +836,70 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         <div class="product-field full"><label for="product-description">Description</label><textarea id="product-description"></textarea></div>
       </div>
     </form>
+    <section class="product-runs" id="product-runs" hidden>
+      <header><h2>Runs for this product</h2></header>
+      <div id="product-run-list"></div>
+    </section>
+  </div>
   </div>
   </div>
 </section>
 
+<section class="products-view" id="group-view" hidden>
+  <div class="product-toolbar">
+    <span class="product-crumbs"><b id="group-title">Summer collection perspective</b></span>
+    <span class="products-caption" id="group-caption"></span>
+  </div>
+  <div class="products-scroll">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>Category</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="group-rows"></tbody>
+    </table>
+  </div>
+</section>
+
 <section class="chat-view" id="chat-view" hidden>
+  <aside class="chat-products" id="chat-products" hidden>
+    <div class="chat-products-bar"><b id="chat-products-title">Products</b><span id="chat-products-count"></span></div>
+    <div class="products-scroll">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="chat-product-rows"></tbody>
+      </table>
+    </div>
+  </aside>
+  <div class="chat-main">
   <header class="chat-head">
     <i class="chat-avatar" id="chat-avatar">✦</i>
     <div>
       <b id="chat-title">AI assistant</b>
       <small id="chat-subtitle" hidden></small>
     </div>
-    <button type="button" id="chat-clear" aria-label="Delete conversation" title="Delete conversation" hidden><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.5h9"/><path d="M6.2 4.5V3.2h3.6v1.3"/><path d="M4.7 4.5l.6 8.2h5.4l.6-8.2"/></svg></button>
+    <div class="chat-actions">
+      <button type="button" class="linked-product" id="chat-open-product" hidden>Open in Details View</button>
+      <button type="button" class="linked-product" id="chat-open-group" hidden>Show products</button>
+      <div class="overflow" id="chat-overflow" hidden>
+        <button type="button" class="overflow-trigger" id="chat-overflow-trigger" aria-label="Conversation actions" aria-expanded="false">⋯</button>
+        <div class="overflow-menu" id="chat-overflow-menu" hidden>
+          <button type="button" data-overflow="rename">Rename</button>
+          <button type="button" data-overflow="delete">Delete conversation</button>
+        </div>
+      </div>
+    </div>
   </header>
   <div class="chat-scroll" id="chat-scroll">
     <div class="chat-welcome" id="chat-welcome">
@@ -705,6 +910,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     </div>
     <div class="chat-thread" id="chat-thread"></div>
   </div>
+  <div class="ask-box" id="chat-ask" hidden></div>
   <div class="chat-composer">
     <div class="composer-box">
       <div class="composer-context" id="chat-context"></div>
@@ -716,6 +922,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
       </div>
     </div>
     <p class="ai-note"><span>AI</span> Uses AI. Verify results.</p>
+  </div>
   </div>
 </section>
 
@@ -802,7 +1009,55 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     </section>
 
     <section class="review-panel" id="archive-panel" hidden>
-      <div class="archive-bar">
+      <div class="toolbar" id="archive-tools" hidden>
+        <label class="search"><span>⌕</span><input id="archive-search" placeholder="Search product, SKU or attribute" /></label>
+        <span class="tool tool-select" id="archive-sort-tool">
+          <i>⇅</i>
+          <select id="archive-sort" aria-label="Sort">
+            <option value="score-desc">Confidence ↓</option>
+            <option value="score-asc">Confidence ↑</option>
+            <option value="product">Product A–Z</option>
+            <option value="attribute">Attribute A–Z</option>
+          </select>
+        </span>
+        <span class="tool tool-select" id="archive-group-tool">
+          <i>▦</i>
+          <select id="archive-group" aria-label="Group by">
+            <option value="none">Review groups</option>
+            <option value="product">By product</option>
+            <option value="attribute">By attribute</option>
+            <option value="category">By category</option>
+            <option value="status">By status</option>
+            <option value="evidence">By evidence</option>
+            <option value="confidence">By confidence</option>
+          </select>
+        </span>
+        <button class="tool" type="button" id="archive-filter-toggle"><i>⚟</i> Filter <b id="archive-filter-badge" hidden></b></button>
+        <div class="spacer"></div>
+        <button class="act act-approve" type="button" id="archive-approve" disabled>✓ Approve</button>
+        <button class="act act-reject" type="button" id="archive-reject" disabled>× Reject</button>
+        <button class="act act-undo" type="button" id="archive-undo" disabled>↩ Undo</button>
+      </div>
+      <div class="filter-row" id="archive-filter-row" hidden>
+        <label>Confidence
+          <select id="archive-score-filter"><option>Any</option><option>90–100</option><option>60–89</option><option>Below 60</option></select>
+        </label>
+        <label>Status
+          <select id="archive-status-filter"><option>All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Refining</option><option>Withdrawn</option></select>
+        </label>
+        <label>Evidence
+          <select id="archive-issue-filter"><option>Any</option><option>Conflicting</option><option>Weak</option><option>Clean</option></select>
+        </label>
+        <label>Refinement
+          <select id="archive-refined-filter"><option>Any</option><option>Refined only</option><option>Never refined</option></select>
+        </label>
+        <button class="clear" type="button" id="archive-clear-filters">Reset filters</button>
+      </div>
+      <div class="ready-bar" id="archive-ready" hidden>
+        <strong id="archive-ready-count"></strong>
+        <span>Approved changes will be written when you finish the review. Decisions remain reversible until then.</span>
+      </div>
+      <div class="archive-bar" id="archive-bar">
         <strong id="archive-summary"></strong>
         <span id="archive-when"></span>
       </div>
@@ -810,14 +1065,19 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         <table>
           <thead>
             <tr>
-              <th>Product</th><th>Attribute</th><th>Current value</th><th>Final value</th>
-              <th>Evidence</th><th>Confidence</th><th>Outcome</th>
+              <th class="check" id="archive-check-head" hidden><input type="checkbox" id="archive-select-all" aria-label="Check all changes"></th>
+              <th class="archive-product">Product</th><th>Attribute</th><th>Current value</th><th id="archive-value-head">Final value</th>
+              <th class="archive-narrow">Evidence</th><th class="archive-narrow" id="archive-score-head">Confidence</th><th class="archive-outcome" id="archive-status-head">Outcome</th>
             </tr>
           </thead>
           <tbody id="archive-rows"></tbody>
         </table>
+        <div class="empty-state" id="archive-empty" hidden><b>No matching changes</b><span>Try adjusting your filters.</span></div>
       </div>
-      <footer class="table-footer"><span id="archive-footer"></span></footer>
+      <footer class="table-footer">
+        <span id="archive-footer"></span>
+        <span class="sel-count" id="archive-sel" hidden>No rows selected</span>
+      </footer>
     </section>
 
     <section class="review-panel" id="review-panel">
@@ -837,7 +1097,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         <span class="tool tool-select" id="group-tool">
           <i>▦</i>
           <select id="group-by" aria-label="Group by">
-            <option value="none">No grouping</option>
+            <option value="none">Review groups</option>
             <option value="product">By product</option>
             <option value="attribute">By attribute</option>
             <option value="category">By category</option>
@@ -937,11 +1197,26 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         <i id="dock-avatar">✦</i>
         <div><h2 id="dock-title">AI assistant</h2><small id="dock-subtitle" hidden></small></div>
         <div class="head-actions">
-          <button type="button" id="dock-delete" aria-label="Delete conversation" title="Delete conversation" hidden><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.5h9"/><path d="M6.2 4.5V3.2h3.6v1.3"/><path d="M4.7 4.5l.6 8.2h5.4l.6-8.2"/></svg></button>
+          <div class="overflow" id="dock-overflow" hidden>
+            <button type="button" class="overflow-trigger" id="dock-overflow-trigger" aria-label="Conversation actions" aria-expanded="false">⋯</button>
+            <div class="overflow-menu" id="dock-overflow-menu" hidden>
+              <button type="button" data-overflow="rename">Rename</button>
+              <button type="button" data-overflow="delete">Delete conversation</button>
+            </div>
+          </div>
           <button type="button" id="dock-expand" aria-label="Open full chat" title="Open full chat">⤢</button>
           <button type="button" id="dock-close" aria-label="Hide chat">×</button>
         </div>
       </header>
+      <div class="follow-bar" id="follow-bar" hidden>
+        <button type="button" class="linked-product" id="open-linked-product" hidden>Open in Details View</button>
+      </div>
+      <div class="group-preview" id="group-preview" hidden>
+        <div class="group-preview-bar"><b id="group-preview-title">Products</b><span id="group-preview-count"></span></div>
+        <div class="group-preview-scroll">
+          <table class="group-preview-table"><tbody id="group-preview-rows"></tbody></table>
+        </div>
+      </div>
       <div class="assistant-menu" id="assistant-menu" hidden>
         <div id="assistant-menu-root">
           <div class="assistant-menu-general" id="assistant-menu-general"></div>
@@ -953,7 +1228,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
               <div class="assistant-menu-flyout" id="menu-flyout-agents"></div>
             </div>
           </div>
-          <div class="assistant-menu-section">
+          <div class="assistant-menu-section" id="menu-conversations-section">
             <b>Conversations</b>
             <div id="assistant-menu-chats"></div>
             <div class="assistant-menu-branch" id="menu-branch-conversations">
@@ -972,6 +1247,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         </div>
       </div>
       <div class="thread" id="dock-thread"></div>
+      <div class="ask-box" id="dock-ask" hidden></div>
       <div class="composer" id="dock-composer">
         <div class="suggestions" id="dock-suggest" hidden></div>
         <div class="composer-box">
@@ -990,6 +1266,8 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
 </div>
 </div>
+
+<div class="agent-menu" id="agent-menu" hidden role="menu" aria-label="Agents"></div>
 
 <div class="toast" id="notice" role="status" hidden>
   <span>✓</span>
@@ -1014,7 +1292,7 @@ const CHANGES = [
   { id: 12, sku: "GD-3012", product: "Cedar Planter Box", category: "Garden", attribute: "Wood species", current: "Cedar", proposed: "Western red cedar", confidence: 34, evidence: 1, issue: "weak", refinedValue: "Western red cedar (Thuja plicata)", sources: ["Generated description"], rationale: "The proposal was inferred from copy rather than a verified specification." }
 ];
 
-/* The catalog the table starts from. Focus View edits the active record in place. */
+/* The catalog the table starts from. Details View edits the active record in place. */
 const PRODUCTS = [
   { sku: "TR-4410", name: "Alpine Trekking Pole", category: "Outdoor", status: "Active", brand: "Northline", attributeLabel: "Material", attribute: "Aluminium", description: "Lightweight adjustable trekking pole built for long-distance trails and mixed terrain." },
   { sku: "KT-2028", name: "Precision Chef Knife", category: "Kitchen", status: "Active", brand: "Hearth & Co", attributeLabel: "Blade length", attribute: "—", description: "Forged chef knife for daily prep, with a full tang and a contoured handle." },
@@ -1123,11 +1401,31 @@ const state = {
   productChecks: new Set(),
   drafts: {},
   chatReturn: "products",
+  detailReturn: "products",
+  detailProductMode: "details",
+  productMode: "details",
+  focusReturn: "products",
   openRunId: 1842,
   chatWith: "general",
   dockChatWith: "general",
   /* Set when a conversation is chosen from the panel. The page stays put. */
   panelThread: null,
+  /* product: the list leads. conversation: a product conversation leads the list. */
+  follow: "product",
+  productQuery: "",
+  productPage: 0,
+  conversationTitles: {},
+  dismissedContext: {},
+  adoptedContext: {},
+  contextCleared: {},
+  contextFollows: {},
+  chatClock: 0,
+  chatRecent: {},
+  productRunHistory: false,
+  proposalChecks: new Set(),
+  proposalFocus: null,
+  /* The conversation whose product table the user has opened. Hidden until then. */
+  groupTable: null,
   chats: {
     "TR-4410:content": [
       { role: "user", text: "Why did you change the material?" },
@@ -1140,6 +1438,14 @@ const state = {
   query: "",
   sort: "score-desc",
   groupBy: "none",
+  archiveQuery: "",
+  archiveSort: "score-desc",
+  archiveGroup: "none",
+  archiveScore: "Any",
+  archiveStatus: "All statuses",
+  archiveIssue: "Any",
+  archiveRefined: "Any",
+  archiveFilterOpen: false,
   collapsedGroups: new Set(),
   score: "Any",
   status: "All statuses",
@@ -1150,6 +1456,7 @@ const state = {
   focused: null,
   panelMode: null,
   decisions: {},
+  resultOpen: new Set(),
   history: {},
   written: new Set(),
   undoable: null,
@@ -1158,7 +1465,7 @@ const state = {
   batches: [],
   thread: [{ role: "agent", kind: "intro" }],
   /* The table starts with the general assistant open, not a named agent. */
-  assistantOpen: true
+  assistantOpen: false
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1221,8 +1528,13 @@ function inTab(change, tabId) {
 
 const tabCount = (tabId) => CHANGES.filter((change) => inTab(change, tabId)).length;
 
-function matchesTab(change) {
-  return inTab(change, state.tab);
+/* The old tabs are groups in one table. A decision moves the change out of its
+   evidence group and into Approved or Dismissed, so each row appears once. */
+function reviewGroupId(change) {
+  const decision = decisionOf(change.id);
+  if (decision === "approved") return "approved";
+  if (decision === "rejected" || decision === "withdrawn") return "dismissed";
+  return evidenceBucket(change);
 }
 
 function matchesScore(change) {
@@ -1269,10 +1581,8 @@ function visibleChanges() {
   const query = state.query.trim().toLowerCase();
   const rows = CHANGES.filter((change) => {
     const haystack = (change.sku + " " + change.product + " " + change.attribute).toLowerCase();
-    /* The decision tabs already pin the status; everywhere else the filter applies. */
-    const statusPinned = state.tab === "approved" || state.tab === "dismissed";
-    const statusOk = statusPinned || state.status === "All statuses" || decisionOf(change.id) === state.status.toLowerCase();
-    return haystack.includes(query) && matchesTab(change) && matchesScore(change) && matchesIssue(change) && matchesRefined(change) && statusOk;
+    const statusOk = state.status === "All statuses" || decisionOf(change.id) === state.status.toLowerCase();
+    return haystack.includes(query) && matchesScore(change) && matchesIssue(change) && matchesRefined(change) && statusOk;
   });
   return sortRows(rows);
 }
@@ -1515,30 +1825,6 @@ function resolveBatch(batch) {
 
 /* ---------- table ---------- */
 
-function renderTabs() {
-  const host = $("tabs");
-  host.textContent = "";
-  TABS.forEach((tab) => {
-    const total = tab.count();
-    if (tab.hideWhenEmpty && total === 0) return;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = (tab.cls ? tab.cls + " " : "") + (state.tab === tab.id ? "active" : "");
-    const label = document.createElement("span");
-    label.textContent = tab.label;
-    const count = document.createElement("b");
-    count.textContent = total.toLocaleString();
-    button.append(label, count);
-    button.addEventListener("click", () => {
-      state.tab = tab.id;
-      state.selected.clear();
-      state.panelMode = state.focused ? "single" : null;
-      render();
-    });
-    host.append(button);
-  });
-}
-
 function focusRow(id) {
   state.focused = id;
   state.panelMode = "single";
@@ -1597,7 +1883,7 @@ function appendChangeRow(body, change) {
   const score = confidenceOf(change);
 
   const tr = document.createElement("tr");
-  if (state.groupBy !== "none") tr.classList.add("grouped");
+  tr.classList.add("grouped");
   if (state.selected.has(change.id)) tr.classList.add("selected");
   if (state.focused === change.id) tr.classList.add("focused");
   if (refining) tr.classList.add("is-refining");
@@ -1742,21 +2028,31 @@ function appendGroupRow(body, group) {
   const count = document.createElement("span");
   count.textContent = group.rows.length + " " + (group.rows.length === 1 ? "change" : "changes");
   head.append(caret, title, count);
+  if (group.note) {
+    const note = document.createElement("span");
+    note.className = "group-note";
+    note.textContent = group.note;
+    head.append(note);
+  }
   cell.append(head);
   tr.append(checkCell, cell);
   body.append(tr);
 }
 
+function reviewGroups(rows) {
+  return TABS.filter((tab) => tab.id !== "all").map((tab) => ({
+    key: "tab:" + tab.id,
+    label: tab.label,
+    note: TAB_NOTES[tab.id] || "",
+    rows: rows.filter((change) => reviewGroupId(change) === tab.id)
+  })).filter((group) => group.rows.length);
+}
+
 function renderRows(rows) {
   const body = $("rows");
   body.textContent = "";
-
-  if (state.groupBy === "none") {
-    rows.forEach((change) => appendChangeRow(body, change));
-    return;
-  }
-
-  groupedRows(rows).forEach((group) => {
+  const groups = state.groupBy === "none" ? reviewGroups(rows) : groupedRows(rows);
+  groups.forEach((group) => {
     appendGroupRow(body, group);
     if (!state.collapsedGroups.has(group.key)) {
       group.rows.forEach((change) => appendChangeRow(body, change));
@@ -2161,7 +2457,258 @@ function renderThread() {
   host.scrollTop = host.scrollHeight;
 }
 
+function openGeneratedReview() {
+  if (state.view !== "detail") return null;
+  const run = RUNS.find((item) => item.id === state.openRunId);
+  if (!run || !run.generated || statusOf(run) !== "review") return null;
+  return run;
+}
+
+function generatedIntro(run) {
+  const proposals = (run.proposals || []).filter((item) => !item.skipped);
+  const products = new Set(proposals.map((item) => item.sku)).size;
+  const conflict = proposals.filter((item) => item.score < 40).length;
+  const weak = proposals.filter((item) => item.score >= 40 && item.score < 90).length;
+  const analysed = run.products;
+  return "I analysed " + analysed + " " + (analysed === 1 ? "product" : "products") +
+    " and proposed " + proposals.length + " attribute " + (proposals.length === 1 ? "change" : "changes") +
+    " on " + products + " of them. " + conflict + " have conflicting sources and " + weak +
+    " rest on weak evidence — those are worth your attention first.";
+}
+
+function generatedRunReply(run, question) {
+  const proposals = (run.proposals || []).filter((item) => !item.skipped);
+  const conflict = proposals.filter((item) => item.score < 40).length;
+  const weak = proposals.filter((item) => item.score >= 40 && item.score < 90).length;
+  const products = new Set(proposals.map((item) => item.sku)).size;
+  const text = question.toLowerCase();
+  if (/conflict|weak|attention|review|wrong|problem/.test(text)) {
+    return "Run #" + run.id + " proposed " + proposals.length + " changes. " + conflict +
+      " conflict and " + weak + " rest on weak evidence. Check the rows you want to decide, then approve or reject them.";
+  }
+  if (/how many|count|total|what did|summar/.test(text)) {
+    return run.agent + " proposed " + proposals.length + " attribute changes across " +
+      products + " " + (products === 1 ? "product" : "products") + ".";
+  }
+  return "This conversation is about run #" + run.id +
+    ". Check changes in the table to approve or reject them, or ask what needs attention.";
+}
+
+function generatedContextLabel(run) {
+  const indexes = pendingProposalIndexes(run);
+  if (!indexes.length) return "Run #" + run.id;
+  if (indexes.length === 1) {
+    const item = run.proposals[indexes[0]];
+    return "✦ " + productBySku(item.sku).name + " · " + item.attribute;
+  }
+  return "✦ " + indexes.length + " changes attached";
+}
+
+function renderGeneratedSingleCard(host, run, index) {
+  const item = run.proposals[index];
+  if (!item) return;
+  const product = productBySku(item.sku);
+  host.append(cardKicker("Inspecting change"));
+  const title = document.createElement("h3");
+  title.textContent = product.name;
+  const meta = document.createElement("p");
+  meta.className = "card-meta";
+  meta.textContent = item.sku + " · " + (item.decision || "pending");
+  host.append(title, meta);
+
+  const checked = pendingProposalIndexes(run).length;
+  if (checked) {
+    const back = document.createElement("div");
+    back.className = "card-note";
+    back.textContent = checked + " " + (checked === 1 ? "row is" : "rows are") + " still ticked. ";
+    const link = document.createElement("button");
+    link.type = "button";
+    link.style.cssText = "border:0;background:transparent;color:#46309d;font-weight:600;padding:0;text-decoration:underline";
+    link.textContent = "View selection";
+    link.addEventListener("click", () => { state.proposalFocus = null; render(); });
+    back.append(link);
+    host.append(back);
+  }
+
+  const card = document.createElement("div");
+  card.className = "card-change";
+  const label = document.createElement("label");
+  label.textContent = item.attribute;
+  const currentRow = document.createElement("div");
+  currentRow.innerHTML = "<span>Current</span>";
+  const currentValue = document.createElement("p");
+  currentValue.className = "removed";
+  currentValue.textContent = item.current;
+  currentRow.append(currentValue);
+  const proposedRow = document.createElement("div");
+  proposedRow.innerHTML = "<span>Proposed</span>";
+  const proposedValue = document.createElement("p");
+  proposedValue.className = "added" + (item.decision === "rejected" ? " retracted" : "");
+  proposedValue.textContent = item.decision === "rejected" ? "Proposal rejected" : item.decision === "ignored" ? "Left unchanged" : item.proposed;
+  proposedRow.append(proposedValue);
+  card.append(label, currentRow, proposedRow);
+  host.append(card);
+
+  const conf = document.createElement("div");
+  conf.className = "card-conf " + band(item.score).key;
+  const big = document.createElement("strong");
+  big.textContent = item.score;
+  const confText = document.createElement("div");
+  const confWhy = document.createElement("b");
+  confWhy.textContent = item.rationale;
+  confText.append(confWhy);
+  conf.append(big, confText);
+  host.append(conf);
+
+  if (generatedReview(run)) {
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    const choices = item.decision
+      ? [["reject", "↩ Undo", null]]
+      : [["approve", "Approve", "approved"], ["reject", "Reject", "rejected"]];
+    choices.forEach(([cls, labelText, decision]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = cls;
+      button.textContent = labelText;
+      button.addEventListener("click", () => {
+        if (decision) applyGeneratedDecision(decision, [index]);
+        else undoGeneratedDecision([index]);
+      });
+      actions.append(button);
+    });
+    host.append(actions);
+  }
+}
+
+function renderGeneratedBulkCard(host, run, indexes) {
+  const items = indexes.map((index) => run.proposals[index]).filter(Boolean);
+  const counts = { high: 0, mid: 0, low: 0 };
+  let conflicts = 0;
+  let weak = 0;
+  items.forEach((item) => {
+    counts[band(item.score).key] += 1;
+    if (item.score < 40) conflicts += 1;
+    else if (item.score < 90) weak += 1;
+  });
+  host.append(cardKicker("Selection"));
+  const title = document.createElement("h3");
+  title.textContent = items.length + " " + (items.length === 1 ? "change" : "changes") + " selected";
+  const meta = document.createElement("p");
+  meta.className = "card-meta";
+  meta.textContent = "Approve or reject them in the toolbar, or write an instruction below to send them back to the agent.";
+  host.append(title, meta);
+  const stats = document.createElement("div");
+  stats.className = "sel-stats";
+  [["high", "90–100"], ["mid", "60–89"], ["low", "Below 60"]].forEach(([key, label]) => {
+    const cell = document.createElement("div");
+    cell.className = key;
+    cell.innerHTML = "<b>" + counts[key] + "</b><span>" + label + "</span>";
+    stats.append(cell);
+  });
+  host.append(stats);
+  if (conflicts || weak) {
+    const flags = document.createElement("div");
+    flags.className = "sel-flags";
+    if (conflicts) { const flag = document.createElement("span"); flag.textContent = "⚠ " + conflicts + " conflicting"; flags.append(flag); }
+    if (weak) { const flag = document.createElement("span"); flag.className = "weak"; flag.textContent = "○ " + weak + " weak evidence"; flags.append(flag); }
+    host.append(flags);
+  }
+  const list = document.createElement("div");
+  list.className = "sel-list";
+  indexes.forEach((index) => {
+    const item = run.proposals[index];
+    const row = document.createElement("div");
+    const name = document.createElement("b");
+    name.textContent = productBySku(item.sku).name;
+    const attribute = document.createElement("em");
+    attribute.textContent = item.attribute;
+    row.append(name, attribute);
+    row.addEventListener("click", () => { state.proposalFocus = index; render(); });
+    list.append(row);
+  });
+  host.append(list);
+  const actions = document.createElement("div");
+  actions.className = "card-actions";
+  [["approve", "Approve", "approved"], ["reject", "Reject", "rejected"]].forEach(([cls, label, decision]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = cls;
+    button.textContent = label + " " + indexes.length;
+    button.addEventListener("click", () => applyGeneratedDecision(decision, indexes));
+    actions.append(button);
+  });
+  host.append(actions);
+}
+
+function appendGeneratedCard(thread, run) {
+  const focus = state.proposalFocus;
+  const focused = focus != null && run.proposals[focus] && !run.proposals[focus].skipped;
+  const checked = pendingProposalIndexes(run);
+  if (!focused && !checked.length) return;
+  const card = document.createElement("div");
+  card.className = "card";
+  if (focused) renderGeneratedSingleCard(card, run, focus);
+  else renderGeneratedBulkCard(card, run, checked);
+  thread.append(card);
+}
+
+function renderGeneratedAssistant(run) {
+  const host = $("thread");
+  host.textContent = "";
+  const intro = document.createElement("div");
+  intro.className = "msg agent";
+  const introText = document.createElement("p");
+  introText.textContent = generatedIntro(run);
+  intro.append(introText);
+  host.append(intro);
+  (run.reviewThread || []).forEach((message) => {
+    const block = document.createElement("div");
+    block.className = "msg " + message.role;
+    if (message.role === "user") {
+      const chipRow = document.createElement("div");
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = message.context || ("Run #" + run.id);
+      chipRow.append(chip);
+      block.append(chipRow);
+    }
+    const text = document.createElement("p");
+    text.textContent = message.text;
+    block.append(text);
+    host.append(block);
+  });
+  appendGeneratedCard(host, run);
+  host.scrollTop = host.scrollHeight;
+  renderComposer();
+}
+
+function askAboutGeneratedRun(run, instruction) {
+  if (!run.reviewThread) run.reviewThread = [];
+  run.reviewThread.push({ role: "user", text: instruction, context: generatedContextLabel(run) });
+  run.reviewThread.push({ role: "agent", text: generatedRunReply(run, instruction) });
+  $("instruction").value = "";
+  autoGrow();
+  renderGeneratedAssistant(run);
+}
+
 function renderComposer() {
+  const generated = openGeneratedReview();
+  if (generated) {
+    const selected = pendingProposalIndexes(generated);
+    paintContext($("composer-context"), generatedContextLabel(generated));
+    const field = $("instruction");
+    const hasInstruction = Boolean(field.value.trim());
+    field.disabled = false;
+    field.placeholder = selected.length
+      ? "Re-check with a rule, or give the value to use…"
+      : "Ask about this run…";
+    $("composer-send").disabled = !hasInstruction;
+    $("composer-hint").textContent = "";
+    $("assistant-name").textContent = generated.agent;
+    $("assistant-status").textContent = "Run #" + generated.id + " · idle";
+    return;
+  }
   const selected = refineTargets();
   paintContext($("composer-context"), reviewContextLabel());
 
@@ -2284,22 +2831,46 @@ function renderRuns() {
   $("runs-total").textContent = RUNS.length + " runs";
 }
 
+function holdConversation() {
+  if (state.panelThread || state.view === "chat") return;
+  const key = dockThreadKey();
+  if ((state.chats[key] || []).length) state.panelThread = key;
+}
+
 /* One view occupies the centre at a time; the navigation reflects which. */
 function setView(view) {
-  if (view !== state.view) state.panelThread = null;
+  if (view !== state.view) {
+    /* Option B keeps the open conversation. The page you land on only changes its context. */
+    if (state.follow === "context") holdConversation();
+    else state.panelThread = null;
+  }
   state.view = view;
   $("products-view").hidden = view !== "products";
   $("product-view").hidden = view !== "product";
   $("chat-view").hidden = view !== "chat";
+  $("group-view").hidden = view !== "group";
   $("conversations-view").hidden = view !== "conversations";
   $("agents-view").hidden = view !== "agents";
   $("runs-view").hidden = view !== "runs";
   $("page").hidden = view !== "detail";
   $("app-nav").hidden = view === "product" || view === "products";
-  /* The product table is home. Focus View is one product from that table, and
+  /* The product table is home. Details View is one product from that table, and
      the assistant only takes over the window in its full-screen views. */
-  $("app-brand").textContent = view === "product" ? "Focus View" : view === "products" ? "Products" : "AI assistant";
-  const backLabel = view === "product" ? "Back to products" : view === "products" ? "Back to the main application" : "Back";
+  $("product-view").classList.toggle("focus", view === "product" && state.productMode === "focus");
+  $("app-brand").textContent = view === "product"
+    ? (state.productMode === "focus" ? "Focus View" : "Details View")
+    : view === "products" || view === "group" ? "Summer collection perspective" : "AI assistant";
+  const backLabel = view === "product" && state.productMode === "focus"
+    ? (state.focusReturn === "chat" ? "Back to the conversation" : state.focusReturn === "products" ? "Back to Summer collection perspective" : "Back")
+    : view === "product"
+    ? "Back to Summer collection perspective"
+    : view === "products"
+      ? "Back to the main application"
+      : view === "detail" && state.detailReturn === "products"
+        ? "Back to Summer collection perspective"
+        : view === "detail" && state.detailReturn === "product"
+          ? (state.detailProductMode === "focus" ? "Back to Focus View" : "Back to Details View")
+          : "Back";
   $("back-button").setAttribute("aria-label", backLabel);
   $("back-button").title = backLabel;
   $("assistant-toggle").hidden = view === "chat";
@@ -2317,14 +2888,17 @@ function renderDock() {
      any other page gets the ordinary conversation. */
   const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
   const openStatus = statusOf(openRun);
-  const inRun = state.view === "detail" && openStatus === "review" && !state.panelThread;
+  const onDetail = state.view === "detail";
+  /* Every run under review gets the review assistant. A run you started does not
+     bring its conversation, or the switcher, onto the run page. */
+  const inRun = onDetail && openStatus === "review";
   /* A run with nothing to decide has nothing to talk about: the agent is either
      still working or already done. New work starts from the Agents section. */
-  const locked = state.view === "detail" && openStatus !== "review";
+  const locked = onDetail && !inRun;
   const open = state.view !== "chat" && state.assistantOpen;
   const attention = RUNS.filter((run) => statusOf(run) === "review").length;
   /* The review assistant has no conversation switcher; every other panel does. */
-  const showMenu = !inRun;
+  const showMenu = !onDetail;
   const menuOpen = state.assistantMenuOpen && showMenu;
   $("dock").hidden = !open;
   $("assistant").hidden = !inRun;
@@ -2342,7 +2916,54 @@ function renderDock() {
     document.querySelectorAll(".assistant-menu-branch.open").forEach((branch) => branch.classList.remove("open"));
   }
   $("assistant-menu-trigger").setAttribute("aria-expanded", String(menuOpen));
-  if (!inRun) renderDockChat(locked, openStatus, openRun);
+  if (inRun && openRun.generated) renderGeneratedAssistant(openRun);
+  else if (!inRun) renderDockChat(locked, openStatus, openRun);
+  renderFollow();
+}
+
+function conversationSku(key) {
+  if (!key) return "";
+  const parsed = parseThreadKey(key);
+  return parsed.sku && PRODUCTS.some((product) => product.sku === parsed.sku) ? parsed.sku : "";
+}
+
+function renderFollow() {
+  $("follow-switch").querySelectorAll("button").forEach((button) => {
+    const on = button.dataset.follow === state.follow;
+    button.className = on ? "active" : "";
+    button.setAttribute("aria-pressed", String(on));
+  });
+  const key = dockThreadKey();
+  const sku = conversationSku(key);
+  const here = state.view === "product" && sku === state.activeSku;
+  const showProduct = Boolean(sku) && !here;
+  $("follow-bar").hidden = !showProduct;
+  $("open-linked-product").hidden = !showProduct;
+  if (!showProduct) return;
+  $("open-linked-product").textContent = "Open " + productBySku(sku).name;
+  $("open-linked-product").title = "Open in Focus View";
+  $("open-linked-product").dataset.key = key;
+}
+
+/* Opens Focus View: the one product linked to this conversation, with no product list. */
+function openLinkedProduct(key) {
+  const sku = conversationSku(key);
+  if (!sku) return;
+  if (state.view === "product") keepProductFields();
+  stashDockDraft();
+  if (!(state.view === "product" && state.productMode === "focus")) state.focusReturn = state.view;
+  state.productMode = "focus";
+  state.assistantMenuOpen = false;
+  state.assistantOpen = true;
+  state.activeSku = sku;
+  const parsed = parseThreadKey(key);
+  state.dockChatWith = !parsed.agentId || parsed.agentId === "general" ? "general" : parsed.agentId;
+  setView("product");
+  state.panelThread = key;
+  renderProduct();
+  renderDock();
+  restoreDockDraft();
+  renderNav();
 }
 
 function activeProduct() {
@@ -2387,12 +3008,18 @@ function stashDockDraft() {
   state.drafts[dockThreadKey()] = field.value;
 }
 
+/* A hidden field reports no height. Measuring the composer while the panel is
+   closed used to collapse it to nothing, so it could not be clicked or typed in. */
+function fitComposer(field) {
+  field.style.height = "26px";
+  field.style.height = Math.max(26, Math.min(field.scrollHeight || 26, 92)) + "px";
+}
+
 function restoreDockDraft() {
   const field = $("dock-input");
   if (!field) return;
   field.value = state.drafts[dockThreadKey()] || "";
-  field.style.height = "26px";
-  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  fitComposer(field);
   $("dock-send").disabled = !field.value.trim();
 }
 
@@ -2404,21 +3031,55 @@ function showProducts() {
   restoreDockDraft();
 }
 
-function showProduct() {
+/* Opening a product keeps the assistant or agent selected on the table.
+   An existing product conversation stays in the list until someone opens it.
+   Backing out of a conversation keeps that conversation. */
+function showProduct(preserveConversation, mode) {
+  if (state.view === "product") keepProductFields();
   stashDockDraft();
+  const returningKey = preserveConversation && state.view === "chat" ? state.chatWith : "";
+  const returning = returningKey ? parseThreadKey(returningKey) : null;
+  if (returning && returning.sku && PRODUCTS.some((product) => product.sku === returning.sku)) {
+    state.activeSku = returning.sku;
+  }
+  state.productMode = mode === "focus" ? "focus" : "details";
   setView("product");
+  if (returningKey && (state.chats[returningKey] || []).length) {
+    state.dockChatWith = !returning.agentId || returning.agentId === "general" ? "general" : returning.agentId;
+    state.panelThread = returningKey;
+  } else if (state.follow !== "context") {
+    /* The table's selection carries over: the AI assistant, or whichever agent was selected. */
+    state.panelThread = null;
+  }
+  revealActiveProduct();
   renderProduct();
+  renderDock();
   restoreDockDraft();
+  renderNav();
 }
 
 function activateProduct(sku) {
   if (!sku || sku === state.activeSku) return;
   if (state.view === "product") keepProductFields();
   stashDockDraft();
+  /* Keep conversation holds on to a started thread before the product changes underneath it. */
+  if (state.view === "product" && state.follow === "context") holdConversation();
   state.activeSku = sku;
-  if (state.view === "products") renderProducts();
-  if (state.view === "product") renderProduct();
-  renderDock();
+  /* Moving through the perspective list does not hunt for an agent thread. */
+  if (state.view === "product") {
+    if (state.follow !== "context") state.panelThread = null;
+    revealActiveProduct();
+  }
+  noteContextChange("product");
+  if (state.view === "products") {
+    renderProducts();
+    renderDock();
+  }
+  if (state.view === "product") {
+    renderProduct();
+    renderDock();
+    renderNav();
+  }
   restoreDockDraft();
 }
 
@@ -2438,6 +3099,7 @@ function renderProducts() {
     box.addEventListener("change", () => {
       if (box.checked) state.productChecks.add(product.sku);
       else state.productChecks.delete(product.sku);
+      noteContextChange("checks");
       renderProductChecks();
       renderDock();
     });
@@ -2470,6 +3132,12 @@ function renderProducts() {
 function renderProductChecks() {
   const count = state.productChecks.size;
   $("products-checked").textContent = count ? count + " checked" : "No products checked";
+  const agent = $("products-agent");
+  agent.disabled = count === 0;
+  agent.title = count ? "Start a run on the checked products." : "Check products in the table first.";
+  const all = $("check-all-products");
+  all.checked = count > 0 && count === PRODUCTS.length;
+  all.indeterminate = count > 0 && count < PRODUCTS.length;
 }
 
 /* Talking to an agent is its own destination, with its own thread. */
@@ -2498,20 +3166,32 @@ function renderConversations() {
   }
   started.forEach((key) => {
     const info = conversationInfo(key);
+    const row = document.createElement("div");
+    row.className = "conversation-row";
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "conversation-row";
+    button.className = "conversation-open";
     const icon = document.createElement("i");
     icon.textContent = info.icon;
     const copy = document.createElement("span");
     const title = document.createElement("strong");
-    title.textContent = info.place;
+    title.textContent = info.title;
     const note = document.createElement("small");
     note.textContent = info.note;
     copy.append(title, note);
     button.append(icon, copy);
     button.addEventListener("click", () => openConversation(key));
-    host.append(button);
+    row.append(button, conversationOverflow(key, title));
+    const sku = conversationSku(key);
+    if (sku) {
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "linked-product";
+      open.textContent = "Open in Focus View";
+      open.addEventListener("click", () => openLinkedProduct(key));
+      row.append(open);
+    }
+    host.append(row);
   });
 }
 
@@ -2552,11 +3232,52 @@ function showRuns() {
 }
 
 function showDetail(runId) {
+  if (state.view !== "detail") {
+    state.detailReturn = state.view;
+    state.detailProductMode = state.productMode;
+  }
   state.openRunId = runId || ACTIVE_RUN.id;
+  state.proposalChecks = new Set();
+  state.proposalFocus = null;
   state.assistantMenuOpen = false;
   state.panelThread = null;
   setView("detail");
   render();
+}
+
+function returnFromDetail() {
+  const back = state.detailReturn || "products";
+  if (back === "product") showProduct(false, state.detailProductMode);
+  else if (back === "runs") showRuns();
+  else if (back === "agents") showAgents();
+  else if (back === "conversations") showConversations();
+  else if (back === "chat") { setView("chat"); renderChat(); }
+  else showProducts();
+}
+
+function returnFromFocus() {
+  const back = state.focusReturn || "products";
+  const thread = state.panelThread;
+  if (back === "group" || back === "chat") {
+    if (back === "group" && thread) {
+      state.chatWith = thread;
+      state.groupTable = thread;
+    }
+    setView("chat");
+    renderChat();
+    return;
+  }
+  if (back === "runs") showRuns();
+  else if (back === "agents") showAgents();
+  else if (back === "conversations") showConversations();
+  else if (back === "detail") { setView("detail"); render(); }
+  else if (back === "product") showProduct();
+  else showProducts();
+  if (thread) {
+    state.panelThread = thread;
+    renderDock();
+    renderNav();
+  }
 }
 
 const NAV_LIMIT = 5;
@@ -2594,6 +3315,8 @@ function renderNav() {
     agents.append(button);
   });
 
+  const started = conversationInstances();
+  $("nav-conversations-section").hidden = !started.length;
   const conversations = $("nav-conversations");
   conversations.textContent = "";
   const currentKey = activeConversationKey();
@@ -2606,12 +3329,17 @@ function renderNav() {
     const icon = document.createElement("i");
     icon.className = "nav-avatar";
     icon.textContent = info.icon;
-    title.append(icon, document.createTextNode(info.place));
+    const name = document.createElement("b");
+    name.textContent = info.title;
+    title.append(icon, name);
     const note = document.createElement("small");
     note.textContent = info.note;
     button.append(title, note);
     button.addEventListener("click", () => openConversation(key));
-    conversations.append(button);
+    const row = document.createElement("div");
+    row.className = "nav-conversation-row";
+    row.append(button, conversationOverflow(key, name));
+    conversations.append(row);
   });
 
   const runs = $("nav-runs");
@@ -2637,14 +3365,88 @@ function renderNav() {
   $("nav-all-runs").hidden = RUNS.length <= NAV_LIMIT;
 }
 
+const PRODUCT_PAGE = 20;
+
+function perspectiveProducts() {
+  const query = state.productQuery.trim().toLowerCase();
+  if (!query) return PRODUCTS;
+  return PRODUCTS.filter((product) => {
+    return (product.name + " " + product.sku + " " + product.category + " " + product.brand).toLowerCase().indexOf(query) !== -1;
+  });
+}
+
+function revealActiveProduct() {
+  const index = perspectiveProducts().findIndex((product) => product.sku === state.activeSku);
+  if (index < 0) return;
+  state.productPage = Math.floor(index / PRODUCT_PAGE);
+}
+
+function renderProductNav() {
+  const matches = perspectiveProducts();
+  const pages = Math.max(1, Math.ceil(matches.length / PRODUCT_PAGE));
+  if (state.productPage > pages - 1) state.productPage = pages - 1;
+  if (state.productPage < 0) state.productPage = 0;
+  const start = state.productPage * PRODUCT_PAGE;
+  const page = matches.slice(start, start + PRODUCT_PAGE);
+  const host = $("product-nav");
+  host.textContent = "";
+  if (!page.length) {
+    const empty = document.createElement("p");
+    empty.className = "product-nav-empty";
+    empty.textContent = "No products match.";
+    host.append(empty);
+  }
+  page.forEach((product) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = product.sku === state.activeSku ? "product-nav-item active" : "product-nav-item";
+    const name = document.createElement("strong");
+    name.textContent = product.name;
+    const meta = document.createElement("small");
+    meta.textContent = product.sku + " · " + product.category;
+    button.append(name, meta);
+    button.addEventListener("click", () => activateProduct(product.sku));
+    host.append(button);
+  });
+
+  const pager = $("product-nav-page");
+  pager.textContent = "";
+  const label = document.createElement("span");
+  label.textContent = matches.length
+    ? (start + 1) + "–" + Math.min(start + page.length, matches.length) + " of " + matches.length
+    : "0 products";
+  pager.append(label);
+  if (pages > 1) {
+    const controls = document.createElement("span");
+    const prev = document.createElement("button");
+    prev.type = "button";
+    prev.className = "product-nav-step";
+    prev.textContent = "Prev";
+    prev.disabled = state.productPage === 0;
+    prev.addEventListener("click", () => { state.productPage -= 1; renderProductNav(); });
+    const next = document.createElement("button");
+    next.type = "button";
+    next.className = "product-nav-step";
+    next.textContent = "Next";
+    next.disabled = state.productPage >= pages - 1;
+    next.addEventListener("click", () => { state.productPage += 1; renderProductNav(); });
+    controls.append(prev, next);
+    pager.append(controls);
+  }
+}
+
 function renderProduct() {
+  renderProductNav();
   const product = activeProduct();
   const initials = product.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("");
 
   $("product-image").textContent = initials;
   $("product-title").textContent = product.name;
   $("product-meta").textContent = product.sku + " · " + product.category;
+  $("product-crumb").textContent = state.productMode === "focus" ? "Focus View" : "Summer collection perspective";
+  $("product-crumb").nextElementSibling.hidden = state.productMode === "focus";
   $("toolbar-category").textContent = product.category;
+  $("toolbar-category").hidden = state.productMode === "focus";
   $("toolbar-status").textContent = product.status;
   $("product-name").value = product.name;
   $("product-sku").value = product.sku;
@@ -2654,6 +3456,52 @@ function renderProduct() {
   $("product-attribute").value = product.attribute;
   $("product-description").value = product.description;
   document.querySelector('label[for="product-attribute"]').textContent = product.attributeLabel;
+  renderProductRuns();
+}
+
+/* A bulk run stays visible on every product it covers. Finished runs stay out of the way. */
+function renderProductRuns() {
+  const runs = RUNS.filter((run) => (run.skus || []).indexOf(state.activeSku) !== -1);
+  const host = $("product-runs");
+  const list = $("product-run-list");
+  host.hidden = !runs.length;
+  list.textContent = "";
+  if (!runs.length) return;
+  const active = runs.filter((run) => statusOf(run) !== "completed");
+  const finished = runs.filter((run) => statusOf(run) === "completed");
+  active.forEach((run) => list.append(productRunRow(run)));
+  if (!finished.length) return;
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "product-run-history";
+  toggle.textContent = (state.productRunHistory ? "Hide " : "") + finished.length + (finished.length === 1 ? " finished run" : " finished runs");
+  toggle.addEventListener("click", () => {
+    state.productRunHistory = !state.productRunHistory;
+    renderProductRuns();
+  });
+  list.append(toggle);
+  if (state.productRunHistory) finished.forEach((run) => list.append(productRunRow(run)));
+}
+
+function productRunRow(run) {
+  const status = statusOf(run);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "product-run";
+  const dot = document.createElement("i");
+  dot.className = "nav-dot " + status;
+  const copy = document.createElement("span");
+  const name = document.createElement("b");
+  name.textContent = run.agent;
+  const note = document.createElement("small");
+  note.textContent = "Run #" + run.id;
+  copy.append(name, note);
+  const badge = document.createElement("span");
+  badge.className = "run-status " + status;
+  badge.textContent = STATUS_LABELS[status];
+  button.append(dot, copy, badge);
+  button.addEventListener("click", () => showDetail(run.id));
+  return button;
 }
 
 function currentConversationKey() {
@@ -2664,28 +3512,144 @@ function currentConversationKey() {
   return "";
 }
 
-/* A started thread is the one selected item. The agent behind it stays unselected. */
+/* A started thread is the one selected item. The agent behind it stays unselected.
+   Opening a product does not adopt an old product conversation as that selection. */
 function activeConversationKey() {
+  /* The run page is the run. The conversation in the panel is not a second selection. */
+  if (state.view === "detail") return "";
   const key = currentConversationKey();
-  return conversationInstances().indexOf(key) === -1 ? "" : key;
+  if (conversationInstances().indexOf(key) === -1) return "";
+  if (state.view === "product" && state.panelThread !== key) return "";
+  return key;
 }
 
 /* Only threads someone has actually sent a message in. Possible pairings stay off the list. */
 function conversationInstances() {
-  return Object.keys(state.chats).filter((key) => (state.chats[key] || []).length);
+  return Object.keys(state.chats)
+    .filter((key) => (state.chats[key] || []).length)
+    .sort((a, b) => (state.chatRecent[b] || 0) - (state.chatRecent[a] || 0));
+}
+
+function conversationTitle(key) {
+  const custom = state.conversationTitles[key];
+  if (custom && custom.trim()) return custom.trim();
+  const messages = state.chats[key] || [];
+  const first = messages.find((message) => message.role === "user") || messages[0];
+  const text = first ? first.text.replace(/\s+/g, " ").trim() : "";
+  if (!text) return "New conversation";
+  return text.length > 48 ? text.slice(0, 48).trim() + "…" : text;
+}
+
+let openOverflow = null;
+
+function closeOverflow() {
+  if (!openOverflow) return;
+  openOverflow.menu.hidden = true;
+  openOverflow.trigger.setAttribute("aria-expanded", "false");
+  if (openOverflow.menu.parentElement !== openOverflow.host) openOverflow.host.append(openOverflow.menu);
+  openOverflow = null;
+}
+
+function toggleOverflow(trigger, menu) {
+  const host = trigger.parentElement;
+  const wasOpen = openOverflow && openOverflow.menu === menu;
+  closeOverflow();
+  if (wasOpen) return;
+  menu.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  document.body.append(menu);
+  const rect = trigger.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + "px";
+  menu.style.left = Math.max(8, rect.right - 180) + "px";
+  openOverflow = { menu: menu, trigger: trigger, host: host };
+}
+
+function conversationOverflow(key, titleElement) {
+  const host = document.createElement("div");
+  host.className = "overflow";
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "overflow-trigger";
+  trigger.setAttribute("aria-label", "Conversation actions");
+  trigger.setAttribute("aria-expanded", "false");
+  trigger.textContent = "⋯";
+  const menu = document.createElement("div");
+  menu.className = "overflow-menu";
+  menu.hidden = true;
+  const rename = document.createElement("button");
+  rename.type = "button";
+  rename.dataset.overflow = "rename";
+  rename.textContent = "Rename";
+  rename.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeOverflow();
+    beginRename(titleElement, key);
+  });
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.dataset.overflow = "delete";
+  remove.textContent = "Delete conversation";
+  remove.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeOverflow();
+    deleteConversation(key);
+    renderDock();
+    renderNav();
+    if (state.view === "chat") renderChat();
+    if (state.view === "conversations") renderConversations();
+  });
+  menu.append(rename, remove);
+  trigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleOverflow(trigger, menu);
+  });
+  host.append(trigger, menu);
+  return host;
+}
+
+function beginRename(element, key) {
+  if (element.querySelector("input")) return;
+  const input = document.createElement("input");
+  input.className = "rename-input";
+  input.setAttribute("aria-label", "Conversation title");
+  input.value = conversationTitle(key);
+  element.textContent = "";
+  element.append(input);
+  input.focus();
+  input.select();
+  let done = false;
+  const finish = (save) => {
+    if (done) return;
+    done = true;
+    const next = input.value.replace(/\s+/g, " ").trim();
+    if (save && next) state.conversationTitles[key] = next;
+    renderNav();
+    if (typeof renderAssistantMenu === "function") renderAssistantMenu();
+    if (state.view === "conversations") renderConversations();
+    if (state.view === "chat") renderChat();
+    else renderDock();
+  };
+  input.addEventListener("click", (event) => event.stopPropagation());
+  input.addEventListener("keydown", (event) => {
+    event.stopPropagation();
+    if (event.key === "Enter") { event.preventDefault(); finish(true); }
+    if (event.key === "Escape") finish(false);
+  });
+  input.addEventListener("blur", () => finish(true));
 }
 
 function conversationInfo(key) {
   const parsed = parseThreadKey(key);
   const agent = agentById(parsed.agentId);
   const who = agent ? agent.name : "AI assistant";
-  const place = parsed.perspective ? "Products" : parsed.sku ? productBySku(parsed.sku).name : "General";
+  const place = parsed.perspective ? "Summer collection perspective" : parsed.sku ? productBySku(parsed.sku).name : "General";
   const messages = state.chats[key] || [];
   const last = messages.length ? messages[messages.length - 1].text : "";
   return {
     place: place,
+    title: conversationTitle(key),
     who: who,
-    note: last ? who + " · " + last : who,
+    note: place + " · " + who,
     icon: agent ? agent.name.charAt(0) : "✦",
     named: Boolean(agent)
   };
@@ -2719,6 +3683,86 @@ function openConversation(key) {
 
 const GENERAL = { id: "general", name: "AI assistant", note: "General product help" };
 
+let agentMenuButton = null;
+
+function closeAgentMenu() {
+  $("agent-menu").hidden = true;
+  if (agentMenuButton) agentMenuButton.setAttribute("aria-expanded", "false");
+  agentMenuButton = null;
+}
+
+function openAgentMenu(button) {
+  const menu = $("agent-menu");
+  if (agentMenuButton === button && !menu.hidden) {
+    closeAgentMenu();
+    return;
+  }
+  closeAgentMenu();
+  agentMenuButton = button;
+  menu.hidden = false;
+  button.setAttribute("aria-expanded", "true");
+  const rect = button.getBoundingClientRect();
+  const left = Math.max(12, rect.right - menu.offsetWidth);
+  menu.style.top = (rect.bottom + 6) + "px";
+  menu.style.left = left + "px";
+}
+
+/* The toolbar starts a run with the agent. On the perspective it only runs on
+   the products that are checked. Details and Focus View run on the product
+   that is open. */
+function chooseAgent(agentId) {
+  closeAgentMenu();
+  const agent = agentById(agentId);
+  if (!agent) return;
+  const checked = PRODUCTS.filter((item) => state.productChecks.has(item.sku));
+  if (state.view !== "product" && !checked.length) return;
+  stashDockDraft();
+  state.dockChatWith = agentId;
+  state.panelThread = null;
+  state.assistantMenuOpen = false;
+  state.assistantOpen = true;
+  const products = state.view === "product"
+    ? [activeProduct()].filter(Boolean)
+    : checked;
+  const target = dockThreadKey();
+  const reply = startSelectionRun(agent, products);
+  const context = currentContextLabel(target);
+  addMessage(target, { role: "user", text: "Run " + agent.name, context: context || undefined });
+  addMessage(target, Object.assign({ role: "agent" }, reply));
+  const started = RUNS.find((item) => item.id === reply.run);
+  if (started) {
+    started.thread = target;
+    trackRun(started);
+  }
+  renderDock();
+  restoreDockDraft();
+  fitComposer($("dock-input"));
+  renderNav();
+  if (state.view === "products") renderProducts();
+  if (state.view === "product") renderProductRuns();
+}
+
+function renderAgentMenu() {
+  const menu = $("agent-menu");
+  menu.textContent = "";
+  AGENTS.forEach((agent) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    const icon = document.createElement("i");
+    icon.textContent = agent.name.charAt(0);
+    const copy = document.createElement("span");
+    const name = document.createElement("strong");
+    name.textContent = agent.name;
+    const note = document.createElement("small");
+    note.textContent = agent.note;
+    copy.append(name, note);
+    button.append(icon, copy);
+    button.addEventListener("click", () => chooseAgent(agent.id));
+    menu.append(button);
+  });
+}
+
 function menuAgentItem(agent) {
   const button = document.createElement("button");
   button.type = "button";
@@ -2734,17 +3778,13 @@ function menuAgentItem(agent) {
   button.addEventListener("click", () => {
     stashDockDraft();
     state.dockChatWith = agent.id;
-    if (state.panelThread) {
-      const parsed = parseThreadKey(state.panelThread);
-      state.panelThread = parsed.sku
-        ? threadKey(agent.id, parsed.sku)
-        : parsed.perspective
-          ? perspectiveThreadKey(agent.id)
-          : threadKey(agent.id);
-    }
+    /* Choosing the assistant or an agent leaves the open conversation and
+       starts from the page you are on. */
+    state.panelThread = null;
     state.assistantMenuOpen = false;
     renderDock();
     restoreDockDraft();
+    renderNav();
   });
   return button;
 }
@@ -2752,26 +3792,29 @@ function menuAgentItem(agent) {
 function menuConversationItem(key) {
   const info = conversationInfo(key);
   const currentKey = activeConversationKey();
+  const row = document.createElement("div");
+  row.className = key === currentKey ? "assistant-menu-item active" : "assistant-menu-item";
   const button = document.createElement("button");
   button.type = "button";
-  button.className = key === currentKey ? "assistant-menu-item active" : "assistant-menu-item";
+  button.className = "menu-conversation";
   const icon = document.createElement("i");
   icon.className = info.named ? "nav-avatar" : "";
   icon.textContent = info.icon;
   const copy = document.createElement("span");
   copy.innerHTML = "<strong></strong><small></small>";
-  copy.querySelector("strong").textContent = info.place;
+  copy.querySelector("strong").textContent = info.title;
   copy.querySelector("small").textContent = info.note;
   button.append(icon, copy);
   button.addEventListener("click", () => openConversation(key));
-  return button;
+  row.append(button, conversationOverflow(key, copy.querySelector("strong")));
+  return row;
 }
 
 function menuRunItem(run) {
   const status = statusOf(run);
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "assistant-menu-item";
+  button.className = state.view === "detail" && run.id === state.openRunId ? "assistant-menu-item active" : "assistant-menu-item";
   const dot = document.createElement("i");
   dot.className = "nav-dot " + status;
   const copy = document.createElement("span");
@@ -2814,6 +3857,7 @@ function renderAssistantMenu() {
   capped(AGENTS, activeConversationKey() ? null : state.dockChatWith, (agent) => agent.id).forEach((agent) => agentHost.append(menuAgentItem(agent)));
   const currentKey = activeConversationKey();
   const conversations = conversationInstances();
+  $("menu-conversations-section").hidden = !conversations.length;
   capped(conversations, currentKey, (key) => key).forEach((key) => chatHost.append(menuConversationItem(key)));
   capped(RUNS, null, (run) => run.id).forEach((run) => runHost.append(menuRunItem(run)));
 
@@ -2826,6 +3870,11 @@ function renderAssistantMenu() {
 }
 
 const thread = (key) => (state.chats[key] = state.chats[key] || []);
+
+function addMessage(key, message) {
+  thread(key).push(message);
+  state.chatRecent[key] = ++state.chatClock;
+}
 const runsBy = (agent) => RUNS.filter((run) => run.agent === agent.name);
 
 /* An agent answers for its own work; the general assistant answers across all of them.
@@ -2892,25 +3941,6 @@ function wantsRun(question) {
   return /\b(run|start|kick off|enrich|re-?analy[sz]e|tag|remap|normali[sz]e|clean(?:\s*up)?)\b/.test(text);
 }
 
-const RUN_TITLES = {
-  content: "Attribute pass",
-  taxonomy: "Category pass",
-  quality: "Quality pass",
-  media: "Media pass"
-};
-
-function runTitle(agent, question) {
-  const cleaned = question
-    .replace(/^(please\s+)?(can you\s+)?/i, "")
-    .replace(/^(run|start|kick off)\b\s*/i, "")
-    .replace(/\b(on this|on these|on the selection|for me|please)\b/gi, "")
-    .replace(/\s+/g, " ")
-    .replace(/[.?!]+$/, "")
-    .trim();
-  if (cleaned.length > 2 && cleaned.length <= 48) return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-  return RUN_TITLES[agent.id] || "New run";
-}
-
 /* On the products table the run covers whatever is checked. On a product, it covers that product. */
 function runSelection(parsed) {
   if (state.view === "products" || parsed.perspective) {
@@ -2923,10 +3953,10 @@ function runSelection(parsed) {
   return PRODUCTS.filter((item) => state.productChecks.has(item.sku));
 }
 
-function startSelectionRun(agent, products, question) {
+function startSelectionRun(agent, products) {
   const run = {
     id: RUNS.reduce((max, item) => Math.max(max, item.id), 0) + 1,
-    name: runTitle(agent, question),
+    name: "Run",
     agent: agent.name,
     products: products.length,
     skus: products.map((item) => item.sku),
@@ -2936,29 +3966,470 @@ function startSelectionRun(agent, products, question) {
     started: "Just now",
     ago: "Just now",
     status: "running",
-    progress: 8
+    progress: 8,
+    generated: true
   };
   RUNS.unshift(run);
   const names = products.slice(0, 3).map((item) => item.name).join(", ");
   const remainder = products.length > 3 ? " and " + (products.length - 3) + " more" : "";
   return {
-    text: "Started " + run.name.toLowerCase() + " #" + run.id + " on " + products.length +
+    text: "Started run #" + run.id + " on " + products.length +
       (products.length === 1 ? " product" : " products") + ": " + names + remainder +
-      ". Proposed changes will show up here once the run finishes.",
+      ". I’ll post the proposed changes here when it finishes.",
     run: run.id
   };
+}
+
+const COLOURS = { "TR-4410": "Graphite", "KT-2028": "Steel", "LG-1182": "Smoked glass", "FN-9031": "Natural oak", "EL-6624": "White" };
+
+/* A finished selection run proposes a handful of attributes per product. One is
+   always skipped, so the summary shows what the agent could not produce. */
+function proposalsFor(product) {
+  const known = CHANGES.find((change) => change.sku === product.sku);
+  return [
+    {
+      sku: product.sku, field: "attribute", attribute: product.attributeLabel,
+      current: product.attribute,
+      proposed: known ? known.proposed : product.attribute,
+      score: known ? known.confidence : 90,
+      rationale: known ? known.rationale : "Matches the supplier specification."
+    },
+    {
+      sku: product.sku, field: "name", attribute: "Product title",
+      current: product.name, proposed: product.brand + " " + product.name, score: 93,
+      rationale: "Cloned one-for-one from the supplier’s Product Name field. Small risk the supplier used marketing phrasing instead of a canonical title."
+    },
+    {
+      sku: product.sku, field: "description", attribute: "Short description",
+      current: product.description,
+      proposed: product.description.split(",")[0].replace(/\.$/, "") + ".",
+      score: 45,
+      rationale: "Shortened from the long description. The supplier gives no short copy, so the wording is the agent’s own."
+    },
+    {
+      sku: product.sku, field: "colour", attribute: "Colour",
+      current: "—", proposed: COLOURS[product.sku] || "Black", score: 13,
+      rationale: "Inferred from the product image only. No source states the colour."
+    },
+    {
+      sku: product.sku, field: null, attribute: "Long description", skipped: true,
+      rationale: "No value was generated, the value exceeded the configured maxLength of 100."
+    }
+  ];
+}
+
+const RUN_TICK_MS = 900;
+
+/* Selection runs are small, so they finish while you watch and report back
+   in the conversation that started them. */
+function trackRun(run) {
+  const timer = setInterval(() => {
+    run.progress = Math.min(100, run.progress + 23);
+    if (run.progress < 100) {
+      if (state.view === "runs") renderRuns();
+      if (state.view === "product") renderProductRuns();
+      return;
+    }
+    clearInterval(timer);
+    finishRun(run);
+  }, RUN_TICK_MS);
+}
+
+function finishRun(run) {
+  run.proposals = run.skus.flatMap((sku) => proposalsFor(productBySku(sku)));
+  const open = run.proposals.filter((item) => !item.skipped);
+  run.status = "review";
+  run.progress = 0;
+  run.changes = open.length;
+  run.attention = open.filter((item) => item.score < 90).length + " need review";
+  run.ago = "Just now";
+  const skipped = run.proposals.length - open.length;
+  const single = run.skus.length === 1;
+  const text = single
+    ? "Run #" + run.id + " finished on " + productBySku(run.skus[0]).name + ". " + open.length +
+      (open.length === 1 ? " attribute" : " attributes") + " generated" + (skipped ? ", " + skipped + " skipped" : "") + "."
+    : "Run #" + run.id + " finished: " + open.length + " proposed changes across " + run.skus.length + " products" +
+      (skipped ? ", " + skipped + " skipped" : "") + ".";
+  run.ask = single ? { choice: "review", other: "", collapsed: false, reviewing: false } : null;
+  if (run.thread) {
+    addMessage(run.thread, single
+      ? { role: "agent", text: text, result: run.id }
+      : { role: "agent", text: text, run: run.id });
+  }
+  notify("Run #" + run.id + " is ready for review.");
+  refreshRunViews(run);
+}
+
+function refreshRunViews(run) {
+  if (state.view === "runs") renderRuns();
+  if (state.view === "detail" && state.openRunId === run.id) render();
+  if (state.view === "chat") renderChat();
+  else {
+    renderDock();
+    renderNav();
+  }
+  if (state.view === "product") renderProductRuns();
+}
+
+const ASK_CHOICES = [
+  { id: "all", title: "Accept all suggestions and finish conversation", note: "Apply every suggestion, including low-confidence matches" },
+  { id: "high", title: "Accept high-confidence suggestions only and finish conversation", note: "Ignore attributes scoring below 90% threshold" },
+  { id: "review", title: "Review suggestions manually", note: "Step through each attribute before applying changes" },
+  { id: "other", title: "Other …", note: "" }
+];
+
+function pendingAsk(key) {
+  return RUNS.find((run) => run.generated && run.thread === key && run.ask && !run.ask.done && run.status === "review" && run.skus.length === 1);
+}
+
+function settleRun(run, pick) {
+  run.proposals.forEach((item) => {
+    if (item.skipped || item.decision) return;
+    const decision = pick(item);
+    if (!decision) return;
+    item.decision = decision;
+    if (decision === "approved") {
+      const product = productBySku(item.sku);
+      if (item.field === "attribute") product.attribute = item.proposed;
+      if (item.field === "name") product.name = item.proposed;
+      if (item.field === "description") product.description = item.proposed;
+    }
+  });
+  const open = run.proposals.filter((item) => !item.skipped);
+  const decided = open.filter((item) => item.decision).length;
+  run.progress = Math.round((decided / open.length) * 100);
+  if (decided === open.length) {
+    run.status = "completed";
+    run.completed = "Just now";
+    run.written = open.filter((item) => item.decision === "approved").length;
+  }
+  if (state.view === "product") renderProduct();
+  if (state.view === "products") renderProducts();
+}
+
+function answerAsk(run, choice) {
+  if (choice === "review") {
+    run.ask.reviewing = true;
+    refreshRunViews(run);
+    return;
+  }
+  if (choice === "other") {
+    const text = (run.ask.other || "").trim();
+    if (!text || !run.thread) return;
+    run.ask.done = true;
+    addMessage(run.thread, { role: "user", text: text });
+    addMessage(run.thread, { role: "agent", text: "Noted. I left the suggestions unapplied." });
+    refreshRunViews(run);
+    return;
+  }
+  if (choice === "discard") settleRun(run, () => "rejected");
+  else if (choice === "all") settleRun(run, () => "approved");
+  else if (choice === "high") settleRun(run, (item) => item.score >= 90 ? "approved" : "ignored");
+  run.ask.done = true;
+  const applied = (run.proposals || []).filter((item) => item.decision === "approved").length;
+  const line = choice === "discard"
+    ? "Discarded the suggestions. Nothing was applied."
+    : choice === "all"
+      ? "Applied every suggestion."
+      : "Applied " + applied + (applied === 1 ? " high-confidence suggestion" : " high-confidence suggestions") + " and left the rest unchanged.";
+  if (run.thread) addMessage(run.thread, { role: "agent", text: line });
+  notify(choice === "discard" ? "Suggestions discarded." : "Run #" + run.id + " is reviewed.");
+  refreshRunViews(run);
+}
+
+/* A single-product run asks, in the panel, what to do with the suggestions. */
+function stepDecision(run, item, decision) {
+  settleRun(run, (candidate) => (candidate === item ? decision : null));
+  const left = run.proposals.filter((proposal) => !proposal.skipped && !proposal.decision).length;
+  if (!left) {
+    run.ask.done = true;
+    const applied = run.proposals.filter((proposal) => proposal.decision === "approved").length;
+    if (run.thread) addMessage(run.thread, { role: "agent", text: "Reviewed every suggestion. Applied " + applied + "." });
+    notify("Run #" + run.id + " is reviewed.");
+  }
+  refreshRunViews(run);
+}
+
+function renderAsk(host, key) {
+  const run = pendingAsk(key);
+  host.hidden = !run;
+  host.textContent = "";
+  if (!run) return;
+  const head = document.createElement("button");
+  head.type = "button";
+  head.className = "ask-head";
+  const chevron = document.createElement("i");
+  chevron.textContent = run.ask.collapsed ? "⌄" : "⌃";
+  const label = document.createElement("span");
+  label.textContent = run.ask.reviewing ? "Review suggestions …" : "Asking questions …";
+  head.append(chevron, label);
+  head.addEventListener("click", () => {
+    run.ask.collapsed = !run.ask.collapsed;
+    renderAsk(host, key);
+  });
+  host.append(head);
+  if (run.ask.collapsed) return;
+
+  const body = document.createElement("div");
+  body.className = "ask-body";
+  if (run.ask.reviewing) {
+    const steps = run.proposals.filter((item) => !item.skipped);
+    const index = steps.findIndex((item) => !item.decision);
+    if (index === -1) {
+      run.ask.done = true;
+      refreshRunViews(run);
+      return;
+    }
+    const item = steps[index];
+    const title = document.createElement("h3");
+    title.textContent = item.attribute;
+    const step = document.createElement("small");
+    step.className = "ask-step";
+    step.textContent = "Attribute " + (index + 1) + " of " + steps.length;
+    const score = document.createElement("span");
+    score.className = "score score-" + band(item.score).key;
+    score.textContent = item.score + "%";
+    const top = document.createElement("div");
+    top.className = "ask-step-head";
+    top.append(title, score);
+    const value = document.createElement("p");
+    value.className = "result-value";
+    const before = document.createElement("span");
+    before.className = "old-value";
+    before.textContent = item.current;
+    const after = document.createElement("span");
+    after.className = "new-value";
+    after.textContent = item.proposed;
+    value.append(before, document.createTextNode(" → "), after);
+    const why = document.createElement("p");
+    why.className = "result-why";
+    why.textContent = item.rationale;
+    const foot = document.createElement("div");
+    foot.className = "ask-foot";
+    const reject = document.createElement("button");
+    reject.type = "button";
+    reject.className = "ask-discard";
+    reject.textContent = "Reject";
+    reject.addEventListener("click", () => stepDecision(run, item, "rejected"));
+    const accept = document.createElement("button");
+    accept.type = "button";
+    accept.className = "ask-continue";
+    accept.textContent = "Accept";
+    accept.addEventListener("click", () => stepDecision(run, item, "approved"));
+    foot.append(reject, accept);
+    body.append(step, top, value, why, foot);
+    host.append(body);
+    return;
+  }
+
+  const title = document.createElement("h3");
+  title.textContent = "Questions";
+  body.append(title);
+  ASK_CHOICES.forEach((choice) => {
+    const row = document.createElement("label");
+    row.className = "ask-option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "ask-" + host.id + "-" + run.id;
+    input.checked = run.ask.choice === choice.id;
+    input.addEventListener("change", () => {
+      run.ask.choice = choice.id;
+      const button = host.querySelector(".ask-continue");
+      if (button) button.disabled = choice.id === "other" && !(run.ask.other || "").trim();
+    });
+    const copy = document.createElement("span");
+    const name = document.createElement("b");
+    name.textContent = choice.title;
+    copy.append(name);
+    if (choice.note) {
+      const note = document.createElement("small");
+      note.textContent = choice.note;
+      copy.append(note);
+    }
+    row.append(input, copy);
+    body.append(row);
+    if (choice.id === "other") {
+      const field = document.createElement("input");
+      field.className = "ask-other";
+      field.type = "text";
+      field.placeholder = "Other …";
+      field.value = run.ask.other || "";
+      field.addEventListener("click", () => {
+        run.ask.choice = "other";
+        input.checked = true;
+        const button = host.querySelector(".ask-continue");
+        if (button) button.disabled = !field.value.trim();
+      });
+      field.addEventListener("input", () => {
+        run.ask.other = field.value;
+        const button = host.querySelector(".ask-continue");
+        if (button && run.ask.choice === "other") button.disabled = !field.value.trim();
+      });
+      body.append(field);
+    }
+  });
+  const foot = document.createElement("div");
+  foot.className = "ask-foot";
+  const discard = document.createElement("button");
+  discard.type = "button";
+  discard.className = "ask-discard";
+  discard.textContent = "Discard all";
+  discard.addEventListener("click", () => answerAsk(run, "discard"));
+  const cont = document.createElement("button");
+  cont.type = "button";
+  cont.className = "ask-continue";
+  cont.textContent = "Continue";
+  cont.disabled = run.ask.choice === "other" && !(run.ask.other || "").trim();
+  cont.addEventListener("click", () => answerAsk(run, run.ask.choice));
+  foot.append(discard, cont);
+  body.append(foot);
+  host.append(body);
+}
+
+function decideProposal(run, index, decision) {
+  const item = run.proposals[index];
+  if (!item || item.skipped) return;
+  item.decision = decision;
+  if (decision === "approved") {
+    const product = productBySku(item.sku);
+    if (item.field === "attribute") product.attribute = item.proposed;
+    if (item.field === "name") product.name = item.proposed;
+    if (item.field === "description") product.description = item.proposed;
+    if (state.view === "product" && state.activeSku === item.sku) renderProduct();
+    if (state.view === "products") renderProducts();
+  }
+  const open = run.proposals.filter((proposal) => !proposal.skipped);
+  const decided = open.filter((proposal) => proposal.decision).length;
+  run.progress = Math.round((decided / open.length) * 100);
+  if (decided === open.length) {
+    run.status = "completed";
+    run.completed = "Just now";
+    run.written = open.filter((proposal) => proposal.decision === "approved").length;
+    notify("Run #" + run.id + " is reviewed.");
+  }
+  refreshRunViews(run);
+}
+
+/* The same pills, values and decisions as the review table, folded into one card. */
+function resultCard(run) {
+  const card = document.createElement("div");
+  card.className = "result-card";
+  const open = run.proposals.filter((item) => !item.skipped);
+  const skipped = run.proposals.length - open.length;
+  const head = document.createElement("div");
+  head.className = "result-head";
+  head.innerHTML = "<b>Summary</b><small></small>";
+  head.querySelector("small").textContent = open.length + (open.length === 1 ? " attribute" : " attributes") + " generated" +
+    (skipped ? ", " + skipped + " skipped" : "");
+  card.append(head);
+
+  const columns = document.createElement("div");
+  columns.className = "result-columns";
+  columns.innerHTML = "<span>Attribute</span><span>Score</span>";
+  card.append(columns);
+
+  const single = run.skus.length === 1;
+  let lastSku = null;
+  run.proposals.forEach((item, index) => {
+    if (!single && item.sku !== lastSku) {
+      lastSku = item.sku;
+      const group = document.createElement("div");
+      group.className = "result-product";
+      group.textContent = productBySku(item.sku).name;
+      card.append(group);
+    }
+    const key = run.id + ":" + index;
+    const expanded = state.resultOpen.has(key);
+    const row = document.createElement("div");
+    row.className = "result-row" + (expanded ? " open" : "");
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "result-toggle";
+    toggle.setAttribute("aria-expanded", String(expanded));
+    const chevron = document.createElement("i");
+    chevron.textContent = expanded ? "⌃" : "⌄";
+    const name = document.createElement("span");
+    name.textContent = item.attribute;
+    const score = document.createElement("span");
+    if (item.skipped) {
+      score.className = "result-none";
+      score.textContent = "—";
+    } else {
+      score.className = "score score-" + band(item.score).key;
+      score.textContent = item.score + "%";
+    }
+    toggle.append(chevron, name);
+    if (item.decision) {
+      const status = document.createElement("span");
+      status.className = "result-status " + item.decision;
+      status.textContent = item.decision === "approved" ? "✓ Approved" : "× Rejected";
+      toggle.append(status);
+    }
+    toggle.append(score);
+    toggle.addEventListener("click", () => {
+      if (state.resultOpen.has(key)) state.resultOpen.delete(key);
+      else state.resultOpen.add(key);
+      const dockScroll = $("dock-thread").scrollTop;
+      const chatScroll = $("chat-scroll").scrollTop;
+      refreshRunViews(run);
+      $("dock-thread").scrollTop = dockScroll;
+      $("chat-scroll").scrollTop = chatScroll;
+    });
+    row.append(toggle);
+
+    if (expanded) {
+      const body = document.createElement("div");
+      body.className = "result-body";
+      const value = document.createElement("p");
+      value.className = "result-value";
+      if (item.skipped) {
+        value.innerHTML = "<span class=\"new-value retracted\">(No value generated)</span>";
+      } else {
+        const before = document.createElement("span");
+        before.className = "old-value";
+        before.textContent = item.current;
+        const after = document.createElement("span");
+        after.className = "new-value";
+        after.textContent = item.proposed;
+        value.append(before, document.createTextNode(" → "), after);
+      }
+      const why = document.createElement("p");
+      why.className = "result-why";
+      why.textContent = item.rationale;
+      body.append(value, why);
+      /* While the questions box is open, the summary is there to read.
+         The decision itself happens in that box. */
+      if (!item.skipped && !item.decision && run.status === "review" && !(run.ask && !run.ask.done)) {
+        const actions = document.createElement("div");
+        actions.className = "msg-actions";
+        const approve = document.createElement("button");
+        approve.type = "button";
+        approve.textContent = "✓ Approve";
+        approve.addEventListener("click", () => decideProposal(run, index, "approved"));
+        const reject = document.createElement("button");
+        reject.type = "button";
+        reject.textContent = "× Reject";
+        reject.addEventListener("click", () => decideProposal(run, index, "rejected"));
+        actions.append(approve, reject);
+        body.append(actions);
+      }
+      row.append(body);
+    }
+    card.append(row);
+  });
+  return card;
 }
 
 function runInstruction(agent, products, question) {
   if (!agent) return { text: "Choose an agent to run this. The selection stays attached." };
   if (!products.length) return { text: "Check the products this run should cover, then ask me again." };
-  return startSelectionRun(agent, products, question);
+  return startSelectionRun(agent, products);
 }
 
 function perspectiveReply(agent, products, question) {
   const subject = agent ? agent.name + " is" : "I’m";
   if (!products.length) {
-    return { text: subject + " looking at the Products perspective. Check products in the table to attach a selection, or ask about the catalog as a whole." };
+    return { text: subject + " looking at the Summer collection perspective. Check products in the table to attach a selection, or ask about the catalog as a whole." };
   }
   const names = products.slice(0, 3).map((product) => product.name).join(", ");
   const remainder = products.length > 3 ? " and " + (products.length - 3) + " more" : "";
@@ -2972,23 +4443,29 @@ function sendChat(preset, source) {
   const question = (preset || field.value).trim();
   if (!question) return;
   const target = source === "dock" ? dockThreadKey() : state.chatWith;
-  const parsed = parseThreadKey(target);
-  const agent = agentById(parsed.agentId);
-  const product = parsed.sku ? productBySku(parsed.sku) : null;
-  const perspectiveProducts = parsed.perspective
+  const scope = currentContextParsed(target);
+  const agent = agentById(scope.agentId);
+  const product = scope.sku ? productBySku(scope.sku) : null;
+  const perspectiveProducts = scope.perspective
     ? PRODUCTS.filter((item) => state.productChecks.has(item.sku))
     : [];
-  const messages = thread(target);
-  const context = chatContextLabel(parsed);
-  messages.push(context ? { role: "user", text: question, context: context } : { role: "user", text: question });
+  const context = currentContextLabel(target);
+  addMessage(target, context ? { role: "user", text: question, context: context } : { role: "user", text: question });
   const reply = wantsRun(question)
-    ? runInstruction(agent, runSelection(parsed), question)
-    : parsed.perspective
+    ? runInstruction(agent, runSelection(scope), question)
+    : scope.perspective
       ? perspectiveReply(agent, perspectiveProducts, question)
       : product
         ? productReply(agent, product, question)
         : (agent ? agentReply(agent, question) : generalReply(question));
-  messages.push(Object.assign({ role: "agent" }, reply));
+  addMessage(target, Object.assign({ role: "agent" }, reply));
+  if (reply.run && !reply.result) {
+    const started = RUNS.find((item) => item.id === reply.run);
+    if (started && started.status === "running" && !started.thread) {
+      started.thread = target;
+      trackRun(started);
+    }
+  }
   field.value = "";
   field.style.height = "26px";
   state.drafts[target] = "";
@@ -2996,6 +4473,7 @@ function sendChat(preset, source) {
   else $("chat-send").disabled = true;
   if (state.view === "products") renderProducts();
   if (state.view === "runs") renderRuns();
+  if (state.view === "product") renderProductRuns();
   renderChat();
 }
 
@@ -3020,13 +4498,17 @@ function paintThread(host, messages) {
     const text = document.createElement("p");
     text.textContent = message.text;
     block.append(text);
+    if (message.result) {
+      const finished = RUNS.find((item) => item.id === message.result);
+      if (finished && finished.proposals) block.append(resultCard(finished));
+    }
     if (message.run) {
       const run = RUNS.find((item) => item.id === message.run);
       const actions = document.createElement("div");
       actions.className = "msg-actions";
       const open = document.createElement("button");
       open.type = "button";
-      open.textContent = "Open " + run.name.toLowerCase() + " #" + run.id;
+      open.textContent = "Open run #" + run.id;
       open.addEventListener("click", () => showDetail(run.id));
       actions.append(open);
       block.append(actions);
@@ -3042,7 +4524,7 @@ function productsContextLabel() {
   const selected = PRODUCTS.filter((product) => state.productChecks.has(product.sku));
   if (selected.length === 1) return "✦ " + selected[0].name;
   if (selected.length > 1) return "✦ " + selected.length + " products attached";
-  return "Products";
+  return "Summer collection perspective";
 }
 
 function chatContextLabel(parsed) {
@@ -3054,16 +4536,150 @@ function chatContextLabel(parsed) {
   return "";
 }
 
-function dockContextLabel() {
-  return chatContextLabel(parseThreadKey(dockThreadKey()));
+function navigationParsed(agentId) {
+  if (state.view === "product") return { perspective: false, sku: state.activeSku, agentId: agentId };
+  if (state.view === "products") return { perspective: true, sku: null, agentId: agentId };
+  return { perspective: false, sku: null, agentId: agentId };
 }
 
-function paintContext(host, label) {
+function navigationContextLabel() {
+  if (state.view === "product") return activeProduct().name;
+  if (state.view === "products") return productsContextLabel();
+  if (state.view === "detail") return reviewContextLabel();
+  return "";
+}
+
+function conversationGroup(key) {
+  if (!key) return null;
+  const parsed = currentContextParsed(key);
+  if (!parsed.perspective) return null;
+  const selected = PRODUCTS.filter((product) => state.productChecks.has(product.sku));
+  return selected.length ? selected : PRODUCTS.slice();
+}
+
+function renderGroupPreview() {
+  $("group-preview").hidden = true;
+  $("group-preview-rows").textContent = "";
+}
+
+function renderChatProducts(products) {
+  $("chat-products-title").textContent = products.length === PRODUCTS.length ? "Products in this conversation" : "Selected products";
+  $("chat-products-count").textContent = products.length + (products.length === 1 ? " product" : " products");
+  const body = $("chat-product-rows");
+  body.textContent = "";
+  products.forEach((product) => {
+    const row = document.createElement("tr");
+    ["name", "sku", "category", "status"].forEach((field) => {
+      const cell = document.createElement("td");
+      cell.textContent = product[field];
+      row.append(cell);
+    });
+    row.addEventListener("click", () => showFocusSku(product.sku));
+    body.append(row);
+  });
+}
+
+function renderGroup() {
+  const key = state.panelThread || state.chatWith;
+  const products = conversationGroup(key) || [];
+  $("group-title").textContent = products.length && products.length < PRODUCTS.length ? products.length + " products" : "Summer collection perspective";
+  $("group-caption").textContent = (state.chats[key] || []).length ? conversationTitle(key) : "The products in this conversation";
+  const body = $("group-rows");
+  body.textContent = "";
+  products.forEach((product) => {
+    const row = document.createElement("tr");
+    ["name", "sku", "category", "status"].forEach((field) => {
+      const cell = document.createElement("td");
+      cell.textContent = product[field];
+      row.append(cell);
+    });
+    row.addEventListener("click", () => showFocusSku(product.sku));
+    body.append(row);
+  });
+}
+
+function showFocusSku(sku) {
+  if (state.view === "product") keepProductFields();
+  stashDockDraft();
+  const thread = state.panelThread || (state.view === "group" ? state.chatWith : null);
+  state.focusReturn = state.view;
+  state.productMode = "focus";
+  state.activeSku = sku;
+  state.assistantOpen = true;
+  setView("product");
+  if (thread) state.panelThread = thread;
+  renderProduct();
+  renderDock();
+  restoreDockDraft();
+  renderNav();
+}
+
+function currentContextParsed(key) {
+  const parsed = parseThreadKey(key);
+  if (state.contextCleared[key]) return { perspective: false, sku: null, agentId: parsed.agentId };
+  const adopted = state.adoptedContext[key];
+  if (adopted) return { perspective: Boolean(adopted.perspective), sku: adopted.sku || null, agentId: parsed.agentId };
+  return parsed;
+}
+
+function currentContextLabel(key) {
+  if (!key || state.contextCleared[key]) return "";
+  if (state.adoptedContext[key]) return state.adoptedContext[key].label;
+  return chatContextLabel(parseThreadKey(key));
+}
+
+/* Clearing only drops the context that is on the chip. The next product
+   change, or the next change to the checked products, attaches a new one. */
+function noteContextChange(kind) {
+  const key = state.view === "chat" ? state.chatWith : dockThreadKey();
+  if (!key || !state.contextFollows[key]) return;
+  if (kind === "product") {
+    const product = activeProduct();
+    state.adoptedContext[key] = { label: product.name, sku: product.sku, perspective: false };
+  } else {
+    state.adoptedContext[key] = { label: productsContextLabel(), sku: null, perspective: true };
+  }
+  delete state.contextCleared[key];
+}
+
+function dismissContext(key) {
+  if (!key) return;
+  const shown = currentContextLabel(key);
+  if (!shown) return;
+  const live = navigationContextLabel();
+  state.contextFollows[key] = true;
+  state.dismissedContext[key] = true;
+  if (live && live !== shown) {
+    const parsed = navigationParsed(parseThreadKey(key).agentId);
+    state.adoptedContext[key] = { label: live, sku: parsed.sku, perspective: parsed.perspective };
+    delete state.contextCleared[key];
+  } else {
+    state.contextCleared[key] = true;
+    delete state.adoptedContext[key];
+  }
+  renderDock();
+  if (state.view === "chat") renderChat();
+}
+
+function dockContextLabel() {
+  return currentContextLabel(dockThreadKey());
+}
+
+function paintContext(host, label, key) {
   host.textContent = "";
   if (!label) return;
   const chip = document.createElement("span");
   chip.className = "chip";
-  chip.textContent = label;
+  chip.append(document.createTextNode(label));
+  if (key) {
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "chip-remove";
+    remove.setAttribute("aria-label", "Remove context");
+    remove.textContent = "×";
+    remove.addEventListener("click", () => dismissContext(key));
+    chip.append(remove);
+  }
   host.append(chip);
 }
 
@@ -3071,18 +4687,19 @@ function renderDockChat(locked, runStatus, run) {
   const target = dockThreadKey();
   const parsed = parseThreadKey(target);
   const agent = agentById(parsed.agentId);
-  const product = parsed.sku ? productBySku(parsed.sku) : null;
   const suggest = $("dock-suggest");
 
   /* A run you cannot act on has no conversation at all: the panel explains where
      the run stands and, when it is over, points at the agent behind it. */
   $("dock-composer").hidden = Boolean(locked);
-  $("dock-expand").hidden = Boolean(locked);
-  $("dock-delete").hidden = true;
+  $("dock-expand").hidden = Boolean(locked) || state.view === "group";
+  $("group-preview").hidden = true;
   if (locked) {
+    $("dock-ask").hidden = true;
     $("dock-avatar").textContent = "✦";
     $("dock-title").textContent = "AI assistant";
     $("dock-subtitle").hidden = true;
+    $("dock-overflow").hidden = true;
     const host = $("dock-thread");
     host.textContent = "";
     host.className = "thread empty";
@@ -3100,28 +4717,36 @@ function renderDockChat(locked, runStatus, run) {
     suggest.append(button);
   });
 
+  const messages = thread(target);
   $("dock-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
-  $("dock-title").textContent = agent ? agent.name : "AI assistant";
-  const inPerspective = parsed.perspective;
-  $("dock-subtitle").textContent = product
-    ? "Working with " + product.name
+  if (messages.length) {
+    $("dock-title").textContent = conversationTitle(target);
+  } else {
+    $("dock-title").textContent = agent ? agent.name : "AI assistant";
+  }
+  $("dock-overflow").hidden = !messages.length;
+  const scope = currentContextParsed(target);
+  const contextProduct = scope.sku ? productBySku(scope.sku) : null;
+  const inPerspective = scope.perspective;
+  $("dock-subtitle").textContent = contextProduct
+    ? "Working with " + contextProduct.name
     : inPerspective
-      ? "Products perspective"
+      ? "Summer collection perspective"
       : (agent ? agent.note : "");
-  $("dock-subtitle").hidden = !product && !inPerspective && !agent;
+  $("dock-subtitle").hidden = !contextProduct && !inPerspective && !agent;
   $("dock-input").disabled = false;
   $("dock-add").disabled = false;
   $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
   $("dock-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
-  paintContext($("dock-context"), dockContextLabel());
+  paintContext($("dock-context"), currentContextLabel(target), target);
+  renderGroupPreview(target);
 
-  const messages = thread(target);
-  $("dock-delete").hidden = !messages.length;
   const host = $("dock-thread");
   paintThread(host, messages);
   /* An untouched panel still greets you rather than showing an empty column. */
   host.className = messages.length ? "thread" : "thread empty";
-  if (!messages.length) host.append(dockWelcome(agent, product, inPerspective));
+  if (!messages.length) host.append(dockWelcome(agent, contextProduct, inPerspective));
+  renderAsk($("dock-ask"), target);
   renderAssistantMenu();
 }
 
@@ -3137,7 +4762,7 @@ function dockWelcome(agent, product, inPerspective) {
   ask.textContent = product
     ? (agent ? agent.name : "AI assistant") + " · " + product.name
     : inPerspective
-      ? (agent ? agent.name : "AI assistant") + " · Products"
+      ? (agent ? agent.name : "AI assistant") + " · Summer collection perspective"
     : (agent ? agent.ask : "How can I help?");
   welcome.append(mark, line, ask);
 
@@ -3189,19 +4814,23 @@ function lockedState(runStatus, run) {
 }
 
 function renderChat() {
-  const parsed = parseThreadKey(state.chatWith);
+  const parsed = currentContextParsed(state.chatWith);
   const agent = agentById(parsed.agentId);
   const product = parsed.sku ? productBySku(parsed.sku) : null;
   const inPerspective = parsed.perspective;
   const messages = thread(state.chatWith);
-
-  /* Only a named agent gets a name; the general chat stays the AI assistant. */
   $("chat-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
-  $("chat-title").textContent = agent ? agent.name : "AI assistant";
+
+  if (messages.length) {
+    $("chat-title").textContent = conversationTitle(state.chatWith);
+  } else {
+    $("chat-title").textContent = agent ? agent.name : "AI assistant";
+  }
+  $("chat-overflow").hidden = !messages.length;
   $("chat-subtitle").textContent = product
     ? "Working with " + product.name
     : inPerspective
-      ? "Products perspective"
+      ? "Summer collection perspective"
       : (agent ? agent.note : "");
   $("chat-subtitle").hidden = !product && !inPerspective && !agent;
   $("chat-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
@@ -3210,14 +4839,30 @@ function renderChat() {
     : "Ask me anything about your catalog and agent runs…";
   $("welcome-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   $("welcome-avatar").className = agent ? "agent" : "";
-  $("welcome-line").textContent = inPerspective ? "Products perspective" : (product ? "New conversation" : (agent ? agent.name : "Good morning Alex,"));
+  $("welcome-line").textContent = inPerspective ? "Summer collection perspective" : (product ? "New conversation" : (agent ? agent.name : "Good morning Alex,"));
   $("welcome-ask").textContent = product
     ? (agent ? agent.name : "AI assistant") + " · " + product.name
     : inPerspective
-      ? (agent ? agent.name : "AI assistant") + " · Products"
+      ? (agent ? agent.name : "AI assistant") + " · Summer collection perspective"
       : (agent ? agent.ask : "How can I help?");
-  paintContext($("chat-context"), chatContextLabel(parsed));
-  $("chat-clear").hidden = !messages.length;
+  paintContext($("chat-context"), currentContextLabel(state.chatWith), state.chatWith);
+  $("chat-overflow").hidden = !messages.length;
+  const linkedSku = conversationSku(state.chatWith);
+  $("chat-open-product").hidden = !linkedSku;
+  if (linkedSku) {
+    $("chat-open-product").textContent = "Open " + productBySku(linkedSku).name;
+    $("chat-open-product").title = "Open in Focus View";
+  }
+  const group = conversationGroup(state.chatWith);
+  const products = state.groupTable === state.chatWith ? group : null;
+  $("chat-view").classList.toggle("with-products", Boolean(products));
+  $("chat-products").hidden = !products;
+  if (products) renderChatProducts(products);
+  $("chat-open-group").hidden = !group;
+  if (group) {
+    $("chat-open-group").textContent = products ? "Hide products" : "Show products";
+    $("chat-open-group").title = products ? "Hide the products in this conversation" : "Show the products in this conversation";
+  }
 
   const starters = $("chat-starters");
   starters.textContent = "";
@@ -3230,6 +4875,7 @@ function renderChat() {
   });
 
   paintThread($("chat-thread"), messages);
+  renderAsk($("chat-ask"), state.chatWith);
   $("chat-welcome").hidden = messages.length > 0;
   $("chat-scroll").className = messages.length ? "chat-scroll has-thread" : "chat-scroll";
   $("chat-scroll").scrollTop = $("chat-scroll").scrollHeight;
@@ -3253,7 +4899,41 @@ const evidenceLabel = (change) => {
 
 /* A finished review is a record wherever it came from, so the run you just closed
    is flattened into the same rows as one closed yesterday. */
+/* A started run has no supplier-issue flag, so the same groups are read from the
+   score: high confidence is ready, the middle band is thin evidence, and a very
+   low score is treated as a conflict. A decision moves the row out of those. */
+function generatedBucket(item) {
+  if (item.decision === "approved") return "approved";
+  if (item.decision === "rejected" || item.decision === "ignored") return "dismissed";
+  if (item.score >= 90) return "good";
+  if (item.score < 40) return "conflict";
+  return "weak";
+}
+
+const GENERATED_GROUPS = [
+  { id: "good", label: "Good to go" },
+  { id: "conflict", label: "Conflicting sources", note: "The score is low enough that the sources are treated as conflicting." },
+  { id: "weak", label: "Weak evidence", note: "The proposal rests on a thin or low-confidence source." },
+  { id: "approved", label: "Approved" },
+  { id: "dismissed", label: "Dismissed", note: "Rejected, or left unchanged." }
+];
+
 function archiveRows(run) {
+  if (run.generated) {
+    return (run.proposals || []).filter((item) => !item.skipped).map((item) => ({
+      sku: item.sku,
+      product: productBySku(item.sku).name,
+      attribute: item.attribute,
+      current: item.current,
+      final: item.proposed,
+      evidence: item.score >= 90 ? "● 2 sources" : item.score >= 40 ? "○ Weak" : "⚠ Conflicting",
+      score: item.score,
+      bucket: generatedBucket(item),
+      outcome: item.decision === "approved"
+        ? (run.status === "completed" ? "written" : "approved")
+        : item.decision === "ignored" ? "ignored" : item.decision === "rejected" ? "rejected" : "pending"
+    }));
+  }
   if (run.id !== ACTIVE_RUN.id) return ARCHIVE[run.id] || [];
   return CHANGES.map((change) => {
     const decision = decisionOf(change.id);
@@ -3270,14 +4950,245 @@ function archiveRows(run) {
   });
 }
 
+function generatedReview(run) {
+  return Boolean(run && run.generated && statusOf(run) === "review");
+}
+
+/* Until the review is finished every change can be checked again, approved,
+   rejected, or undone. Nothing reaches the product before Finish review. */
+function pendingProposalIndexes(run, indexes) {
+  return (indexes || [...state.proposalChecks]).filter((index) => {
+    const item = run.proposals[index];
+    return item && !item.skipped;
+  });
+}
+
+function applyGeneratedDecision(decision, only) {
+  const run = RUNS.find((item) => item.id === state.openRunId);
+  if (!generatedReview(run)) return;
+  const indexes = pendingProposalIndexes(run, only).filter((index) => run.proposals[index].decision !== decision);
+  if (!indexes.length) return;
+  indexes.forEach((index) => {
+    run.proposals[index].decision = decision;
+    state.proposalChecks.delete(index);
+    if (state.proposalFocus === index) state.proposalFocus = null;
+  });
+  const open = run.proposals.filter((item) => !item.skipped);
+  run.progress = Math.round((open.filter((item) => item.decision).length / open.length) * 100);
+  notify(indexes.length + " " + (indexes.length === 1 ? "change" : "changes") + " " +
+    (decision === "approved" ? "approved" : "rejected") + ".");
+  refreshRunViews(run);
+}
+
+function undoGeneratedDecision(only) {
+  const run = RUNS.find((item) => item.id === state.openRunId);
+  if (!generatedReview(run)) return;
+  const indexes = pendingProposalIndexes(run, only).filter((index) => run.proposals[index].decision);
+  if (!indexes.length) return;
+  indexes.forEach((index) => {
+    delete run.proposals[index].decision;
+    state.proposalChecks.delete(index);
+  });
+  const open = run.proposals.filter((item) => !item.skipped);
+  run.progress = Math.round((open.filter((item) => item.decision).length / open.length) * 100);
+  notify(indexes.length + " " + (indexes.length === 1 ? "decision" : "decisions") + " undone.");
+  refreshRunViews(run);
+}
+
+function finishGeneratedReview(run) {
+  if (!generatedReview(run)) return;
+  const open = run.proposals.filter((item) => !item.skipped);
+  if (open.some((item) => !item.decision)) return;
+  const approved = open.filter((item) => item.decision === "approved");
+  approved.forEach((item) => {
+    const product = productBySku(item.sku);
+    if (item.field === "attribute") product.attribute = item.proposed;
+    if (item.field === "name") product.name = item.proposed;
+    if (item.field === "description") product.description = item.proposed;
+  });
+  run.status = "completed";
+  run.completed = "Just now";
+  run.written = approved.length;
+  run.progress = 100;
+  if (run.ask) run.ask.done = true;
+  state.proposalChecks = new Set();
+  state.proposalFocus = null;
+  if (state.view === "product") renderProduct();
+  if (state.view === "products") renderProducts();
+  refreshRunViews(run);
+  notify("Review finished. " + approved.length + " " +
+    (approved.length === 1 ? "change was" : "changes were") + " written to the catalog.");
+}
+
+function generatedEntries(run) {
+  return (run.proposals || []).map((item, index) => ({ item, index }))
+    .filter(({ item }) => !item.skipped)
+    .map(({ item, index }) => {
+      const product = productBySku(item.sku);
+      const issue = item.score >= 90 ? "" : item.score >= 40 ? "weak" : "conflict";
+      return {
+        index,
+        sku: item.sku,
+        product: product.name,
+        attribute: item.attribute,
+        category: product.category,
+        productStatus: product.status,
+        current: item.current,
+        final: item.proposed,
+        evidence: issue === "conflict" ? "⚠ Conflicting" : issue === "weak" ? "○ Weak" : "● 2 sources",
+        issue,
+        score: item.score,
+        bucket: generatedBucket(item),
+        outcome: item.decision === "approved"
+          ? (run.status === "completed" ? "written" : "approved")
+          : item.decision === "ignored" ? "ignored" : item.decision === "rejected" ? "rejected" : "pending"
+      };
+    });
+}
+
+function matchesArchiveEntry(row) {
+  const query = state.archiveQuery.trim().toLowerCase();
+  const haystack = (row.sku + " " + row.product + " " + row.attribute).toLowerCase();
+  if (!haystack.includes(query)) return false;
+  if (state.archiveScore === "90–100" && row.score < 90) return false;
+  if (state.archiveScore === "60–89" && (row.score < 60 || row.score >= 90)) return false;
+  if (state.archiveScore === "Below 60" && row.score >= 60) return false;
+  if (state.archiveIssue === "Conflicting" && row.issue !== "conflict") return false;
+  if (state.archiveIssue === "Weak" && row.issue !== "weak") return false;
+  if (state.archiveIssue === "Clean" && row.issue) return false;
+  if (state.archiveRefined === "Refined only") return false;
+  const status = row.outcome === "written" ? "approved" : row.outcome;
+  if (state.archiveStatus !== "All statuses" && status !== state.archiveStatus.toLowerCase()) return false;
+  return true;
+}
+
+function sortArchiveEntries(rows) {
+  const sorted = rows.slice();
+  if (state.archiveSort === "score-desc") sorted.sort((a, b) => b.score - a.score);
+  if (state.archiveSort === "score-asc") sorted.sort((a, b) => a.score - b.score);
+  if (state.archiveSort === "product") sorted.sort((a, b) => a.product.localeCompare(b.product));
+  if (state.archiveSort === "attribute") sorted.sort((a, b) => a.attribute.localeCompare(b.attribute));
+  return sorted;
+}
+
+function visibleGeneratedEntries(run) {
+  return sortArchiveEntries(generatedEntries(run).filter(matchesArchiveEntry));
+}
+
+function archiveFilterCount() {
+  let count = 0;
+  if (state.archiveScore !== "Any") count += 1;
+  if (state.archiveStatus !== "All statuses") count += 1;
+  if (state.archiveIssue !== "Any") count += 1;
+  if (state.archiveRefined !== "Any") count += 1;
+  return count;
+}
+
+function archiveGroupKey(row) {
+  const by = state.archiveGroup;
+  if (by === "product") return row.sku;
+  if (by === "attribute") return row.attribute;
+  if (by === "category") return row.category;
+  if (by === "status") return row.outcome;
+  if (by === "evidence") return row.issue || "clean";
+  if (by === "confidence") return band(row.score).key;
+  return row.bucket;
+}
+
+function archiveGroupLabel(row) {
+  const by = state.archiveGroup;
+  if (by === "product") return row.product + " · " + row.sku;
+  if (by === "attribute") return row.attribute;
+  if (by === "category") return row.category;
+  if (by === "status") return row.outcome;
+  if (by === "evidence") return row.issue === "conflict" ? "Conflicting sources" : row.issue === "weak" ? "Weak evidence" : "Clean evidence";
+  if (by === "confidence") return band(row.score).label;
+  return "";
+}
+
+function archiveGroups(rows) {
+  if (state.archiveGroup === "none") {
+    return GENERATED_GROUPS.map((spec) => ({
+      key: spec.id,
+      label: spec.label,
+      note: spec.note,
+      rows: rows.filter((row) => row.bucket === spec.id)
+    })).filter((group) => group.rows.length);
+  }
+  const groups = [];
+  const index = new Map();
+  rows.forEach((row) => {
+    const key = archiveGroupKey(row);
+    if (!index.has(key)) {
+      const group = { key: key, label: archiveGroupLabel(row), rows: [] };
+      index.set(key, group);
+      groups.push(group);
+    }
+    index.get(key).rows.push(row);
+  });
+  return groups;
+}
+
 function renderArchive(run) {
-  const rows = archiveRows(run);
+  const open = generatedReview(run);
+  const allGenerated = run.generated ? generatedEntries(run) : [];
+  const rows = run.generated ? (open ? visibleGeneratedEntries(run) : allGenerated) : archiveRows(run);
+  const checked = open ? [...state.proposalChecks].filter((index) => run.proposals[index] && !run.proposals[index].skipped) : [];
+  const filters = archiveFilterCount();
+  $("archive-tools").hidden = !open;
+  $("archive-bar").hidden = open;
+  $("archive-filter-row").hidden = !open || !state.archiveFilterOpen;
+  $("archive-check-head").hidden = !open;
+  $("archive-sel").hidden = !open;
+  $("archive-group-tool").className = state.archiveGroup === "none" ? "tool tool-select" : "tool tool-select on";
+  $("archive-filter-toggle").className = state.archiveFilterOpen || filters ? "tool on" : "tool";
+  $("archive-filter-badge").hidden = filters === 0;
+  $("archive-filter-badge").textContent = filters;
+  if ($("archive-search").value !== state.archiveQuery) $("archive-search").value = state.archiveQuery;
+  $("archive-sort").value = state.archiveSort;
+  $("archive-group").value = state.archiveGroup;
+  $("archive-score-filter").value = state.archiveScore;
+  $("archive-status-filter").value = state.archiveStatus;
+  $("archive-issue-filter").value = state.archiveIssue;
+  $("archive-refined-filter").value = state.archiveRefined;
+  $("archive-value-head").textContent = open ? "Proposed value" : "Final value";
+  $("archive-status-head").textContent = open ? "Status" : "Outcome";
+  $("archive-score-head").textContent = state.archiveSort === "score-asc" ? "Confidence ↑" : state.archiveSort === "score-desc" ? "Confidence ↓" : "Confidence";
+  const visibleIndexes = run.generated ? rows.map((row) => row.index) : [];
+  const checkedHere = visibleIndexes.filter((index) => state.proposalChecks.has(index));
+  const all = $("archive-select-all");
+  all.checked = visibleIndexes.length > 0 && checkedHere.length === visibleIndexes.length;
+  all.indeterminate = checkedHere.length > 0 && checkedHere.length < visibleIndexes.length;
+  all.disabled = !visibleIndexes.length;
   const body = $("archive-rows");
   body.textContent = "";
 
-  rows.forEach((row) => {
+  function appendArchiveRow(row, proposal) {
     const tr = document.createElement("tr");
     const written = row.outcome === "written";
+    const approvedNow = row.outcome === "approved";
+    const pending = row.outcome === "pending";
+    if (run.generated) tr.classList.add("grouped");
+
+    if (open) {
+      const checkCell = document.createElement("td");
+      checkCell.className = "check";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = Boolean(proposal) && state.proposalChecks.has(proposal.index);
+      box.disabled = !proposal;
+      box.setAttribute("aria-label", "Check " + row.product + " " + row.attribute);
+      box.addEventListener("click", (event) => event.stopPropagation());
+      box.addEventListener("change", () => {
+        if (box.checked) state.proposalChecks.add(proposal.index);
+        else state.proposalChecks.delete(proposal.index);
+        state.proposalFocus = null;
+        state.assistantOpen = true;
+        render();
+      });
+      checkCell.append(box);
+      tr.append(checkCell);
+    }
 
     const productCell = document.createElement("td");
     const name = document.createElement("span");
@@ -3291,13 +5202,14 @@ function renderArchive(run) {
     attribute.className = "attribute";
     attribute.textContent = row.attribute;
 
+    const keeps = written || pending || approvedNow;
     const current = document.createElement("td");
-    current.className = written ? "old-value" : "";
+    current.className = keeps ? "old-value" : "";
     current.textContent = row.current;
 
     const final = document.createElement("td");
-    final.className = written ? "new-value" : "new-value retracted";
-    final.textContent = written ? row.final : row.outcome === "withdrawn" ? "Proposal withdrawn" : "Proposal rejected";
+    final.className = keeps ? "new-value" : "new-value retracted";
+    final.textContent = keeps ? row.final : row.outcome === "withdrawn" ? "Proposal withdrawn" : row.outcome === "ignored" ? "Left unchanged" : "Proposal rejected";
 
     const evidence = document.createElement("td");
     const evidenceTag = document.createElement("span");
@@ -3313,32 +5225,130 @@ function renderArchive(run) {
 
     const outcome = document.createElement("td");
     const status = document.createElement("span");
-    status.className = written ? "status status-approved status-written" : "status status-rejected";
-    status.textContent = written ? "⌁ written back" : row.outcome;
+    status.className = written
+      ? "status status-approved status-written"
+      : approvedNow ? "status status-approved" : pending ? "status" : "status status-rejected";
+    status.textContent = written ? "⌁ written back" : pending ? "pending" : row.outcome;
     outcome.append(status);
 
     tr.append(productCell, attribute, current, final, evidence, score, outcome);
+    if (run.generated && proposal) {
+      tr.addEventListener("click", (event) => {
+        if (event.target.tagName === "INPUT") return;
+        state.proposalFocus = proposal.index;
+        state.assistantOpen = true;
+        render();
+      });
+    }
     body.append(tr);
-  });
+  }
 
-  const written = rows.filter((row) => row.outcome === "written").length;
-  const products = new Set(rows.map((row) => row.product)).size;
+  if (!run.generated) {
+    rows.forEach((row) => appendArchiveRow(row, null));
+  } else {
+    archiveGroups(rows).forEach((spec) => {
+      const members = spec.rows;
+      const key = run.id + ":" + spec.key;
+      const collapsed = state.collapsedGroups.has(key);
+      const pendingMembers = open ? members : [];
+      const selectedCount = pendingMembers.filter((member) => state.proposalChecks.has(member.index)).length;
+      const allSelected = pendingMembers.length > 0 && selectedCount === pendingMembers.length;
+      const head = document.createElement("tr");
+      head.className = "group-row";
+      head.addEventListener("click", (event) => {
+        if (event.target.tagName === "INPUT") return;
+        if (state.collapsedGroups.has(key)) state.collapsedGroups.delete(key);
+        else state.collapsedGroups.add(key);
+        render();
+      });
+      if (open) {
+        const checkCell = document.createElement("td");
+        checkCell.className = "check";
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = allSelected;
+        box.indeterminate = !allSelected && selectedCount > 0;
+        box.disabled = !pendingMembers.length;
+        box.setAttribute("aria-label", "Check " + spec.label);
+        box.addEventListener("click", (event) => event.stopPropagation());
+        box.addEventListener("change", () => {
+          pendingMembers.forEach((member) => {
+            if (allSelected) state.proposalChecks.delete(member.index);
+            else state.proposalChecks.add(member.index);
+          });
+          state.proposalFocus = null;
+          state.assistantOpen = true;
+          render();
+        });
+        checkCell.append(box);
+        head.append(checkCell);
+      }
+      const cell = document.createElement("td");
+      cell.colSpan = 7;
+      const label = document.createElement("div");
+      label.className = "group-head";
+      const caret = document.createElement("span");
+      caret.className = "caret";
+      caret.textContent = collapsed ? "▸" : "▾";
+      const title = document.createElement("b");
+      title.textContent = spec.label;
+      const count = document.createElement("span");
+      count.textContent = members.length + (members.length === 1 ? " change" : " changes");
+      label.append(caret, title, count);
+      if (spec.note) {
+        const note = document.createElement("span");
+        note.className = "group-note";
+        note.textContent = spec.note;
+        label.append(note);
+      }
+      cell.append(label);
+      head.append(cell);
+      body.append(head);
+      if (!collapsed) members.forEach((member) => appendArchiveRow(member, member));
+    });
+  }
 
-  $("archive-summary").textContent = written + " of " + rows.length + " changes written to the catalog";
-  $("archive-when").textContent = "· review finished " + run.completed.toLowerCase() + " by " + run.owner;
-  $("archive-footer").textContent = rows.length + " " + (rows.length === 1 ? "change" : "changes") + " · read only";
+  const source = run.generated ? allGenerated : rows;
+  const written = source.filter((row) => row.outcome === "written").length;
+  const approvedNow = source.filter((row) => row.outcome === "approved").length;
+  const products = new Set(source.map((row) => row.product)).size;
 
-  /* The tiles report the outcome once a review is closed, not the proposal quality. */
+  if (open) {
+    const total = allGenerated.length;
+    $("archive-footer").textContent = rows.length === total
+      ? total + " " + (total === 1 ? "change" : "changes")
+      : rows.length + " of " + total + " " + (total === 1 ? "change" : "changes");
+    $("archive-sel").innerHTML = checked.length
+      ? "<b>" + checked.length + "</b> selected" + (checkedHere.length !== checked.length ? " · " + checkedHere.length + " here" : "")
+      : "No rows selected";
+    $("archive-ready").hidden = approvedNow === 0;
+    $("archive-ready-count").textContent = approvedNow.toLocaleString() + " " + (approvedNow === 1 ? "change" : "changes") + " ready";
+    $("archive-empty").hidden = rows.length > 0;
+    setAction("archive-approve", "✓ Approve", checked.filter((index) => run.proposals[index].decision !== "approved").length, checked.length, "Every selected change is already approved.");
+    setAction("archive-reject", "× Reject", checked.filter((index) => run.proposals[index].decision !== "rejected").length, checked.length, "Every selected change is already rejected.");
+    setAction("archive-undo", "↩ Undo", checked.filter((index) => run.proposals[index].decision).length, checked.length, "Nothing to undo — pick rows you have already approved or rejected.");
+  } else {
+    $("archive-ready").hidden = true;
+    $("archive-empty").hidden = true;
+    $("archive-summary").textContent = written + " of " + rows.length + " changes written to the catalog";
+    $("archive-when").textContent = "· review finished " + String(run.completed || "just now").toLowerCase() + " by " + run.owner;
+    $("archive-footer").textContent = rows.length + " " + (rows.length === 1 ? "change" : "changes") + " · read only";
+  }
+
+  /* While the review is open the tiles match a run still in progress. Once it is
+     finished they report what was written. */
+  const counted = run.generated ? allGenerated : rows;
+  const high = counted.filter((row) => row.score >= 90).length;
   $("summary-analysed").textContent = run.products.toLocaleString();
   $("summary-untouched").textContent = (run.products - products).toLocaleString() + " left unchanged";
-  $("summary-total").textContent = rows.length;
+  $("summary-total").textContent = counted.length;
   $("summary-affected").textContent = "across " + products.toLocaleString() + " products";
-  $("summary-high").textContent = written;
-  $("summary-high-label").textContent = "Written to catalog";
-  $("summary-high-note").textContent = "Applied to your products";
-  $("summary-review").textContent = rows.length - written;
-  $("summary-review-label").textContent = "Not applied";
-  $("summary-review-note").textContent = "Rejected or withdrawn";
+  $("summary-high").textContent = open ? high : written;
+  $("summary-high-label").textContent = open ? "High confidence" : "Written to catalog";
+  $("summary-high-note").textContent = open ? "Score 90–100" : "Applied to your products";
+  $("summary-review").textContent = open ? counted.length - high : counted.length - written;
+  $("summary-review-label").textContent = open ? "Need review" : "Not applied";
+  $("summary-review-note").textContent = open ? "Score below 90" : "Rejected or withdrawn";
 }
 
 /* ---------- render ---------- */
@@ -3355,7 +5365,7 @@ function render() {
   const openStatus = statusOf(openRun);
   /* What a run shows follows its status, not which run it happens to be: a review
      you just finished reads exactly like one finished yesterday. */
-  const reviewing = openStatus === "review";
+  const reviewing = openStatus === "review" && !openRun.generated;
 
   /* Header chrome is shared by every run; only the body below it differs. */
   $("crumb-run").textContent = "#" + openRun.id;
@@ -3367,10 +5377,18 @@ function render() {
   /* Nothing is pending on a finished run, so the header carries no badge. */
   $("run-status").hidden = openStatus === "completed";
   $("run-state").hidden = openStatus !== "running";
-  $("archive-panel").hidden = openStatus !== "completed";
+  $("archive-panel").hidden = reviewing || openStatus === "running";
   $("review-panel").hidden = !reviewing;
   $("summary-strip").hidden = openStatus === "running";
-  $("finish-review").hidden = !reviewing;
+  $("finish-review").hidden = openStatus !== "review";
+  if (openRun.generated && openStatus === "review") {
+    const open = (openRun.proposals || []).filter((item) => !item.skipped);
+    const left = open.filter((item) => !item.decision).length;
+    $("finish-review").disabled = left > 0;
+    $("finish-review").title = left
+      ? left + " " + (left === 1 ? "change still needs" : "changes still need") + " a decision before you can finish."
+      : "Write the approved changes to the catalog and close this run.";
+  }
   renderDock();
   renderNav();
 
@@ -3380,10 +5398,16 @@ function render() {
     else renderArchive(openRun);
     $("progress-card").hidden = running;
     if (!running) {
-      $("progress-pct").textContent = "100%";
-      $("progress-bar").style.width = "100%";
+      const proposals = openRun.generated ? (openRun.proposals || []).filter((item) => !item.skipped) : [];
+      const awaiting = openRun.generated && openStatus === "review";
+      const decidedCount = proposals.filter((item) => item.decision).length;
+      const percent = awaiting && proposals.length ? Math.round((decidedCount / proposals.length) * 100) : 100;
+      $("progress-pct").textContent = percent + "%";
+      $("progress-bar").style.width = percent + "%";
       $("progress-unit").textContent = "reviewed";
-      $("progress-label").textContent = "All changes decided";
+      $("progress-label").textContent = awaiting
+        ? decidedCount + " of " + proposals.length + " decided"
+        : "All changes decided";
     }
     return;
   }
@@ -3397,10 +5421,10 @@ function render() {
   const selectedTotal = state.selected.size;
   const readyCount = CHANGES.filter((change) => decisionOf(change.id) === "approved" && !isWritten(change.id)).length;
   const decided = CHANGES.filter((change) => ["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
-  const tab = TABS.find((item) => item.id === state.tab) || TABS[0];
   const filters = activeFilterCount();
 
-  renderTabs();
+  $("tabs").hidden = true;
+  $("tab-note").hidden = true;
   renderRows(rows);
   const focusedRow = document.querySelector("#rows tr.focused");
   if (focusedRow) focusedRow.scrollIntoView({ block: "nearest" });
@@ -3411,7 +5435,7 @@ function render() {
   $("filter-toggle").className = state.filterOpen || filters ? "tool on" : "tool";
   $("filter-badge").hidden = filters === 0;
   $("filter-badge").textContent = filters;
-  $("status-filter").disabled = state.tab === "approved" || state.tab === "dismissed";
+  $("status-filter").disabled = false;
 
   $("sel-count").innerHTML = selectedTotal
     ? "<b>" + selectedTotal.toLocaleString() + "</b> selected" + (selectedHere !== selectedTotal ? " · " + selectedHere + " here" : "")
@@ -3427,12 +5451,11 @@ function render() {
   $("select-all").indeterminate = !allSelected && selectedHere > 0;
   $("score-head").textContent = state.sort === "score-asc" ? "Confidence ↑" : state.sort === "score-desc" ? "Confidence ↓" : "Confidence";
 
-  $("ready-bar").hidden = state.tab !== "approved" || readyCount === 0;
+  $("ready-bar").hidden = readyCount === 0;
   $("ready-count").textContent = readyCount.toLocaleString() + " " + (readyCount === 1 ? "change" : "changes") + " ready";
-  const tabTotal = tab.count();
-  $("footer-range").textContent = rows.length === tabTotal
-    ? tabTotal + " " + (tabTotal === 1 ? "change" : "changes")
-    : rows.length + " of " + tabTotal + " " + (tabTotal === 1 ? "change" : "changes");
+  $("footer-range").textContent = rows.length === CHANGES.length
+    ? CHANGES.length + " " + (CHANGES.length === 1 ? "change" : "changes")
+    : rows.length + " of " + CHANGES.length + " " + (CHANGES.length === 1 ? "change" : "changes");
   const highConfidence = CHANGES.filter((change) => confidenceOf(change) >= 90).length;
   $("summary-analysed").textContent = PRODUCTS_ANALYSED.toLocaleString();
   $("summary-untouched").textContent = untouchedProductCount().toLocaleString() + " left unchanged";
@@ -3445,9 +5468,7 @@ function render() {
   $("summary-review-label").textContent = "Need review";
   $("summary-review-note").textContent = "Score below 90";
   $("empty").hidden = rows.length > 0;
-  $("empty-hint").textContent = EMPTY_HINTS[state.tab] || "Try adjusting your filters.";
-  $("tab-note").hidden = !TAB_NOTES[state.tab] || rows.length === 0;
-  $("tab-note").textContent = TAB_NOTES[state.tab] || "";
+  $("empty-hint").textContent = "Try adjusting your filters.";
 
   const percent = Math.round((decided / CHANGES.length) * 100);
   $("progress-pct").textContent = percent + "%";
@@ -3486,6 +5507,45 @@ $("clear-filters").addEventListener("click", () => {
   render();
 });
 
+$("archive-select-all").addEventListener("click", (event) => event.stopPropagation());
+$("archive-select-all").addEventListener("change", () => {
+  const run = RUNS.find((item) => item.id === state.openRunId);
+  if (!generatedReview(run)) return;
+  const selectable = visibleGeneratedEntries(run).map((row) => row.index);
+  const allChecked = selectable.length > 0 && selectable.every((index) => state.proposalChecks.has(index));
+  selectable.forEach((index) => {
+    if (allChecked) state.proposalChecks.delete(index);
+    else state.proposalChecks.add(index);
+  });
+  state.proposalFocus = null;
+  state.assistantOpen = true;
+  render();
+});
+$("archive-search").addEventListener("input", (event) => { state.archiveQuery = event.target.value; render(); });
+$("archive-sort").addEventListener("change", (event) => { state.archiveSort = event.target.value; render(); });
+$("archive-group").addEventListener("change", (event) => {
+  state.archiveGroup = event.target.value;
+  state.collapsedGroups = new Set();
+  render();
+});
+$("archive-filter-toggle").addEventListener("click", () => { state.archiveFilterOpen = !state.archiveFilterOpen; render(); });
+$("archive-score-filter").addEventListener("change", (event) => { state.archiveScore = event.target.value; render(); });
+$("archive-status-filter").addEventListener("change", (event) => { state.archiveStatus = event.target.value; render(); });
+$("archive-issue-filter").addEventListener("change", (event) => { state.archiveIssue = event.target.value; render(); });
+$("archive-refined-filter").addEventListener("change", (event) => { state.archiveRefined = event.target.value; render(); });
+$("archive-clear-filters").addEventListener("click", () => {
+  state.archiveQuery = "";
+  state.archiveScore = "Any";
+  state.archiveStatus = "All statuses";
+  state.archiveIssue = "Any";
+  state.archiveRefined = "Any";
+  $("archive-search").value = "";
+  render();
+});
+$("archive-approve").addEventListener("click", () => applyGeneratedDecision("approved"));
+$("archive-reject").addEventListener("click", () => applyGeneratedDecision("rejected"));
+$("archive-undo").addEventListener("click", () => undoGeneratedDecision());
+
 $("select-all").addEventListener("change", () => {
   const selectable = actionable(visibleChanges().map((row) => row.id));
   const allSelected = selectable.length > 0 && selectable.every((id) => state.selected.has(id));
@@ -3497,7 +5557,11 @@ $("select-all").addEventListener("change", () => {
 $("act-approve").addEventListener("click", () => applyDecision("approved", [...state.selected]));
 $("act-reject").addEventListener("click", () => applyDecision("rejected", [...state.selected]));
 $("act-undo").addEventListener("click", () => undoDecision([...state.selected]));
-$("finish-review").addEventListener("click", finishReview);
+$("finish-review").addEventListener("click", () => {
+  const run = RUNS.find((item) => item.id === state.openRunId);
+  if (run && run.generated) finishGeneratedReview(run);
+  else finishReview();
+});
 /* From a run you can step sideways into a conversation with the agent behind it. */
 $("run-agent-label").addEventListener("click", () => {
   const run = RUNS.find((item) => item.id === state.openRunId) || ACTIVE_RUN;
@@ -3540,24 +5604,53 @@ document.querySelectorAll(".assistant-menu-branch").forEach((branch) => {
 $("runs-back").addEventListener("click", showRuns);
 function deleteConversation(key) {
   delete state.chats[key];
+  delete state.chatRecent[key];
   delete state.drafts[key];
+  delete state.conversationTitles[key];
+  delete state.dismissedContext[key];
+  delete state.adoptedContext[key];
+  delete state.contextCleared[key];
+  delete state.contextFollows[key];
   if (state.panelThread === key) state.panelThread = null;
 }
 
-$("chat-clear").addEventListener("click", () => {
-  deleteConversation(state.chatWith);
-  renderChat();
+$("dock-overflow-trigger").addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleOverflow($("dock-overflow-trigger"), $("dock-overflow-menu"));
 });
-$("dock-delete").addEventListener("click", () => {
-  deleteConversation(dockThreadKey());
-  renderDock();
-  renderNav();
-  if (state.view === "conversations") renderConversations();
+$("dock-overflow-menu").addEventListener("click", (event) => {
+  const action = event.target.closest("button");
+  if (!action) return;
+  event.stopPropagation();
+  const key = dockThreadKey();
+  closeOverflow();
+  if (action.dataset.overflow === "rename") beginRename($("dock-title"), key);
+  if (action.dataset.overflow === "delete") {
+    deleteConversation(key);
+    renderDock();
+    renderNav();
+  }
+});
+$("chat-overflow-trigger").addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleOverflow($("chat-overflow-trigger"), $("chat-overflow-menu"));
+});
+$("chat-overflow-menu").addEventListener("click", (event) => {
+  const action = event.target.closest("button");
+  if (!action) return;
+  event.stopPropagation();
+  const key = state.chatWith;
+  closeOverflow();
+  if (action.dataset.overflow === "rename") beginRename($("chat-title"), key);
+  if (action.dataset.overflow === "delete") {
+    deleteConversation(key);
+    renderChat();
+    renderNav();
+  }
 });
 $("chat-input").addEventListener("input", (event) => {
   const field = event.target;
-  field.style.height = "26px";
-  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  fitComposer(field);
   $("chat-send").disabled = !field.value.trim();
 });
 $("chat-input").addEventListener("keydown", (event) => {
@@ -3573,10 +5666,16 @@ $("chat-send").addEventListener("click", () => sendChat());
    the surrounding application. */
 $("back-button").addEventListener("click", () => {
   if (state.view === "products") return;
-  if (state.view === "product") showProducts();
+  if (state.view === "product" && state.productMode === "focus") returnFromFocus();
+  else if (state.view === "product") showProducts();
   else if (state.view === "chat") {
     if (state.chatReturn === "products") showProducts();
-    else showProduct();
+    else showProduct(true);
+  }   else if (state.view === "detail") returnFromDetail();
+  else if (state.view === "group") {
+    if (state.chatWith) state.groupTable = state.chatWith;
+    setView("chat");
+    renderChat();
   } else showProduct();
 });
 
@@ -3607,8 +5706,7 @@ $("product-export").addEventListener("click", () => {
 
 $("dock-input").addEventListener("input", (event) => {
   const field = event.target;
-  field.style.height = "26px";
-  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  fitComposer(field);
   $("dock-send").disabled = !field.value.trim();
   state.drafts[dockThreadKey()] = field.value;
 });
@@ -3632,9 +5730,10 @@ $("assistant-menu-trigger").addEventListener("click", (event) => {
 /* The rail is a preview of the conversation; expanding hands it to the full view. */
 $("dock-expand").addEventListener("click", () => {
   stashDockDraft();
+  const key = dockThreadKey();
   const onRecord = state.view === "product" || state.view === "products";
   state.chatReturn = onRecord ? state.view : "products";
-  state.chatWith = dockThreadKey();
+  state.chatWith = key;
   setView("chat");
   renderChat();
 });
@@ -3651,15 +5750,14 @@ $("notice").addEventListener("mouseleave", () => {
 $("assistant-toggle").addEventListener("click", () => {
   state.assistantOpen = !state.assistantOpen;
   renderDock();
+  if (state.assistantOpen) fitComposer($("dock-input"));
   if (state.view === "detail") render();
 });
 $("assistant-close").addEventListener("click", () => { state.assistantOpen = false; renderDock(); });
 
 /* Keeps the field one row tall until the instruction actually wraps. */
 function autoGrow() {
-  const field = $("instruction");
-  field.style.height = "26px";
-  field.style.height = Math.min(field.scrollHeight, 92) + "px";
+  fitComposer($("instruction"));
 }
 
 $("instruction").addEventListener("input", () => { autoGrow(); renderComposer(); });
@@ -3675,10 +5773,12 @@ $("composer-add").addEventListener("click", (event) => {
   $("composer-suggest").hidden = !$("composer-suggest").hidden;
 });
 document.addEventListener("click", (event) => {
+  if (!event.target.closest(".agent-menu") && !event.target.closest(".agent-action")) closeAgentMenu();
+  if (!event.target.closest(".overflow-menu") && !event.target.closest(".overflow-trigger")) closeOverflow();
   ["composer-suggest", "dock-suggest"].forEach((id) => {
     if (!$(id).hidden && !$(id).contains(event.target)) $(id).hidden = true;
   });
-  if (state.assistantMenuOpen && !$("assistant-menu").contains(event.target) && !event.target.closest(".assistant-menu-flyout")) {
+  if (state.assistantMenuOpen && !$("assistant-menu").contains(event.target) && !event.target.closest(".assistant-menu-flyout") && !event.target.closest(".overflow") && !event.target.closest(".overflow-menu")) {
     state.assistantMenuOpen = false;
     renderDock();
   }
@@ -3695,17 +5795,57 @@ document.querySelectorAll("[data-suggest]").forEach((button) => {
 $("composer-send").addEventListener("click", () => {
   const instruction = $("instruction").value.trim();
   if (!instruction) return;
+  const generated = openGeneratedReview();
+  if (generated) { askAboutGeneratedRun(generated, instruction); return; }
   const ids = refineTargets();
   if (!ids.length) { askAboutRun(instruction); return; }
   sendRefinement(instruction, ids);
 });
 
+document.querySelectorAll(".agent-action").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openAgentMenu(button);
+  });
+});
+
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
+  if (agentMenuButton) { closeAgentMenu(); return; }
   if (state.panelMode === "single") { state.focused = null; state.panelMode = state.selected.size ? "bulk" : null; render(); }
   else if (state.panelMode === "bulk") { state.selected.clear(); state.panelMode = null; render(); }
 });
 
+$("follow-switch").addEventListener("click", (event) => {
+  if (event.target.closest(".follow-info")) return;
+  const button = event.target.closest("button");
+  if (!button || state.follow === button.dataset.follow) return;
+  state.follow = button.dataset.follow;
+  if (state.follow === "context") holdConversation();
+  renderDock();
+  renderNav();
+});
+$("open-linked-product").addEventListener("click", () => openLinkedProduct($("open-linked-product").dataset.key));
+$("chat-open-product").addEventListener("click", () => openLinkedProduct(state.chatWith));
+$("chat-open-group").addEventListener("click", () => {
+  if (!conversationGroup(state.chatWith)) return;
+  state.groupTable = state.groupTable === state.chatWith ? null : state.chatWith;
+  renderChat();
+});
+$("product-nav-search").addEventListener("input", (event) => {
+  state.productQuery = event.target.value;
+  state.productPage = 0;
+  renderProductNav();
+});
+$("check-all-products").addEventListener("click", (event) => event.stopPropagation());
+$("check-all-products").addEventListener("change", () => {
+  const allChecked = PRODUCTS.length > 0 && PRODUCTS.every((product) => state.productChecks.has(product.sku));
+  if (allChecked) state.productChecks.clear();
+  else PRODUCTS.forEach((product) => state.productChecks.add(product.sku));
+  noteContextChange("checks");
+  renderProducts();
+  renderDock();
+});
 $("open-focus").addEventListener("click", () => showProduct());
 $("product-rows").addEventListener("dblclick", (event) => {
   if (event.target.closest("input")) return;
@@ -3713,6 +5853,7 @@ $("product-rows").addEventListener("dblclick", (event) => {
 });
 
 syncFilterInputs();
+renderAgentMenu();
 showProducts();
 </script>
 </body>
