@@ -281,6 +281,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .run-name { display: block; color: var(--ink); font-weight: 600; }
 .run-name + small { display: block; margin-top: 4px; color: var(--muted); }
 .run-agent { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .18); color: #475569; font-size: 11px; font-weight: 600; }
+/* An agent's own colour. Violet stays the generic assistant and AI traces. */
+.nav-avatar[data-agent],
+.agent-menu i[data-agent],
+.chat-avatar[data-agent],
+.agent-tile > i[data-agent],
+.conversation-open > i[data-agent],
+.chat-welcome span[data-agent],
+.dock-welcome span[data-agent],
+.run-agent[data-agent] { background: var(--agent-soft); color: var(--agent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--agent) 24%, transparent); }
+#dock-avatar[data-agent],
+#assistant-avatar[data-agent] { background: var(--agent); color: #fff; box-shadow: none; }
+#run-agent-label[data-agent],
+#run-agent-label[data-agent]:hover,
+.product-run b[data-agent] { color: var(--agent); }
 .run-progress { width: 150px; }
 .run-progress span { display: block; margin-bottom: 5px; color: #475569; font-size: 12px; }
 .run-progress i { display: block; height: 5px; overflow: hidden; border-radius: 9999px; background: #e2e8f0; }
@@ -1166,7 +1180,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 <aside class="dock" id="dock" hidden>
     <section class="assistant" id="assistant">
       <header>
-        <i>✦</i>
+        <i id="assistant-avatar">✦</i>
         <div><h2 id="assistant-name">Agent assistant</h2><small id="assistant-status">idle</small></div>
         <button type="button" id="assistant-close" aria-label="Hide assistant">×</button>
       </header>
@@ -1314,25 +1328,25 @@ const RUNS = [
    produced; the two are navigated separately. */
 const AGENTS = [
   {
-    id: "content", name: "Content Optimizer", note: "Attributes and descriptions",
+    id: "content", name: "Content Optimizer", note: "Attributes and descriptions", color: "#4338ca", soft: "#eef2ff",
     ask: "What should I work on?",
     hint: "Can enrich attributes, rewrite descriptions and start a run",
     starters: ["What did you change in your last run?", "Enrich the fabric attribute across outerwear", "Why is the evidence weak on some products?"]
   },
   {
-    id: "taxonomy", name: "Taxonomy Mapper", note: "Categories and hierarchy",
+    id: "taxonomy", name: "Taxonomy Mapper", note: "Categories and hierarchy", color: "#0f766e", soft: "#ccfbf1",
     ask: "Where should this sit?",
     hint: "Can remap categories and flag misplaced products",
     starters: ["How is the category remap going?", "Which products sit in the wrong category?", "Map new arrivals to the winter tree"]
   },
   {
-    id: "quality", name: "Data Quality", note: "Dimensions and formats",
+    id: "quality", name: "Data Quality", note: "Dimensions and formats", color: "#c2410c", soft: "#ffedd5",
     ask: "What looks wrong?",
     hint: "Can normalise units, formats and missing values",
     starters: ["What did the dimensions cleanup fix?", "Find products with missing weights", "Normalise all sizes to centimetres"]
   },
   {
-    id: "media", name: "Media Tagger", note: "Images and alt text",
+    id: "media", name: "Media Tagger", note: "Images and alt text", color: "#be185d", soft: "#fce7f3",
     ask: "What needs tagging?",
     hint: "Can tag imagery and write alt text",
     starters: ["How many products have no alt text?", "Tag the spring lookbook images"]
@@ -1340,6 +1354,19 @@ const AGENTS = [
 ];
 const agentById = (id) => AGENTS.find((agent) => agent.id === id) || null;
 const agentByName = (name) => AGENTS.find((agent) => agent.name === name) || null;
+
+function markAgent(el, agent) {
+  if (!el) return;
+  if (!agent) {
+    el.removeAttribute("data-agent");
+    el.style.removeProperty("--agent");
+    el.style.removeProperty("--agent-soft");
+    return;
+  }
+  el.dataset.agent = agent.id;
+  el.style.setProperty("--agent", agent.color);
+  el.style.setProperty("--agent-soft", agent.soft);
+}
 
 /* A finished run keeps its decided rows so it can still be read back. */
 const ARCHIVE = {
@@ -2706,6 +2733,8 @@ function renderComposer() {
     $("composer-send").disabled = !hasInstruction;
     $("composer-hint").textContent = "";
     $("assistant-name").textContent = generated.agent;
+    $("assistant-avatar").textContent = generated.agent.charAt(0);
+    markAgent($("assistant-avatar"), agentByName(generated.agent));
     $("assistant-status").textContent = "Run #" + generated.id + " · idle";
     return;
   }
@@ -2723,6 +2752,8 @@ function renderComposer() {
 
   const running = state.batches.filter((batch) => batch.status === "running");
   $("assistant-name").textContent = ACTIVE_RUN.agent;
+  $("assistant-avatar").textContent = ACTIVE_RUN.agent.charAt(0);
+  markAgent($("assistant-avatar"), agentByName(ACTIVE_RUN.agent));
   $("assistant-status").textContent = running.length
     ? "Run #" + ACTIVE_RUN.id + " · re-analysing " + running.reduce((total, batch) => total + batch.ids.length, 0) + " changes"
     : "Run #" + ACTIVE_RUN.id + " · idle";
@@ -2774,6 +2805,7 @@ function renderRuns() {
     const agentChip = document.createElement("span");
     agentChip.className = "run-agent";
     agentChip.textContent = "✦ " + run.agent;
+    markAgent(agentChip, agentByName(run.agent));
     agent.append(agentChip);
     runCell.append(name, agent);
 
@@ -3173,6 +3205,7 @@ function renderConversations() {
     button.className = "conversation-open";
     const icon = document.createElement("i");
     icon.textContent = info.icon;
+    markAgent(icon, info.agent);
     const copy = document.createElement("span");
     const title = document.createElement("strong");
     title.textContent = info.title;
@@ -3210,6 +3243,7 @@ function renderAgents() {
     tile.className = "agent-tile";
     const avatar = document.createElement("i");
     avatar.textContent = agent.name.charAt(0);
+    markAgent(avatar, agent);
     const name = document.createElement("strong");
     name.textContent = agent.name;
     const note = document.createElement("small");
@@ -3306,8 +3340,11 @@ function renderNav() {
     button.type = "button";
     button.className = open ? "nav-run active" : "nav-run";
     const title = document.createElement("span");
-    title.innerHTML = '<i class="nav-avatar">' + agent.name.charAt(0) + "</i>";
-    title.append(agent.name);
+    const avatar = document.createElement("i");
+    avatar.className = "nav-avatar";
+    avatar.textContent = agent.name.charAt(0);
+    markAgent(avatar, agent);
+    title.append(avatar, agent.name);
     const note = document.createElement("small");
     note.textContent = (state.chats[agent.id] || []).length ? "Conversation open" : agent.note;
     button.append(title, note);
@@ -3329,6 +3366,7 @@ function renderNav() {
     const icon = document.createElement("i");
     icon.className = "nav-avatar";
     icon.textContent = info.icon;
+    markAgent(icon, info.agent);
     const name = document.createElement("b");
     name.textContent = info.title;
     title.append(icon, name);
@@ -3493,6 +3531,7 @@ function productRunRow(run) {
   const copy = document.createElement("span");
   const name = document.createElement("b");
   name.textContent = run.agent;
+  markAgent(name, agentByName(run.agent));
   const note = document.createElement("small");
   note.textContent = "Run #" + run.id;
   copy.append(name, note);
@@ -3651,6 +3690,7 @@ function conversationInfo(key) {
     who: who,
     note: place + " · " + who,
     icon: agent ? agent.name.charAt(0) : "✦",
+    agent: agent,
     named: Boolean(agent)
   };
 }
@@ -3751,6 +3791,7 @@ function renderAgentMenu() {
     button.setAttribute("role", "menuitem");
     const icon = document.createElement("i");
     icon.textContent = agent.name.charAt(0);
+    markAgent(icon, agent);
     const copy = document.createElement("span");
     const name = document.createElement("strong");
     name.textContent = agent.name;
@@ -3770,6 +3811,7 @@ function menuAgentItem(agent) {
   const icon = document.createElement("i");
   icon.className = agent.id === "general" ? "" : "nav-avatar";
   icon.textContent = agent.id === "general" ? "✦" : agent.name.charAt(0);
+  markAgent(icon, agent.id === "general" ? null : agent);
   const copy = document.createElement("span");
   copy.innerHTML = "<strong></strong><small></small>";
   copy.querySelector("strong").textContent = agent.name;
@@ -3800,6 +3842,7 @@ function menuConversationItem(key) {
   const icon = document.createElement("i");
   icon.className = info.named ? "nav-avatar" : "";
   icon.textContent = info.icon;
+  markAgent(icon, info.agent);
   const copy = document.createElement("span");
   copy.innerHTML = "<strong></strong><small></small>";
   copy.querySelector("strong").textContent = info.title;
@@ -4697,6 +4740,7 @@ function renderDockChat(locked, runStatus, run) {
   if (locked) {
     $("dock-ask").hidden = true;
     $("dock-avatar").textContent = "✦";
+    markAgent($("dock-avatar"), null);
     $("dock-title").textContent = "AI assistant";
     $("dock-subtitle").hidden = true;
     $("dock-overflow").hidden = true;
@@ -4719,6 +4763,7 @@ function renderDockChat(locked, runStatus, run) {
 
   const messages = thread(target);
   $("dock-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
+  markAgent($("dock-avatar"), agent);
   if (messages.length) {
     $("dock-title").textContent = conversationTitle(target);
   } else {
@@ -4756,6 +4801,7 @@ function dockWelcome(agent, product, inPerspective) {
   const mark = document.createElement("span");
   mark.textContent = agent ? agent.name.charAt(0) : "✦";
   if (agent) mark.className = "agent";
+  markAgent(mark, agent);
   const line = document.createElement("p");
   line.textContent = product || inPerspective ? "New conversation" : (agent ? agent.name : "Good morning Alex,");
   const ask = document.createElement("b");
@@ -4820,6 +4866,7 @@ function renderChat() {
   const inPerspective = parsed.perspective;
   const messages = thread(state.chatWith);
   $("chat-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
+  markAgent($("chat-avatar"), agent);
 
   if (messages.length) {
     $("chat-title").textContent = conversationTitle(state.chatWith);
@@ -4839,6 +4886,7 @@ function renderChat() {
     : "Ask me anything about your catalog and agent runs…";
   $("welcome-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   $("welcome-avatar").className = agent ? "agent" : "";
+  markAgent($("welcome-avatar"), agent);
   $("welcome-line").textContent = inPerspective ? "Summer collection perspective" : (product ? "New conversation" : (agent ? agent.name : "Good morning Alex,"));
   $("welcome-ask").textContent = product
     ? (agent ? agent.name : "AI assistant") + " · " + product.name
@@ -5371,6 +5419,7 @@ function render() {
   $("crumb-run").textContent = "#" + openRun.id;
   $("run-heading").textContent = "#" + openRun.id;
   $("run-agent-label").textContent = openRun.agent;
+  markAgent($("run-agent-label"), agentByName(openRun.agent));
   $("run-when").textContent = ", " + runWhen(openRun);
   $("run-status").className = "run-status " + openStatus;
   $("run-status").textContent = STATUS_LABELS[openStatus];
