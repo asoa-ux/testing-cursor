@@ -243,7 +243,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .conversation-open { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding: 4px 0; border: 0; background: transparent; text-align: left; }
 .conversation-open > i { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-lg); background: var(--violet-soft); color: var(--violet); font-style: normal; font-size: 15px; font-weight: 600; }
 .rename-input { width: 12em; max-width: 100%; border: 0; border-bottom: 1px solid #93c5fd; background: transparent; font: inherit; font-weight: 600; color: inherit; padding: 0; }
-.conversation-row strong { display: block; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.conversation-row strong { display: block; overflow: hidden; font-size: 14px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
 .overflow { position: relative; flex-shrink: 0; }
 .overflow[hidden] { display: none; }
 .overflow-trigger { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: #64748b; font-size: 18px; line-height: 1; }
@@ -255,6 +255,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .overflow-menu button[data-overflow="delete"] { color: #be123c; }
 .nav-conversation-row { display: flex; align-items: center; }
 .nav-conversation-row .nav-run { flex: 1; min-width: 0; }
+.nav-conversation-row .nav-run span, .nav-conversation-row .nav-run b { font-weight: 400; }
 .conversation-row small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
 .runs-page { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 24px 28px; overflow: auto; }
 .runs-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
@@ -275,8 +276,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .runs-table th:nth-child(1) { width: 230px; }
 .runs-table th:nth-child(5) { width: 180px; }
 .runs-table th:last-child { width: 72px; }
-.runs-table tbody tr.openable { cursor: pointer; }
-.runs-table tbody tr.openable:hover td { background: #f8fafc; }
+.runs-table tbody tr { cursor: default; }
 .run-name { display: block; color: var(--ink); font-weight: 600; }
 .run-name + small { display: block; margin-top: 4px; color: var(--muted); }
 .run-agent { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .18); color: #475569; font-size: 11px; font-weight: 600; }
@@ -395,7 +395,7 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 /* The dropdowns wear the same chrome as the buttons beside them; the native select
    sits inside with its own styling stripped. */
 .tool-select { padding-right: 9px; }
-.tool-select select { appearance: none; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-weight: 500; padding: 0 16px 0 0; background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%), linear-gradient(135deg, #94a3b8 50%, transparent 50%); background-position: right 6px top 14px, right 1px top 14px; background-size: 5px 5px; background-repeat: no-repeat; }
+.tool-select select { align-self: stretch; height: 100%; appearance: none; -webkit-appearance: none; border: 0; outline: 0; background-color: transparent; color: inherit; font: inherit; font-weight: 500; padding: 0 18px 0 0; background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%), linear-gradient(135deg, #94a3b8 50%, transparent 50%); background-position: right 5px center, right 0 center; background-size: 5px 5px; background-repeat: no-repeat; }
 .tool-select:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
 .toolbar .spacer { flex: 1; }
 .sel-count { margin-left: auto; color: var(--muted); white-space: nowrap; }
@@ -411,7 +411,7 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 
 .filter-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); }
 .filter-row label { display: flex; align-items: center; gap: 7px; color: #475569; font-size: 13px; font-weight: 500; }
-.filter-row select { height: 32px; min-width: 130px; border-radius: var(--radius); background: #fff; border: 1px solid #cbd5e1; box-shadow: var(--ring); color: #334155; padding: 0 9px; font-weight: 400; }
+.filter-row select { height: 32px; min-width: 130px; border-radius: var(--radius); border: 1px solid #cbd5e1; box-shadow: var(--ring); color: #334155; padding: 0 28px 0 10px; font-weight: 400; appearance: none; -webkit-appearance: none; background-color: #fff; background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%), linear-gradient(135deg, #94a3b8 50%, transparent 50%); background-position: right 12px center, right 7px center; background-size: 5px 5px; background-repeat: no-repeat; }
 .filter-row select:disabled { background: #f1f5f9; color: #94a3b8; }
 .filter-row .clear { margin-left: auto; background: transparent; border: 0; color: var(--blue); font-weight: 500; }
 .ready-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--green-soft); border-bottom: 1px solid #a7f3d0; color: #065f46; }
@@ -484,8 +484,10 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .assistant { min-height: 0; overflow: hidden; display: flex; flex-direction: column; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); }
 .assistant > header { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 .assistant > header i { font-style: normal; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; background: var(--violet); color: #fff; font-size: 13px; }
-.assistant > header h2 { font-size: 14px; font-weight: 600; margin: 0; }
-.assistant > header small { display: block; color: var(--muted); font-size: 12px; }
+.assistant > header > div { min-width: 0; }
+.assistant > header h2 { overflow: hidden; font-size: 14px; font-weight: 600; margin: 0; text-overflow: ellipsis; white-space: nowrap; }
+.assistant > header small { display: block; overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.assistant > header small[hidden] { display: none; }
 .assistant > header button { border: 0; background: transparent; color: #94a3b8; font-size: 18px; }
 .assistant > header > .head-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
 .follow-switch { display: flex; flex-shrink: 0; padding: 2px; border-radius: 8px; background: #e2e8f0; }
@@ -521,6 +523,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .assistant-menu-item > i, .menu-conversation > i { flex-shrink: 0; font-style: normal; }
 .assistant-menu-item > span, .menu-conversation > span { flex: 1; min-width: 0; }
 .menu-conversation { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
+.menu-conversation strong { font-weight: 400; }
 .assistant-menu-item .menu-link { color: #94a3b8; font-size: 13px; }
 .assistant-menu-item strong { display: block; font-size: 13px; font-weight: 600; }
 .assistant-menu-item small { display: block; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
@@ -615,6 +618,11 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .msg p:last-child { margin: 0; }
 .msg b.head { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 7px; }
 .chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 9999px; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .2); color: #1d4ed8; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.chip-products { cursor: pointer; }
+.chip-products:hover { background: #dbeafe; }
+.chip-products.on { box-shadow: inset 0 0 0 1.5px #2563eb; }
+.msg.user .chip-products:hover { background: rgb(255 255 255 / .28); }
+.msg.user .chip-products.on { box-shadow: inset 0 0 0 1.5px #fff; }
 .chip-remove { width: 14px; height: 14px; margin: 0 -3px 0 1px; padding: 0; border: 0; border-radius: 9999px; background: transparent; color: #1d4ed8; font-size: 13px; line-height: 1; }
 .chip-remove:hover { background: rgb(37 99 235 / .12); }
 .msg.user .chip { background: rgb(255 255 255 / .16); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .3); color: #fff; }
@@ -642,6 +650,8 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .result-why { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .result-body .msg-actions { margin-top: 8px; }
 .ask-box { flex-shrink: 0; margin: 0 12px 8px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; box-shadow: var(--ring); overflow: hidden; }
+/* Full-screen questions line up with the chat input: the composer is 720px with 28px of padding on each side. */
+#chat-ask { width: min(664px, calc(100% - 56px)); margin: 0 auto 8px; }
 .ask-box[hidden] { display: none !important; }
 .ask-head { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-align: left; }
 .ask-head i { font-style: normal; color: #94a3b8; }
@@ -903,7 +913,6 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     </div>
     <div class="chat-actions">
       <button type="button" class="linked-product" id="chat-open-product" hidden>Open in Details View</button>
-      <button type="button" class="linked-product" id="chat-open-group" hidden>Show products</button>
       <div class="overflow" id="chat-overflow" hidden>
         <button type="button" class="overflow-trigger" id="chat-overflow-trigger" aria-label="Conversation actions" aria-expanded="false">⋯</button>
         <div class="overflow-menu" id="chat-overflow-menu" hidden>
@@ -1223,12 +1232,6 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
       <div class="follow-bar" id="follow-bar" hidden>
         <button type="button" class="linked-product" id="open-linked-product" hidden>Open in Details View</button>
       </div>
-      <div class="group-preview" id="group-preview" hidden>
-        <div class="group-preview-bar"><b id="group-preview-title">Products</b><span id="group-preview-count"></span></div>
-        <div class="group-preview-scroll">
-          <table class="group-preview-table"><tbody id="group-preview-rows"></tbody></table>
-        </div>
-      </div>
       <div class="assistant-menu" id="assistant-menu" hidden>
         <div id="assistant-menu-root">
           <div class="assistant-menu-general" id="assistant-menu-general"></div>
@@ -1260,6 +1263,12 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
       </div>
       <div class="thread" id="dock-thread"></div>
       <div class="ask-box" id="dock-ask" hidden></div>
+      <div class="group-preview" id="group-preview" hidden>
+        <div class="group-preview-bar"><b id="group-preview-title">Attached products</b><span id="group-preview-count"></span></div>
+        <div class="group-preview-scroll">
+          <table class="group-preview-table"><tbody id="group-preview-rows"></tbody></table>
+        </div>
+      </div>
       <div class="composer" id="dock-composer">
         <div class="suggestions" id="dock-suggest" hidden></div>
         <div class="composer-box">
@@ -1426,8 +1435,8 @@ const state = {
   productChecks: new Set(),
   drafts: {},
   chatReturn: "products",
-  detailReturn: "products",
-  detailProductMode: "details",
+  /* Where the full-screen assistant was opened from. Moving between chat, runs and a run does not change it. */
+  assistantReturn: { view: "products", mode: "details" },
   productMode: "details",
   focusReturn: "products",
   openRunId: 1842,
@@ -1451,6 +1460,7 @@ const state = {
   proposalFocus: null,
   /* The conversation whose product table the user has opened. Hidden until then. */
   groupTable: null,
+  productPeek: null,
   chats: {
     "TR-4410:content": [
       { role: "user", text: "Why did you change the material?" },
@@ -1652,6 +1662,19 @@ function nextPendingAfter(fromId) {
   return null;
 }
 
+function reviewHistory(text) {
+  state.thread.push({ role: "agent", kind: "answer", text: text });
+}
+
+/* Decisions are counted by product, so approving several attributes on one
+   product still reads as that one product. */
+function productDecisionText(decision, skus) {
+  const count = new Set(skus.filter(Boolean)).size;
+  const products = count === 1 ? "product" : "products";
+  if (decision === "undo") return count + " " + products + " " + (count === 1 ? "is" : "are") + " pending again.";
+  return count + " " + products + " " + (count === 1 ? "was" : "were") + " " + decision + ".";
+}
+
 function applyDecision(decision, ids) {
   const targets = ids.filter(decision === "approved" ? canApprove : canReject);
   if (!targets.length) return;
@@ -1659,6 +1682,7 @@ function applyDecision(decision, ids) {
   const fromId = targets.length === 1 ? targets[0] : state.focused;
   targets.forEach((id) => { state.decisions[id] = decision; });
   const skipped = ids.length - targets.length;
+  reviewHistory(productDecisionText(decision, targets.map((id) => changeById(id).sku)));
   notify(targets.length.toLocaleString() + " " + (targets.length === 1 ? "change" : "changes") + " " +
     (decision === "approved" ? "approved" : "rejected") + "." +
     (skipped ? " " + skipped + " already " + decision + " or written back — left untouched." : ""), targets);
@@ -1679,6 +1703,7 @@ function undoDecision(ids) {
   const targets = ids.filter(canUndo);
   if (!targets.length) return;
   targets.forEach((id) => { delete state.decisions[id]; });
+  reviewHistory(productDecisionText("undo", targets.map((id) => changeById(id).sku)));
   notify(targets.length.toLocaleString() + " " + (targets.length === 1 ? "decision" : "decisions") + " undone. " +
     (targets.length === 1 ? "The change is" : "They are") + " pending again.");
   render();
@@ -2678,23 +2703,41 @@ function appendGeneratedCard(thread, run) {
   thread.append(card);
 }
 
-function renderGeneratedAssistant(run) {
-  const host = $("thread");
-  host.textContent = "";
-  const intro = document.createElement("div");
-  intro.className = "msg agent";
-  const introText = document.createElement("p");
-  introText.textContent = generatedIntro(run);
-  intro.append(introText);
-  host.append(intro);
-  (run.reviewThread || []).forEach((message) => {
+/* The run panel keeps the turn that started it and the note that it finished.
+   Anything said before or after that stays in the originating conversation. */
+function runConfirmIndex(run) {
+  const messages = (run && run.thread && state.chats[run.thread]) || [];
+  return messages.findIndex((message) => message.role === "agent" && message.run === run.id);
+}
+
+function runFinishMessage(run) {
+  const messages = (run && run.thread && state.chats[run.thread]) || [];
+  const confirmAt = runConfirmIndex(run);
+  return messages.find((message, index) => message.role === "agent" && index !== confirmAt && (message.result === run.id || message.run === run.id));
+}
+
+function originExcerpt(run) {
+  const messages = (run && run.thread && state.chats[run.thread]) || [];
+  const confirmAt = runConfirmIndex(run);
+  if (confirmAt < 0) return [];
+  const start = confirmAt > 0 && messages[confirmAt - 1].role === "user" ? confirmAt - 1 : confirmAt;
+  const excerpt = messages.slice(start, confirmAt + 1);
+  const finish = runFinishMessage(run);
+  if (finish) excerpt.push(finish);
+  return excerpt;
+}
+
+function appendOrigin(host, run) {
+  const excerpt = originExcerpt(run);
+  if (!excerpt.length) return false;
+  excerpt.forEach((message) => {
     const block = document.createElement("div");
     block.className = "msg " + message.role;
-    if (message.role === "user") {
+    if (message.role === "user" && message.context) {
       const chipRow = document.createElement("div");
       const chip = document.createElement("span");
       chip.className = "chip";
-      chip.textContent = message.context || ("Run #" + run.id);
+      chip.textContent = message.context;
       chipRow.append(chip);
       block.append(chipRow);
     }
@@ -2703,6 +2746,50 @@ function renderGeneratedAssistant(run) {
     block.append(text);
     host.append(block);
   });
+  const actions = document.createElement("div");
+  actions.className = "msg-actions";
+  const link = document.createElement("button");
+  link.type = "button";
+  link.textContent = "View originating conversation";
+  link.addEventListener("click", () => openConversation(run.thread));
+  actions.append(link);
+  host.append(actions);
+  return true;
+}
+
+function appendReviewHistory(host, run) {
+  (run.reviewThread || []).forEach((message) => {
+    const block = document.createElement("div");
+    block.className = "msg " + message.role;
+    if (message.role === "user" && message.context) {
+      const chipRow = document.createElement("div");
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = message.context;
+      chipRow.append(chip);
+      block.append(chipRow);
+    }
+    const text = document.createElement("p");
+    text.textContent = message.text;
+    block.append(text);
+    host.append(block);
+  });
+}
+
+function renderGeneratedAssistant(run) {
+  const host = $("thread");
+  host.textContent = "";
+  appendOrigin(host, run);
+  /* The finish note already says what came back. The intro only fills in when that note is not here yet. */
+  if (!runFinishMessage(run)) {
+    const intro = document.createElement("div");
+    intro.className = "msg agent";
+    const introText = document.createElement("p");
+    introText.textContent = generatedIntro(run);
+    intro.append(introText);
+    host.append(intro);
+  }
+  appendReviewHistory(host, run);
   appendGeneratedCard(host, run);
   host.scrollTop = host.scrollHeight;
   renderComposer();
@@ -2801,7 +2888,6 @@ function runTableRow(run, decided) {
   const statusKey = statusOf(run);
   const progress = current ? Math.round((decided / CHANGES.length) * 100) : run.progress;
   const tr = document.createElement("tr");
-  tr.className = "openable";
 
   const runCell = document.createElement("td");
   const name = document.createElement("span");
@@ -2854,9 +2940,8 @@ function runTableRow(run, decided) {
   open.type = "button";
   open.className = "run-open";
   open.textContent = statusKey === "review" ? "Review" : "View";
-  open.addEventListener("click", (event) => { event.stopPropagation(); showDetail(run.id); });
+  open.addEventListener("click", () => showDetail(run.id));
   action.append(open);
-  tr.addEventListener("click", () => showDetail(run.id));
 
   tr.append(runCell, scope, changes, attention, progressCell, owner, started, status, action);
   return tr;
@@ -2904,11 +2989,7 @@ function setView(view) {
     ? "Back to Summer collection perspective"
     : view === "products"
       ? "Back to the main application"
-      : view === "detail" && state.detailReturn === "products"
-        ? "Back to Summer collection perspective"
-        : view === "detail" && state.detailReturn === "product"
-          ? (state.detailProductMode === "focus" ? "Back to Focus View" : "Back to Details View")
-          : "Back";
+      : assistantBackLabel();
   $("back-button").setAttribute("aria-label", backLabel);
   $("back-button").title = backLabel;
   $("assistant-toggle").hidden = inFullScreenPage(view);
@@ -2927,8 +3008,8 @@ function renderDock() {
   const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
   const openStatus = statusOf(openRun);
   const onDetail = state.view === "detail";
-  /* Every run under review gets the review assistant. A run you started does not
-     bring its conversation, or the switcher, onto the run page. */
+  /* Every run under review gets the review assistant. The panel shows the turn
+     that started the run; the rest of that conversation stays where it was. */
   const inRun = onDetail && openStatus === "review";
   /* A run with nothing to decide has nothing to talk about: the agent is either
      still working or already done. New work starts from the Agents section. */
@@ -3181,14 +3262,46 @@ function renderProductChecks() {
   all.indeterminate = count > 0 && count < PRODUCTS.length;
 }
 
-/* Talking to an agent is its own destination, with its own thread. */
+/* The assistant is one place. Back always leaves for the page it was opened from,
+   even after View all runs, a conversation, or a run. */
+function rememberAssistantOrigin() {
+  if (inFullScreenPage(state.view)) return;
+  state.assistantReturn = {
+    view: state.view === "product" ? "product" : "products",
+    mode: state.productMode === "focus" ? "focus" : "details"
+  };
+}
+
+function assistantBackLabel() {
+  const back = state.assistantReturn || { view: "products", mode: "details" };
+  if (back.view === "product") return back.mode === "focus" ? "Back to Focus View" : "Back to Details View";
+  return "Back to Summer collection perspective";
+}
+
+function leaveAssistant() {
+  const back = state.assistantReturn || { view: "products", mode: "details" };
+  if (back.view === "product") showProduct(state.view === "chat", back.mode);
+  else showProducts();
+}
+
+/* Talking to an agent is its own destination, with its own thread.
+   On the full-screen page the scope stays put: a perspective or product
+   conversation keeps that chip when you switch agent. */
 function showChat(agentId) {
-  state.chatWith = agentId || "general";
+  rememberAssistantOrigin();
+  const agent = !agentId || agentId === "general" ? "general" : agentId;
+  const keep = state.view === "chat" || state.view === "agents" || state.view === "conversations";
+  const parsed = keep ? currentContextParsed(state.chatWith) : null;
+  state.dockChatWith = agent;
+  if (parsed && parsed.sku) state.chatWith = threadKey(agent, parsed.sku);
+  else if (parsed && parsed.perspective) state.chatWith = perspectiveThreadKey(agent);
+  else state.chatWith = agent;
   setView("chat");
   renderChat();
 }
 
 function showConversations() {
+  rememberAssistantOrigin();
   state.assistantMenuOpen = false;
   setView("conversations");
   renderConversations();
@@ -3238,6 +3351,7 @@ function renderConversations() {
 }
 
 function showAgents() {
+  rememberAssistantOrigin();
   state.assistantMenuOpen = false;
   setView("agents");
   renderAgents();
@@ -3269,16 +3383,14 @@ function renderAgents() {
 }
 
 function showRuns() {
+  rememberAssistantOrigin();
   state.assistantMenuOpen = false;
   setView("runs");
   renderRuns();
 }
 
 function showDetail(runId) {
-  if (state.view !== "detail") {
-    state.detailReturn = state.view;
-    state.detailProductMode = state.productMode;
-  }
+  rememberAssistantOrigin();
   state.openRunId = runId || ACTIVE_RUN.id;
   state.proposalChecks = new Set();
   state.proposalFocus = null;
@@ -3288,15 +3400,6 @@ function showDetail(runId) {
   render();
 }
 
-function returnFromDetail() {
-  const back = state.detailReturn || "products";
-  if (back === "product") showProduct(false, state.detailProductMode);
-  else if (back === "runs") showRuns();
-  else if (back === "agents") showAgents();
-  else if (back === "conversations") showConversations();
-  else if (back === "chat") { setView("chat"); renderChat(); }
-  else showProducts();
-}
 
 function returnFromFocus() {
   const back = state.focusReturn || "products";
@@ -3775,7 +3878,8 @@ function chooseAgent(agentId) {
   const target = dockThreadKey();
   const reply = startSelectionRun(agent, products);
   const context = currentContextLabel(target);
-  addMessage(target, { role: "user", text: "Run " + agent.name, context: context || undefined });
+  const attached = products.map((item) => item.sku);
+  addMessage(target, { role: "user", text: "Run " + agent.name, context: context || undefined, skus: attached.length > 1 ? attached : undefined });
   addMessage(target, Object.assign({ role: "agent" }, reply));
   const started = RUNS.find((item) => item.id === reply.run);
   if (started) {
@@ -4501,7 +4605,8 @@ function sendChat(preset, source) {
     ? PRODUCTS.filter((item) => state.productChecks.has(item.sku))
     : [];
   const context = currentContextLabel(target);
-  addMessage(target, context ? { role: "user", text: question, context: context } : { role: "user", text: question });
+  const attached = contextAttachment(target);
+  addMessage(target, context ? { role: "user", text: question, context: context, skus: attached.length > 1 ? attached : undefined } : { role: "user", text: question });
   const reply = wantsRun(question)
     ? runInstruction(agent, runSelection(scope), question)
     : scope.perspective
@@ -4533,9 +4638,9 @@ const starterPrompts = (agent) => agent
   : ["What needs my review?", "Which agents do I have?", "What is running right now?"];
 
 /* Messages render identically wherever the conversation is shown. */
-function paintThread(host, messages) {
+function paintThread(host, messages, surface, key) {
   host.textContent = "";
-  messages.forEach((message) => {
+  messages.forEach((message, index) => {
     const block = document.createElement("div");
     block.className = "msg " + message.role;
     if (message.context) {
@@ -4543,6 +4648,7 @@ function paintThread(host, messages) {
       const chip = document.createElement("span");
       chip.className = "chip";
       chip.textContent = message.context;
+      bindProductChip(chip, surface, "msg-" + index, key, message.skus || []);
       chipRow.append(chip);
       block.append(chipRow);
     }
@@ -4608,13 +4714,89 @@ function conversationGroup(key) {
   return selected.length ? selected : PRODUCTS.slice();
 }
 
+/* The products a chip stands for. A perspective chip follows the table selection.
+   A message chip keeps the selection it was sent with, so the same panel can
+   cover a different set without losing the earlier one. */
+function contextAttachment(key) {
+  if (!key || state.contextCleared[key]) return [];
+  const adopted = state.adoptedContext[key];
+  if (adopted) {
+    if (Array.isArray(adopted.skus)) return adopted.skus.slice();
+    if (adopted.sku) return [adopted.sku];
+    return [];
+  }
+  const parsed = parseThreadKey(key);
+  if (parsed.sku) return [parsed.sku];
+  if (parsed.perspective) return PRODUCTS.filter((product) => state.productChecks.has(product.sku)).map((product) => product.sku);
+  return [];
+}
+
+function toggleProductPeek(surface, id, key, skus) {
+  const current = state.productPeek;
+  const same = current && current.surface === surface && current.id === id && current.key === key;
+  state.productPeek = same ? null : { surface: surface, id: id, key: key, skus: skus.slice() };
+  if (state.view === "chat") renderChat();
+  else renderDock();
+}
+
+function peekProducts(surface, key) {
+  const peek = state.productPeek;
+  if (!peek || peek.surface !== surface || peek.key !== key) return null;
+  const skus = peek.id === "composer" ? contextAttachment(key) : peek.skus;
+  const products = (skus || []).map((sku) => PRODUCTS.find((product) => product.sku === sku)).filter(Boolean);
+  if (products.length < 2) {
+    if (peek.id === "composer") state.productPeek = null;
+    return null;
+  }
+  return products;
+}
+
+function bindProductChip(chip, surface, id, key, skus) {
+  if (!surface || !key || !skus || skus.length < 2) return;
+  chip.classList.add("chip-products");
+  const open = state.productPeek && state.productPeek.surface === surface && state.productPeek.id === id && state.productPeek.key === key;
+  chip.classList.toggle("on", Boolean(open));
+  chip.setAttribute("role", "button");
+  chip.tabIndex = 0;
+  chip.title = open ? "Hide attached products" : "Show attached products";
+  const activate = (event) => {
+    if (event.target.closest(".chip-remove")) return;
+    event.preventDefault();
+    toggleProductPeek(surface, id, key, id === "composer" ? contextAttachment(key) : skus);
+  };
+  chip.addEventListener("click", activate);
+  chip.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    activate(event);
+  });
+}
+
+function fillProductRows(body, products) {
+  body.textContent = "";
+  products.forEach((product) => {
+    const row = document.createElement("tr");
+    const name = document.createElement("td");
+    name.textContent = product.name;
+    const sku = document.createElement("td");
+    sku.textContent = product.sku;
+    row.append(name, sku);
+    row.addEventListener("click", () => showFocusSku(product.sku));
+    body.append(row);
+  });
+}
+
 function renderGroupPreview() {
-  $("group-preview").hidden = true;
+  const products = peekProducts("dock", dockThreadKey());
+  $("group-preview").hidden = !products;
   $("group-preview-rows").textContent = "";
+  if (!products) return;
+  $("group-preview-title").textContent = "Attached products";
+  $("group-preview-count").textContent = products.length + " products";
+  fillProductRows($("group-preview-rows"), products);
 }
 
 function renderChatProducts(products) {
-  $("chat-products-title").textContent = products.length === PRODUCTS.length ? "Products in this conversation" : "Selected products";
+  $("chat-products-title").textContent = "Attached products";
   $("chat-products-count").textContent = products.length + (products.length === 1 ? " product" : " products");
   const body = $("chat-product-rows");
   body.textContent = "";
@@ -4686,9 +4868,10 @@ function noteContextChange(kind) {
   if (!key || !state.contextFollows[key]) return;
   if (kind === "product") {
     const product = activeProduct();
-    state.adoptedContext[key] = { label: product.name, sku: product.sku, perspective: false };
+    state.adoptedContext[key] = { label: product.name, sku: product.sku, perspective: false, skus: [product.sku] };
   } else {
-    state.adoptedContext[key] = { label: productsContextLabel(), sku: null, perspective: true };
+    const selected = PRODUCTS.filter((product) => state.productChecks.has(product.sku));
+    state.adoptedContext[key] = { label: productsContextLabel(), sku: null, perspective: true, skus: selected.map((product) => product.sku) };
   }
   delete state.contextCleared[key];
 }
@@ -4700,9 +4883,11 @@ function dismissContext(key) {
   const live = navigationContextLabel();
   state.contextFollows[key] = true;
   state.dismissedContext[key] = true;
+  if (state.productPeek && state.productPeek.key === key && state.productPeek.id === "composer") state.productPeek = null;
   if (live && live !== shown) {
     const parsed = navigationParsed(parseThreadKey(key).agentId);
-    state.adoptedContext[key] = { label: live, sku: parsed.sku, perspective: parsed.perspective };
+    const skus = parsed.sku ? [parsed.sku] : parsed.perspective ? PRODUCTS.filter((product) => state.productChecks.has(product.sku)).map((product) => product.sku) : [];
+    state.adoptedContext[key] = { label: live, sku: parsed.sku, perspective: parsed.perspective, skus: skus };
     delete state.contextCleared[key];
   } else {
     state.contextCleared[key] = true;
@@ -4719,6 +4904,7 @@ function dockContextLabel() {
 function paintContext(host, label, key) {
   host.textContent = "";
   if (!label) return;
+  const surface = host.id === "dock-context" ? "dock" : host.id === "chat-context" ? "chat" : null;
   const chip = document.createElement("span");
   chip.className = "chip";
   chip.append(document.createTextNode(label));
@@ -4731,6 +4917,7 @@ function paintContext(host, label, key) {
     remove.addEventListener("click", () => dismissContext(key));
     chip.append(remove);
   }
+  bindProductChip(chip, surface, "composer", key, key ? contextAttachment(key) : []);
   host.append(chip);
 }
 
@@ -4754,7 +4941,10 @@ function renderDockChat(locked, runStatus, run) {
     $("dock-overflow").hidden = true;
     const host = $("dock-thread");
     host.textContent = "";
-    host.className = "thread empty";
+    /* A finished review only says it is finished. A run still working shows what started it. */
+    const showOrigin = run && runStatus === "running" && originExcerpt(run).length;
+    host.className = showOrigin ? "thread" : "thread empty";
+    if (showOrigin) appendOrigin(host, run);
     host.append(lockedState(runStatus, run));
     renderAssistantMenu();
     return;
@@ -4770,10 +4960,18 @@ function renderDockChat(locked, runStatus, run) {
   });
 
   const messages = thread(target);
+  const who = agent ? agent.name : "AI assistant";
   $("dock-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   markAgent($("dock-avatar"), agent);
-  $("dock-title").textContent = agent ? agent.name : "AI assistant";
-  $("dock-subtitle").hidden = true;
+  /* Once a conversation exists, the header takes its name. The agent stays underneath. */
+  if (messages.length) {
+    $("dock-title").textContent = conversationTitle(target);
+    $("dock-subtitle").textContent = who;
+    $("dock-subtitle").hidden = conversationTitle(target) === who;
+  } else {
+    $("dock-title").textContent = who;
+    $("dock-subtitle").hidden = true;
+  }
   $("dock-overflow").hidden = !messages.length;
   $("dock-input").disabled = false;
   $("dock-add").disabled = false;
@@ -4783,7 +4981,7 @@ function renderDockChat(locked, runStatus, run) {
   renderGroupPreview(target);
 
   const host = $("dock-thread");
-  paintThread(host, messages);
+  paintThread(host, messages, "dock", target);
   /* An untouched panel still greets you rather than showing an empty column. */
   host.className = messages.length ? "thread" : "thread empty";
   if (!messages.length) host.append(dockWelcome(agent));
@@ -4899,16 +5097,10 @@ function renderChat() {
     $("chat-open-product").textContent = "Open " + productBySku(linkedSku).name;
     $("chat-open-product").title = "Open in Focus View";
   }
-  const group = conversationGroup(state.chatWith);
-  const products = state.groupTable === state.chatWith ? group : null;
-  $("chat-view").classList.toggle("with-products", Boolean(products));
-  $("chat-products").hidden = !products;
-  if (products) renderChatProducts(products);
-  $("chat-open-group").hidden = !group;
-  if (group) {
-    $("chat-open-group").textContent = products ? "Hide products" : "Show products";
-    $("chat-open-group").title = products ? "Hide the products in this conversation" : "Show the products in this conversation";
-  }
+  const peeked = peekProducts("chat", state.chatWith);
+  $("chat-view").classList.toggle("with-products", Boolean(peeked));
+  $("chat-products").hidden = !peeked;
+  if (peeked) renderChatProducts(peeked);
 
   const starters = $("chat-starters");
   starters.textContent = "";
@@ -4920,7 +5112,7 @@ function renderChat() {
     starters.append(button);
   });
 
-  paintThread($("chat-thread"), messages);
+  paintThread($("chat-thread"), messages, "chat", state.chatWith);
   renderAsk($("chat-ask"), state.chatWith);
   $("chat-welcome").hidden = messages.length > 0;
   $("chat-scroll").className = messages.length ? "chat-scroll has-thread" : "chat-scroll";
@@ -5021,6 +5213,8 @@ function applyGeneratedDecision(decision, only) {
   });
   const open = run.proposals.filter((item) => !item.skipped);
   run.progress = Math.round((open.filter((item) => item.decision).length / open.length) * 100);
+  if (!run.reviewThread) run.reviewThread = [];
+  run.reviewThread.push({ role: "agent", text: productDecisionText(decision, indexes.map((index) => run.proposals[index].sku)) });
   notify(indexes.length + " " + (indexes.length === 1 ? "change" : "changes") + " " +
     (decision === "approved" ? "approved" : "rejected") + ".");
   refreshRunViews(run);
@@ -5037,6 +5231,8 @@ function undoGeneratedDecision(only) {
   });
   const open = run.proposals.filter((item) => !item.skipped);
   run.progress = Math.round((open.filter((item) => item.decision).length / open.length) * 100);
+  if (!run.reviewThread) run.reviewThread = [];
+  run.reviewThread.push({ role: "agent", text: productDecisionText("undo", indexes.map((index) => run.proposals[index].sku)) });
   notify(indexes.length + " " + (indexes.length === 1 ? "decision" : "decisions") + " undone.");
   refreshRunViews(run);
 }
@@ -5715,15 +5911,7 @@ $("back-button").addEventListener("click", () => {
   if (state.view === "products") return;
   if (state.view === "product" && state.productMode === "focus") returnFromFocus();
   else if (state.view === "product") showProducts();
-  else if (state.view === "chat") {
-    if (state.chatReturn === "products") showProducts();
-    else showProduct(true);
-  }   else if (state.view === "detail") returnFromDetail();
-  else if (state.view === "group") {
-    if (state.chatWith) state.groupTable = state.chatWith;
-    setView("chat");
-    renderChat();
-  } else showProduct();
+  else leaveAssistant();
 });
 
 function keepProductFields() {
@@ -5776,6 +5964,7 @@ $("assistant-menu-trigger").addEventListener("click", (event) => {
 });
 /* The rail is a preview of the conversation; expanding hands it to the full view. */
 $("dock-expand").addEventListener("click", () => {
+  rememberAssistantOrigin();
   stashDockDraft();
   const key = dockThreadKey();
   const onRecord = state.view === "product" || state.view === "products";
@@ -5882,11 +6071,6 @@ $("follow-switch").addEventListener("click", (event) => {
 });
 $("open-linked-product").addEventListener("click", () => openLinkedProduct($("open-linked-product").dataset.key));
 $("chat-open-product").addEventListener("click", () => openLinkedProduct(state.chatWith));
-$("chat-open-group").addEventListener("click", () => {
-  if (!conversationGroup(state.chatWith)) return;
-  state.groupTable = state.groupTable === state.chatWith ? null : state.chatWith;
-  renderChat();
-});
 $("product-nav-search").addEventListener("input", (event) => {
   state.productQuery = event.target.value;
   state.productPage = 0;
