@@ -191,7 +191,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-more { display: block; width: 100%; text-align: left; padding: 6px 10px; border: 0; background: transparent; color: var(--blue); font-size: 13px; font-weight: 500; }
 .nav-more:hover { text-decoration: underline; }
 .nav-more.active { font-weight: 600; }
-.header-search { width: 240px; }
 
 /* The chat is a centred thread. A header appears only when you opened a named agent. */
 .chat-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
@@ -748,7 +747,6 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 <header class="app-header">
   <button class="icon-button back-button" type="button" id="back-button" aria-label="Back to the main application">←</button>
   <b class="brand" id="app-brand">Details View</b>
-  <label class="search header-search"><span>⌕</span><input placeholder="Search products, runs or agents" /></label>
   <div class="header-spacer"></div>
   <button class="assistant-toggle active" type="button" id="assistant-toggle"><i>✦</i> AI assistant<b id="assistant-badge" hidden></b></button>
   <button class="icon-button" aria-label="Help">?</button>
@@ -774,7 +772,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
   <div class="nav-group">
     <b>Agent runs</b>
     <div id="nav-runs"></div>
-    <button class="nav-more" type="button" id="nav-all-runs">View all agent runs</button>
+    <button class="nav-more" type="button" id="nav-all-runs">View all runs</button>
   </div>
 </aside>
 
@@ -1254,7 +1252,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
             <b>Agent runs</b>
             <div id="assistant-menu-runs"></div>
             <div class="assistant-menu-branch" id="menu-branch-runs">
-              <div class="assistant-menu-more">View all agent runs</div>
+              <div class="assistant-menu-more">View all runs</div>
               <div class="assistant-menu-flyout" id="menu-flyout-runs"></div>
             </div>
           </div>
@@ -2789,72 +2787,7 @@ function renderRuns() {
   const body = $("run-rows");
   body.textContent = "";
   const decided = CHANGES.filter((change) => ["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
-
-  RUNS.forEach((run) => {
-    const current = run.id === ACTIVE_RUN.id;
-    const statusKey = statusOf(run);
-    const progress = current ? Math.round((decided / CHANGES.length) * 100) : run.progress;
-    const tr = document.createElement("tr");
-    tr.className = "openable";
-
-    const runCell = document.createElement("td");
-    const name = document.createElement("span");
-    name.className = "run-name";
-    name.textContent = run.name + " #" + run.id;
-    const agent = document.createElement("small");
-    const agentChip = document.createElement("span");
-    agentChip.className = "run-agent";
-    agentChip.textContent = "✦ " + run.agent;
-    markAgent(agentChip, agentByName(run.agent));
-    agent.append(agentChip);
-    runCell.append(name, agent);
-
-    const scope = document.createElement("td");
-    scope.textContent = run.products.toLocaleString() + " products";
-    const changes = document.createElement("td");
-    changes.textContent = run.changes === null ? "Calculating…" : run.changes.toLocaleString();
-    const attention = document.createElement("td");
-    attention.textContent = statusKey === "completed" ? run.changes + " reviewed" : run.attention;
-
-    const progressCell = document.createElement("td");
-    if (statusKey === "running") {
-      progressCell.className = "run-muted";
-      progressCell.textContent = "—";
-    } else {
-      const progressWrap = document.createElement("div");
-      progressWrap.className = "run-progress";
-      const progressLabel = document.createElement("span");
-      progressLabel.textContent = progress + "% reviewed";
-      const bar = document.createElement("i");
-      bar.style.setProperty("--progress", progress + "%");
-      progressWrap.append(progressLabel, bar);
-      progressCell.append(progressWrap);
-    }
-
-    const owner = document.createElement("td");
-    owner.textContent = run.owner;
-    const started = document.createElement("td");
-    started.className = "run-muted";
-    started.textContent = run.started;
-    const status = document.createElement("td");
-    const badge = document.createElement("span");
-    badge.className = "run-status " + statusKey;
-    badge.textContent = STATUS_LABELS[statusKey];
-    status.append(badge);
-
-    /* Every run opens; what you can do inside depends on where the run has got to. */
-    const action = document.createElement("td");
-    const open = document.createElement("button");
-    open.type = "button";
-    open.className = "run-open";
-    open.textContent = statusKey === "review" ? "Review" : "View";
-    open.addEventListener("click", (event) => { event.stopPropagation(); showDetail(run.id); });
-    action.append(open);
-    tr.addEventListener("click", () => showDetail(run.id));
-
-    tr.append(runCell, scope, changes, attention, progressCell, owner, started, status, action);
-    body.append(tr);
-  });
+  RUNS.forEach((run) => body.append(runTableRow(run, decided)));
 
   const statuses = RUNS.map(statusOf);
   $("runs-review-count").textContent = statuses.filter((status) => status === "review").length;
@@ -2863,10 +2796,82 @@ function renderRuns() {
   $("runs-total").textContent = RUNS.length + " runs";
 }
 
+function runTableRow(run, decided) {
+  const current = run.id === ACTIVE_RUN.id;
+  const statusKey = statusOf(run);
+  const progress = current ? Math.round((decided / CHANGES.length) * 100) : run.progress;
+  const tr = document.createElement("tr");
+  tr.className = "openable";
+
+  const runCell = document.createElement("td");
+  const name = document.createElement("span");
+  name.className = "run-name";
+  name.textContent = run.name + " #" + run.id;
+  const agent = document.createElement("small");
+  const agentChip = document.createElement("span");
+  agentChip.className = "run-agent";
+  agentChip.textContent = "✦ " + run.agent;
+  markAgent(agentChip, agentByName(run.agent));
+  agent.append(agentChip);
+  runCell.append(name, agent);
+
+  const scope = document.createElement("td");
+  scope.textContent = run.products.toLocaleString() + " products";
+  const changes = document.createElement("td");
+  changes.textContent = run.changes === null ? "Calculating…" : run.changes.toLocaleString();
+  const attention = document.createElement("td");
+  attention.textContent = statusKey === "completed" ? run.changes + " reviewed" : run.attention;
+
+  const progressCell = document.createElement("td");
+  if (statusKey === "running") {
+    progressCell.className = "run-muted";
+    progressCell.textContent = "—";
+  } else {
+    const progressWrap = document.createElement("div");
+    progressWrap.className = "run-progress";
+    const progressLabel = document.createElement("span");
+    progressLabel.textContent = progress + "% reviewed";
+    const bar = document.createElement("i");
+    bar.style.setProperty("--progress", progress + "%");
+    progressWrap.append(progressLabel, bar);
+    progressCell.append(progressWrap);
+  }
+
+  const owner = document.createElement("td");
+  owner.textContent = run.owner;
+  const started = document.createElement("td");
+  started.className = "run-muted";
+  started.textContent = run.started;
+  const status = document.createElement("td");
+  const badge = document.createElement("span");
+  badge.className = "run-status " + statusKey;
+  badge.textContent = STATUS_LABELS[statusKey];
+  status.append(badge);
+
+  /* Every run opens; what you can do inside depends on where the run has got to. */
+  const action = document.createElement("td");
+  const open = document.createElement("button");
+  open.type = "button";
+  open.className = "run-open";
+  open.textContent = statusKey === "review" ? "Review" : "View";
+  open.addEventListener("click", (event) => { event.stopPropagation(); showDetail(run.id); });
+  action.append(open);
+  tr.addEventListener("click", () => showDetail(run.id));
+
+  tr.append(runCell, scope, changes, attention, progressCell, owner, started, status, action);
+  return tr;
+}
+
 function holdConversation() {
   if (state.panelThread || state.view === "chat") return;
   const key = dockThreadKey();
   if ((state.chats[key] || []).length) state.panelThread = key;
+}
+
+/* Everything with the assistant sidebar is the AI assistant full-screen page:
+   the chat, agents, conversations, runs and a run being investigated. */
+function inFullScreenPage(view) {
+  return view !== "product" && view !== "products";
 }
 
 /* One view occupies the centre at a time; the navigation reflects which. */
@@ -2887,11 +2892,12 @@ function setView(view) {
   $("page").hidden = view !== "detail";
   $("app-nav").hidden = view === "product" || view === "products";
   /* The product table is home. Details View is one product from that table, and
-     the assistant only takes over the window in its full-screen views. */
+     the AI assistant full-screen page is the chat that takes over the window. */
   $("product-view").classList.toggle("focus", view === "product" && state.productMode === "focus");
   $("app-brand").textContent = view === "product"
     ? (state.productMode === "focus" ? "Focus View" : "Details View")
-    : view === "products" || view === "group" ? "Summer collection perspective" : "AI assistant";
+    : view === "products" ? "Summer collection perspective"
+    : "AI assistant full-screen page";
   const backLabel = view === "product" && state.productMode === "focus"
     ? (state.focusReturn === "chat" ? "Back to the conversation" : state.focusReturn === "products" ? "Back to Summer collection perspective" : "Back")
     : view === "product"
@@ -2905,7 +2911,7 @@ function setView(view) {
           : "Back";
   $("back-button").setAttribute("aria-label", backLabel);
   $("back-button").title = backLabel;
-  $("assistant-toggle").hidden = view === "chat";
+  $("assistant-toggle").hidden = inFullScreenPage(view);
   $("nav-all-agents").className = view === "agents" ? "nav-more active" : "nav-more";
   $("nav-all-conversations").className = view === "conversations" ? "nav-more active" : "nav-more";
   $("nav-all-runs").className = view === "runs" ? "nav-more active" : "nav-more";
@@ -2927,7 +2933,8 @@ function renderDock() {
   /* A run with nothing to decide has nothing to talk about: the agent is either
      still working or already done. New work starts from the Agents section. */
   const locked = onDetail && !inRun;
-  const open = state.view !== "chat" && state.assistantOpen;
+  /* Investigating a run keeps the panel open. There is no button to dismiss it. */
+  const open = onDetail || (!inFullScreenPage(state.view) && state.assistantOpen);
   const attention = RUNS.filter((run) => statusOf(run) === "review").length;
   /* The review assistant has no conversation switcher; every other panel does. */
   const showMenu = !onDetail;
@@ -2935,6 +2942,8 @@ function renderDock() {
   $("dock").hidden = !open;
   $("assistant").hidden = !inRun;
   $("dock-chat").hidden = inRun;
+  $("assistant-close").hidden = onDetail;
+  $("dock-close").hidden = onDetail;
   $("assistant-toggle").className = open ? "assistant-toggle active" : "assistant-toggle";
   /* A badge belongs to something closed: it says there is work inside. Opening
      it makes the badge redundant, and closing it again brings the badge back
@@ -3400,7 +3409,6 @@ function renderNav() {
 
   $("nav-all-agents").hidden = AGENTS.length <= NAV_LIMIT;
   $("nav-all-conversations").hidden = conversationInstances().length <= NAV_LIMIT;
-  $("nav-all-runs").hidden = RUNS.length <= NAV_LIMIT;
 }
 
 const PRODUCT_PAGE = 20;
@@ -3702,9 +3710,9 @@ function openConversation(key) {
   const agentId = !parsed.agentId || parsed.agentId === "general" ? "general" : parsed.agentId;
   state.dockChatWith = agentId;
 
-  /* Inside the assistant, the conversation is the page. Outside it, only the
-     panel changes and the page stays where it is. */
-  const inAssistant = state.view === "chat" || state.view === "conversations" || state.view === "agents" || state.view === "runs";
+  /* Inside the assistant, including a run opened from it, the conversation is the
+     page. Outside it, only the panel changes and the page stays where it is. */
+  const inAssistant = state.view === "chat" || state.view === "conversations" || state.view === "agents" || state.view === "runs" || state.view === "detail";
   if (inAssistant) {
     state.chatWith = key;
     state.chatReturn = parsed.sku ? "product" : "products";
@@ -4764,21 +4772,9 @@ function renderDockChat(locked, runStatus, run) {
   const messages = thread(target);
   $("dock-avatar").textContent = agent ? agent.name.charAt(0) : "✦";
   markAgent($("dock-avatar"), agent);
-  if (messages.length) {
-    $("dock-title").textContent = conversationTitle(target);
-  } else {
-    $("dock-title").textContent = agent ? agent.name : "AI assistant";
-  }
+  $("dock-title").textContent = agent ? agent.name : "AI assistant";
+  $("dock-subtitle").hidden = true;
   $("dock-overflow").hidden = !messages.length;
-  const scope = currentContextParsed(target);
-  const contextProduct = scope.sku ? productBySku(scope.sku) : null;
-  const inPerspective = scope.perspective;
-  $("dock-subtitle").textContent = contextProduct
-    ? "Working with " + contextProduct.name
-    : inPerspective
-      ? "Summer collection perspective"
-      : (agent ? agent.note : "");
-  $("dock-subtitle").hidden = !contextProduct && !inPerspective && !agent;
   $("dock-input").disabled = false;
   $("dock-add").disabled = false;
   $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
@@ -4790,12 +4786,12 @@ function renderDockChat(locked, runStatus, run) {
   paintThread(host, messages);
   /* An untouched panel still greets you rather than showing an empty column. */
   host.className = messages.length ? "thread" : "thread empty";
-  if (!messages.length) host.append(dockWelcome(agent, contextProduct, inPerspective));
+  if (!messages.length) host.append(dockWelcome(agent));
   renderAsk($("dock-ask"), target);
   renderAssistantMenu();
 }
 
-function dockWelcome(agent, product, inPerspective) {
+function dockWelcome(agent) {
   const welcome = document.createElement("div");
   welcome.className = "dock-welcome";
   const mark = document.createElement("span");
@@ -4803,13 +4799,15 @@ function dockWelcome(agent, product, inPerspective) {
   if (agent) mark.className = "agent";
   markAgent(mark, agent);
   const line = document.createElement("p");
-  line.textContent = product || inPerspective ? "New conversation" : (agent ? agent.name : "Good morning Alex,");
   const ask = document.createElement("b");
-  ask.textContent = product
-    ? (agent ? agent.name : "AI assistant") + " · " + product.name
-    : inPerspective
-      ? (agent ? agent.name : "AI assistant") + " · Summer collection perspective"
-    : (agent ? agent.ask : "How can I help?");
+  /* The header already names who you are talking to. Context stays on the input. */
+  if (agent) {
+    line.hidden = true;
+    ask.textContent = agent.ask;
+  } else {
+    line.textContent = "Good morning Alex,";
+    ask.textContent = "How can I help?";
+  }
   welcome.append(mark, line, ask);
 
   const chips = document.createElement("div");
@@ -5786,7 +5784,11 @@ $("dock-expand").addEventListener("click", () => {
   setView("chat");
   renderChat();
 });
-$("dock-close").addEventListener("click", () => { state.assistantOpen = false; renderDock(); });
+$("dock-close").addEventListener("click", () => {
+  if (state.view === "detail") return;
+  state.assistantOpen = false;
+  renderDock();
+});
 $("notice-dismiss").addEventListener("click", dismissToast);
 $("notice-undo").addEventListener("click", () => undoDecision(state.undoable || []));
 /* Reading the message should not race the timer away. */
@@ -5802,7 +5804,11 @@ $("assistant-toggle").addEventListener("click", () => {
   if (state.assistantOpen) fitComposer($("dock-input"));
   if (state.view === "detail") render();
 });
-$("assistant-close").addEventListener("click", () => { state.assistantOpen = false; renderDock(); });
+$("assistant-close").addEventListener("click", () => {
+  if (state.view === "detail") return;
+  state.assistantOpen = false;
+  renderDock();
+});
 
 /* Keeps the field one row tall until the instruction actually wraps. */
 function autoGrow() {
