@@ -823,7 +823,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
   </div>
 
   <div class="nav-group">
-    <b>Agent runs</b>
+    <b>History of runs</b>
     <div id="nav-runs"></div>
     <button class="nav-more" type="button" id="nav-all-runs">View all runs</button>
   </div>
@@ -1014,7 +1014,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 <section class="runs-page" id="runs-view" hidden>
   <div class="runs-heading">
     <div>
-      <h1>Agent runs</h1>
+      <h1>History of runs</h1>
       <p>Completed runs. A run completes once you have reviewed it and the agent has written the data. Until then it lives in its conversation.</p>
     </div>
   </div>
@@ -1039,7 +1039,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
 <main id="page">
  <div class="page-col">
-  <div class="crumbs"><button type="button" id="runs-back">Agent runs</button> <span>/</span> <em id="crumb-run" style="font-style:normal"></em><button class="review-close" type="button" id="review-close" aria-label="Close review">×</button></div>
+  <div class="crumbs"><button type="button" id="runs-back">History of runs</button> <span>/</span> <em id="crumb-run" style="font-style:normal"></em><button class="review-close" type="button" id="review-close" aria-label="Close review">×</button></div>
 
   <section class="title-row">
     <div>
@@ -1303,7 +1303,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
             </div>
           </div>
           <div class="assistant-menu-section">
-            <b>Agent runs</b>
+            <b>History of runs</b>
             <div id="assistant-menu-runs"></div>
             <div class="assistant-menu-branch" id="menu-branch-runs">
               <div class="assistant-menu-more">View all runs</div>
@@ -1796,7 +1796,7 @@ function reviewSummaryText(run) {
   return "Run #" + run.id + " is complete. " + appliedLine + rejectedLine;
 }
 
-/* Finishing a review returns to the conversation that holds it. The run record stays in Agent runs. */
+/* Finishing a review returns to the conversation that holds it. The run record stays in History of runs. */
 function returnToConversation(run) {
   const key = conversationForRun(run) || run.thread;
   if (!key) return;
@@ -4704,8 +4704,8 @@ function answerAsk(run, choice) {
     : choice === "all"
       ? "Applied every suggestion."
       : "Applied " + applied + (applied === 1 ? " high-confidence suggestion" : " high-confidence suggestions") + " and left the rest unchanged.";
-  if (run.thread) addMessage(run.thread, { role: "agent", text: line + " Run #" + run.id + " is in Agent runs.", result: run.id });
-  notify(choice === "discard" ? "Suggestions discarded." : "Run #" + run.id + " is in Agent runs.");
+  if (run.thread) addMessage(run.thread, { role: "agent", text: line + " Run #" + run.id + " is in History of runs.", result: run.id });
+  notify(choice === "discard" ? "Suggestions discarded." : "Run #" + run.id + " is in History of runs.");
   refreshRunViews(run);
 }
 
@@ -4716,8 +4716,8 @@ function stepDecision(run, item, decision) {
   if (!left) {
     run.ask.done = true;
     const applied = run.proposals.filter((proposal) => proposal.decision === "approved").length;
-    if (run.thread) addMessage(run.thread, { role: "agent", text: "Reviewed every suggestion. Applied " + applied + ". Run #" + run.id + " is in Agent runs.", result: run.id });
-    notify("Run #" + run.id + " is in Agent runs.");
+    if (run.thread) addMessage(run.thread, { role: "agent", text: "Reviewed every suggestion. Applied " + applied + ". Run #" + run.id + " is in History of runs.", result: run.id });
+    notify("Run #" + run.id + " is in History of runs.");
   }
   refreshRunViews(run);
 }
@@ -6366,7 +6366,7 @@ function render() {
   /* Header chrome is shared by every run; only the body below it differs. */
   /* Until it completes, a run belongs to its conversation, so the trail leads back there. */
   const homeThread = runCompleted(openRun) ? null : conversationForRun(openRun);
-  $("runs-back").textContent = homeThread ? conversationTitle(homeThread) : "Agent runs";
+  $("runs-back").textContent = homeThread ? conversationTitle(homeThread) : "History of runs";
   $("review-close").setAttribute("aria-label", runCompleted(openRun) ? "Close run" : "Close review");
   $("crumb-run").textContent = homeThread && reviewOpen(openRun) ? "Review of run #" + openRun.id : "#" + openRun.id;
   $("run-heading").textContent = "#" + openRun.id;
