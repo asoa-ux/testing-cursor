@@ -303,6 +303,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .run-status.running { color: #475569; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .18); }
 /* A finished run has nothing to flag, so it reads as plain text. */
 .run-status.completed { padding-left: 0; color: var(--muted); background: transparent; box-shadow: none; }
+.run-origin-line { display: flex; align-items: center; gap: 4px; }
+.run-origin-line:has(#run-origin-label:empty) { display: none; }
+.run-origin { color: #64748b; font-size: 12px; }
+.run-origin-link { border: 0; padding: 0; background: transparent; color: #2563eb; font: inherit; font-size: 12px; text-align: left; }
+.run-origin-link:hover { text-decoration: underline; }
+.run-scope { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 .run-open { border: 0; background: transparent; color: var(--blue); font-weight: 600; }
 .run-muted { color: var(--muted); }
 
@@ -311,9 +317,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; padding: 16px 28px 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .page-col { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .page-col > .crumbs, .page-col > .title-row, .page-col > .summary-strip { flex-shrink: 0; }
-.crumbs { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+.crumbs { display: flex; align-items: center; color: var(--muted); font-size: 12px; margin-bottom: 12px; }
 .crumbs button { border: 0; background: transparent; padding: 0; color: var(--blue); font-size: inherit; }
 .crumbs button:hover { text-decoration: underline; }
+.crumbs .review-close { margin-left: auto; width: 28px; height: 28px; padding: 0; border-radius: var(--radius); color: #64748b; font-size: 18px; line-height: 1; }
+.crumbs .review-close:hover { background: #f1f5f9; color: #0f172a; text-decoration: none; }
 .crumbs span { padding: 0 7px; color: #cbd5e1; }
 .title-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
 .title-row h1 { display: flex; align-items: center; gap: 10px; font-size: 24px; line-height: 1.2; margin: 0 0 4px; font-weight: 600; letter-spacing: -.02em; }
@@ -367,7 +375,7 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 #archive-panel th.archive-outcome { width: 130px; }
 
 .review-panel { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow), 0 0 0 1px rgb(15 23 42 / .04); overflow: hidden; }
-.review-panel > .tabs, .review-panel > .toolbar, .review-panel > .filter-row, .review-panel > .ready-bar, .review-panel > .tab-note, .review-panel > .table-footer { flex-shrink: 0; }
+.review-panel > .tabs, .review-panel > .toolbar, .review-panel > .filter-row, .review-panel > .ready-bar, .review-panel > .updated-bar, .review-panel > .tab-note, .review-panel > .table-footer { flex-shrink: 0; }
 .tab-note { padding: 10px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); color: #475569; font-size: 13px; }
 .tabs { display: flex; align-items: stretch; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto; }
 .tabs button { display: flex; align-items: center; gap: 8px; white-space: nowrap; border: 0; background: transparent; color: var(--muted); padding: 14px 4px 12px; border-bottom: 2px solid transparent; font-weight: 500; }
@@ -419,6 +427,14 @@ main { flex: 1; min-height: 0; width: 100%; max-width: 1800px; margin: 0 auto; p
 .ready-bar span { color: #047857; }
 .ready-bar button { margin-left: auto; border-radius: var(--radius); background: var(--green); border: 1px solid transparent; box-shadow: var(--ring); color: #fff; padding: 8px 14px; font-weight: 500; }
 .ready-bar button:hover { background: #047857; }
+.updated-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #eef2ff; border-bottom: 1px solid #c7d2fe; color: #312e81; }
+.updated-bar strong { font-size: 14px; font-weight: 600; }
+.updated-bar span { color: #4338ca; }
+.updated-bar button { margin-left: auto; border-radius: var(--radius); background: #4338ca; border: 1px solid transparent; box-shadow: var(--ring); color: #fff; padding: 8px 14px; font-weight: 500; }
+.updated-bar button:hover { background: #3730a3; }
+.update-result { padding: 10px 12px; margin-bottom: 12px; border-radius: var(--radius); background: #eef2ff; box-shadow: inset 0 0 0 1px rgb(67 56 202 / .2); color: #312e81; }
+.update-result b { display: block; margin-bottom: 4px; font-size: 13px; }
+.update-result p { margin: 2px 0 0; font-size: 13px; line-height: 1.45; }
 
 .table-wrap { flex: 1; min-height: 0; overflow: auto; }
 table { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
@@ -432,11 +448,16 @@ th:nth-child(8) { width: 98px; }
 th.check, td.check { width: 42px; padding-left: 16px; }
 td { padding: 12px; border-bottom: 1px solid var(--soft-line); vertical-align: middle; color: #334155; }
 tbody tr { cursor: pointer; }
+tbody tr.grouped { cursor: default; }
+tbody tr.grouped td.check,
+tbody tr.grouped input { cursor: pointer; }
 tbody tr:hover { background: #f8fafc; }
 tbody tr.selected { background: var(--blue-soft); }
 tbody tr.focused { box-shadow: inset 3px 0 0 var(--blue); background: var(--blue-soft); }
 tbody tr.selected.focused { background: #eff6ff; }
 tbody tr.is-refining { background: var(--violet-soft); color: #6b7280; }
+tbody tr.is-updated { background: #eef2ff; }
+tbody tr.is-updated.focused { background: #e0e7ff; box-shadow: inset 3px 0 0 #4338ca; }
 tbody tr.is-settled .new-value { color: var(--muted); font-weight: 400; }
 input[type="checkbox"] { accent-color: var(--blue); width: 16px; height: 16px; border-radius: 4px; }
 input[type="checkbox"]:disabled { cursor: not-allowed; }
@@ -450,6 +471,8 @@ td small { display: block; color: #94a3b8; margin-top: 2px; font-size: 12px; }
 .evidence.conflict { color: #b45309; }
 .evidence.weak { color: #92400e; }
 .evidence.working { color: #6d28d9; }
+.evidence.supplier { color: #4338ca; font-weight: 600; }
+.new-value .supplier-note { display: block; margin-top: 2px; color: #4338ca; font-size: 12px; font-weight: 600; text-decoration: none; }
 .score { display: inline-grid; place-items: center; min-width: 38px; height: 22px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
 .score-high { color: #047857; background: var(--green-soft); box-shadow: inset 0 0 0 1px rgb(5 150 105 / .2); }
 .score-mid { color: #b45309; background: var(--amber-soft); box-shadow: inset 0 0 0 1px rgb(217 119 6 / .2); }
@@ -461,6 +484,7 @@ td small { display: block; color: #94a3b8; margin-top: 2px; font-size: 12px; }
 .delta.flat { color: #94a3b8; }
 .status { font-size: 12px; font-weight: 500; text-transform: capitalize; padding: 2px 9px; border-radius: 9999px; background: #f1f5f9; color: #475569; white-space: nowrap; box-shadow: inset 0 0 0 1px rgb(100 116 139 / .15); }
 .status-approved { background: var(--green-soft); color: #047857; box-shadow: inset 0 0 0 1px rgb(5 150 105 / .2); }
+.status-updated { background: #eef2ff; color: #4338ca; box-shadow: inset 0 0 0 1px rgb(67 56 202 / .25); text-transform: none; }
 .status-rejected { background: var(--red-soft); color: #be123c; box-shadow: inset 0 0 0 1px rgb(225 29 72 / .2); }
 .status-refining { background: var(--violet-soft); color: #6d28d9; box-shadow: inset 0 0 0 1px rgb(124 58 237 / .2); }
 .status-withdrawn { background: #f1f5f9; color: #475569; }
@@ -616,6 +640,9 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .msg.user { background: var(--blue); color: #fff; margin-left: 32px; }
 .msg p { margin: 0 0 8px; }
 .msg p:last-child { margin: 0; }
+.change-summary { margin: 8px 0 0; padding: 0; list-style: none; }
+.change-summary li { padding: 3px 0; font-size: 13px; color: #334155; }
+.change-summary li.rejected { color: #64748b; }
 .msg b.head { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 7px; }
 .chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 9999px; background: var(--blue-soft); box-shadow: inset 0 0 0 1px rgb(37 99 235 / .2); color: #1d4ed8; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
 .chip-products { cursor: pointer; }
@@ -629,10 +656,22 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .msg-actions button { border-radius: var(--radius); border: 1px solid #cbd5e1; background: #fff; box-shadow: var(--ring); color: #334155; padding: 6px 10px; font-size: 12px; font-weight: 500; }
 .msg-actions button:hover { background: #f8fafc; }
+.msg-actions button:disabled { background: #f1f5f9; color: #94a3b8; box-shadow: none; cursor: default; }
+.msg-actions button:disabled:hover { background: #f1f5f9; }
 .result-card { margin-top: 10px; border-radius: var(--radius-lg); background: #fff; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
 .result-head { padding: 10px 12px 8px; }
 .result-head b { display: block; font-size: 14px; font-weight: 600; }
 .result-head small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+.result-card > .msg-actions { padding: 0 12px 12px; }
+.result-card.has-activity > .msg-actions { padding-bottom: 8px; }
+.review-activity { margin: 0 12px 12px; padding: 8px 10px; border-radius: var(--radius); background: #eef2ff; box-shadow: inset 0 0 0 1px #c7d2fe; }
+.review-activity > b { display: block; margin-bottom: 6px; color: #4338ca; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.review-turn { margin: 0 0 6px; font-size: 13px; line-height: 1.45; color: #312e81; }
+.review-turn:last-child { margin-bottom: 0; }
+.review-turn.user { color: #1e1b4b; font-weight: 500; }
+.review-turn.working { display: flex; align-items: flex-start; gap: 8px; color: #4338ca; font-weight: 500; }
+.review-activity .dots { flex-shrink: 0; margin-top: 5px; }
+.review-activity .dots span { background: #4338ca; }
 .result-columns { display: flex; justify-content: space-between; padding: 6px 12px 6px 34px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 600; }
 .result-product { padding: 8px 12px 4px; border-top: 1px solid var(--line); background: #f8fafc; color: #334155; font-size: 12px; font-weight: 600; }
 .result-row { border-top: 1px solid var(--line); }
@@ -649,13 +688,17 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 .result-value { font-size: 13px; }
 .result-why { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .result-body .msg-actions { margin-top: 8px; }
-.ask-box { flex-shrink: 0; margin: 0 12px 8px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; box-shadow: var(--ring); overflow: hidden; }
+.suggestions-card { flex-shrink: 0; max-height: min(240px, 36%); margin: 0 12px 8px; overflow: auto; }
+.suggestions-card[hidden] { display: none !important; }
+.suggestions-card .result-card { margin-top: 0; }
+#chat-suggestions { width: min(664px, calc(100% - 56px)); margin: 0 auto 8px; }
+.ask-box { flex-shrink: 0; display: flex; flex-direction: column; max-height: min(320px, 42%); margin: 0 12px 8px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; box-shadow: var(--ring); overflow: hidden; }
 /* Full-screen questions line up with the chat input: the composer is 720px with 28px of padding on each side. */
 #chat-ask { width: min(664px, calc(100% - 56px)); margin: 0 auto 8px; }
 .ask-box[hidden] { display: none !important; }
 .ask-head { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-align: left; }
 .ask-head i { font-style: normal; color: #94a3b8; }
-.ask-body { padding: 2px 14px 12px; border-top: 1px solid var(--line); }
+.ask-body { min-height: 0; overflow: auto; padding: 2px 14px 12px; border-top: 1px solid var(--line); }
 .ask-body h3 { margin: 10px 0 8px; font-size: 14px; font-weight: 600; }
 .ask-option { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; cursor: pointer; }
 .ask-option input { margin-top: 3px; accent-color: var(--blue); }
@@ -931,6 +974,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
     </div>
     <div class="chat-thread" id="chat-thread"></div>
   </div>
+  <div class="suggestions-card" id="chat-suggestions" hidden></div>
   <div class="ask-box" id="chat-ask" hidden></div>
   <div class="chat-composer">
     <div class="composer-box">
@@ -971,22 +1015,22 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
   <div class="runs-heading">
     <div>
       <h1>Agent runs</h1>
-      <p>Review proposed changes and finalize completed runs.</p>
+      <p>Completed runs. A run completes once you have reviewed it and the agent has written the data. Until then it lives in its conversation.</p>
     </div>
   </div>
   <div class="runs-summary">
-    <div><strong id="runs-review-count">0</strong><span>Need review</span></div>
-    <div><strong id="runs-progress-count">0</strong><span>In progress</span></div>
-    <div><strong id="runs-completed-count">0</strong><span>Review complete</span></div>
+    <div><strong id="runs-completed-count">0</strong><span>Completed runs</span></div>
+    <div><strong id="runs-applied-count">0</strong><span>Changes applied</span></div>
+    <div><strong id="runs-rejected-count">0</strong><span>Changes rejected</span></div>
   </div>
   <section class="runs-panel">
     <div class="runs-toolbar">
-      <h2>All runs</h2>
+      <h2>Completed runs</h2>
       <span id="runs-total"></span>
     </div>
     <table class="runs-table">
       <thead>
-        <tr><th>Run</th><th>Scope</th><th>Proposed changes</th><th>Attention</th><th>Review progress</th><th>Owner</th><th>Started</th><th>Status</th><th></th></tr>
+        <tr><th>Run</th><th>Scope</th><th>Proposed changes</th><th>Applied</th><th>Rejected</th><th>Origin</th><th>Owner</th><th>Started</th><th>Completed</th><th></th></tr>
       </thead>
       <tbody id="run-rows"></tbody>
     </table>
@@ -995,15 +1039,17 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
 <main id="page">
  <div class="page-col">
-  <div class="crumbs"><button type="button" id="runs-back">Agent runs</button> <span>/</span> <em id="crumb-run" style="font-style:normal"></em></div>
+  <div class="crumbs"><button type="button" id="runs-back">Agent runs</button> <span>/</span> <em id="crumb-run" style="font-style:normal"></em><button class="review-close" type="button" id="review-close" aria-label="Close review">×</button></div>
 
   <section class="title-row">
     <div>
       <h1>
         <span id="run-heading">#1842</span>
-        <span class="run-status review" id="run-status">Needs review</span>
+        <span class="run-status review" id="run-status">Awaiting review</span>
       </h1>
       <p><button class="agent-link" type="button" id="run-agent-label"></button><span id="run-when"></span></p>
+      <p class="run-origin-line"><span id="run-origin-label"></span><button class="agent-link" type="button" id="run-origin-link" hidden></button></p>
+      <p class="run-scope" id="run-scope"></p>
     </div>
     <div class="title-actions">
       <div class="progress-card" id="progress-card">
@@ -1152,7 +1198,12 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
 
       <div class="ready-bar" id="ready-bar" hidden>
         <strong id="ready-count"></strong>
-        <span>Approved changes will be written when you approve the run. Decisions remain reversible until then.</span>
+        <span>Approved changes will be written when you finish the review. Decisions remain reversible until then.</span>
+      </div>
+      <div class="updated-bar" id="updated-bar" hidden>
+        <strong id="updated-count"></strong>
+        <span id="updated-note">Rows the supplier specification supports move to Good to go.</span>
+        <button type="button" id="updated-show">Updated in this review</button>
       </div>
 
       <div class="tab-note" id="tab-note" hidden></div>
@@ -1262,6 +1313,7 @@ tbody tr.grouped td:first-child { box-shadow: inset 12px 0 0 #f8fafc; }
         </div>
       </div>
       <div class="thread" id="dock-thread"></div>
+      <div class="suggestions-card" id="dock-suggestions" hidden></div>
       <div class="ask-box" id="dock-ask" hidden></div>
       <div class="group-preview" id="group-preview" hidden>
         <div class="group-preview-bar"><b id="group-preview-title">Attached products</b><span id="group-preview-count"></span></div>
@@ -1304,13 +1356,13 @@ const CHANGES = [
   { id: 3, sku: "LG-1182", product: "Harbor Pendant Light", category: "Lighting", attribute: "Bulb included", current: "No", proposed: "Yes", confidence: 91, evidence: 3, issue: "conflict", sources: ["Supplier feed: Yes", "Brand website: Yes", "Retail listing: No"], rationale: "Two sources support the proposal, but one retailer listing conflicts." },
   { id: 4, sku: "FN-9031", product: "Lena Dining Chair", category: "Furniture", attribute: "Seat material", current: "Polyester", proposed: "Recycled polyester", confidence: 88, evidence: 2, issue: null, sources: ["Brand website", "Sustainability report"], rationale: "The brand page specifies recycled content; the report confirms the collection." },
   { id: 5, sku: "EL-6624", product: "Arc USB-C Charger", category: "Electronics", attribute: "Power output", current: "45 W", proposed: "65 W", confidence: 82, evidence: 3, issue: "conflict", refinedValue: "65 W (USB-PD 3.0)", sources: ["Technical sheet: 65 W", "Packaging: 65 W", "Distributor feed: 45 W"], rationale: "Recent primary sources say 65 W, while the distributor feed appears outdated." },
-  { id: 6, sku: "BT-1099", product: "Calm Body Wash", category: "Beauty", attribute: "Volume", current: "500 ml", proposed: "450 ml", confidence: 76, evidence: 1, issue: "weak", sources: ["Retail listing"], rationale: "Only one third-party listing contains the proposed volume." },
-  { id: 7, sku: "TR-8842", product: "Summit Daypack", category: "Outdoor", attribute: "Water resistance", current: "Waterproof", proposed: "Water-resistant", confidence: 71, evidence: 2, issue: "conflict", refinedValue: "Water-resistant (IPX4)", sources: ["Brand website: Water-resistant", "Legacy catalog: Waterproof"], rationale: "The current brand terminology conflicts with the legacy catalog." },
-  { id: 8, sku: "HM-3301", product: "Cloud Cotton Sheet", category: "Home", attribute: "Thread count", current: "400", proposed: "300", confidence: 64, evidence: 1, issue: "weak", refinedValue: "300 (single-ply)", sources: ["Marketplace listing"], rationale: "The proposal relies on one marketplace listing and needs confirmation." },
-  { id: 9, sku: "PT-7750", product: "Grain-Free Adult Kibble", category: "Pet", attribute: "Protein", current: "28%", proposed: "30%", confidence: 58, evidence: 2, issue: "conflict", refinedValue: "30% (dry matter)", sources: ["Packaging image: 30%", "Supplier feed: 28%"], rationale: "The packaging image may be newer, but the sources disagree." },
-  { id: 10, sku: "SP-4107", product: "Core Yoga Mat", category: "Sport", attribute: "Thickness", current: "6 mm", proposed: "8 mm", confidence: 52, evidence: 1, issue: "weak", sources: ["Retail listing"], rationale: "A single retail listing supports the change; no primary source was found." },
-  { id: 11, sku: "CH-5520", product: "Junior Cycle Helmet", category: "Sport", attribute: "Certification", current: "EN 1078", proposed: "EN 1078 + CPSC", confidence: 43, evidence: 1, issue: "weak", refinedValue: "EN 1078", sources: ["Distributor notes"], rationale: "The added certification appears only in unstructured distributor notes." },
-  { id: 12, sku: "GD-3012", product: "Cedar Planter Box", category: "Garden", attribute: "Wood species", current: "Cedar", proposed: "Western red cedar", confidence: 34, evidence: 1, issue: "weak", refinedValue: "Western red cedar (Thuja plicata)", sources: ["Generated description"], rationale: "The proposal was inferred from copy rather than a verified specification." }
+  { id: 6, sku: "TR-4410", product: "Alpine Trekking Pole", category: "Outdoor", attribute: "Packed length", current: "70 cm", proposed: "65 cm", confidence: 76, evidence: 1, issue: "weak", sources: ["Retail listing"], rationale: "Only one third-party listing contains the proposed packed length." },
+  { id: 7, sku: "KT-2028", product: "Precision Chef Knife", category: "Kitchen", attribute: "Handle material", current: "Wood", proposed: "Pakkawood", confidence: 71, evidence: 2, issue: "conflict", refinedValue: "Pakkawood (stabilised)", sources: ["Brand website: Pakkawood", "Legacy catalog: Wood"], rationale: "The current brand terminology conflicts with the legacy catalog." },
+  { id: 8, sku: "LG-1182", product: "Harbor Pendant Light", category: "Lighting", attribute: "Cord length", current: "150 cm", proposed: "120 cm", confidence: 64, evidence: 1, issue: "weak", refinedValue: "120 cm (adjustable)", sources: ["Marketplace listing"], rationale: "The proposal relies on one marketplace listing and needs confirmation." },
+  { id: 9, sku: "FN-9031", product: "Lena Dining Chair", category: "Furniture", attribute: "Seat height", current: "45 cm", proposed: "47 cm", confidence: 58, evidence: 2, issue: "conflict", refinedValue: "47 cm (uncompressed)", sources: ["Packaging image: 47 cm", "Supplier feed: 45 cm"], rationale: "The packaging image may be newer, but the sources disagree." },
+  { id: 10, sku: "EL-6624", product: "Arc USB-C Charger", category: "Electronics", attribute: "Cable length", current: "1.5 m", proposed: "2 m", confidence: 52, evidence: 1, issue: "weak", sources: ["Retail listing"], rationale: "A single retail listing supports the change; no primary source was found." },
+  { id: 11, sku: "TR-4410", product: "Alpine Trekking Pole", category: "Outdoor", attribute: "Weight", current: "250 g", proposed: "240 g", confidence: 43, evidence: 1, issue: "weak", refinedValue: "250 g", sources: ["Distributor notes"], rationale: "The lower weight appears only in unstructured distributor notes." },
+  { id: 12, sku: "FN-9031", product: "Lena Dining Chair", category: "Furniture", attribute: "Frame material", current: "Oak", proposed: "Stained oak", confidence: 34, evidence: 1, issue: "weak", refinedValue: "Stained oak", sources: ["Generated description"], rationale: "The proposal was inferred from copy rather than a verified specification." }
 ];
 
 /* The catalog the table starts from. Details View edits the active record in place. */
@@ -1323,13 +1375,8 @@ const PRODUCTS = [
 ];
 const productBySku = (sku) => PRODUCTS.find((product) => product.sku === sku) || PRODUCTS[0];
 
-/* Other runs are summary-only in this focused prototype. The active run uses the
-   live review state below; historical and running rows provide navigation context. */
-const RUNS = [
-  { id: 1842, name: "Attribute enrichment", agent: "Content Optimizer", products: 45, changes: 12, attention: "4 conflicts · 5 weak", owner: "Alex Kim", started: "Today, 09:42", ago: "20 minutes ago", status: "review" },
-  { id: 1843, name: "Category normalization", agent: "Taxonomy Mapper", products: 2480, changes: null, attention: "—", owner: "Maya Chen", started: "Today, 10:18", ago: "2 hours ago", status: "running", progress: 64 },
-  { id: 1841, name: "Dimensions cleanup", agent: "Data Quality", products: 860, changes: 10, written: 8, attention: "10 reviewed", owner: "Alex Kim", started: "Yesterday, 15:06", completed: "Yesterday, 17:40", ago: "Yesterday", status: "completed", progress: 100 }
-];
+/* Nothing has been run yet. A run appears only after an agent is started. */
+const RUNS = [];
 
 /* Agents are counterparts you talk to directly. A run is something an agent
    produced; the two are navigated separately. */
@@ -1375,24 +1422,11 @@ function markAgent(el, agent) {
   el.style.setProperty("--agent-soft", agent.soft);
 }
 
-/* A finished run keeps its decided rows so it can still be read back. */
-const ARCHIVE = {
-  1841: [
-    { sku: "FN-2210", product: "Oak Coffee Table", attribute: "Width", current: "120 cm", final: "118 cm", evidence: "● 3 sources", score: 94, outcome: "written" },
-    { sku: "FN-3380", product: "Steel Shelf Unit", attribute: "Height", current: "180cm", final: "180 cm", evidence: "● 2 sources", score: 97, outcome: "written" },
-    { sku: "BG-1145", product: "Canvas Tote Bag", attribute: "Depth", current: "—", final: "12 cm", evidence: "● 2 sources", score: 88, outcome: "written" },
-    { sku: "HM-7702", product: "Ceramic Vase", attribute: "Height", current: "30 cm", final: "30 cm", evidence: "⚠ Conflicting", score: 51, outcome: "rejected" },
-    { sku: "LG-6031", product: "Studio Desk Lamp", attribute: "Base diameter", current: "—", final: "16 cm", evidence: "● 3 sources", score: 91, outcome: "written" },
-    { sku: "HM-4408", product: "Wool Area Rug", attribute: "Length", current: "200 cm", final: "200 cm", evidence: "○ Weak", score: 47, outcome: "rejected" },
-    { sku: "FN-5590", product: "Walnut Bar Stool", attribute: "Seat height", current: "65 cm", final: "66 cm", evidence: "● 2 sources", score: 85, outcome: "written" },
-    { sku: "HM-2267", product: "Gallery Picture Frame", attribute: "Depth", current: "2 cm", final: "1.8 cm", evidence: "● 2 sources", score: 90, outcome: "written" },
-    { sku: "ST-8814", product: "Stackable Storage Bin", attribute: "Volume", current: "40 L", final: "42 L", evidence: "● 2 sources", score: 87, outcome: "written" },
-    { sku: "TX-3325", product: "Cotton Bath Towel", attribute: "Length", current: "130 cm", final: "140 cm", evidence: "● 3 sources", score: 93, outcome: "written" }
-  ]
-};
+/* Finished runs keep their decided rows so they can still be read back. */
+const ARCHIVE = {};
 
-/* The run being reviewed. Its agent is named wherever the run speaks for itself. */
-const ACTIVE_RUN = RUNS.find((run) => run.id === 1842);
+/* No run is open until an agent is started. */
+const ACTIVE_RUN = null;
 
 const OUTCOMES = {
   confirmed: { label: "Confirmed", note: "The agent found more support for the same value." },
@@ -1439,7 +1473,7 @@ const state = {
   assistantReturn: { view: "products", mode: "details" },
   productMode: "details",
   focusReturn: "products",
-  openRunId: 1842,
+  openRunId: null,
   chatWith: "general",
   dockChatWith: "general",
   /* Set when a conversation is chosen from the panel. The page stays put. */
@@ -1461,12 +1495,7 @@ const state = {
   /* The conversation whose product table the user has opened. Hidden until then. */
   groupTable: null,
   productPeek: null,
-  chats: {
-    "TR-4410:content": [
-      { role: "user", text: "Why did you change the material?" },
-      { role: "agent", text: "On Alpine Trekking Pole, Material is currently Aluminium. I proposed 7075 aluminium alloy because the supplier specification, packaging, and brand website all name that grade." }
-    ]
-  },
+  chats: {},
   assistantMenuOpen: false,
   runCompleted: false,
   tab: "all",
@@ -1489,6 +1518,8 @@ const state = {
   filterOpen: false,
   selected: new Set(),
   focused: null,
+  pinnedUpdates: new Set(),
+  justMoved: [],
   panelMode: null,
   decisions: {},
   resultOpen: new Set(),
@@ -1523,7 +1554,7 @@ const uniqueProductCount = () => new Set(CHANGES.map((change) => change.sku)).si
 /* The run looked at more products than it changed; the rest came back clean and
    never reach this screen. Everything else on the page is derived, so this is the
    one figure the run itself has to report. */
-const PRODUCTS_ANALYSED = 45;
+const PRODUCTS_ANALYSED = 5;
 const untouchedProductCount = () => PRODUCTS_ANALYSED - uniqueProductCount();
 
 function band(score) {
@@ -1553,7 +1584,8 @@ function evidenceBucket(change) {
   return "good";
 }
 
-/* Approved and Dismissed are decision queues that cut across the evidence buckets. */
+/* Hidden tab counts can still split by decision. The table itself does not:
+   an approved row stays in its evidence group. */
 function inTab(change, tabId) {
   if (tabId === "all") return true;
   if (tabId === "approved") return decisionOf(change.id) === "approved";
@@ -1563,12 +1595,30 @@ function inTab(change, tabId) {
 
 const tabCount = (tabId) => CHANGES.filter((change) => inTab(change, tabId)).length;
 
-/* The old tabs are groups in one table. A decision moves the change out of its
-   evidence group and into Approved or Dismissed, so each row appears once. */
+/* The groups are evidence. Approving leaves a row in that group and marks it
+   approved. Rejecting is the one decision that moves a row, into Dismissed. */
+const GROUP_NAMES = { good: "Good to go", conflict: "Conflicting sources", weak: "Weak evidence" };
+
+function movedByRefine(change) {
+  const revision = state.revisions[change.id];
+  return Boolean(revision && revision.home && revision.home !== "good" && ["confirmed", "revised", "directed"].includes(revision.outcome));
+}
+
+function heldInPlace(change) {
+  return movedByRefine(change) && state.pinnedUpdates.has(change.id) && !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id));
+}
+
+function updatedChanges() {
+  return CHANGES.filter((change) => movedByRefine(change) && !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id)));
+}
+
 function reviewGroupId(change) {
   const decision = decisionOf(change.id);
-  if (decision === "approved") return "approved";
   if (decision === "rejected" || decision === "withdrawn") return "dismissed";
+  if (decision === "refining" || heldInPlace(change)) {
+    const revision = state.revisions[change.id];
+    return (revision && revision.home) || evidenceBucket(change);
+  }
   return evidenceBucket(change);
 }
 
@@ -1678,22 +1728,20 @@ function productDecisionText(decision, skus) {
 function applyDecision(decision, ids) {
   const targets = ids.filter(decision === "approved" ? canApprove : canReject);
   if (!targets.length) return;
-  const queue = targets.length === 1 || (state.panelMode === "single" && targets.includes(state.focused));
-  const fromId = targets.length === 1 ? targets[0] : state.focused;
   targets.forEach((id) => { state.decisions[id] = decision; });
   const skipped = ids.length - targets.length;
   reviewHistory(productDecisionText(decision, targets.map((id) => changeById(id).sku)));
   notify(targets.length.toLocaleString() + " " + (targets.length === 1 ? "change" : "changes") + " " +
     (decision === "approved" ? "approved" : "rejected") + "." +
     (skipped ? " " + skipped + " already " + decision + " or written back — left untouched." : ""), targets);
-  targets.forEach((id) => state.selected.delete(id));
-  if (queue) {
-    const next = nextPendingAfter(fromId);
-    state.focused = next;
-    state.panelMode = next ? "single" : null;
-  } else if (state.panelMode === "bulk" && state.selected.size === 0) {
-    state.panelMode = state.focused ? "single" : null;
-  }
+  targets.forEach((id) => {
+    const change = changeById(id);
+    const revision = change && state.revisions[id];
+    const leftItsGroup = decision === "approved" && revision && revision.home && evidenceBucket(change) !== revision.home;
+    state.pinnedUpdates.delete(id);
+    if (!leftItsGroup) state.selected.delete(id);
+  });
+  state.panelMode = state.selected.size ? "bulk" : null;
   render();
 }
 
@@ -1709,20 +1757,99 @@ function undoDecision(ids) {
   render();
 }
 
+/* The approved value replaces the catalog attribute. A refined value wins over the original proposal. */
+function writeChangeToCatalog(change) {
+  const product = PRODUCTS.find((item) => item.sku === change.sku);
+  if (!product || product.attributeLabel !== change.attribute) return;
+  product.attribute = proposedOf(change);
+}
+
+function reviewChangeRows(run, decision) {
+  if (run.generated) {
+    return (run.proposals || []).filter((item) => !item.skipped && item.decision === decision).map((item) => ({
+      product: productBySku(item.sku).name,
+      attribute: item.attribute,
+      value: item.proposed
+    }));
+  }
+  if (run.records) {
+    const written = decision === "approved";
+    return run.records.filter((row) => written ? row.outcome === "written" : row.outcome === "rejected").map((row) => ({
+      product: row.product,
+      attribute: row.attribute,
+      value: row.final
+    }));
+  }
+  if (!ACTIVE_RUN || run.id !== ACTIVE_RUN.id) return [];
+  return CHANGES.filter((change) => decisionOf(change.id) === decision).map((change) => ({
+    product: change.product,
+    attribute: change.attribute,
+    value: proposedOf(change)
+  }));
+}
+
+function reviewSummaryText(run) {
+  const applied = run.written || 0;
+  const rejected = run.rejected || 0;
+  const appliedLine = applied === 1 ? "1 change was written to the catalog." : applied + " changes were written to the catalog.";
+  const rejectedLine = rejected === 0 ? "" : rejected === 1 ? " 1 was rejected." : " " + rejected + " were rejected.";
+  return "Run #" + run.id + " is complete. " + appliedLine + rejectedLine;
+}
+
+/* Finishing a review returns to the conversation that holds it. The run record stays in Agent runs. */
+function returnToConversation(run) {
+  const key = conversationForRun(run) || run.thread;
+  if (!key) return;
+  const count = run.changes;
+  (state.chats[key] || []).forEach((message) => {
+    if (message.result === run.id) {
+      message.text = "I proposed " + (count == null ? "the" : count) + " " +
+        (count === 1 ? "change" : "changes") + " for run #" + run.id + ".";
+    }
+  });
+  const scope = scopeContext(run.skus);
+  addMessage(key, Object.assign({
+    role: "agent",
+    text: reviewSummaryText(run),
+    result: run.id,
+    changes: { applied: reviewChangeRows(run, "approved"), rejected: reviewChangeRows(run, "rejected") }
+  }, scope || {}));
+  openConversation(key);
+}
+
 function finishReview() {
   const undecided = CHANGES.filter((change) => !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id)));
   if (undecided.length || state.runCompleted) return;
   const approved = CHANGES.filter((change) => decisionOf(change.id) === "approved").map((change) => change.id);
-  approved.forEach((id) => state.written.add(id));
+  approved.forEach((id) => {
+    state.written.add(id);
+    writeChangeToCatalog(changeById(id));
+  });
   state.runCompleted = true;
+  ACTIVE_RUN.review = "finalized";
+  ACTIVE_RUN.reviewFinalized = "Just now";
   ACTIVE_RUN.completed = "Just now";
+  ACTIVE_RUN.ago = "Just now";
   ACTIVE_RUN.written = approved.length;
-  /* The run stays open, now read-only, so you can see what you just committed. */
+  ACTIVE_RUN.rejected = CHANGES.filter((change) => decisionOf(change.id) === "rejected").length;
+  ACTIVE_RUN.records = CHANGES.map((change) => {
+    const decision = decisionOf(change.id);
+    return {
+      sku: change.sku,
+      product: change.product,
+      attribute: change.attribute,
+      current: change.current,
+      final: proposedOf(change),
+      evidence: evidenceLabel(change),
+      score: confidenceOf(change),
+      outcome: decision === "approved" ? "written" : decision === "withdrawn" ? "withdrawn" : "rejected"
+    };
+  });
   state.selected.clear();
   state.focused = null;
   state.panelMode = null;
-  render();
-  notify("Review finished. " + approved.length + " " +
+  returnToConversation(ACTIVE_RUN);
+  notify("Run #" + ACTIVE_RUN.id + " completed. " + approved.length + " " +
     (approved.length === 1 ? "change was" : "changes were") + " written to the catalog.");
 }
 
@@ -1732,17 +1859,23 @@ function finishReview() {
    on the run itself. */
 function refineTargets() {
   if (state.selected.size) return actionable([...state.selected]);
-  if (state.focused && canRefine(state.focused)) return [state.focused];
   return [];
 }
 
 /* The composer is a prompt, not just a search hint: an instruction that names the
-   value outright ("use 8 mm instead") settles the change rather than re-running it.
-   Sourcing rules such as "use supplier sources" are steering, not a value. */
+   value outright ("use burgundy", "change the selection to burgundy") settles the
+   change. "Check the supplier specification" is a request to look again. */
 function dictatedValue(instruction) {
   const text = instruction.trim().replace(/\s+/g, " ");
-  const match = text.match(/\b(?:use|set(?:\s+it)?(?:\s+to)?|change(?:\s+it)?\s+to|make\s+it|should\s+be|replace\s+with)\s+(.+)$/i);
-  if (!match) return null;
+  const match = text.match(/\b(?:use|set(?:\s+it)?(?:\s+to)?|change(?:\s+(?:it|the\s+\w+))?\s+to|make\s+it|should\s+be|replace\s+with)\s+(.+)$/i);
+  if (!match) {
+    const bare = text.replace(/[.;,]+$/, "").replace(/^["“'‘]+|["”'’]+$/g, "").trim();
+    if (!bare || /[?]/.test(bare)) return null;
+    if (/^(check|look|re-?check|why|what|how|prefer|ignore|keep|only|is|are|can|does|do)\b/i.test(bare)) return null;
+    if (/\b(sources?|listings?|documents?|specification|spec|supplier)\b/i.test(bare)) return null;
+    if (bare.split(" ").length > 3) return null;
+    return bare;
+  }
   const value = match[1]
     .replace(/\s+instead\b.*$/i, "")
     .replace(/[.;,]+$/, "")
@@ -1754,15 +1887,20 @@ function dictatedValue(instruction) {
   return value;
 }
 
+function supplierAsk(instruction) {
+  return /\b(supplier|specification|spec)\b/i.test(instruction);
+}
+
 function outcomeFor(change, instruction) {
   const text = instruction.toLowerCase();
   const wantsPrimary = /primary|manufacturer|supplier|official/.test(text);
   const keepExisting = /keep|existing/.test(text);
   if (dictatedValue(instruction)) return "directed";
   if (keepExisting && change.issue === "conflict") return "withdrawn";
-  if (wantsPrimary && change.issue === "weak" && change.evidence < 2) return "withdrawn";
+  if (supplierAsk(instruction) && change.issue === "weak" && change.evidence < 2 && !change.refinedValue) return "withdrawn";
+  if (wantsPrimary && change.issue === "weak" && change.evidence < 2 && !change.refinedValue) return "withdrawn";
   if (change.refinedValue) return "revised";
-  if (change.issue === "weak") return "unchanged";
+  if (change.issue === "weak" && !supplierAsk(instruction)) return "unchanged";
   return "confirmed";
 }
 
@@ -1771,6 +1909,23 @@ function scoreAfter(change, outcome) {
   if (outcome === "confirmed") return Math.min(99, base + 8 + (change.id % 4));
   if (outcome === "revised") return Math.min(97, Math.max(base, 68) + 7 + (change.id % 3));
   return base;
+}
+
+function productNames(skus) {
+  const names = (skus || []).map((sku) => {
+    const product = PRODUCTS.find((item) => item.sku === sku);
+    return product ? product.name : "";
+  }).filter(Boolean);
+  if (!names.length) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return names[0] + " and " + names[1];
+  return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+}
+
+function scopeContext(skus) {
+  const names = (skus || []).filter((sku) => PRODUCTS.some((item) => item.sku === sku));
+  if (!names.length) return null;
+  return { context: names.length === 1 ? "✦ " + productNames(names) : "✦ " + names.length + " products", skus: names };
 }
 
 function runContextLabel() {
@@ -1811,62 +1966,213 @@ function askAboutRun(instruction) {
   render();
 }
 
-function sendRefinement(instruction, ids) {
-  const batch = { id: state.batches.length + 1, instruction: instruction, ids: ids.slice(), status: "running", summary: null };
-  state.batches.push(batch);
+function applyOneRevision(id, instruction, batchId) {
+  const change = changeById(id);
+  if (!change) return null;
+  const outcome = outcomeFor(change, instruction);
+  const previous = state.revisions[id];
+  const dictated = outcome === "directed" ? dictatedValue(instruction) : null;
+  const home = previous && previous.home ? previous.home : evidenceBucket(change);
+  const checkedSupplier = supplierAsk(instruction);
+  state.revisions[id] = {
+    pass: (previous ? previous.pass : 1) + 1,
+    home: home,
+    outcome: outcome,
+    note: checkedSupplier
+      ? (outcome === "withdrawn"
+        ? "Checked the supplier specification. It does not support a change."
+        : "Checked the supplier specification.")
+      : "",
+    batchId: batchId,
+    instruction: instruction,
+    human: outcome === "directed",
+    previousValue: previous ? previous.value : change.proposed,
+    previousScore: previous ? previous.score : change.confidence,
+    value: dictated || (outcome === "revised" ? change.refinedValue : outcome === "withdrawn" ? change.current : (previous ? previous.value : change.proposed)),
+    score: outcome === "directed" ? 100 : scoreAfter(change, outcome)
+  };
+  const revision = state.revisions[id];
+  if (!state.history[id]) state.history[id] = [];
+  state.history[id].push({
+    outcome: outcome,
+    instruction: instruction,
+    value: outcome === "withdrawn" ? change.current : revision.value,
+    score: revision.score
+  });
+  state.decisions[id] = outcome === "withdrawn" ? "withdrawn" : "pending";
+  return {
+    id: id,
+    outcome: outcome,
+    from: revision.previousValue,
+    to: outcome === "withdrawn" ? change.current : revision.value,
+    fromScore: revision.previousScore,
+    toScore: revision.score
+  };
+}
+
+function conversationForRun(run) {
+  if (!run) return null;
+  if (run.thread && state.chats[run.thread]) return run.thread;
+  const reviewId = run.revises || run.id;
+  const parent = run.revises ? RUNS.find((item) => item.id === run.revises) : run;
+  if (parent && parent.thread && state.chats[parent.thread]) return parent.thread;
+  return Object.keys(state.chats).find((key) => (state.chats[key] || []).some((message) => message.result === reviewId || message.review === reviewId)) || null;
+}
+
+function latestRunIn(key) {
+  const messages = state.chats[key] || [];
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const id = messages[index].review || messages[index].result;
+    if (!id) continue;
+    const run = RUNS.find((item) => item.id === id);
+    if (run) return run;
+  }
+  return null;
+}
+
+function pendingReviewIn(key) {
+  const run = latestRunIn(key);
+  return run && reviewOpen(run) ? run : null;
+}
+
+/* A review is open only while something in it still needs a decision.
+   Approving the rest leaves it ready to finish, not marked as open. */
+function undecidedIn(run) {
+  if (!run || reviewOf(run) !== "pending") return 0;
+  if (run.generated) return (run.proposals || []).filter((item) => !item.skipped && (!item.decision || item.decision === "refining")).length;
+  if (ACTIVE_RUN && run.id === ACTIVE_RUN.id) {
+    return CHANGES.filter((change) => !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
+  }
+  return 0;
+}
+
+function productStillOpen(run, sku) {
+  if (!run || !sku || reviewOf(run) !== "pending") return false;
+  if (run.generated) return (run.proposals || []).some((item) => item.sku === sku && !item.skipped && !item.decision);
+  if (ACTIVE_RUN && run.id === ACTIVE_RUN.id) {
+    return CHANGES.some((change) => change.sku === sku && !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id)));
+  }
+  return false;
+}
+
+function conversationNeedsReview(key) {
+  return undecidedIn(pendingReviewIn(key)) > 0;
+}
+
+/* A value you type is a decision on the open review. The finished run stays finished. */
+function pinUpdates(ids) {
+  ids.forEach((id) => state.pinnedUpdates.add(id));
+  if (!ids.length) return;
+  state.panelMode = state.selected.size ? "bulk" : null;
+}
+
+function releasePinsExcept(id, reveal) {
+  const released = [];
+  state.pinnedUpdates.forEach((pinned) => {
+    if (pinned !== id) {
+      state.pinnedUpdates.delete(pinned);
+      released.push(pinned);
+    }
+  });
+  released.forEach((pinned) => {
+    const change = changeById(pinned);
+    if (change) state.collapsedGroups.delete("tab:" + reviewGroupId(change));
+  });
+  state.justMoved = reveal ? released : [];
+}
+
+function applyDirectedUpdate(instruction, ids) {
+  ids.forEach((id) => applyOneRevision(id, instruction, null));
+  ids.forEach((id) => state.selected.add(id));
+  pinUpdates(ids);
+}
+
+function refinementReport(ids, instruction) {
+  const lines = ids.slice(0, 4).map((id) => {
+    const change = changeById(id);
+    const revision = state.revisions[id];
+    if (!change || !revision) return "";
+    const next = revision.outcome === "withdrawn" ? change.current + " kept" : revision.value;
+    return change.attribute + " on " + change.product + ": " + revision.previousValue + " → " + next +
+      ", confidence " + revision.previousScore + " → " + revision.score;
+  }).filter(Boolean);
+  const extra = ids.length > 4 ? " +" + (ids.length - 4) + " more." : "";
+  const lead = supplierAsk(instruction) ? "Checked the supplier specification. " : "Updated this review. ";
+  return lead + lines.join(". ") + (lines.length ? "." : "") + extra;
+}
+
+function refreshOpenSurface() {
+  if (state.view === "chat") {
+    renderChat();
+    renderNav();
+    return;
+  }
+  if (state.view === "detail") {
+    render();
+    return;
+  }
+  renderDock();
+  renderNav();
+}
+
+function directedReply(ids) {
+  const names = ids.slice(0, 2).map((id) => {
+    const change = changeById(id);
+    return change ? change.attribute + " on " + change.product : "";
+  }).filter(Boolean);
+  const extra = ids.length > 2 ? " and " + (ids.length - 2) + " more" : "";
+  return "Updated " + (names.join(", ") || "the selected proposals") + extra +
+    " in this review. Approve when you are ready.";
+}
+
+/* Asking the agent to look again updates the open review. It does not become another process to open. */
+function refineInReview(instruction, ids, key) {
   ids.forEach((id) => { state.decisions[id] = "refining"; });
-  state.thread.push({ role: "user", kind: "instruction", text: instruction, count: ids.length, context: reviewContextLabel() });
-  state.thread.push({ role: "agent", kind: "batch", batchId: batch.id });
-  state.selected.clear();
-  state.panelMode = null;
+  ids.forEach((id) => state.selected.add(id));
+  pinUpdates(ids);
+  addMessage(key, {
+    role: "agent",
+    text: "Looking at " + ids.length + " " + (ids.length === 1 ? "change" : "changes") + " again in this review.",
+    review: ACTIVE_RUN.id
+  });
+  setTimeout(() => {
+    ids.forEach((id) => applyOneRevision(id, instruction, null));
+    ids.forEach((id) => state.pinnedUpdates.delete(id));
+    const moved = ids.filter((id) => {
+      const change = changeById(id);
+      return change && reviewGroupId(change) === "good";
+    });
+    if (moved.length) state.collapsedGroups.delete("tab:good");
+    state.justMoved = moved;
+    addMessage(key, { role: "agent", text: refinementReport(ids, instruction), review: ACTIVE_RUN.id });
+    refreshOpenSurface();
+  }, 900);
+}
+
+function sendRefinement(instruction, ids) {
+  const key = state.panelThread || ACTIVE_RUN.thread || "products:content";
+  if (!state.chats[key]) state.chats[key] = [];
+  addMessage(key, { role: "user", text: instruction, context: reviewContextLabel(), review: ACTIVE_RUN.id });
+  if (dictatedValue(instruction)) {
+    applyDirectedUpdate(instruction, ids);
+    addMessage(key, { role: "agent", text: directedReply(ids), review: ACTIVE_RUN.id });
+  } else {
+    refineInReview(instruction, ids, key);
+  }
+  state.panelThread = key;
   $("instruction").value = "";
   autoGrow();
   render();
-  setTimeout(() => resolveBatch(batch), REFINE_DELAY);
 }
 
 function resolveBatch(batch) {
-  const summary = { confirmed: 0, revised: 0, withdrawn: 0, unchanged: 0 };
-  /* Each pass keeps its own before/after snapshot so an older reply in the thread
-     still shows what that pass did, even after the row is refined again. */
+  const summary = { confirmed: 0, revised: 0, withdrawn: 0, unchanged: 0, directed: 0 };
   batch.results = [];
   batch.ids.forEach((id) => {
-    const change = changeById(id);
-    if (!change) return;
-    const outcome = outcomeFor(change, batch.instruction);
-    const previous = state.revisions[id];
-    summary[outcome] += 1;
-    const dictated = outcome === "directed" ? dictatedValue(batch.instruction) : null;
-    state.revisions[id] = {
-      pass: (previous ? previous.pass : 1) + 1,
-      outcome: outcome,
-      batchId: batch.id,
-      instruction: batch.instruction,
-      human: outcome === "directed",
-      previousValue: previous ? previous.value : change.proposed,
-      previousScore: previous ? previous.score : change.confidence,
-      value: dictated || (outcome === "revised" ? change.refinedValue : outcome === "withdrawn" ? change.current : (previous ? previous.value : change.proposed)),
-      /* A value you supplied is not something the agent can be uncertain about. */
-      score: outcome === "directed" ? 100 : scoreAfter(change, outcome)
-    };
-    const revision = state.revisions[id];
-    /* The card is the only place iterations are shown, so the full chain lives here. */
-    if (!state.history[id]) state.history[id] = [];
-    state.history[id].push({
-      outcome: outcome,
-      instruction: batch.instruction,
-      value: outcome === "withdrawn" ? change.current : revision.value,
-      score: revision.score
-    });
-    batch.results.push({
-      id: id,
-      outcome: outcome,
-      from: revision.previousValue,
-      to: outcome === "withdrawn" ? change.current : revision.value,
-      fromScore: revision.previousScore,
-      toScore: revision.score
-    });
-    state.decisions[id] = outcome === "withdrawn" ? "withdrawn" : "pending";
+    const result = applyOneRevision(id, batch.instruction, batch.id);
+    if (!result) return;
+    summary[result.outcome] = (summary[result.outcome] || 0) + 1;
+    batch.results.push(result);
   });
   batch.status = "done";
   batch.summary = summary;
@@ -1875,16 +2181,10 @@ function resolveBatch(batch) {
 
 /* ---------- table ---------- */
 
-function focusRow(id) {
-  state.focused = id;
-  state.panelMode = "single";
-  render();
-}
-
 function toggleRow(id, checked) {
   if (checked) state.selected.add(id);
   else state.selected.delete(id);
-  state.panelMode = state.selected.size ? "bulk" : (state.focused ? "single" : null);
+  state.panelMode = state.selected.size ? "bulk" : null;
   render();
 }
 
@@ -1937,19 +2237,17 @@ function appendChangeRow(body, change) {
   if (state.selected.has(change.id)) tr.classList.add("selected");
   if (state.focused === change.id) tr.classList.add("focused");
   if (refining) tr.classList.add("is-refining");
+  if (movedByRefine(change) && !["approved", "rejected", "withdrawn"].includes(decision)) tr.classList.add("is-updated");
   if (decision === "approved" || decision === "rejected" || decision === "withdrawn") tr.classList.add("is-settled");
-  tr.addEventListener("click", (event) => {
-    if (event.target.tagName === "INPUT") return;
-    focusRow(change.id);
-  });
+  tr.dataset.change = String(change.id);
 
   const checkCell = document.createElement("td");
   checkCell.className = "check";
   const box = document.createElement("input");
   box.type = "checkbox";
   box.checked = state.selected.has(change.id);
-  box.disabled = refining || written || state.runCompleted;
-  if (written || state.runCompleted) box.title = "This review is finished.";
+  box.disabled = written || state.runCompleted;
+  if (written || state.runCompleted) box.title = "This run is completed.";
   box.setAttribute("aria-label", "Select " + change.product);
   box.addEventListener("change", () => toggleRow(change.id, box.checked));
   checkCell.append(box);
@@ -1978,15 +2276,24 @@ function appendChangeRow(body, change) {
   } else {
     proposedCell.textContent = proposedOf(change);
   }
+  if (revision && revision.note) {
+    const note = document.createElement("small");
+    note.className = "supplier-note";
+    note.textContent = revision.note;
+    proposedCell.append(note);
+  }
 
-  /* This column always answers "how good is the evidence", never "what did the last
-     pass do" — refinement shows up as a moved score, and in the card's history. */
+  /* While the row is held, keep the evidence it had so it still belongs in that group.
+     The new score and the Updated mark show what the agent just changed. */
   const evidenceCell = document.createElement("td");
   const evidence = document.createElement("span");
-  const bucket = evidenceBucket(change);
+  const bucket = heldInPlace(change) ? reviewGroupId(change) : evidenceBucket(change);
   if (refining) {
     evidence.className = "evidence working";
     evidence.innerHTML = '<span class="pulse"></span>Re-analysing';
+  } else if (revision && revision.note) {
+    evidence.className = "evidence supplier";
+    evidence.textContent = revision.outcome === "withdrawn" ? "Supplier does not support it" : "Supplier checked";
   } else if (bucket === "conflict") {
     evidence.className = "evidence conflict";
     evidence.textContent = "⚠ Conflicting";
@@ -2027,8 +2334,14 @@ function appendChangeRow(body, change) {
 
   const statusCell = document.createElement("td");
   const status = document.createElement("span");
-  status.className = "status status-" + decision + (written ? " status-written" : "");
-  status.textContent = written ? "⌁ written back" : decision;
+  const showUpdated = movedByRefine(change) && !["approved", "rejected", "withdrawn", "refining"].includes(decision);
+  status.className = "status status-" + (showUpdated ? "updated" : decision) + (written ? " status-written" : "");
+  status.textContent = written ? "⌁ written back" : showUpdated ? "Updated" : decision;
+  if (showUpdated && revision) {
+    const home = GROUP_NAMES[revision.home] || "this group";
+    status.title = "Updated by agent. Confidence " + revision.previousScore + " → " + score + ". " +
+      (heldInPlace(change) ? "Kept in " + home + " until you leave this row." : "Now in Good to go.");
+  }
   if (written) status.title = "Live in the catalog — this one can no longer be undone.";
   statusCell.append(status);
 
@@ -2061,7 +2374,7 @@ function appendGroupRow(body, group) {
   box.setAttribute("aria-label", "Select group " + group.label);
   box.addEventListener("change", () => {
     selectable.forEach((id) => { allSelected ? state.selected.delete(id) : state.selected.add(id); });
-    state.panelMode = state.selected.size ? "bulk" : (state.focused ? "single" : null);
+    state.panelMode = state.selected.size ? "bulk" : null;
     render();
   });
   checkCell.append(box);
@@ -2121,12 +2434,40 @@ function cardKicker(label) {
   return wrap;
 }
 
+function updateResult(change) {
+  const revision = state.revisions[change.id];
+  if (!revision || !["confirmed", "revised", "directed"].includes(revision.outcome)) return null;
+  const block = document.createElement("div");
+  block.className = "update-result";
+  const title = document.createElement("b");
+  title.textContent = "Updated by agent";
+  const value = document.createElement("p");
+  value.textContent = "Value: " + revision.previousValue + " → " + proposedOf(change);
+  const scoreLine = document.createElement("p");
+  scoreLine.textContent = "Confidence: " + revision.previousScore + " → " + confidenceOf(change);
+  const where = document.createElement("p");
+  const home = GROUP_NAMES[revision.home] || "this group";
+  where.textContent = heldInPlace(change)
+    ? "Kept in " + home + ". It moves to Good to go when you leave this row."
+    : (reviewGroupId(change) === "good" ? "Now in Good to go." : "Still in " + (GROUP_NAMES[reviewGroupId(change)] || "this group") + ".");
+  block.append(title);
+  if (revision.note) {
+    const note = document.createElement("p");
+    note.textContent = revision.note;
+    block.append(note);
+  }
+  block.append(value, scoreLine, where);
+  return block;
+}
+
 function renderSingleCard(host, change) {
   const decision = decisionOf(change.id);
   const revision = state.revisions[change.id];
   const score = confidenceOf(change);
 
   host.append(cardKicker("Inspecting change"));
+  const update = updateResult(change);
+  if (update) host.append(update);
 
   const title = document.createElement("h3");
   title.textContent = change.product;
@@ -2327,7 +2668,6 @@ function renderBulkCard(host) {
     const attribute = document.createElement("em");
     attribute.textContent = change.attribute;
     row.append(name, attribute);
-    row.addEventListener("click", () => focusRow(change.id));
     list.append(row);
   });
   host.append(list);
@@ -2365,22 +2705,11 @@ function renderBulkCard(host) {
 /* The context card lives at the end of the conversation, below the run summary and
    any refinement batches, so the panel reads as one continuous thread. */
 function appendCard(thread) {
-  const mode = state.panelMode;
+  if (!state.selected.size) return;
   const card = document.createElement("div");
   card.className = "card";
-
-  if (mode === "bulk" && state.selected.size) {
-    renderBulkCard(card);
-    thread.append(card);
-    return;
-  }
-  if (mode === "single" && state.focused) {
-    const change = changeById(state.focused);
-    if (change) {
-      renderSingleCard(card, change);
-      thread.append(card);
-    }
-  }
+  renderBulkCard(card);
+  thread.append(card);
 }
 
 /* ---------- assistant thread ---------- */
@@ -2436,7 +2765,6 @@ function resultList(batch) {
     }
 
     item.append(top, values, score);
-    item.addEventListener("click", () => focusRow(result.id));
     list.append(item);
   });
 
@@ -2510,7 +2838,7 @@ function renderThread() {
 function openGeneratedReview() {
   if (state.view !== "detail") return null;
   const run = RUNS.find((item) => item.id === state.openRunId);
-  if (!run || !run.generated || statusOf(run) !== "review") return null;
+  if (!run || !run.generated || !reviewOpen(run)) return null;
   return run;
 }
 
@@ -2692,14 +3020,11 @@ function renderGeneratedBulkCard(host, run, indexes) {
 }
 
 function appendGeneratedCard(thread, run) {
-  const focus = state.proposalFocus;
-  const focused = focus != null && run.proposals[focus] && !run.proposals[focus].skipped;
   const checked = pendingProposalIndexes(run);
-  if (!focused && !checked.length) return;
+  if (!checked.length) return;
   const card = document.createElement("div");
   card.className = "card";
-  if (focused) renderGeneratedSingleCard(card, run, focus);
-  else renderGeneratedBulkCard(card, run, checked);
+  renderGeneratedBulkCard(card, run, checked);
   thread.append(card);
 }
 
@@ -2853,40 +3178,77 @@ function syncFilterInputs() {
 
 /* ---------- run navigation ---------- */
 
-const STATUS_LABELS = { review: "Needs review", running: "In progress", completed: "Review complete" };
-
-function currentRunStatus() {
-  return state.runCompleted ? "completed" : "review";
+/* Open and finished runs share this. A run is complete only after the review is finalized. */
+function reviewOf(run) {
+  if (!run || run.status === "running") return null;
+  if (run.review) return run.review;
+  return run.written != null ? "finalized" : null;
 }
 
-const statusOf = (run) => (run.id === ACTIVE_RUN.id ? currentRunStatus() : run.status);
+function reviewOpen(run) {
+  return reviewOf(run) === "pending";
+}
+
+/* A run completes only once its review is finished and the data is written.
+   Until every change is decided it is awaiting review. After that it is ready to finish. */
+function phaseOf(run) {
+  if (run.status === "running") return { key: "running", label: "Working" };
+  if (reviewOpen(run)) {
+    return undecidedIn(run) > 0
+      ? { key: "review", label: "Awaiting review" }
+      : { key: "ready", label: "Ready to finish" };
+  }
+  return { key: "completed", label: "Completed" };
+}
+
+const runCompleted = (run) => reviewOf(run) === "finalized";
+
+function runMark(run) {
+  if (statusOf(run) === "running") return "running";
+  if (reviewOpen(run) && undecidedIn(run) > 0) return "review";
+  return "completed";
+}
+
+const statusOf = (run) => run.status;
 
 function runWhen(run) {
-  return statusOf(run) === "completed" && run.completed ? run.started + " – " + run.completed : run.started;
+  return runCompleted(run) && run.completed ? run.started + " – " + run.completed : run.started;
 }
 
 /* The sidebar only needs a sense of recency; the run header keeps the clock time. */
 function runAgo(run) {
-  return statusOf(run) === "completed" && run.completed === "Just now" ? "Just now" : run.ago;
+  return runCompleted(run) && run.completed === "Just now" ? "Just now" : run.ago;
+}
+
+function runOrigin(run) {
+  if (run.origin === "autonomous" || (!run.thread && !run.revises)) {
+    return { autonomous: true, label: "Autonomous" };
+  }
+  const parent = run.revises ? RUNS.find((item) => item.id === run.revises) : run;
+  const key = run.thread || (parent && parent.thread);
+  return key
+    ? { autonomous: false, key: key, label: conversationTitle(key) }
+    : { autonomous: true, label: "Autonomous" };
+}
+
+/* Work in progress lives in its conversation. The runs list only holds completed runs. */
+function completedRuns() {
+  return RUNS.filter((run) => !run.revises && runCompleted(run));
 }
 
 function renderRuns() {
   const body = $("run-rows");
   body.textContent = "";
-  const decided = CHANGES.filter((change) => ["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
-  RUNS.forEach((run) => body.append(runTableRow(run, decided)));
+  const listed = completedRuns();
+  listed.forEach((run) => body.append(runTableRow(run)));
 
-  const statuses = RUNS.map(statusOf);
-  $("runs-review-count").textContent = statuses.filter((status) => status === "review").length;
-  $("runs-progress-count").textContent = statuses.filter((status) => status === "running").length;
-  $("runs-completed-count").textContent = statuses.filter((status) => status === "completed").length;
-  $("runs-total").textContent = RUNS.length + " runs";
+  $("runs-completed-count").textContent = listed.length;
+  $("runs-applied-count").textContent = listed.reduce((total, run) => total + (run.written || 0), 0);
+  $("runs-rejected-count").textContent = listed.reduce((total, run) => total + (run.rejected || 0), 0);
+  $("runs-total").textContent = listed.length + (listed.length === 1 ? " run" : " runs");
 }
 
-function runTableRow(run, decided) {
-  const current = run.id === ACTIVE_RUN.id;
-  const statusKey = statusOf(run);
-  const progress = current ? Math.round((decided / CHANGES.length) * 100) : run.progress;
+function runTableRow(run) {
   const tr = document.createElement("tr");
 
   const runCell = document.createElement("td");
@@ -2902,48 +3264,47 @@ function runTableRow(run, decided) {
   runCell.append(name, agent);
 
   const scope = document.createElement("td");
-  scope.textContent = run.products.toLocaleString() + " products";
+  scope.textContent = productNames(run.skus) || run.products.toLocaleString() + " products";
   const changes = document.createElement("td");
   changes.textContent = run.changes === null ? "Calculating…" : run.changes.toLocaleString();
-  const attention = document.createElement("td");
-  attention.textContent = statusKey === "completed" ? run.changes + " reviewed" : run.attention;
-
-  const progressCell = document.createElement("td");
-  if (statusKey === "running") {
-    progressCell.className = "run-muted";
-    progressCell.textContent = "—";
-  } else {
-    const progressWrap = document.createElement("div");
-    progressWrap.className = "run-progress";
-    const progressLabel = document.createElement("span");
-    progressLabel.textContent = progress + "% reviewed";
-    const bar = document.createElement("i");
-    bar.style.setProperty("--progress", progress + "%");
-    progressWrap.append(progressLabel, bar);
-    progressCell.append(progressWrap);
-  }
+  const applied = document.createElement("td");
+  applied.textContent = (run.written || 0).toLocaleString();
+  const rejected = document.createElement("td");
+  rejected.textContent = (run.rejected || 0).toLocaleString();
 
   const owner = document.createElement("td");
   owner.textContent = run.owner;
+  const origin = document.createElement("td");
+  const originInfo = runOrigin(run);
+  if (originInfo.autonomous) {
+    const label = document.createElement("span");
+    label.className = "run-origin";
+    label.textContent = "Autonomous";
+    origin.append(label);
+  } else {
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "run-origin-link";
+    link.textContent = originInfo.label;
+    link.addEventListener("click", () => openConversation(originInfo.key));
+    origin.append(link);
+  }
   const started = document.createElement("td");
   started.className = "run-muted";
   started.textContent = run.started;
-  const status = document.createElement("td");
-  const badge = document.createElement("span");
-  badge.className = "run-status " + statusKey;
-  badge.textContent = STATUS_LABELS[statusKey];
-  status.append(badge);
+  const completed = document.createElement("td");
+  completed.className = "run-muted";
+  completed.textContent = run.completed || "—";
 
-  /* Every run opens; what you can do inside depends on where the run has got to. */
   const action = document.createElement("td");
   const open = document.createElement("button");
   open.type = "button";
   open.className = "run-open";
-  open.textContent = statusKey === "review" ? "Review" : "View";
+  open.textContent = "View";
   open.addEventListener("click", () => showDetail(run.id));
   action.append(open);
 
-  tr.append(runCell, scope, changes, attention, progressCell, owner, started, status, action);
+  tr.append(runCell, scope, changes, applied, rejected, origin, owner, started, completed, action);
   return tr;
 }
 
@@ -3006,18 +3367,18 @@ function renderDock() {
   /* The review assistant only makes sense inside the run you are reviewing;
      any other page gets the ordinary conversation. */
   const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
-  const openStatus = statusOf(openRun);
+  const openStatus = openRun ? statusOf(openRun) : null;
   const onDetail = state.view === "detail";
   /* Every run under review gets the review assistant. The panel shows the turn
      that started the run; the rest of that conversation stays where it was. */
-  const inRun = onDetail && openStatus === "review";
-  /* A run with nothing to decide has nothing to talk about: the agent is either
-     still working or already done. New work starts from the Agents section. */
-  const locked = onDetail && !inRun;
-  /* Investigating a run keeps the panel open. There is no button to dismiss it. */
-  const open = onDetail || (!inFullScreenPage(state.view) && state.assistantOpen);
-  const attention = RUNS.filter((run) => statusOf(run) === "review").length;
-  /* The review assistant has no conversation switcher; every other panel does. */
+  /* The conversation stays up while a review is open. A finished run is only a log, so the panel stays closed. */
+  const finishedLog = Boolean(openRun) && onDetail && runCompleted(openRun);
+  const inRun = Boolean(openRun) && onDetail && reviewOpen(openRun) && !conversationForRun(openRun);
+  const locked = Boolean(openRun) && onDetail && !conversationForRun(openRun);
+  const open = !finishedLog && (onDetail || (!inFullScreenPage(state.view) && state.assistantOpen));
+  const attention = RUNS.filter((run) => undecidedIn(run) > 0).length;
+  /* The review fills the page, so the conversation panel stays on this thread. */
+  if (onDetail) state.assistantMenuOpen = false;
   const showMenu = !onDetail;
   const menuOpen = state.assistantMenuOpen && showMenu;
   $("dock").hidden = !open;
@@ -3039,6 +3400,7 @@ function renderDock() {
   }
   $("assistant-menu-trigger").setAttribute("aria-expanded", String(menuOpen));
   if (inRun && openRun.generated) renderGeneratedAssistant(openRun);
+  else if (inRun) renderThread();
   else if (!inRun) renderDockChat(locked, openStatus, openRun);
   renderFollow();
 }
@@ -3391,12 +3753,15 @@ function showRuns() {
 
 function showDetail(runId) {
   rememberAssistantOrigin();
-  state.openRunId = runId || ACTIVE_RUN.id;
+  const requested = RUNS.find((item) => item.id === runId);
+  if (!requested) return;
+  state.openRunId = requested.id;
   state.proposalChecks = new Set();
   state.proposalFocus = null;
   state.assistantMenuOpen = false;
-  state.panelThread = null;
+  state.assistantOpen = true;
   setView("detail");
+  state.panelThread = conversationForRun(requested);
   render();
 }
 
@@ -3482,6 +3847,11 @@ function renderNav() {
     const name = document.createElement("b");
     name.textContent = info.title;
     title.append(icon, name);
+    if (conversationNeedsReview(key)) {
+      const dot = document.createElement("i");
+      dot.className = "nav-dot review";
+      title.prepend(dot);
+    }
     const note = document.createElement("small");
     note.textContent = info.note;
     button.append(title, note);
@@ -3495,13 +3865,12 @@ function renderNav() {
   const runs = $("nav-runs");
   runs.textContent = "";
   const runCurrent = state.view === "detail" ? state.openRunId : null;
-  capped(RUNS, runCurrent, (run) => run.id).forEach((run) => {
-    const status = statusOf(run);
+  capped(completedRuns(), runCurrent, (run) => run.id).forEach((run) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = run.id === runCurrent ? "nav-run active" : "nav-run";
     const title = document.createElement("span");
-    title.innerHTML = '<i class="nav-dot ' + status + '"></i>';
+    title.innerHTML = '<i class="nav-dot ' + runMark(run) + '"></i>';
     title.append("#" + run.id);
     const note = document.createElement("small");
     note.textContent = run.agent + ", " + runAgo(run);
@@ -3512,6 +3881,7 @@ function renderNav() {
 
   $("nav-all-agents").hidden = AGENTS.length <= NAV_LIMIT;
   $("nav-all-conversations").hidden = conversationInstances().length <= NAV_LIMIT;
+  $("nav-all-runs").hidden = completedRuns().length <= NAV_LIMIT;
 }
 
 const PRODUCT_PAGE = 20;
@@ -3616,14 +3986,15 @@ function renderProductRuns() {
   host.hidden = !runs.length;
   list.textContent = "";
   if (!runs.length) return;
-  const active = runs.filter((run) => statusOf(run) !== "completed");
-  const finished = runs.filter((run) => statusOf(run) === "completed");
+  const active = runs.filter((run) => statusOf(run) === "running" || productStillOpen(run, state.activeSku));
+  const finished = runs.filter((run) => runCompleted(run));
+  host.hidden = !active.length && !finished.length;
   active.forEach((run) => list.append(productRunRow(run)));
   if (!finished.length) return;
   const toggle = document.createElement("button");
   toggle.type = "button";
   toggle.className = "product-run-history";
-  toggle.textContent = (state.productRunHistory ? "Hide " : "") + finished.length + (finished.length === 1 ? " finished run" : " finished runs");
+  toggle.textContent = (state.productRunHistory ? "Hide " : "") + finished.length + (finished.length === 1 ? " completed run" : " completed runs");
   toggle.addEventListener("click", () => {
     state.productRunHistory = !state.productRunHistory;
     renderProductRuns();
@@ -3633,12 +4004,12 @@ function renderProductRuns() {
 }
 
 function productRunRow(run) {
-  const status = statusOf(run);
+  const phase = phaseOf(run);
   const button = document.createElement("button");
   button.type = "button";
   button.className = "product-run";
   const dot = document.createElement("i");
-  dot.className = "nav-dot " + status;
+  dot.className = "nav-dot " + runMark(run);
   const copy = document.createElement("span");
   const name = document.createElement("b");
   name.textContent = run.agent;
@@ -3647,8 +4018,8 @@ function productRunRow(run) {
   note.textContent = "Run #" + run.id;
   copy.append(name, note);
   const badge = document.createElement("span");
-  badge.className = "run-status " + status;
-  badge.textContent = STATUS_LABELS[status];
+  badge.className = "run-status " + runMark(run);
+  badge.textContent = phase.label;
   button.append(dot, copy, badge);
   button.addEventListener("click", () => showDetail(run.id));
   return button;
@@ -3665,8 +4036,11 @@ function currentConversationKey() {
 /* A started thread is the one selected item. The agent behind it stays unselected.
    Opening a product does not adopt an old product conversation as that selection. */
 function activeConversationKey() {
-  /* The run page is the run. The conversation in the panel is not a second selection. */
-  if (state.view === "detail") return "";
+  /* A completed run is its own record. Until then, its review is part of the conversation. */
+  if (state.view === "detail") {
+    const openRun = RUNS.find((run) => run.id === state.openRunId);
+    return openRun && !runCompleted(openRun) ? (conversationForRun(openRun) || "") : "";
+  }
   const key = currentConversationKey();
   if (conversationInstances().indexOf(key) === -1) return "";
   if (state.view === "product" && state.panelThread !== key) return "";
@@ -3799,7 +4173,12 @@ function conversationInfo(key) {
     place: place,
     title: conversationTitle(key),
     who: who,
-    note: place + " · " + who,
+    note: conversationNeedsReview(key)
+      ? "Review open · " + undecidedIn(pendingReviewIn(key)) + " left"
+      : pendingReviewIn(key) ? "Ready to finish"
+      : (latestRunIn(key) && reviewOf(latestRunIn(key)) === "finalized")
+        ? "Run #" + latestRunIn(key).id + " completed"
+        : place + " · " + who,
     icon: agent ? agent.name.charAt(0) : "✦",
     agent: agent,
     named: Boolean(agent)
@@ -3876,7 +4255,8 @@ function chooseAgent(agentId) {
     ? [activeProduct()].filter(Boolean)
     : checked;
   const target = dockThreadKey();
-  const reply = startSelectionRun(agent, products);
+  const blocking = unfinishedRun();
+  const reply = blocking ? unfinishedRunReply(blocking) : startSelectionRun(agent, products);
   const context = currentContextLabel(target);
   const attached = products.map((item) => item.sku);
   addMessage(target, { role: "user", text: "Run " + agent.name, context: context || undefined, skus: attached.length > 1 ? attached : undefined });
@@ -3960,18 +4340,22 @@ function menuConversationItem(key) {
   copy.querySelector("strong").textContent = info.title;
   copy.querySelector("small").textContent = info.note;
   button.append(icon, copy);
+  if (conversationNeedsReview(key)) {
+    const dot = document.createElement("i");
+    dot.className = "nav-dot review";
+    button.prepend(dot);
+  }
   button.addEventListener("click", () => openConversation(key));
   row.append(button, conversationOverflow(key, copy.querySelector("strong")));
   return row;
 }
 
 function menuRunItem(run) {
-  const status = statusOf(run);
   const button = document.createElement("button");
   button.type = "button";
   button.className = state.view === "detail" && run.id === state.openRunId ? "assistant-menu-item active" : "assistant-menu-item";
   const dot = document.createElement("i");
-  dot.className = "nav-dot " + status;
+  dot.className = "nav-dot " + runMark(run);
   const copy = document.createElement("span");
   copy.innerHTML = "<strong></strong><small></small>";
   copy.querySelector("strong").textContent = "#" + run.id;
@@ -4014,14 +4398,14 @@ function renderAssistantMenu() {
   const conversations = conversationInstances();
   $("menu-conversations-section").hidden = !conversations.length;
   capped(conversations, currentKey, (key) => key).forEach((key) => chatHost.append(menuConversationItem(key)));
-  capped(RUNS, null, (run) => run.id).forEach((run) => runHost.append(menuRunItem(run)));
+  capped(completedRuns(), null, (run) => run.id).forEach((run) => runHost.append(menuRunItem(run)));
 
   fillFlyout($("menu-flyout-agents"), AGENTS.map(menuAgentItem));
   fillFlyout($("menu-flyout-conversations"), conversations.map(menuConversationItem));
-  fillFlyout($("menu-flyout-runs"), RUNS.map(menuRunItem));
+  fillFlyout($("menu-flyout-runs"), completedRuns().map(menuRunItem));
   $("menu-branch-agents").hidden = AGENTS.length <= NAV_LIMIT;
   $("menu-branch-conversations").hidden = conversations.length <= NAV_LIMIT;
-  $("menu-branch-runs").hidden = RUNS.length <= NAV_LIMIT;
+  $("menu-branch-runs").hidden = completedRuns().length <= NAV_LIMIT;
 }
 
 const thread = (key) => (state.chats[key] = state.chats[key] || []);
@@ -4044,30 +4428,32 @@ function agentReply(agent, question) {
       return { text: "I'm still working through " + latest.name.toLowerCase() + " #" + latest.id +
         " across " + latest.products.toLocaleString() + " products. I'll flag anything that needs you when I'm done.", run: latest.id };
     }
-    if (status === "completed") {
-      return { text: "My last run, " + latest.name.toLowerCase() + " #" + latest.id + ", is closed. You kept " +
-        latest.written + " of " + latest.changes + " changes.", run: latest.id };
+    if (reviewOf(latest) === "pending") {
+      return { text: "Run #" + latest.id + " is waiting for your review. I proposed " + latest.changes +
+        " changes. Once you approve, I write the data and the run completes.", result: latest.id };
     }
-    return { text: "My last run, #" + latest.id + ", proposed " + latest.changes + " changes on " +
-      latest.products + " products. " + latest.attention + " need a closer look before you finish the review.", run: latest.id };
+    if (reviewOf(latest) === "finalized") {
+      return { text: "My last run, " + latest.name.toLowerCase() + " #" + latest.id + ", is completed: " +
+        (latest.written || 0) + " applied, " + (latest.rejected || 0) + " rejected.", result: latest.id };
+    }
   }
   if (/weak|conflict|evidence|why|confiden/.test(text)) {
     return { text: "Where sources disagree or only one listing backs a value, I keep the score low rather than guess. " +
       "Tell me which source to trust, or give me the value outright, and I'll apply it." };
   }
   if (/^(run|start|enrich|tag|map|normalis|normaliz|find|fix|clean)/.test(text) || /\b(run|start) (a|the|another)\b/.test(text)) {
-    return { text: "I can start that as a run. I'll analyse the matching products and come back with proposed changes for you to review — nothing is written until you finish the review." };
+    return { text: "I can start that as a run. I'll analyse the matching products and bring the proposed changes back here for you to review. The run completes once you approve and I write the data." };
   }
   return { text: agent.note + " is my remit. Ask me about my runs, why a value looks the way it does, or give me something to work on." };
 }
 
 function generalReply(question) {
   const text = question.toLowerCase();
-  const needsReview = RUNS.filter((run) => statusOf(run) === "review");
+  const needsReview = RUNS.filter(reviewOpen);
   if (/run|review|pending|waiting|todo/.test(text) && needsReview.length) {
     const run = needsReview[0];
-    return { text: run.agent + " finished " + run.name.toLowerCase() + " #" + run.id + " and proposed " +
-      run.changes + " changes — " + run.attention + ".", run: run.id };
+    return { text: run.agent + " proposed " + run.changes + " changes in " + run.name.toLowerCase() + " #" + run.id +
+      " (" + run.attention + "). The run is waiting for your review.", result: run.id };
   }
   if (/agent|who/.test(text)) {
     return { text: "You have " + AGENTS.length + " agents: " + AGENTS.map((agent) => agent.name).join(", ") +
@@ -4111,7 +4497,7 @@ function runSelection(parsed) {
 function startSelectionRun(agent, products) {
   const run = {
     id: RUNS.reduce((max, item) => Math.max(max, item.id), 0) + 1,
-    name: "Run",
+    name: products.length === 1 ? products[0].name : products.length + " products",
     agent: agent.name,
     products: products.length,
     skus: products.map((item) => item.sku),
@@ -4122,6 +4508,7 @@ function startSelectionRun(agent, products) {
     ago: "Just now",
     status: "running",
     progress: 8,
+    origin: "on-demand",
     generated: true
   };
   RUNS.unshift(run);
@@ -4193,26 +4580,52 @@ function trackRun(run) {
 function finishRun(run) {
   run.proposals = run.skus.flatMap((sku) => proposalsFor(productBySku(sku)));
   const open = run.proposals.filter((item) => !item.skipped);
-  run.status = "review";
-  run.progress = 0;
+    run.status = "completed";
+    run.review = "pending";
+    run.progress = 0;
+    run.changes = open.length;
+    run.attention = open.filter((item) => item.score < 90).length + " need review";
+    run.ago = "Just now";
+    const single = run.skus.length === 1;
+    if (single) run.ask = { done: false, collapsed: false, reviewing: false, choice: "all", other: "" };
+    const skipped = run.proposals.length - open.length;
+    const text = single
+      ? "I proposed " + open.length + " " + (open.length === 1 ? "change" : "changes") +
+        " on " + productBySku(run.skus[0]).name + (skipped ? ", " + skipped + " skipped" : "") +
+        ". Use the questions to refine or approve them. Once you approve, I write the data and run #" + run.id + " joins the run history."
+      : "I proposed " + open.length + " " + (open.length === 1 ? "change" : "changes") +
+        " across " + run.skus.length + " products" + (skipped ? ", " + skipped + " skipped" : "") +
+        ". Review them here. Once you approve, I write the data and run #" + run.id + " completes.";
+    if (run.thread) {
+      const scope = scopeContext(run.skus);
+      const message = { role: "agent", text: text };
+      if (!single) message.result = run.id;
+      addMessage(run.thread, Object.assign(message, scope || {}));
+    }
+    notify("Run #" + run.id + " is waiting for your review.");
+  refreshRunViews(run);
+}
+
+/* An autonomous run has no conversation to return to, so its review opens a new one with the agent. */
+function postAutonomousReview(run) {
+  if (!run.proposals) run.proposals = run.skus.flatMap((sku) => proposalsFor(productBySku(sku)));
+  const open = run.proposals.filter((item) => !item.skipped);
   run.changes = open.length;
   run.attention = open.filter((item) => item.score < 90).length + " need review";
-  run.ago = "Just now";
-  const skipped = run.proposals.length - open.length;
-  const single = run.skus.length === 1;
-  const text = single
-    ? "Run #" + run.id + " finished on " + productBySku(run.skus[0]).name + ". " + open.length +
-      (open.length === 1 ? " attribute" : " attributes") + " generated" + (skipped ? ", " + skipped + " skipped" : "") + "."
-    : "Run #" + run.id + " finished: " + open.length + " proposed changes across " + run.skus.length + " products" +
-      (skipped ? ", " + skipped + " skipped" : "") + ".";
-  run.ask = single ? { choice: "review", other: "", collapsed: false, reviewing: false } : null;
-  if (run.thread) {
-    addMessage(run.thread, single
-      ? { role: "agent", text: text, result: run.id }
-      : { role: "agent", text: text, run: run.id });
-  }
-  notify("Run #" + run.id + " is ready for review.");
-  refreshRunViews(run);
+  const agent = agentByName(run.agent);
+  const key = agent ? agent.id : "general";
+  run.thread = key;
+  if (!(state.chats[key] || []).length) state.conversationTitles[key] = run.name;
+  const scope = scopeContext(run.skus);
+  addMessage(key, {
+    role: "agent",
+    text: "I started " + run.name.toLowerCase() + " on my own and proposed " + open.length + " " +
+      (open.length === 1 ? "change" : "changes") + " across " + run.skus.length + " " +
+      (run.skus.length === 1 ? "product" : "products") + ". Review them here. Once you approve, I write the data and run #" + run.id + " completes.",
+    result: run.id,
+    context: scope ? scope.context : undefined,
+    skus: scope ? scope.skus : undefined
+  });
 }
 
 function refreshRunViews(run) {
@@ -4234,7 +4647,7 @@ const ASK_CHOICES = [
 ];
 
 function pendingAsk(key) {
-  return RUNS.find((run) => run.generated && run.thread === key && run.ask && !run.ask.done && run.status === "review" && run.skus.length === 1);
+  return RUNS.find((run) => run.generated && run.thread === key && run.ask && !run.ask.done && reviewOpen(run) && run.skus.length === 1);
 }
 
 function settleRun(run, pick) {
@@ -4254,9 +4667,13 @@ function settleRun(run, pick) {
   const decided = open.filter((item) => item.decision).length;
   run.progress = Math.round((decided / open.length) * 100);
   if (decided === open.length) {
-    run.status = "completed";
+    run.review = "finalized";
+    run.reviewFinalized = "Just now";
     run.completed = "Just now";
+    run.ago = "Just now";
     run.written = open.filter((item) => item.decision === "approved").length;
+    run.rejected = open.filter((item) => item.decision === "rejected").length;
+    if (run.ask) run.ask.done = true;
   }
   if (state.view === "product") renderProduct();
   if (state.view === "products") renderProducts();
@@ -4287,8 +4704,8 @@ function answerAsk(run, choice) {
     : choice === "all"
       ? "Applied every suggestion."
       : "Applied " + applied + (applied === 1 ? " high-confidence suggestion" : " high-confidence suggestions") + " and left the rest unchanged.";
-  if (run.thread) addMessage(run.thread, { role: "agent", text: line });
-  notify(choice === "discard" ? "Suggestions discarded." : "Run #" + run.id + " is reviewed.");
+  if (run.thread) addMessage(run.thread, { role: "agent", text: line + " Run #" + run.id + " is in Agent runs.", result: run.id });
+  notify(choice === "discard" ? "Suggestions discarded." : "Run #" + run.id + " is in Agent runs.");
   refreshRunViews(run);
 }
 
@@ -4299,8 +4716,8 @@ function stepDecision(run, item, decision) {
   if (!left) {
     run.ask.done = true;
     const applied = run.proposals.filter((proposal) => proposal.decision === "approved").length;
-    if (run.thread) addMessage(run.thread, { role: "agent", text: "Reviewed every suggestion. Applied " + applied + "." });
-    notify("Run #" + run.id + " is reviewed.");
+    if (run.thread) addMessage(run.thread, { role: "agent", text: "Reviewed every suggestion. Applied " + applied + ". Run #" + run.id + " is in Agent runs.", result: run.id });
+    notify("Run #" + run.id + " is in Agent runs.");
   }
   refreshRunViews(run);
 }
@@ -4441,27 +4858,24 @@ function renderAsk(host, key) {
   host.append(body);
 }
 
+/* Suggestions sit above the questions, in their own card. */
+function renderSuggestions(host, key) {
+  const run = pendingAsk(key);
+  host.hidden = !run;
+  host.textContent = "";
+  if (!run) return;
+  host.append(resultCard(run));
+}
+
 function decideProposal(run, index, decision) {
   const item = run.proposals[index];
   if (!item || item.skipped) return;
   item.decision = decision;
-  if (decision === "approved") {
-    const product = productBySku(item.sku);
-    if (item.field === "attribute") product.attribute = item.proposed;
-    if (item.field === "name") product.name = item.proposed;
-    if (item.field === "description") product.description = item.proposed;
-    if (state.view === "product" && state.activeSku === item.sku) renderProduct();
-    if (state.view === "products") renderProducts();
-  }
+  state.proposalChecks.delete(index);
+  if (state.proposalFocus === index) state.proposalFocus = null;
   const open = run.proposals.filter((proposal) => !proposal.skipped);
   const decided = open.filter((proposal) => proposal.decision).length;
   run.progress = Math.round((decided / open.length) * 100);
-  if (decided === open.length) {
-    run.status = "completed";
-    run.completed = "Just now";
-    run.written = open.filter((proposal) => proposal.decision === "approved").length;
-    notify("Run #" + run.id + " is reviewed.");
-  }
   refreshRunViews(run);
 }
 
@@ -4554,17 +4968,17 @@ function resultCard(run) {
       body.append(value, why);
       /* While the questions box is open, the summary is there to read.
          The decision itself happens in that box. */
-      if (!item.skipped && !item.decision && run.status === "review" && !(run.ask && !run.ask.done)) {
+      if (!item.skipped && !item.decision && reviewOpen(run)) {
         const actions = document.createElement("div");
         actions.className = "msg-actions";
         const approve = document.createElement("button");
         approve.type = "button";
         approve.textContent = "✓ Approve";
-        approve.addEventListener("click", () => decideProposal(run, index, "approved"));
+        approve.addEventListener("click", () => stepDecision(run, item, "approved"));
         const reject = document.createElement("button");
         reject.type = "button";
         reject.textContent = "× Reject";
-        reject.addEventListener("click", () => decideProposal(run, index, "rejected"));
+        reject.addEventListener("click", () => stepDecision(run, item, "rejected"));
         actions.append(approve, reject);
         body.append(actions);
       }
@@ -4575,7 +4989,26 @@ function resultCard(run) {
   return card;
 }
 
+/* A review stays open until it is finished and the data is written. Another run waits. */
+function unfinishedRun() {
+  return RUNS.find((run) => reviewOpen(run)) || RUNS.find((run) => run.status === "running") || null;
+}
+
+function unfinishedRunReply(run) {
+  if (reviewOpen(run)) {
+    return {
+      text: "Run #" + run.id + ", " + run.name + ", is still in review. Finish that review before starting another.",
+      result: run.id
+    };
+  }
+  return {
+    text: "Run #" + run.id + " is still working. It has to be reviewed before I can start another."
+  };
+}
+
 function runInstruction(agent, products, question) {
+  const blocking = unfinishedRun();
+  if (blocking) return unfinishedRunReply(blocking);
   if (!agent) return { text: "Choose an agent to run this. The selection stays attached." };
   if (!products.length) return { text: "Check the products this run should cover, then ask me again." };
   return startSelectionRun(agent, products);
@@ -4590,6 +5023,89 @@ function perspectiveReply(agent, products, question) {
   const remainder = products.length > 3 ? " and " + (products.length - 3) + " more" : "";
   return { text: subject + " using " + products.length + (products.length === 1 ? " checked product" : " checked products") +
     " as context: " + names + remainder + ". Ask about them together, or tell me what you want the agent to do." };
+}
+
+function generatedTargets(run) {
+  const checked = pendingProposalIndexes(run);
+  if (checked.length) return checked;
+  if (state.proposalFocus != null && run.proposals[state.proposalFocus] && !run.proposals[state.proposalFocus].skipped) return [state.proposalFocus];
+  return [];
+}
+
+/* A typed value updates the selected proposals. Anything else, such as
+   "check the supplier specification", sends those same rows back to the agent. */
+function applyGeneratedInstruction(run, instruction, indexes, key) {
+  const dictated = dictatedValue(instruction);
+  const names = indexes.slice(0, 2).map((index) => {
+    const item = run.proposals[index];
+    return item ? item.attribute + " on " + productBySku(item.sku).name : "";
+  }).filter(Boolean);
+  const extra = indexes.length > 2 ? " and " + (indexes.length - 2) + " more" : "";
+  if (dictated) {
+    indexes.forEach((index) => {
+      const item = run.proposals[index];
+      item.proposed = dictated;
+      item.score = 100;
+      item.human = true;
+      item.updated = true;
+      item.supplier = "";
+      item.note = "Set during review.";
+      item.rationale = "Set during review.";
+      delete item.decision;
+      delete item.home;
+    });
+    if (key) addMessage(key, { role: "agent", text: "Updated " + (names.join(", ") || "the selected proposals") + extra + " to " + dictated + ". Approve when you are ready.", review: run.id });
+  } else {
+    indexes.forEach((index) => {
+      const item = run.proposals[index];
+      if (!item) return;
+      item.home = item.score >= 90 ? "good" : item.score < 40 ? "conflict" : "weak";
+      item.decision = "refining";
+      item.updated = false;
+    });
+    if (key) addMessage(key, { role: "agent", text: "Looking at " + indexes.length + " " + (indexes.length === 1 ? "change" : "changes") + " again in this review.", review: run.id });
+    setTimeout(() => {
+      indexes.forEach((index) => {
+        const item = run.proposals[index];
+        if (!item) return;
+        delete item.decision;
+        delete item.home;
+        const text = instruction.toLowerCase();
+        if (/\b(supplier|specification|spec)\b/.test(text) && item.field === "colour") {
+          item.rationale = "Checked the supplier specification. It does not state the colour.";
+          item.note = "Checked the supplier specification. It does not support a change.";
+          item.supplier = "unsupported";
+          item.score = Math.min(item.score, 20);
+          item.updated = true;
+        } else if (/\b(supplier|specification|spec)\b/.test(text)) {
+          item.rationale = "Checked against the supplier specification.";
+          item.note = "Checked the supplier specification.";
+          item.supplier = "supported";
+          item.score = Math.min(99, Math.max(item.score, 92));
+          item.updated = true;
+        } else {
+          item.rationale = "Re-checked: " + instruction;
+          item.note = "";
+          item.supplier = "";
+          item.score = Math.min(99, item.score + 6);
+          item.updated = true;
+        }
+      });
+      const moved = indexes.filter((index) => {
+        const item = run.proposals[index];
+        return item && item.supplier !== "unsupported" && item.score >= 90;
+      });
+      if (moved.length) state.collapsedGroups.delete(run.id + ":good");
+      state.justMoved = moved;
+      const supplier = /\b(supplier|specification|spec)\b/.test(instruction);
+      const line = supplier
+        ? "Checked the supplier specification. Rows it supports move to Good to go."
+        : "Updated " + (names.join(", ") || "the selected proposals") + extra + " in this review.";
+      if (key) addMessage(key, { role: "agent", text: line, review: run.id });
+      refreshOpenSurface();
+    }, 900);
+  }
+  indexes.forEach((index) => state.proposalChecks.add(index));
 }
 
 function sendChat(preset, source) {
@@ -4607,6 +5123,37 @@ function sendChat(preset, source) {
   const context = currentContextLabel(target);
   const attached = contextAttachment(target);
   addMessage(target, context ? { role: "user", text: question, context: context, skus: attached.length > 1 ? attached : undefined } : { role: "user", text: question });
+  const screenReview = state.view === "detail"
+    ? RUNS.find((run) => run.id === state.openRunId && reviewOpen(run))
+    : null;
+  const openReview = screenReview || pendingReviewIn(target);
+  const onThisReview = openReview && (state.view !== "detail" || state.openRunId === openReview.id);
+  const reviewInstruction = Boolean(dictatedValue(question)) || /\b(check|look|re-?check|supplier|specification|spec|source)\b/i.test(question);
+  const reviewIds = !onThisReview ? []
+    : openReview.generated ? generatedTargets(openReview)
+    : ACTIVE_RUN && openReview.id === ACTIVE_RUN.id ? refineTargets() : [];
+  if (onThisReview && (openReview.generated || (ACTIVE_RUN && openReview.id === ACTIVE_RUN.id)) && (reviewIds.length || reviewInstruction)) {
+    const spoken = thread(target);
+    const last = spoken[spoken.length - 1];
+    if (last && last.role === "user" && !last.result) last.review = openReview.id;
+    if (!reviewIds.length) {
+      addMessage(target, { role: "agent", text: "Check the rows you want me to look at, then ask again.", review: openReview.id });
+    } else if (openReview.generated) {
+      applyGeneratedInstruction(openReview, question, reviewIds, target);
+    } else if (dictatedValue(question)) {
+      applyDirectedUpdate(question, reviewIds);
+      addMessage(target, { role: "agent", text: refinementReport(reviewIds, question), review: openReview.id });
+    } else {
+      refineInReview(question, reviewIds, target);
+    }
+    field.value = "";
+    field.style.height = "26px";
+    state.drafts[target] = "";
+    if (source === "dock") $("dock-send").disabled = true;
+    else $("chat-send").disabled = true;
+    refreshOpenSurface();
+    return;
+  }
   const reply = wantsRun(question)
     ? runInstruction(agent, runSelection(scope), question)
     : scope.perspective
@@ -4630,17 +5177,141 @@ function sendChat(preset, source) {
   if (state.view === "products") renderProducts();
   if (state.view === "runs") renderRuns();
   if (state.view === "product") renderProductRuns();
-  renderChat();
+  refreshOpenSurface();
 }
 
 const starterPrompts = (agent) => agent
   ? agent.starters
   : ["What needs my review?", "Which agents do I have?", "What is running right now?"];
 
+/* The run card lives in the conversation, and so does its review. The run
+   completes once the review is finished and the agent has written the data.
+   Follow-ups stay inside that card, instead of reading as a new turn. */
+function reviewActivityMessages(run, messages) {
+  return (messages || []).filter((message) => message.review === run.id && !message.result);
+}
+
+function reviewIsRefining(run) {
+  if (!run || reviewOf(run) !== "pending") return false;
+  if (run.generated) return (run.proposals || []).some((item) => !item.skipped && item.decision === "refining");
+  if (ACTIVE_RUN && run.id === ACTIVE_RUN.id) return CHANGES.some((change) => decisionOf(change.id) === "refining");
+  return false;
+}
+
+function appendReviewActivity(card, run, messages) {
+  const activity = reviewActivityMessages(run, messages);
+  if (!activity.length) return;
+  const refining = reviewIsRefining(run);
+  card.classList.add("has-activity");
+  const log = document.createElement("div");
+  log.className = "review-activity";
+  const label = document.createElement("b");
+  label.textContent = "In this review";
+  log.append(label);
+  activity.forEach((message, index) => {
+    const working = message.role === "agent" && /^Looking at\b/.test(message.text);
+    const superseded = working && !refining && activity.slice(index + 1).some((later) => later.role === "agent");
+    if (superseded) return;
+    const line = document.createElement("p");
+    line.className = "review-turn" + (working ? " working" : message.role === "user" ? " user" : "");
+    if (working) {
+      const dots = document.createElement("span");
+      dots.className = "dots";
+      dots.innerHTML = "<span></span><span></span><span></span>";
+      line.append(dots);
+    }
+    const prefix = message.role === "user" ? "You: " : "";
+    line.append(document.createTextNode(prefix + message.text));
+    log.append(line);
+  });
+  card.append(log);
+}
+
+function viewRunLink(run) {
+  const actions = document.createElement("div");
+  actions.className = "msg-actions";
+  const open = document.createElement("button");
+  open.type = "button";
+  open.textContent = "View run";
+  open.addEventListener("click", () => showDetail(run.id));
+  actions.append(open);
+  return actions;
+}
+
+function conversationRunCard(run, messages, source) {
+  const card = document.createElement("div");
+  card.className = "result-card";
+  const head = document.createElement("div");
+  head.className = "result-head";
+  const title = document.createElement("b");
+  const note = document.createElement("small");
+  if (statusOf(run) === "running") {
+    title.textContent = "Run #" + run.id + " is working";
+    const names = productNames(run.skus);
+    note.textContent = names
+      ? names + ". The proposals will appear here for your review."
+      : "The proposals will appear here for your review.";
+  } else if (reviewOf(run) === "pending") {
+    const left = undecidedIn(run);
+    const names = productNames(run.skus);
+    if (left === 0) {
+      title.textContent = "Ready to finish";
+      note.textContent = (names ? names + ". " : "") + "Every change is decided. Finish the review and run #" + run.id + " writes the data.";
+    } else {
+      title.textContent = (run.name && run.name !== "Run" ? run.name : "Run #" + run.id) + " · Awaiting review";
+      note.textContent = (names ? names + " · " : "") + left + " " + (left === 1 ? "change" : "changes") + " still to review.";
+    }
+  } else if (reviewOf(run) === "finalized") {
+    title.textContent = "Run #" + run.id + " completed";
+    note.textContent = (run.written || 0) + " applied · " + (run.rejected || 0) + " rejected";
+  } else {
+    title.textContent = "Run #" + run.id;
+    note.textContent = run.agent;
+  }
+  head.append(title, note);
+  card.append(head);
+  if (reviewOf(run) === "pending" || reviewOf(run) === "finalized") {
+    const actions = document.createElement("div");
+    actions.className = "msg-actions";
+    const reviewing = reviewOf(run) === "pending" && state.view === "detail" && state.openRunId === run.id;
+    const open = document.createElement("button");
+    open.type = "button";
+    open.textContent = reviewOf(run) === "finalized" ? "View run" : (reviewing ? "Reviewing changes" : "Review changes");
+    open.disabled = reviewing;
+    if (!reviewing) open.addEventListener("click", () => showDetail(run.id));
+    actions.append(open);
+    card.append(actions);
+  }
+  const threadMessages = messages || [];
+  const firstCard = threadMessages.find((item) => item.result === run.id);
+  if (!source || source === firstCard) appendReviewActivity(card, run, threadMessages);
+  return card;
+}
+
 /* Messages render identically wherever the conversation is shown. */
+function changeSummary(changes) {
+  const list = document.createElement("ul");
+  list.className = "change-summary";
+  (changes.applied || []).forEach((item) => {
+    const row = document.createElement("li");
+    row.textContent = item.product + " · " + item.attribute + " → " + item.value;
+    list.append(row);
+  });
+  (changes.rejected || []).forEach((item) => {
+    const row = document.createElement("li");
+    row.className = "rejected";
+    row.textContent = item.product + " · " + item.attribute + " · rejected";
+    list.append(row);
+  });
+  return list;
+}
+
 function paintThread(host, messages, surface, key) {
   host.textContent = "";
   messages.forEach((message, index) => {
+    const insideReview = message.review && !message.result && !message.changes &&
+      messages.some((item) => item.result === message.review);
+    if (insideReview) return;
     const block = document.createElement("div");
     block.className = "msg " + message.role;
     if (message.context) {
@@ -4655,23 +5326,29 @@ function paintThread(host, messages, surface, key) {
     const text = document.createElement("p");
     text.textContent = message.text;
     block.append(text);
+    if (message.changes) block.append(changeSummary(message.changes));
+    if (message.run && !message.result) {
+      const started = RUNS.find((item) => item.id === message.run);
+      if (started && statusOf(started) === "running") block.append(conversationRunCard(started));
+    }
     if (message.result) {
       const finished = RUNS.find((item) => item.id === message.result);
-      if (finished && finished.proposals) block.append(resultCard(finished));
-    }
-    if (message.run) {
-      const run = RUNS.find((item) => item.id === message.run);
-      const actions = document.createElement("div");
-      actions.className = "msg-actions";
-      const open = document.createElement("button");
-      open.type = "button";
-      open.textContent = "Open run #" + run.id;
-      open.addEventListener("click", () => showDetail(run.id));
-      actions.append(open);
-      block.append(actions);
+      const firstResult = messages.find((item) => item.result === message.result) === message;
+      const singleProduct = finished && finished.generated && finished.skus && finished.skus.length === 1 && finished.proposals;
+      if (finished && message.changes) block.append(viewRunLink(finished));
+      else if (singleProduct && firstResult) block.append(resultCard(finished));
+      else if (finished) block.append(conversationRunCard(finished, messages, message));
     }
     host.append(block);
   });
+  /* A checked or focused row stays in this conversation, so its sources and actions are here too. */
+  if (key && state.view === "detail") {
+    const review = pendingReviewIn(key);
+    if (review && review.id === state.openRunId) {
+      if (review.generated) appendGeneratedCard(host, review);
+      else appendCard(host);
+    }
+  }
   host.scrollTop = host.scrollHeight;
 }
 
@@ -4930,9 +5607,10 @@ function renderDockChat(locked, runStatus, run) {
   /* A run you cannot act on has no conversation at all: the panel explains where
      the run stands and, when it is over, points at the agent behind it. */
   $("dock-composer").hidden = Boolean(locked);
-  $("dock-expand").hidden = Boolean(locked) || state.view === "group";
+  $("dock-expand").hidden = Boolean(locked) || state.view === "group" || state.view === "detail";
   $("group-preview").hidden = true;
   if (locked) {
+    $("dock-suggestions").hidden = true;
     $("dock-ask").hidden = true;
     $("dock-avatar").textContent = "✦";
     markAgent($("dock-avatar"), null);
@@ -4975,8 +5653,18 @@ function renderDockChat(locked, runStatus, run) {
   $("dock-overflow").hidden = !messages.length;
   $("dock-input").disabled = false;
   $("dock-add").disabled = false;
-  $("dock-input").placeholder = agent ? "Message " + agent.name + "…" : "Ask anything…";
-  $("dock-hint").textContent = agent ? agent.hint : "Ask about your catalog or agent runs";
+  const openReview = state.view === "detail" ? pendingReviewIn(target) : null;
+  const selectedReview = !openReview ? 0
+    : openReview.generated ? generatedTargets(openReview).length
+    : ACTIVE_RUN && openReview.id === ACTIVE_RUN.id ? refineTargets().length : 0;
+  $("dock-input").placeholder = openReview
+    ? (selectedReview ? "Set a value, or ask the agent to look again…" : "Check rows to update this review…")
+    : (agent ? "Message " + agent.name + "…" : "Ask anything…");
+  $("dock-hint").textContent = openReview
+    ? (selectedReview
+      ? selectedReview + " selected. A value updates this review. Asking the agent updates it too."
+      : "This review is still open. It stays in this conversation until you finish it.")
+    : (agent ? agent.hint : "Ask about your catalog");
   paintContext($("dock-context"), currentContextLabel(target), target);
   renderGroupPreview(target);
 
@@ -4985,6 +5673,7 @@ function renderDockChat(locked, runStatus, run) {
   /* An untouched panel still greets you rather than showing an empty column. */
   host.className = messages.length ? "thread" : "thread empty";
   if (!messages.length) host.append(dockWelcome(agent));
+  renderSuggestions($("dock-suggestions"), target);
   renderAsk($("dock-ask"), target);
   renderAssistantMenu();
 }
@@ -5037,7 +5726,7 @@ function lockedState(runStatus, run) {
     return block;
   }
 
-  heading.textContent = "This review is finished";
+  heading.textContent = "This run is completed";
   body.textContent = "Every change in this run has been decided. To look at these products again, run "
     + (agent ? agent.name : "the agent") + " once more.";
   block.append(mark, heading, body);
@@ -5113,6 +5802,7 @@ function renderChat() {
   });
 
   paintThread($("chat-thread"), messages, "chat", state.chatWith);
+  renderSuggestions($("chat-suggestions"), state.chatWith);
   renderAsk($("chat-ask"), state.chatWith);
   $("chat-welcome").hidden = messages.length > 0;
   $("chat-scroll").className = messages.length ? "chat-scroll has-thread" : "chat-scroll";
@@ -5123,8 +5813,11 @@ function renderChat() {
 
 /* A run still analysing has nothing to show yet, so it reports progress instead. */
 function renderRunState(run) {
+  const autonomous = runOrigin(run).autonomous;
   $("run-state-title").textContent = run.agent + " is still analysing";
-  $("run-state-text").textContent = "Proposed changes appear here for review once this run finishes.";
+  $("run-state-text").textContent = autonomous
+    ? "This run started autonomously. When it has proposals, " + run.agent + " opens a conversation with you to review them. The run completes once you approve and the agent writes the data."
+    : "This run was requested in a conversation. Proposed changes will return there for your review. The run completes once you approve and the agent writes the data.";
 }
 
 /* A finished run is the same table, read only: what was decided and what went live. */
@@ -5139,10 +5832,10 @@ const evidenceLabel = (change) => {
    is flattened into the same rows as one closed yesterday. */
 /* A started run has no supplier-issue flag, so the same groups are read from the
    score: high confidence is ready, the middle band is thin evidence, and a very
-   low score is treated as a conflict. A decision moves the row out of those. */
+   low score is treated as a conflict. Approving leaves the row in that group. */
 function generatedBucket(item) {
-  if (item.decision === "approved") return "approved";
   if (item.decision === "rejected" || item.decision === "ignored") return "dismissed";
+  if (item.decision === "refining" && item.home) return item.home;
   if (item.score >= 90) return "good";
   if (item.score < 40) return "conflict";
   return "weak";
@@ -5168,11 +5861,30 @@ function archiveRows(run) {
       score: item.score,
       bucket: generatedBucket(item),
       outcome: item.decision === "approved"
-        ? (run.status === "completed" ? "written" : "approved")
+        ? (reviewOf(run) === "finalized" ? "written" : "approved")
         : item.decision === "ignored" ? "ignored" : item.decision === "rejected" ? "rejected" : "pending"
     }));
   }
-  if (run.id !== ACTIVE_RUN.id) return ARCHIVE[run.id] || [];
+  if (run.revises) {
+    return (run.results || []).map((result) => {
+      const change = changeById(result.id);
+      const decision = decisionOf(result.id);
+      const written = isWritten(result.id);
+      const score = result.toScore;
+      return {
+        sku: change ? change.sku : "",
+        product: change ? change.product : "",
+        attribute: change ? change.attribute : "",
+        current: result.from,
+        final: result.to,
+        evidence: score >= 90 ? "● Strong" : score >= 40 ? "○ Weak" : "⚠ Conflicting",
+        score: score,
+        outcome: written ? "written" : decision === "approved" ? "approved" : decision === "rejected" ? "rejected" : decision === "withdrawn" ? "withdrawn" : "pending"
+      };
+    });
+  }
+  if (run.records) return run.records;
+  if (!ACTIVE_RUN || run.id !== ACTIVE_RUN.id) return ARCHIVE[run.id] || [];
   return CHANGES.map((change) => {
     const decision = decisionOf(change.id);
     return {
@@ -5183,13 +5895,15 @@ function archiveRows(run) {
       final: proposedOf(change),
       evidence: evidenceLabel(change),
       score: confidenceOf(change),
-      outcome: decision === "approved" ? "written" : decision === "withdrawn" ? "withdrawn" : "rejected"
+      outcome: decision === "approved"
+        ? (reviewOf(run) === "finalized" ? "written" : "approved")
+        : decision === "rejected" ? "rejected" : decision === "withdrawn" ? "withdrawn" : "pending"
     };
   });
 }
 
 function generatedReview(run) {
-  return Boolean(run && run.generated && statusOf(run) === "review");
+  return Boolean(run && run.generated && reviewOpen(run));
 }
 
 /* Until the review is finished every change can be checked again, approved,
@@ -5248,17 +5962,20 @@ function finishGeneratedReview(run) {
     if (item.field === "name") product.name = item.proposed;
     if (item.field === "description") product.description = item.proposed;
   });
-  run.status = "completed";
+  run.review = "finalized";
+  run.reviewFinalized = "Just now";
   run.completed = "Just now";
+  run.ago = "Just now";
   run.written = approved.length;
+  run.rejected = open.length - approved.length;
   run.progress = 100;
   if (run.ask) run.ask.done = true;
   state.proposalChecks = new Set();
   state.proposalFocus = null;
   if (state.view === "product") renderProduct();
   if (state.view === "products") renderProducts();
-  refreshRunViews(run);
-  notify("Review finished. " + approved.length + " " +
+  returnToConversation(run);
+  notify("Run #" + run.id + " completed. " + approved.length + " " +
     (approved.length === 1 ? "change was" : "changes were") + " written to the catalog.");
 }
 
@@ -5281,8 +5998,12 @@ function generatedEntries(run) {
         issue,
         score: item.score,
         bucket: generatedBucket(item),
+        refining: item.decision === "refining",
+        updated: Boolean(item.updated) && item.decision !== "refining",
+        supplier: item.supplier || "",
+        note: item.note || "",
         outcome: item.decision === "approved"
-          ? (run.status === "completed" ? "written" : "approved")
+          ? (reviewOf(run) === "finalized" ? "written" : "approved")
           : item.decision === "ignored" ? "ignored" : item.decision === "rejected" ? "rejected" : "pending"
       };
     });
@@ -5411,6 +6132,10 @@ function renderArchive(run) {
     const approvedNow = row.outcome === "approved";
     const pending = row.outcome === "pending";
     if (run.generated) tr.classList.add("grouped");
+    if (proposal) tr.dataset.proposal = String(proposal.index);
+    if (proposal && state.proposalChecks.has(proposal.index)) tr.classList.add("selected");
+    if (row.refining) tr.classList.add("is-refining");
+    if (row.updated) tr.classList.add("is-updated");
 
     if (open) {
       const checkCell = document.createElement("td");
@@ -5422,6 +6147,7 @@ function renderArchive(run) {
       box.setAttribute("aria-label", "Check " + row.product + " " + row.attribute);
       box.addEventListener("click", (event) => event.stopPropagation());
       box.addEventListener("change", () => {
+        if (syncingChecks) return;
         if (box.checked) state.proposalChecks.add(proposal.index);
         else state.proposalChecks.delete(proposal.index);
         state.proposalFocus = null;
@@ -5452,11 +6178,28 @@ function renderArchive(run) {
     const final = document.createElement("td");
     final.className = keeps ? "new-value" : "new-value retracted";
     final.textContent = keeps ? row.final : row.outcome === "withdrawn" ? "Proposal withdrawn" : row.outcome === "ignored" ? "Left unchanged" : "Proposal rejected";
+    if (row.note) {
+      const note = document.createElement("small");
+      note.className = "supplier-note";
+      note.textContent = row.note;
+      final.append(note);
+    }
 
     const evidence = document.createElement("td");
     const evidenceTag = document.createElement("span");
-    evidenceTag.className = "evidence" + (row.evidence.startsWith("⚠") ? " conflict" : row.evidence.startsWith("○") ? " weak" : "");
-    evidenceTag.textContent = row.evidence;
+    if (row.refining) {
+      evidenceTag.className = "evidence working";
+      evidenceTag.textContent = "Re-analysing";
+    } else if (row.supplier === "supported") {
+      evidenceTag.className = "evidence supplier";
+      evidenceTag.textContent = "Supplier checked";
+    } else if (row.supplier === "unsupported") {
+      evidenceTag.className = "evidence supplier";
+      evidenceTag.textContent = "Supplier does not support it";
+    } else {
+      evidenceTag.className = "evidence" + (row.evidence.startsWith("⚠") ? " conflict" : row.evidence.startsWith("○") ? " weak" : "");
+      evidenceTag.textContent = row.evidence;
+    }
     evidence.append(evidenceTag);
 
     const score = document.createElement("td");
@@ -5469,19 +6212,12 @@ function renderArchive(run) {
     const status = document.createElement("span");
     status.className = written
       ? "status status-approved status-written"
+      : row.updated ? "status status-updated"
       : approvedNow ? "status status-approved" : pending ? "status" : "status status-rejected";
-    status.textContent = written ? "⌁ written back" : pending ? "pending" : row.outcome;
+    status.textContent = written ? "⌁ written back" : row.refining ? "Re-analysing" : row.updated ? "Updated" : pending ? "pending" : row.outcome;
     outcome.append(status);
 
     tr.append(productCell, attribute, current, final, evidence, score, outcome);
-    if (run.generated && proposal) {
-      tr.addEventListener("click", (event) => {
-        if (event.target.tagName === "INPUT") return;
-        state.proposalFocus = proposal.index;
-        state.assistantOpen = true;
-        render();
-      });
-    }
     body.append(tr);
   }
 
@@ -5514,6 +6250,7 @@ function renderArchive(run) {
         box.setAttribute("aria-label", "Check " + spec.label);
         box.addEventListener("click", (event) => event.stopPropagation());
         box.addEventListener("change", () => {
+          if (syncingChecks) return;
           pendingMembers.forEach((member) => {
             if (allSelected) state.proposalChecks.delete(member.index);
             else state.proposalChecks.add(member.index);
@@ -5548,6 +6285,12 @@ function renderArchive(run) {
       body.append(head);
       if (!collapsed) members.forEach((member) => appendArchiveRow(member, member));
     });
+    const moved = state.justMoved && state.justMoved[0];
+    state.justMoved = [];
+    if (moved != null) {
+      const movedRow = body.querySelector('tr[data-proposal="' + moved + '"]');
+      if (movedRow) movedRow.scrollIntoView({ block: "center" });
+    }
   }
 
   const source = run.generated ? allGenerated : rows;
@@ -5588,7 +6331,10 @@ function renderArchive(run) {
   $("summary-high").textContent = open ? high : written;
   $("summary-high-label").textContent = open ? "High confidence" : "Written to catalog";
   $("summary-high-note").textContent = open ? "Score 90–100" : "Applied to your products";
-  $("summary-review").textContent = open ? counted.length - high : counted.length - written;
+  const still = open
+    ? counted.filter((row) => row.score < 90 && row.outcome === "pending").length
+    : counted.length - written;
+  $("summary-review").textContent = still;
   $("summary-review-label").textContent = open ? "Need review" : "Not applied";
   $("summary-review-note").textContent = open ? "Score below 90" : "Rejected or withdrawn";
 }
@@ -5602,35 +6348,60 @@ function setAction(id, label, eligible, selectedTotal, reason) {
   button.title = eligible ? "" : selectedTotal ? reason : "Select rows first.";
 }
 
+/* Assigning the header checkbox during a redraw must not fire its change
+   handler, or it would tick every row again — including ones just approved. */
+let syncingChecks = false;
+
 function render() {
+  syncingChecks = true;
+  try {
   const openRun = RUNS.find((run) => run.id === state.openRunId) || ACTIVE_RUN;
+  if (!openRun) return;
   const openStatus = statusOf(openRun);
-  /* What a run shows follows its status, not which run it happens to be: a review
-     you just finished reads exactly like one finished yesterday. */
-  const reviewing = openStatus === "review" && !openRun.generated;
+  const phase = phaseOf(openRun);
+  /* The live table is the seeded review. A generated run uses the same page
+     once the agent has finished and the review is still open. */
+  const reviewing = reviewOpen(openRun) && !openRun.generated;
 
   /* Header chrome is shared by every run; only the body below it differs. */
-  $("crumb-run").textContent = "#" + openRun.id;
+  /* Until it completes, a run belongs to its conversation, so the trail leads back there. */
+  const homeThread = runCompleted(openRun) ? null : conversationForRun(openRun);
+  $("runs-back").textContent = homeThread ? conversationTitle(homeThread) : "Agent runs";
+  $("review-close").setAttribute("aria-label", runCompleted(openRun) ? "Close run" : "Close review");
+  $("crumb-run").textContent = homeThread && reviewOpen(openRun) ? "Review of run #" + openRun.id : "#" + openRun.id;
   $("run-heading").textContent = "#" + openRun.id;
   $("run-agent-label").textContent = openRun.agent;
   markAgent($("run-agent-label"), agentByName(openRun.agent));
   $("run-when").textContent = ", " + runWhen(openRun);
-  $("run-status").className = "run-status " + openStatus;
-  $("run-status").textContent = STATUS_LABELS[openStatus];
-  /* Nothing is pending on a finished run, so the header carries no badge. */
-  $("run-status").hidden = openStatus === "completed";
+  const origin = runOrigin(openRun);
+  const reviewThread = origin.autonomous ? conversationForRun(openRun) : origin.key;
+  $("run-origin-link").hidden = !reviewThread;
+  $("run-origin-label").textContent = origin.autonomous
+    ? (reviewThread ? "Started autonomously · Review in conversation:" : "Started autonomously")
+    : "Originating conversation:";
+  if (reviewThread) {
+    $("run-origin-link").textContent = conversationTitle(reviewThread);
+    $("run-origin-link").onclick = () => openConversation(reviewThread);
+  } else {
+    $("run-origin-link").onclick = null;
+  }
+  $("run-status").className = "run-status " + runMark(openRun);
+  $("run-status").textContent = phase.label;
+  $("run-status").hidden = false;
+  $("run-scope").textContent = productNames(openRun.skus);
+  $("run-scope").hidden = !$("run-scope").textContent;
   $("run-state").hidden = openStatus !== "running";
   $("archive-panel").hidden = reviewing || openStatus === "running";
   $("review-panel").hidden = !reviewing;
   $("summary-strip").hidden = openStatus === "running";
-  $("finish-review").hidden = openStatus !== "review";
-  if (openRun.generated && openStatus === "review") {
+  $("finish-review").hidden = !reviewOpen(openRun);
+  if (reviewOpen(openRun) && openRun.generated) {
     const open = (openRun.proposals || []).filter((item) => !item.skipped);
-    const left = open.filter((item) => !item.decision).length;
+    const left = open.filter((item) => !item.decision || item.decision === "refining").length;
     $("finish-review").disabled = left > 0;
     $("finish-review").title = left
       ? left + " " + (left === 1 ? "change still needs" : "changes still need") + " a decision before you can finish."
-      : "Write the approved changes to the catalog and close this run.";
+      : "The agent writes the approved changes to the catalog and the run completes.";
   }
   renderDock();
   renderNav();
@@ -5642,7 +6413,7 @@ function render() {
     $("progress-card").hidden = running;
     if (!running) {
       const proposals = openRun.generated ? (openRun.proposals || []).filter((item) => !item.skipped) : [];
-      const awaiting = openRun.generated && openStatus === "review";
+      const awaiting = openRun.generated && reviewOpen(openRun);
       const decidedCount = proposals.filter((item) => item.decision).length;
       const percent = awaiting && proposals.length ? Math.round((decidedCount / proposals.length) * 100) : 100;
       $("progress-pct").textContent = percent + "%";
@@ -5669,8 +6440,14 @@ function render() {
   $("tabs").hidden = true;
   $("tab-note").hidden = true;
   renderRows(rows);
-  const focusedRow = document.querySelector("#rows tr.focused");
-  if (focusedRow) focusedRow.scrollIntoView({ block: "nearest" });
+  const movedId = state.justMoved && state.justMoved[0];
+  state.justMoved = [];
+  const movedRow = movedId ? document.querySelector('#rows tr[data-change="' + movedId + '"]') : null;
+  if (movedRow) movedRow.scrollIntoView({ block: "center" });
+  else {
+    const focusedRow = document.querySelector("#rows tr.focused");
+    if (focusedRow) focusedRow.scrollIntoView({ block: "nearest" });
+  }
   renderThread();
 
   $("group-tool").className = state.groupBy === "none" ? "tool tool-select" : "tool tool-select on";
@@ -5696,6 +6473,10 @@ function render() {
 
   $("ready-bar").hidden = readyCount === 0;
   $("ready-count").textContent = readyCount.toLocaleString() + " " + (readyCount === 1 ? "change" : "changes") + " ready";
+  const updated = updatedChanges();
+  $("updated-bar").hidden = updated.length === 0;
+  $("updated-count").textContent = updated.length + (updated.length === 1 ? " change updated by the agent" : " changes updated by the agent");
+  $("updated-show").textContent = state.refined === "Refined only" ? "Show all" : "Updated in this review";
   $("footer-range").textContent = rows.length === CHANGES.length
     ? CHANGES.length + " " + (CHANGES.length === 1 ? "change" : "changes")
     : rows.length + " of " + CHANGES.length + " " + (CHANGES.length === 1 ? "change" : "changes");
@@ -5707,7 +6488,8 @@ function render() {
   $("summary-high").textContent = highConfidence;
   $("summary-high-label").textContent = "High confidence";
   $("summary-high-note").textContent = "Score 90–100";
-  $("summary-review").textContent = CHANGES.length - highConfidence;
+  const stillToReview = CHANGES.filter((change) => confidenceOf(change) < 90 && !["approved", "rejected", "withdrawn"].includes(decisionOf(change.id))).length;
+  $("summary-review").textContent = stillToReview;
   $("summary-review-label").textContent = "Need review";
   $("summary-review-note").textContent = "Score below 90";
   $("empty").hidden = rows.length > 0;
@@ -5720,9 +6502,12 @@ function render() {
   $("finish-review").disabled = decided !== CHANGES.length;
   $("finish-review").title = decided !== CHANGES.length
     ? (CHANGES.length - decided) + " changes still need a decision."
-    : "Write the approved changes to the catalog and close this review.";
+    : "The agent writes the approved changes to the catalog and the run completes.";
 
   renderComposer();
+  } finally {
+    syncingChecks = false;
+  }
 }
 
 /* ---------- events ---------- */
@@ -5739,6 +6524,10 @@ $("score-filter").addEventListener("change", (event) => { state.score = event.ta
 $("status-filter").addEventListener("change", (event) => { state.status = event.target.value; render(); });
 $("issue-filter").addEventListener("change", (event) => { state.issue = event.target.value; render(); });
 $("refined-filter").addEventListener("change", (event) => { state.refined = event.target.value; render(); });
+$("updated-show").addEventListener("click", () => {
+  state.refined = state.refined === "Refined only" ? "Any" : "Refined only";
+  render();
+});
 $("clear-filters").addEventListener("click", () => {
   state.query = "";
   state.score = "Any";
@@ -5752,6 +6541,7 @@ $("clear-filters").addEventListener("click", () => {
 
 $("archive-select-all").addEventListener("click", (event) => event.stopPropagation());
 $("archive-select-all").addEventListener("change", () => {
+  if (syncingChecks) return;
   const run = RUNS.find((item) => item.id === state.openRunId);
   if (!generatedReview(run)) return;
   const selectable = visibleGeneratedEntries(run).map((row) => row.index);
@@ -5790,10 +6580,11 @@ $("archive-reject").addEventListener("click", () => applyGeneratedDecision("reje
 $("archive-undo").addEventListener("click", () => undoGeneratedDecision());
 
 $("select-all").addEventListener("change", () => {
+  if (syncingChecks) return;
   const selectable = actionable(visibleChanges().map((row) => row.id));
   const allSelected = selectable.length > 0 && selectable.every((id) => state.selected.has(id));
   selectable.forEach((id) => { allSelected ? state.selected.delete(id) : state.selected.add(id); });
-  state.panelMode = state.selected.size ? "bulk" : (state.focused ? "single" : null);
+  state.panelMode = state.selected.size ? "bulk" : null;
   render();
 });
 
@@ -5808,7 +6599,7 @@ $("finish-review").addEventListener("click", () => {
 /* From a run you can step sideways into a conversation with the agent behind it. */
 $("run-agent-label").addEventListener("click", () => {
   const run = RUNS.find((item) => item.id === state.openRunId) || ACTIVE_RUN;
-  const agent = agentByName(run.agent);
+  const agent = run ? agentByName(run.agent) : null;
   if (agent) showChat(agent.id);
 });
 $("nav-general").addEventListener("click", () => showChat("general"));
@@ -5844,7 +6635,14 @@ document.querySelectorAll(".assistant-menu-branch").forEach((branch) => {
   branch.addEventListener("mouseleave", hide);
   flyout.addEventListener("mouseleave", hide);
 });
-$("runs-back").addEventListener("click", showRuns);
+function closeReview() {
+  const openRun = RUNS.find((run) => run.id === state.openRunId);
+  const home = openRun && !runCompleted(openRun) ? conversationForRun(openRun) : null;
+  if (home) openConversation(home);
+  else showRuns();
+}
+$("runs-back").addEventListener("click", closeReview);
+$("review-close").addEventListener("click", closeReview);
 function deleteConversation(key) {
   delete state.chats[key];
   delete state.chatRecent[key];
@@ -6040,7 +6838,17 @@ $("composer-send").addEventListener("click", () => {
   const instruction = $("instruction").value.trim();
   if (!instruction) return;
   const generated = openGeneratedReview();
-  if (generated) { askAboutGeneratedRun(generated, instruction); return; }
+  if (generated) {
+    const indexes = generatedTargets(generated);
+    const key = conversationForRun(generated) || generated.thread;
+    if (!indexes.length) { askAboutGeneratedRun(generated, instruction); return; }
+    if (key) addMessage(key, { role: "user", text: instruction, context: generatedContextLabel(generated) });
+    applyGeneratedInstruction(generated, instruction, indexes, key);
+    $("instruction").value = "";
+    autoGrow();
+    render();
+    return;
+  }
   const ids = refineTargets();
   if (!ids.length) { askAboutRun(instruction); return; }
   sendRefinement(instruction, ids);
@@ -6056,8 +6864,7 @@ document.querySelectorAll(".agent-action").forEach((button) => {
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (agentMenuButton) { closeAgentMenu(); return; }
-  if (state.panelMode === "single") { state.focused = null; state.panelMode = state.selected.size ? "bulk" : null; render(); }
-  else if (state.panelMode === "bulk") { state.selected.clear(); state.panelMode = null; render(); }
+  if (state.panelMode === "bulk") { state.selected.clear(); state.focused = null; state.panelMode = null; render(); }
 });
 
 $("follow-switch").addEventListener("click", (event) => {
@@ -6091,6 +6898,7 @@ $("product-rows").addEventListener("dblclick", (event) => {
   showProduct();
 });
 
+RUNS.filter((run) => run.origin === "autonomous" && reviewOpen(run) && !run.thread).forEach(postAutonomousReview);
 syncFilterInputs();
 renderAgentMenu();
 showProducts();
