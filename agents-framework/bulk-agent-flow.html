@@ -1,0 +1,2419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bulk content optimizer — flow prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: rgba(0, 0, 0, 0.87);
+      --muted: rgba(0, 0, 0, 0.6);
+      --dim: rgba(0, 0, 0, 0.38);
+      --line: #e3e7ea;
+      --line-strong: #cfd6db;
+      --paper: #ececec;
+      --panel-bg: #f5f5f5;
+      --header: #0f4c5c;
+      --header-ink: #e8f2f4;
+      --accent: #0d71af;
+      --high: #307932;
+      --mid: #e06c00;
+      --low: #b00020;
+      --select: #d7ebf7;
+      --h-global-header: 48px;
+      --h-action-toolbar: 44px;
+      --h-tabs-row: 41px;
+      --h-crumbs: 37px;
+      --h-context-band: calc(var(--h-tabs-row) + var(--h-crumbs));
+      font-family: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 21px;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; min-width: 1200px; }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; background: none; border: none; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .app { height: 100%; display: flex; flex-direction: column; background: var(--paper); }
+
+    .mdm-header {
+      display: flex; align-items: center; gap: 12px; box-sizing: border-box;
+      height: var(--h-global-header); min-height: var(--h-global-header); max-height: var(--h-global-header);
+      padding: 0 16px; background: var(--header); color: var(--header-ink); flex-shrink: 0;
+      overflow: hidden;
+    }
+    .mdm-header svg { color: var(--header-ink); flex-shrink: 0; }
+    .brand-mark { width: 22px; height: 22px; background: #1fa394; border-radius: 3px; flex-shrink: 0; }
+    .brand { display: flex; flex-direction: column; line-height: 1.15; margin-right: 8px; min-width: 0; }
+    .brand b { font-size: 13px; font-weight: 600; }
+    .brand span { font-size: 11px; opacity: 0.75; }
+    .lang, .nav-link { font-size: 12px; color: var(--header-ink); text-decoration: none; opacity: 0.9; }
+    .search {
+      display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
+      border-radius: 4px; padding: 0 10px; height: 30px; flex: 1; max-width: 420px; margin-left: 16px;
+    }
+    .search input { border: 0; background: transparent; color: #fff; width: 100%; outline: none; font-size: 12px; }
+    .search input::placeholder { color: rgba(255,255,255,0.6); }
+    .ai-assistant {
+      margin-left: auto; background: #1a7a6d; color: #fff; border: 0; border-radius: 4px;
+      padding: 7px 12px; font-weight: 600; font-size: 12px; white-space: nowrap;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 0 14px rgba(46, 196, 171, 0.45);
+    }
+    .assistant-back {
+      display: flex; align-items: center; gap: 4px; border: 0; background: transparent;
+      color: var(--header-ink); font-size: 13px; font-weight: 600; padding: 4px 0; margin-right: 4px;
+    }
+    .assistant-back:hover { opacity: 0.92; }
+    .assistant-back svg { opacity: 0.95; }
+    .icon-btn {
+      border: 0; background: transparent; color: inherit; width: 28px; height: 28px;
+      display: grid; place-items: center; border-radius: 4px; position: relative; padding: 0;
+    }
+    .icon-btn.light { color: var(--header-ink); }
+    .icon-btn.light:hover { background: rgba(255,255,255,0.12); }
+    .icon-btn .badge {
+      position: absolute; top: 2px; right: 1px; background: #2b8aed; color: #fff;
+      font-size: 9px; font-weight: 700; min-width: 14px; height: 14px; border-radius: 99px;
+      display: grid; place-items: center; line-height: 1;
+    }
+    .avatar {
+      width: 26px; height: 26px; border-radius: 99px; background: #c8a46a; color: #1c2429;
+      display: grid; place-items: center; font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+    .spacer { flex: 1; }
+
+    .toolbar {
+      display: flex; align-items: center; gap: 4px; box-sizing: border-box;
+      height: var(--h-action-toolbar); min-height: var(--h-action-toolbar); max-height: var(--h-action-toolbar);
+      padding: 0 12px; background: #fff; border-bottom: 1px solid var(--line); flex-shrink: 0; position: relative;
+    }
+    .tool {
+      display: flex; align-items: center; gap: 6px; border: 0; background: transparent;
+      color: #3d4a51; padding: 6px 8px; border-radius: 4px; font-size: 12px;
+    }
+    .tool:hover { background: #f4f6f7; }
+    .tool.is-on { background: #e8f3fb; color: var(--accent); font-weight: 600; }
+    .tool svg { flex-shrink: 0; }
+    .zoom { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-left: 8px; }
+    .zoom input { width: 88px; accent-color: var(--header); }
+    .details-btn {
+      background: var(--header); color: #fff; border: 0; border-radius: 4px;
+      padding: 6px 12px; font-size: 12px; font-weight: 600;
+    }
+    .menu-pop {
+      position: absolute; top: calc(100% + 2px); left: 140px; z-index: 30;
+      min-width: 220px; background: #fff; border: 1px solid var(--line-strong);
+      border-radius: 2px; box-shadow: 0 8px 24px rgba(16,24,32,0.12); padding: 4px 0;
+    }
+    .menu-pop button {
+      width: 100%; text-align: left; padding: 10px 14px; font-size: 13px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .menu-pop button:hover { background: #e8f3fb; color: var(--accent); }
+    .menu-pop button.is-active { background: #e8f3fb; color: var(--accent); font-weight: 600; }
+    .menu-pop button b { font-weight: 600; }
+    .menu-pop.group-menu { left: 200px; min-width: 260px; }
+    .menu-pop-divider { height: 1px; background: var(--line); margin: 4px 0; }
+    .menu-pop button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .context-band {
+      flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box;
+      height: var(--h-context-band); min-height: var(--h-context-band); max-height: var(--h-context-band);
+    }
+    .tabs-row {
+      display: flex; align-items: flex-end; gap: 0; box-sizing: border-box;
+      height: var(--h-tabs-row); min-height: var(--h-tabs-row); max-height: var(--h-tabs-row);
+      background: #e8ecee; padding: 8px 12px 0; flex-shrink: 0;
+    }
+    .tabs-row--placeholder { pointer-events: none; visibility: hidden; }
+    .tab {
+      border: 1px solid transparent; background: transparent; padding: 8px 16px;
+      color: var(--muted); border-radius: 6px 6px 0 0; font-size: 12px;
+    }
+    .tab.is-on { background: #fff; border-color: var(--line); color: var(--ink); font-weight: 600; border-bottom-color: #fff; }
+    .tab-inner { display: inline-flex; align-items: center; gap: 6px; }
+    .tab-star { color: #f9a825; display: grid; place-items: center; }
+    .crumbs {
+      display: flex; align-items: center; box-sizing: border-box;
+      height: var(--h-crumbs); min-height: var(--h-crumbs); max-height: var(--h-crumbs);
+      padding: 0 20px; font-size: 12px; color: var(--muted); background: #fff;
+      border-bottom: 1px solid var(--line); flex-shrink: 0;
+    }
+    .crumbs a { color: var(--accent); text-decoration: none; }
+    .crumbs a:hover { text-decoration: underline; }
+
+    .workspace-row {
+      flex: 1; min-height: 0; display: flex; align-items: stretch;
+    }
+    .workspace-main {
+      flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff;
+    }
+    .main-col { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; }
+
+    .screen-review { background: #fff; }
+    .review-screen { background: #fff; }
+
+    .table-wrap { flex: 1; min-height: 0; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      position: sticky; top: 0; z-index: 2; background: #fafbfc; text-align: left;
+      font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line);
+      padding: 10px 12px; white-space: nowrap;
+    }
+    td { border-bottom: 1px solid var(--line); padding: 10px 12px; vertical-align: top; }
+    tr.is-selected td { background: var(--select); }
+    tr.is-reviewed td { background: #fafafa; }
+    tr.group-row td {
+      background: #eef1f3; padding: 8px 12px; border-bottom: 1px solid var(--line);
+      font-size: 12px; color: var(--muted);
+    }
+    tr.group-row strong { color: var(--ink); font-weight: 600; font-size: 13px; }
+    tr.group-row .group-meta { font-weight: 400; margin-left: 8px; }
+    td.is-grouped-empty { color: var(--dim); }
+    .cell-check { width: 40px; text-align: center; }
+    .cell-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .item-cell { display: flex; align-items: center; gap: 8px; min-width: 160px; }
+    .folder { width: 18px; height: 14px; background: #90a4ae; border-radius: 2px 2px 0 0; flex-shrink: 0; position: relative; }
+    .folder::after {
+      content: ""; position: absolute; top: -3px; left: 0; width: 8px; height: 4px;
+      background: #90a4ae; border-radius: 2px 2px 0 0;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px; background: #eceff1;
+      border-radius: 2px; padding: 2px 6px; font-size: 12px; margin: 2px 4px 2px 0;
+    }
+    .chip .star { color: #f9a825; font-size: 10px; }
+    .table-status {
+      flex-shrink: 0; display: flex; align-items: center; min-height: 40px;
+      padding: 8px 16px; font-size: 12px; color: var(--muted);
+      border-top: 1px solid var(--line); background: #f8fafc;
+    }
+    .review-finish-bar {
+      flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; padding: 12px 16px; background: #fff; border-top: 1px solid var(--line);
+    }
+    .review-finish-progress { flex: 1; min-width: 0; max-width: 420px; }
+    .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .progress-label strong { color: var(--ink); font-weight: 600; font-size: 14px; margin-right: 4px; }
+    .progress-bar { height: 6px; background: #e0e0e0; border-radius: 99px; overflow: hidden; }
+    .progress-bar span { display: block; height: 100%; background: var(--accent); transition: width 0.2s; }
+    .finish-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .btn-finish {
+      background: var(--accent); color: #fff; border: 0; border-radius: 2px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+    }
+    .btn-finish:not(:disabled):hover { filter: brightness(1.05); }
+
+    .score {
+      display: inline-block; min-width: 44px; text-align: center; padding: 0 8px; height: 20px;
+      line-height: 20px; border-radius: 10px; color: #fff; font-size: 11px; font-weight: 600;
+    }
+    .score.high { background: var(--high); }
+    .score.mid { background: var(--mid); }
+    .score.low { background: var(--low); }
+    .status { font-size: 12px; color: var(--muted); }
+    .status.approved { color: var(--high); font-weight: 600; }
+    .status.rejected { color: var(--low); font-weight: 600; }
+    .value-col { max-width: 220px; line-height: 1.4; }
+    .desc-col { max-width: 280px; line-height: 1.4; color: var(--ink); }
+    .tag-col { max-width: 200px; }
+    .reasoning { max-width: 260px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .record-status { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* Side panel — no close control */
+    .panel {
+      width: 384px; flex-shrink: 0; align-self: stretch; background: var(--panel-bg);
+      border-left: 1px solid var(--line-strong); display: flex; flex-direction: column;
+      min-height: 0; height: auto;
+    }
+    .panel[hidden] { display: none; }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 24px 24px 0; flex-shrink: 0;
+    }
+    .panel-title { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 500; }
+    .panel-rule { height: 1px; background: #cfd8dc; margin: 16px 24px 0; }
+    .panel-run-row { display: flex; justify-content: flex-end; padding: 16px 24px 0; }
+    .run-chip {
+      background: #eceff1; color: var(--muted); border-radius: 2px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600;
+    }
+    .panel-feed {
+      flex: 1; min-height: 0; overflow: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .panel-empty {
+      flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0;
+    }
+    .panel-empty-hero {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 16px 8px 24px; gap: 12px;
+    }
+    .panel-empty-icon { color: var(--accent); line-height: 0; }
+    .panel-empty-icon svg { width: 48px; height: 48px; }
+    .panel-empty-hero h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+    .panel-empty-hero p {
+      margin: 0; max-width: 280px; font-size: 13px; line-height: 1.45; color: var(--muted);
+    }
+    .panel-empty-run { font-size: 14px; margin-top: 4px; }
+    .panel-empty-run:disabled { opacity: 0.45; cursor: not-allowed; text-decoration: none; }
+    .panel-idle-thread { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    .panel-thread-archive {
+      padding: 8px 10px; background: #eceff1; border-radius: 2px; font-size: 12px; color: var(--muted);
+    }
+    .panel-thread-archive strong { color: var(--ink); font-weight: 600; }
+    .single-summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .single-summary-table th {
+      position: static; text-align: left; font-weight: 600; color: var(--muted); font-size: 12px;
+      padding: 6px 8px; border-bottom: 1px solid var(--line); background: transparent;
+    }
+    .single-summary-table td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .single-attr-name { color: var(--accent); font-weight: 500; }
+    .single-attr-toggle {
+      width: 100%; display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent;
+      text-align: left; font: inherit; color: inherit;
+    }
+    .single-attr-toggle .chev { font-size: 10px; color: var(--muted); width: 12px; }
+    .single-attr-detail { padding: 8px 8px 10px 26px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .single-attr-detail b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 4px; font-size: 12px; }
+    .single-asking {
+      display: flex; align-items: center; gap: 8px; padding: 10px 8px 0; font-size: 13px; color: var(--muted);
+    }
+    .panel-turn-relative { position: relative; }
+    .single-questions {
+      margin-top: 12px; background: #fff; border: 1px solid var(--line-strong); border-radius: 4px;
+      box-shadow: 0 8px 20px rgba(16, 24, 32, 0.12); padding: 14px 14px 12px;
+    }
+    .single-questions--frozen { box-shadow: none; background: #fafafa; }
+    .single-questions--frozen .single-q-option { pointer-events: none; opacity: 0.55; }
+    .single-questions--frozen .single-q-option.is-chosen { opacity: 1; }
+    .single-questions--frozen .single-questions-foot { display: none; }
+    .single-manual-record {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+    }
+    .single-manual-record:last-child { border-bottom: 0; }
+    .single-manual-log { margin-top: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; background: #fff; }
+    .single-manual-log > strong { display: block; font-size: 13px; margin-bottom: 8px; }
+    .single-questions > strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+    .single-q-option {
+      display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border: 0; background: transparent;
+      width: 100%; text-align: left; font: inherit; cursor: pointer;
+    }
+    .single-q-option input { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
+    .single-q-option b { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .single-q-option span { display: block; font-size: 12px; color: var(--muted); line-height: 1.35; margin-top: 2px; }
+    .single-questions-foot {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px;
+      padding-top: 10px; border-top: 1px solid var(--line);
+    }
+    .single-questions-foot .link-discard {
+      border: 0; background: transparent; color: var(--accent); font-size: 13px; font-weight: 600; padding: 6px 0;
+    }
+    .single-questions-foot .actions { display: flex; gap: 8px; margin-left: auto; }
+    .btn-refine-secondary {
+      border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 2px;
+      padding: 6px 12px; font-size: 13px; font-weight: 600;
+    }
+    .btn-refine-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-single-primary {
+      background: var(--accent); color: #fff; border: 0; border-radius: 2px;
+      padding: 6px 14px; font-size: 13px; font-weight: 600;
+    }
+    .btn-single-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .single-manual {
+      margin-top: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: #fff;
+    }
+    .single-manual-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .single-manual h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+    .single-manual-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .single-manual-actions .tool { border: 1px solid var(--line); border-radius: 2px; padding: 6px 12px; font-size: 12px; font-weight: 600; }
+    .single-finished .panel-lede { margin-top: 4px; }
+    .panel-lede { margin: 0; font-size: 14px; }
+    .work-toggle {
+      display: flex; align-items: center; gap: 4px; padding: 0; color: var(--muted); font-size: 14px;
+    }
+    .work-toggle.is-live {
+      background: linear-gradient(21.75deg, #07528d 6.42%, #931179 58.07%, #ec8b04 109.72%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      font-weight: 500;
+    }
+    .steps { list-style: none; margin: 8px 0 0; padding: 0 0 0 22px; border-left: 1px solid #d4d4d4; }
+    .steps li { position: relative; padding: 0 0 8px 12px; color: var(--dim); font-size: 14px; }
+    .steps li.is-now { color: var(--muted); }
+    .steps li.is-done { color: var(--dim); }
+
+    .summary {
+      border: 1px solid #d4d4d4; border-radius: 2px; background: var(--panel-bg); overflow: hidden;
+    }
+    .summary-head {
+      width: 100%; display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 8px 12px; text-align: left;
+    }
+    .summary-head strong { display: block; font-size: 16px; font-weight: 500; }
+    .summary-head em { display: block; font-style: normal; font-size: 12px; color: var(--muted); }
+    .summary-body { padding: 0 12px 12px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;
+    }
+    .stat {
+      display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--muted);
+    }
+    .stat b { display: block; font-size: 20px; font-weight: 500; color: var(--ink); line-height: 1.2; }
+    .stat-icon { width: 28px; height: 28px; border-radius: 4px; display: grid; place-items: center; font-size: 14px; }
+    .stat-icon.blue { background: #e3f2fd; }
+    .stat-icon.purple { background: #f3e5f5; }
+    .stat-icon.green { background: #e8f5e9; }
+    .stat-icon.red { background: #ffebee; }
+    .btn-review {
+      align-self: flex-end; margin-top: 8px; background: var(--accent); color: #fff;
+      border-radius: 2px; padding: 8px 16px; font-size: 13px; font-weight: 600;
+    }
+    .btn-review.is-muted {
+      background: #eceff1; color: var(--muted); pointer-events: none;
+    }
+    .panel-user {
+      align-self: flex-end; max-width: calc(100% - 16px); background: #e5e5e5;
+      padding: 8px; border-radius: 2px; font-size: 14px;
+    }
+    .panel-dock {
+      flex-shrink: 0; padding: 0 24px 24px; background: var(--panel-bg);
+      border-top: 1px solid transparent;
+    }
+    .dock-input {
+      display: flex; gap: 8px; align-items: flex-end; background: #fff; border: 1px solid #cfd8dc;
+      border-radius: 2px; padding: 8px 10px;
+    }
+    .dock-input-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .dock-selection-chip {
+      align-self: flex-start; display: inline-flex; align-items: center; gap: 4px;
+      background: #eceff1; border-radius: 2px; padding: 2px 8px; font-size: 12px; line-height: 18px;
+      color: var(--ink);
+    }
+    .dock-selection-chip .star { color: #f9a825; font-size: 10px; }
+    .dock-input textarea {
+      width: 100%; border: 0; resize: none; min-height: 44px; max-height: 120px; outline: none;
+      font-size: 14px; line-height: 21px;
+    }
+    .dock-send {
+      width: 32px; height: 32px; border-radius: 2px; background: #eceff1; color: var(--muted);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .dock-send:not(:disabled) { background: var(--accent); color: #fff; }
+    .dock-meta { margin-top: 8px; font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+    .ai-pill {
+      display: inline-block; padding: 1px 6px; border: 1px solid #cfd8dc; border-radius: 2px;
+      font-size: 10px; font-weight: 600;
+    }
+    .chev { display: inline-block; transition: transform 0.15s; }
+    .chev.open { transform: rotate(180deg); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px; height: 14px; border: 2px solid #cfd8dc; border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block;
+    }
+
+    .panel-title-wrap { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .panel-icon-btn {
+      width: 20px; height: 20px; padding: 2px; border: 0; background: transparent;
+      color: var(--muted); display: grid; place-items: center; flex-shrink: 0;
+    }
+    .panel-icon-btn.is-on { color: var(--ink); }
+    .panel-icon-btn:hover { color: var(--ink); }
+    .panel-switch {
+      position: absolute; top: calc(100% + 10px); left: -8px; width: 300px; background: #f3f3f3;
+      border-radius: 4px; box-shadow: 0 8px 24px rgba(16, 24, 32, 0.18); z-index: 40;
+      padding: 8px; color: var(--ink);
+    }
+    .panel-switch::before {
+      content: ""; position: absolute; top: -6px; left: 12px; width: 12px; height: 12px;
+      background: #f3f3f3; transform: rotate(45deg); box-shadow: -1px -1px 0 rgba(16, 24, 32, 0.04);
+    }
+    .panel-switch-chat {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 2px;
+      color: var(--muted); font-size: 14px; font-weight: 500;
+    }
+    .panel-switch-rule { height: 1px; background: #d4d4d4; margin: 4px 8px 8px; }
+    .panel-switch-kicker { padding: 4px 12px 8px; font-size: 12px; color: var(--muted); }
+    .panel-switch-agent {
+      width: 100%; border: 0; background: #0d71af; color: #fff; text-align: left; border-radius: 2px; padding: 12px;
+    }
+    .panel-switch-agent-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+    .panel-switch-agent p {
+      margin: 6px 0 0 24px; font-size: 13px; line-height: 18px; color: rgba(255,255,255,0.92);
+    }
+    .panel-switch-run {
+      width: 100%; border: 0; background: transparent; text-align: left; border-radius: 2px;
+      padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; font-size: 14px;
+    }
+    .panel-switch-run:hover { background: #ececec; }
+    .panel-switch-run em { display: block; font-style: normal; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .panel-switch-run-icon { color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+
+    .panel-turn { display: flex; flex-direction: column; gap: 12px; }
+    .run-meta-line {
+      display: flex; align-items: center; padding: 0; color: var(--muted); font-size: 14px; line-height: 21px;
+    }
+    .run-meta-toggle {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 14px; text-align: left;
+    }
+    .run-meta-toggle .meta-left { display: flex; align-items: center; gap: 8px; }
+    .run-meta-toggle .meta-right { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 14px; }
+    .panel-link {
+      border: 0; background: transparent; color: var(--accent); font-size: 14px; font-weight: 600;
+      padding: 0; text-align: left;
+    }
+    .panel-link:hover { text-decoration: underline; }
+
+    .modal-scrim {
+      position: fixed; inset: 0; z-index: 100; background: rgba(15, 23, 42, 0.45);
+      display: grid; place-items: center; padding: 24px;
+    }
+    .modal {
+      width: min(720px, 100%); max-height: min(80vh, 640px); background: #fff; border-radius: 4px;
+      box-shadow: 0 16px 48px rgba(16, 24, 32, 0.2); display: flex; flex-direction: column; overflow: hidden;
+    }
+    .modal-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+      padding: 20px 24px 12px; border-bottom: 1px solid var(--line); flex-shrink: 0;
+    }
+    .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; }
+    .modal-head p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    .modal-close {
+      border: 0; background: transparent; color: var(--muted); width: 32px; height: 32px;
+      border-radius: 4px; font-size: 20px; line-height: 1;
+    }
+    .modal-close:hover { background: #f4f6f7; color: var(--ink); }
+    .modal-body { flex: 1; min-height: 0; overflow: auto; padding: 0 24px 16px; }
+    .modal-body table { font-size: 13px; }
+    .modal-foot {
+      flex-shrink: 0; padding: 12px 24px 20px; border-top: 1px solid var(--line);
+      display: flex; justify-content: flex-end;
+    }
+    .modal-foot button {
+      background: var(--accent); color: #fff; border: 0; border-radius: 2px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+    }
+    .log-decision { font-size: 12px; font-weight: 600; }
+    .log-decision.approved { color: var(--high); }
+  </style>
+</head>
+<body>
+  <div class="app" id="app"></div>
+  <script>
+    const HIGH = 90;
+    const RUN_STEPS = [
+      "Read product data and context",
+      "Evaluate attributes against quality policies",
+      "Generate enriched content",
+    ];
+    const REFINE_STEPS = ["Read your instructions", "Regenerate selected suggestions"];
+    const AGENT_PURPOSE =
+      "Transforms trusted product data and business context into optimized, brand-compliant, channel-ready, and AI-discoverable product content at scale.";
+    const DEMO_RUN_ID = 1234;
+    const RUN_DURATION_SEC = 6;
+
+    /** @type {{ id: string|null, label: string, hint?: string }[]} */
+    const REVIEW_GROUP_OPTIONS = [
+      { id: "item", label: "Item", hint: "One block per product" },
+      { id: "score", label: "Confidence score", hint: "High, medium, needs attention" },
+      { id: "attribute", label: "Attribute", hint: "Same field together" },
+      { id: "status", label: "Review status", hint: "Pending, approved, rejected" },
+    ];
+
+    const CATALOG_HEADERS = [
+      "Item",
+      "Web product name",
+      "Short description",
+      "Tags",
+      "Category",
+      "Product ID",
+      "Record status",
+    ];
+
+    const CATALOG_ROWS = [
+      {
+        id: "r1",
+        name: "Linen Duvet Set",
+        sku: "LD-204",
+        webName: "Washed linen duvet set",
+        shortDesc: "Soft linen duvet cover and shams for warm nights.",
+        tags: ["Summer 2026", "Organic linen"],
+        category: "Bedding",
+        recordStatus: "Draft",
+      },
+      {
+        id: "r2",
+        name: "Arc Desk Lamp",
+        sku: "AD-118",
+        webName: "Arc desk lamp — matte black",
+        shortDesc: "Minimal desk lamp with adjustable arm.",
+        tags: ["Home office", "LED"],
+        category: "Lighting",
+        recordStatus: "In enrichment",
+      },
+      {
+        id: "r3",
+        name: "Ridge Backpack",
+        sku: "RB-902",
+        webName: "Ridge commuter backpack 20L",
+        shortDesc: "Durable daypack for commuters.",
+        tags: ["Commute", "Water-resistant"],
+        category: "Bags",
+        recordStatus: "Draft",
+      },
+      {
+        id: "r4",
+        name: "Navy Beach Tote",
+        sku: "BT-441",
+        webName: "Navy beach tote — recycled cotton",
+        shortDesc: "Tote for sunny days.",
+        tags: ["Beach", "Recycled cotton"],
+        category: "Accessories",
+        recordStatus: "Published",
+      },
+      {
+        id: "r5",
+        name: "Garden tableware set",
+        sku: "GT-012",
+        webName: "Garden tableware set | 12-piece ceramic",
+        shortDesc: "12-piece ceramic tableware set for outdoor dining.",
+        tags: ["Outdoor dining", "Ceramic"],
+        category: "Home",
+        recordStatus: "Published",
+      },
+      {
+        id: "r6",
+        name: "Ceramic Serving Bowl",
+        sku: "CS-778",
+        webName: "Hand-glazed serving bowl 30 cm",
+        shortDesc: "Hand-thrown serving bowl for shared meals.",
+        tags: ["Kitchen", "Oven safe"],
+        category: "Home",
+        recordStatus: "Draft",
+      },
+      {
+        id: "r7",
+        name: "Weekend cooler bag",
+        sku: "WC-330",
+        webName: "Insulated weekend cooler",
+        shortDesc: "Soft cooler for park and beach days.",
+        tags: ["Outdoor", "Insulated"],
+        category: "Outdoor",
+        recordStatus: "In enrichment",
+      },
+      {
+        id: "r8",
+        name: "Outdoor folding chair",
+        sku: "OF-221",
+        webName: "Folding camp chair with carry bag",
+        shortDesc: "Lightweight chair for festivals and camping.",
+        tags: ["Camping", "Steel frame"],
+        category: "Outdoor",
+        recordStatus: "Published",
+      },
+      {
+        id: "r9",
+        name: "Striped beach umbrella",
+        sku: "SU-109",
+        webName: "UV beach umbrella 2 m",
+        shortDesc: "Wide canopy with tilt and carry sleeve.",
+        tags: ["Beach", "UPF 50+"],
+        category: "Outdoor",
+        recordStatus: "Draft",
+      },
+      {
+        id: "r10",
+        name: "Sand-proof picnic blanket",
+        sku: "PB-556",
+        webName: "Sand-proof picnic blanket — navy stripe",
+        shortDesc: "Machine-washable blanket with waterproof backing.",
+        tags: ["Picnic", "Machine wash"],
+        category: "Outdoor",
+        recordStatus: "Published",
+      },
+    ];
+
+    /** Per-product attribute suggestions generated by the optimizer (shown on review). */
+    const PRODUCT_EDITS = {
+      r1: [
+        {
+          attribute: "Short description",
+          previous: "Soft linen duvet cover and shams for warm nights.",
+          newValue: "Breathable washed-linen duvet set with button closure and two matching shams.",
+          score: 97,
+          reasoning: "Adds material, closure, and component detail from specifications.",
+        },
+        {
+          attribute: "Long description",
+          previous: "Includes duvet cover and pillow shams.",
+          newValue: "A breathable linen duvet set with a button closure, two shams, and a relaxed drape for summer bedrooms.",
+          score: 94,
+          reasoning: "Expands on components already stored on the record.",
+        },
+      ],
+      r2: [
+        {
+          attribute: "Short description",
+          previous: "Minimal desk lamp with adjustable arm.",
+          newValue: "Slim arc desk lamp with dimmable LED and matte black finish.",
+          score: 96,
+          reasoning: "Pulls finish and light source from structured attributes.",
+        },
+        {
+          attribute: "Long description",
+          previous: "Good for home office.",
+          newValue: "Matte black arc lamp with a dimmable LED head, weighted base, and 24-inch reach for desk tasks.",
+          score: 93,
+          reasoning: "Adds material and finish from specifications.",
+        },
+        {
+          attribute: "Colors",
+          previous: "black, white",
+          newValue: "Matte black, Cloud white",
+          score: 88,
+          reasoning: "Normalizes color names to approved vocabulary.",
+        },
+      ],
+      r3: [
+        {
+          attribute: "Short description",
+          previous: "Durable daypack for commuters.",
+          newValue: "Water-resistant ridge backpack with padded laptop sleeve and sternum strap.",
+          score: 98,
+          reasoning: "Uses material and feature fields from the record.",
+        },
+        {
+          attribute: "Long description",
+          previous: "Roomy main compartment.",
+          newValue: "Water-resistant ridge backpack with a 20L main compartment, padded 15-inch laptop sleeve, and breathable back panel.",
+          score: 95,
+          reasoning: "Adds capacity and laptop fit from specifications.",
+        },
+      ],
+      r4: [
+        {
+          attribute: "Short description",
+          previous: "Tote for sunny days.",
+          newValue: "Roomy navy beach tote in recycled cotton with interior pocket.",
+          score: 91,
+          reasoning: "Aligns copy with material and color attributes.",
+        },
+      ],
+      r5: [
+        {
+          attribute: "Short description",
+          previous: "12-piece ceramic tableware set for outdoor dining.",
+          newValue: "12-piece glazed ceramic tableware set for garden dining, dishwasher safe.",
+          score: 92,
+          reasoning: "Adds care note from product specs.",
+        },
+      ],
+      r6: [
+        {
+          attribute: "Short description",
+          previous: "Hand-thrown serving bowl for shared meals.",
+          newValue: "Hand-glazed ceramic serving bowl, 30 cm, oven safe to 200°C.",
+          score: 89,
+          reasoning: "Adds size and heat tolerance from the data sheet.",
+        },
+      ],
+      r7: [
+        {
+          attribute: "Long description",
+          previous: "",
+          newValue: "Insulated weekend cooler with welded seams, bottle opener, and 24-hour ice retention.",
+          score: 86,
+          reasoning: "Drafted from insulation and accessory attributes.",
+        },
+      ],
+    };
+
+    /** @type {{ id: string, item: string, attribute: string, previous: string, newValue: string, score: number, reasoning: string, status: 'pending'|'approved'|'rejected' }[]} */
+    let suggestions = [];
+
+    const state = {
+      view: "catalog", // catalog | review
+      panelOpen: false,
+      panelPhase: "idle", // idle | working | done | reviewing | reviewPaused | complete | singleAsking | singleQuestions | singleManual | singleComplete
+      runMode: null, // bulk | single
+      singleQuestionChoice: null, // all | high | manual
+      singleManualIndex: 0,
+      singleExpandedAttrs: new Set(),
+      singleThreads: [],
+      /** How the single-product conversation was resolved: all | high | manual | discard */
+      singleOutcome: null,
+      agentsMenuOpen: false,
+      catalogSelected: new Set(["r1", "r2", "r3", "r4", "r5", "r6", "r7"]),
+      reviewSelected: new Set(),
+      runStep: 0,
+      summaryOpen: true,
+      workOpen: false,
+      chatDraft: "",
+      chatLog: [],
+      refineHistory: [],
+      activeRefine: null,
+      lastAnalyzedCount: 0,
+      panelMenuOpen: false,
+      runLogOpen: false,
+      runStepsOpen: false,
+      currentRun: null,
+      completedRun: null,
+      writtenChanges: [],
+      reviewGroup: null,
+      groupMenuOpen: false,
+      /** Session markers interleaved with refineHistory by afterRefineIndex. */
+      reviewSessionMarks: [],
+      idleChatLog: [],
+      keepChatFocus: false,
+      panelFeedWasNearBottom: true,
+      panelFeedScrollTop: 0,
+    };
+
+    function isSinglePanelPhase() {
+      return (
+        state.runMode === "single" &&
+        ["singleAsking", "singleQuestions", "singleManual", "singleComplete"].includes(state.panelPhase)
+      );
+    }
+
+    function canRefineInPanel() {
+      if (state.activeRefine) return false;
+      if (isSinglePanelPhase() && state.panelPhase !== "singleComplete") {
+        return pendingSuggestions().length > 0;
+      }
+      if (state.reviewSelected.size === 0) return false;
+      return state.view === "review" && state.panelPhase === "reviewing";
+    }
+
+    function archiveSingleThreadIfNeeded() {
+      if (state.runMode !== "single" || !suggestions.length) return;
+      const applied = suggestions.filter((s) => s.status === "approved").length;
+      state.singleThreads.push({
+        product: suggestions[0]?.item || "Product",
+        attributeCount: suggestions.length,
+        applied,
+        finished: state.panelPhase === "singleComplete",
+      });
+    }
+
+    function canChatWhilePaused() {
+      return state.panelPhase === "reviewPaused" && !state.activeRefine;
+    }
+
+    function isRunCommand(text) {
+      const t = text.trim().toLowerCase();
+      return t === "run" || t === "run agent";
+    }
+
+    function canSendPanelMessage() {
+      if (state.activeRefine) return false;
+      if (state.panelPhase === "idle") return state.chatDraft.trim().length > 0;
+      if (isSinglePanelPhase() && state.panelPhase !== "singleComplete") {
+        return state.chatDraft.trim().length > 0 && pendingSuggestions().length > 0;
+      }
+      return canRefineInPanel() || canChatWhilePaused();
+    }
+
+    function toggleAssistantPanel() {
+      if (state.view !== "catalog") return;
+      state.panelOpen = !state.panelOpen;
+      if (state.panelOpen) state.keepChatFocus = true;
+      render();
+    }
+
+    function scoreClass(score) {
+      if (score >= HIGH) return "high";
+      if (score >= 70) return "mid";
+      return "low";
+    }
+
+    function buildSuggestions(selectedIds) {
+      const out = [];
+      selectedIds.forEach((id) => {
+        const row = CATALOG_ROWS.find((r) => r.id === id);
+        if (!row) return;
+        const edits = PRODUCT_EDITS[id];
+        if (!edits?.length) {
+          out.push({
+            id: "s" + (out.length + 1),
+            item: row.name,
+            attribute: "Short description",
+            previous: row.shortDesc,
+            newValue: row.shortDesc.replace(/\.$/, "") + ", enriched for channel-ready copy.",
+            score: 90,
+            reasoning: "Light polish of existing short description.",
+            status: "pending",
+          });
+          return;
+        }
+        edits.forEach((edit) => {
+          out.push({
+            id: "s" + (out.length + 1),
+            item: row.name,
+            attribute: edit.attribute,
+            previous: edit.previous,
+            newValue: edit.newValue,
+            score: edit.score,
+            reasoning: edit.reasoning,
+            status: "pending",
+          });
+        });
+      });
+      return out;
+    }
+
+    function renderTagChips(tags) {
+      return tags
+        .map((t) => `<span class="chip"><span class="star">★</span> ${escapeHtml(t)}</span>`)
+        .join("");
+    }
+
+    function stats() {
+      const total = suggestions.length;
+      const pending = suggestions.filter((s) => s.status === "pending").length;
+      const reviewed = total - pending;
+      const ready = suggestions.filter((s) => s.status === "pending" && s.score >= HIGH).length;
+      const attention = suggestions.filter((s) => s.status === "pending" && s.score < HIGH).length;
+      return { total, pending, reviewed, ready, attention };
+    }
+
+    function svgSort() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M4 3v10M4 13l2.2-2.2M4 13 1.8 10.8M12 13V3M12 3l2.2 2.2M12 3 9.8 5.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    }
+    function svgFilter() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M2.5 3.5h11l-4 5.2V13l-3-1.5V8.7L2.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+    }
+    function svgGroup() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="0.6" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="0.6" stroke="currentColor" stroke-width="1.2"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="0.6" stroke="currentColor" stroke-width="1.2"/><path d="M11.2 9h2.3v4.5h-4.5V11" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+    }
+    function svgSparkle() {
+      return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M7 1.2 8.1 5 12 6.2 8.1 7.4 7 11.2 5.9 7.4 2 6.2 5.9 5 7 1.2Z" fill="currentColor"/></svg>';
+    }
+    function svgAgents() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><rect x="3.5" y="5" width="9" height="7" rx="1.2" stroke="currentColor" stroke-width="1.2"/><circle cx="6.2" cy="8.2" r="0.9" fill="currentColor"/><circle cx="9.8" cy="8.2" r="0.9" fill="currentColor"/><path d="M6.5 10.2h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M8 5V3.2M5.5 3.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+    }
+    function svgPlus() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+    }
+    function svgInspect() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10 10 13.5 13.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    }
+    function svgMore() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><circle cx="4" cy="8" r="1.1" fill="currentColor"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg>';
+    }
+    function svgSearch() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><circle cx="7" cy="7" r="4.2" stroke="currentColor" stroke-width="1.4"/><path d="M10.2 10.2 13 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+    }
+    function svgFolder() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M2.5 4.5h4l1.2 1.4H13.5v6.6h-11V4.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+    }
+    function svgBack() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M10 3.5 5.5 8 10 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+    function svgBell() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M8 2.5a3.5 3.5 0 0 0-3.5 3.5c0 2.4-1 3.4-1 3.4h9s-1-1-1-3.4A3.5 3.5 0 0 0 8 2.5Z" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    }
+    function svgGrid() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><rect x="2.5" y="2.5" width="4" height="4" rx="0.6" stroke="currentColor" stroke-width="1.2"/><rect x="9.5" y="2.5" width="4" height="4" rx="0.6" stroke="currentColor" stroke-width="1.2"/><rect x="2.5" y="9.5" width="4" height="4" rx="0.6" stroke="currentColor" stroke-width="1.2"/><rect x="9.5" y="9.5" width="4" height="4" rx="0.6" stroke="currentColor" stroke-width="1.2"/></svg>';
+    }
+    function svgHelp() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 6.4a1.9 1.9 0 1 1 2.9 1.6c-.9.5-1.1 1-1.1 1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="11.4" r="0.75" fill="currentColor"/></svg>';
+    }
+    function svgGear() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><circle cx="8" cy="8" r="2.1" stroke="currentColor" stroke-width="1.3"/><path d="M8 2.5v1.4M8 12.1v1.4M2.5 8h1.4M12.1 8h1.4M4.1 4.1l1 1M10.9 10.9l1 1M11.9 4.1l-1 1M5.1 10.9l-1 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    }
+    function svgStarTab() {
+      return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M7 1.6 8.5 5l3.7.3-2.8 2.4.9 3.6L7 9.6 3.7 11.3l.9-3.6L1.8 5.3 5.5 5 7 1.6Z" stroke="currentColor" stroke-width="1.2" fill="currentColor"/></svg>';
+    }
+    function svgHex() {
+      return '<svg width="16" height="16" viewBox="0 0 36 36" fill="none" aria-hidden><path d="M18 3.5 30.5 10.5v15L18 32.5 5.5 25.5v-15L18 3.5Z" stroke="currentColor" stroke-width="1.4"/><path d="M18 11.5 19.5 16.2 24.2 17.8 19.5 19.4 18 24.1 16.5 19.4 11.8 17.8 16.5 16.2 18 11.5Z" fill="currentColor"/></svg>';
+    }
+    function svgCheck() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M3.5 8.2 6.4 11.2 12.5 4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+    function svgX() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    }
+    function svgSend() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l18-7-7 18-2-7-9-4z"/></svg>';
+    }
+
+    function renderHeaderUtilities() {
+      return `
+        <button type="button" class="icon-btn light" aria-label="Notifications">${svgBell()}<span class="badge">2</span></button>
+        <button type="button" class="icon-btn light" aria-label="Apps">${svgGrid()}</button>
+        <button type="button" class="icon-btn light" aria-label="Help">${svgHelp()}</button>
+        <div class="avatar" aria-hidden="true">JS</div>
+        <button type="button" class="icon-btn light" aria-label="Settings">${svgGear()}</button>`;
+    }
+
+    function renderCatalogHeader() {
+      return `
+        <header class="mdm-header">
+          <div class="brand-mark" aria-hidden="true"></div>
+          ${svgFolder()}
+          <div class="brand"><b>Summer collection 2026</b><span>Nothing to save.</span></div>
+          <span class="lang">English (US)</span>
+          <a class="nav-link" href="#">Main</a>
+          <label class="search">${svgSearch()}<input placeholder="Search" /></label>
+          <button type="button" class="ai-assistant" data-action="open-assistant">+ AI assistant</button>
+          ${renderHeaderUtilities()}
+        </header>`;
+    }
+
+    function renderReviewHeader() {
+      return `
+        <header class="mdm-header">
+          <button type="button" class="assistant-back" data-action="back-catalog">${svgBack()} AI assistant</button>
+          <span class="lang">English (US)</span>
+          <a class="nav-link" href="#">Main</a>
+          <label class="search">${svgSearch()}<input placeholder="Search" /></label>
+          <span class="spacer"></span>
+          ${renderHeaderUtilities()}
+        </header>`;
+    }
+
+    function svgChat() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M3 3.8h10v7.4H6.3L3 13.4V3.8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+    }
+    function svgRunMark() {
+      return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden class="panel-switch-run-icon"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>';
+    }
+
+    function runLogChanges() {
+      if (state.writtenChanges.length) return state.writtenChanges;
+      if (state.completedRun?.written?.length) return state.completedRun.written;
+      return [];
+    }
+
+    function renderPanelMenu() {
+      const run = state.completedRun || state.currentRun;
+      const runRow = run
+        ? `<button type="button" class="panel-switch-run" data-action="open-run-log">
+            ${svgRunMark()}
+            <span><strong>Run #${run.id}</strong><em>Content optimizer, ${run.at || "just now"}</em></span>
+          </button>`
+        : "";
+      return `
+        <div class="panel-switch" role="menu">
+          <div class="panel-switch-chat" aria-disabled="true">${svgChat()} Chat</div>
+          <div class="panel-switch-rule"></div>
+          <div class="panel-switch-kicker">Agents</div>
+          <button type="button" class="panel-switch-agent" data-action="close-panel-menu">
+            <span class="panel-switch-agent-title">${svgHex()} Content optimizer</span>
+            <p>${AGENT_PURPOSE}</p>
+          </button>
+          <div class="panel-switch-rule"></div>
+          <div class="panel-switch-kicker">Agent runs</div>
+          ${runRow || '<p class="panel-switch-kicker" style="padding-top:0">No runs yet</p>'}
+        </div>`;
+    }
+
+    function renderSingleArchivedThreads() {
+      return state.singleThreads
+        .map(
+          (t) => `
+        <div class="panel-thread-archive">
+          <strong>${escapeHtml(t.product)}</strong> · ${t.attributeCount} attribute${t.attributeCount === 1 ? "" : "s"}
+          ${t.finished ? ` · ${t.applied} applied` : " · replaced by a new run"}
+        </div>`
+        )
+        .join("");
+    }
+
+    function renderSingleAttributeRows() {
+      const frozen = state.panelPhase === "singleComplete";
+      return suggestions
+        .map((s) => {
+          const open = state.singleExpandedAttrs.has(s.id);
+          const statusBadge =
+            frozen && s.status === "approved"
+              ? '<span class="status approved" style="margin-left:8px">Approved</span>'
+              : frozen && s.status === "rejected"
+                ? '<span class="status rejected" style="margin-left:8px">Rejected</span>'
+                : "";
+          return `
+          <tr>
+            <td colspan="2" style="padding:0;border:none">
+              <button type="button" class="single-attr-toggle" data-action="toggle-single-attr" data-id="${s.id}" ${frozen ? "disabled style=\"cursor:default\"" : ""}>
+                <span class="chev ${open ? "open" : ""}">▼</span>
+                <span class="single-attr-name">${escapeHtml(s.attribute)}</span>
+                <span class="score ${scoreClass(s.score)}" style="margin-left:auto">${s.score}%</span>
+                ${statusBadge}
+              </button>
+              ${open ? `
+                <div class="single-attr-detail">
+                  <b>New value</b>
+                  ${escapeHtml(s.newValue)}
+                  <b style="margin-top:8px">Reasoning</b>
+                  ${escapeHtml(s.reasoning)}
+                </div>` : ""}
+            </td>
+          </tr>`;
+        })
+        .join("");
+    }
+
+    function renderSingleQuestionsFrozen() {
+      const chosen =
+        state.singleOutcome === "discard" ? "discard" : state.singleQuestionChoice || state.singleOutcome;
+      const options = [
+        { id: "all", title: "Accept suggestions and finish conversation", hint: "Apply every suggestion, including low-confidence matches." },
+        { id: "high", title: "Accept high-confidence only", hint: "Ignore attributes scoring below 90% threshold." },
+        { id: "manual", title: "Review suggestions manually", hint: "Step through each attribute before applying changes." },
+      ];
+      if (state.singleOutcome === "discard") {
+        return `
+          <div class="single-questions single-questions--frozen">
+            <strong>Questions</strong>
+            <p class="panel-lede" style="margin-top:8px">You chose to <b>discard all</b> suggestions.</p>
+          </div>`;
+      }
+      return `
+        <div class="single-questions single-questions--frozen">
+          <strong>Questions</strong>
+          ${options
+            .map(
+              (opt) => `
+            <label class="single-q-option ${chosen === opt.id ? "is-chosen" : ""}">
+              <input type="radio" name="single-q-frozen" ${chosen === opt.id ? "checked" : ""} disabled />
+              <span><b>${opt.title}</b><span>${opt.hint}</span></span>
+            </label>`
+            )
+            .join("")}
+        </div>`;
+    }
+
+    function renderSingleManualHistory() {
+      if (state.singleOutcome !== "manual") return "";
+      const rows = suggestions
+        .map(
+          (s) => `
+        <div class="single-manual-record">
+          <span>${escapeHtml(s.attribute)}</span>
+          ${
+            s.status === "approved"
+              ? '<span class="status approved">Approved</span>'
+              : s.status === "rejected"
+                ? '<span class="status rejected">Rejected</span>'
+                : '<span class="status">Pending</span>'
+          }
+        </div>`
+        )
+        .join("");
+      return `
+        <div class="single-manual-log">
+          <strong>Manual review</strong>
+          ${rows}
+        </div>`;
+    }
+
+    function renderSingleRunTurn() {
+      const frozen = state.panelPhase === "singleComplete";
+      const n = suggestions.length;
+      const stepsHtml = RUN_STEPS.map((label) => `<li class="is-done">${label}</li>`).join("");
+      const showQuestions = !frozen && state.panelPhase === "singleQuestions";
+      const showQuestionsFrozen = frozen && state.singleOutcome;
+      const asking =
+        !frozen && state.panelPhase === "singleAsking"
+          ? `<div class="single-asking"><span class="spinner"></span> Asking questions…</div>`
+          : !frozen && state.panelPhase === "singleQuestions"
+            ? `<div class="single-asking" style="color:var(--dim)">Asking questions…</div>`
+            : frozen
+              ? `<div class="single-asking" style="color:var(--dim)">Asking questions…</div>`
+              : "";
+      const choice = state.singleQuestionChoice;
+      const primaryLabel = choice === "manual" ? "Next" : "Apply";
+      const primaryDisabled = !choice;
+      return `
+        <div class="panel-turn panel-turn-relative">
+          <button type="button" class="run-meta-toggle" data-action="toggle-run-steps">
+            <span class="meta-left"><span>${RUN_STEPS.length} steps</span></span>
+            <span class="meta-right">${RUN_DURATION_SEC} s <span class="chev ${state.runStepsOpen ? "open" : ""}">▼</span></span>
+          </button>
+          ${state.runStepsOpen ? `<ul class="steps">${stepsHtml}</ul>` : ""}
+          <p class="panel-lede">Done. I generated ${n} attribute${n === 1 ? "" : "s"}. Review carefully the ones with low score:</p>
+          <div class="summary">
+            <button type="button" class="summary-head" data-action="toggle-summary">
+              <span><strong>Summary</strong><em>${n} attribute${n === 1 ? "" : "s"} generated</em></span>
+              <span class="chev ${state.summaryOpen ? "open" : ""}">▼</span>
+            </button>
+            ${state.summaryOpen ? `
+              <div class="summary-body" style="padding-top:0">
+                <table class="single-summary-table">
+                  <thead><tr><th>Attribute name</th><th style="width:72px">Score</th></tr></thead>
+                  <tbody>${renderSingleAttributeRows()}</tbody>
+                </table>
+                ${asking}
+              </div>` : ""}
+          </div>
+          ${state.refineHistory.map((turn) => renderRefineExchange(turn)).join("")}
+          ${showQuestions ? `
+            <div class="single-questions" role="dialog" aria-labelledby="single-q-title">
+              <strong id="single-q-title">Questions</strong>
+              <label class="single-q-option">
+                <input type="radio" name="single-q" data-action="set-single-choice" data-choice="all" ${choice === "all" ? "checked" : ""} />
+                <span><b>Accept suggestions and finish conversation</b><span>Apply every suggestion, including low-confidence matches.</span></span>
+              </label>
+              <label class="single-q-option">
+                <input type="radio" name="single-q" data-action="set-single-choice" data-choice="high" ${choice === "high" ? "checked" : ""} />
+                <span><b>Accept high-confidence only</b><span>Ignore attributes scoring below 90% threshold.</span></span>
+              </label>
+              <label class="single-q-option">
+                <input type="radio" name="single-q" data-action="set-single-choice" data-choice="manual" ${choice === "manual" ? "checked" : ""} />
+                <span><b>Review suggestions manually</b><span>Step through each attribute before applying changes.</span></span>
+              </label>
+              <div class="single-questions-foot">
+                <button type="button" class="link-discard" data-action="single-discard-all">Discard all</button>
+                <div class="actions">
+                  <button type="button" class="btn-refine-secondary" data-action="single-refine-focus" ${state.activeRefine ? "disabled" : ""}>Refine</button>
+                  <button type="button" class="btn-single-primary" data-action="single-primary" ${primaryDisabled ? "disabled" : ""}>${primaryLabel}</button>
+                </div>
+              </div>
+            </div>` : ""}
+          ${showQuestionsFrozen ? renderSingleQuestionsFrozen() : ""}
+          ${frozen ? renderSingleManualHistory() : ""}
+          ${!frozen && state.panelPhase === "singleManual" ? renderSingleManualStep() : ""}
+        </div>`;
+    }
+
+    function renderSingleManualStep() {
+      const s = suggestions[state.singleManualIndex];
+      if (!s) return "";
+      const decided = s.status !== "pending";
+      return `
+        <div class="single-manual">
+          <div class="single-manual-meta">Attribute ${state.singleManualIndex + 1} of ${suggestions.length}</div>
+          <h3>${escapeHtml(s.attribute)}</h3>
+          <span class="score ${scoreClass(s.score)}">${s.score}%</span>
+          <div class="single-attr-detail" style="padding-left:0;margin-top:10px">
+            <b>New value</b>
+            ${escapeHtml(s.newValue)}
+            <b style="margin-top:8px">Reasoning</b>
+            ${escapeHtml(s.reasoning)}
+          </div>
+          <div class="single-manual-actions">
+            <button type="button" class="tool" data-action="single-manual-decide" data-decision="approved">${svgCheck()} Approve</button>
+            <button type="button" class="tool" data-action="single-manual-decide" data-decision="rejected">${svgX()} Reject</button>
+            <button type="button" class="btn-single-primary" data-action="single-manual-next" ${decided ? "" : "disabled"}>Next</button>
+          </div>
+        </div>`;
+    }
+
+    function renderSingleCompleteNote() {
+      const product = suggestions[0]?.item || state.currentRun?.product || "Product";
+      const n = state.writtenChanges.length;
+      return `
+        <div class="panel-turn single-finished">
+          <div class="work-toggle">Conversation finished</div>
+          <p class="panel-lede">Done. ${n} change${n === 1 ? "" : "s"} applied to ${escapeHtml(product)}.</p>
+          ${n ? `<button type="button" class="panel-link" data-action="open-run-log">View run log</button>` : ""}
+        </div>`;
+    }
+
+    function renderRunResultTurn(total, reviewBtnLabel, reviewBtnMuted) {
+      const stepsHtml = RUN_STEPS.map((label) => `<li class="is-done">${label}</li>`).join("");
+      const btnClass = reviewBtnMuted ? "btn-review is-muted" : "btn-review";
+      const btnAttrs = reviewBtnMuted ? "disabled" : 'data-action="open-review"';
+      return `
+        <div class="panel-turn">
+          <button type="button" class="run-meta-toggle" data-action="toggle-run-steps">
+            <span class="meta-left"><span>${RUN_STEPS.length} steps</span></span>
+            <span class="meta-right">${RUN_DURATION_SEC} s <span class="chev ${state.runStepsOpen ? "open" : ""}">▼</span></span>
+          </button>
+          ${state.runStepsOpen ? `<ul class="steps">${stepsHtml}</ul>` : ""}
+          <p class="panel-lede">Done. I made ${total} suggestions. Review carefully the ones with low score.</p>
+          <div class="summary">
+            <button type="button" class="summary-head" data-action="toggle-summary">
+              <span><strong>Summary</strong><em>${total} suggestions</em></span>
+              <span class="chev ${state.summaryOpen ? "open" : ""}">▼</span>
+            </button>
+            ${state.summaryOpen ? `
+              <div class="summary-body">
+                Approve, reject them or write instructions to send them back to the agent. Once everything is reviewed, you can finish and attributes will be enriched.
+                <div class="stat-grid">
+                  <div class="stat"><span class="stat-icon blue">🔍</span><span><b>${state.lastAnalyzedCount}</b> items analyzed</span></div>
+                  <div class="stat"><span class="stat-icon purple">✦</span><span><b>${total}</b> suggestions</span></div>
+                  <div class="stat"><span class="stat-icon green">✓</span><span><b>${state.completedRun?.ready ?? stats().ready}</b> ready</span></div>
+                  <div class="stat"><span class="stat-icon red">!</span><span><b>${state.completedRun?.attention ?? stats().attention}</b> need attention</span></div>
+                </div>
+              </div>` : ""}
+          </div>
+          <button type="button" class="${btnClass}" ${btnAttrs}>${reviewBtnLabel}</button>
+        </div>`;
+    }
+
+    function pauseDetailText() {
+      const st = stats();
+      return st.pending === 0
+        ? "All suggestions are decided. Continue to finish the review and write approved changes."
+        : `${st.reviewed} of ${st.total} reviewed · ${st.pending} still pending. Pick up where you left off.`;
+    }
+
+    function renderReviewSessionMark(mark) {
+      const labels = {
+        started: "Review started",
+        paused: "Review paused",
+        resumed: "Review resumed",
+      };
+      const label = labels[mark.type] || mark.type;
+      const detail = mark.detail
+        ? `<p class="panel-lede">${escapeHtml(mark.detail)}</p>`
+        : "";
+      return `
+        <div class="panel-turn">
+          <div class="work-toggle">${label}</div>
+          ${detail}
+        </div>`;
+    }
+
+    function renderReviewSessionTimeline() {
+      const marks = [...state.reviewSessionMarks].sort(
+        (a, b) => a.afterRefineIndex - b.afterRefineIndex
+      );
+      let html = "";
+      let refineIdx = 0;
+      for (const mark of marks) {
+        while (refineIdx < mark.afterRefineIndex && refineIdx < state.refineHistory.length) {
+          html += renderRefineExchange(state.refineHistory[refineIdx]);
+          refineIdx++;
+        }
+        html += renderReviewSessionMark(mark);
+      }
+      while (refineIdx < state.refineHistory.length) {
+        html += renderRefineExchange(state.refineHistory[refineIdx]);
+        refineIdx++;
+      }
+      return html;
+    }
+
+    function renderRefineExchange(turn) {
+      return `
+        <div class="panel-user">${escapeHtml(turn.prompt)}</div>
+        <p class="panel-lede">${escapeHtml(turn.reply)}</p>`;
+    }
+
+    function renderActiveRefine(active) {
+      const stepsHtml = REFINE_STEPS.map((label, idx) => {
+        const cls = idx < active.step ? "is-done" : idx === active.step ? "is-now" : "";
+        return `<li class="${cls}">${label}</li>`;
+      }).join("");
+      return `
+        <div class="panel-user">${escapeHtml(active.prompt)}</div>
+        <button type="button" class="work-toggle is-live" disabled>
+          <span class="spinner"></span> Working…
+        </button>
+        <ul class="steps">${stepsHtml}</ul>`;
+    }
+
+    function renderReviewFinishedNote(writtenCount) {
+      return `
+        <div class="panel-turn">
+          <div class="work-toggle">Review finished</div>
+          <p class="panel-lede">Done. ${writtenCount} change${writtenCount === 1 ? "" : "s"} were written.</p>
+          <button type="button" class="panel-link" data-action="open-run-log">View run log</button>
+        </div>`;
+    }
+
+    function renderRunLogModal() {
+      if (!state.runLogOpen) return "";
+      const run = state.completedRun || state.currentRun || { id: DEMO_RUN_ID };
+      const changes = runLogChanges();
+      const rows = changes.length
+        ? changes.map((c) => `
+            <tr>
+              <td>${escapeHtml(c.item)}</td>
+              <td>${escapeHtml(c.attribute)}</td>
+              <td class="value-col">${escapeHtml(c.previous) || "—"}</td>
+              <td class="value-col">${escapeHtml(c.newValue)}</td>
+              <td><span class="log-decision approved">Written</span></td>
+            </tr>`).join("")
+        : `<tr><td colspan="5" style="color:var(--muted);padding:16px 0">No written changes for this run.</td></tr>`;
+      return `
+        <div class="modal-scrim" data-action="close-run-log-scrim" role="presentation">
+          <div class="modal" role="dialog" aria-labelledby="run-log-title" aria-modal="true" data-action="stop">
+            <div class="modal-head">
+              <div>
+                <h2 id="run-log-title">Run #${run.id} · Content optimizer</h2>
+                <p>${changes.length} attribute change${changes.length === 1 ? "" : "s"} written to STEP</p>
+              </div>
+              <button type="button" class="modal-close" data-action="close-run-log" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Attribute</th>
+                    <th>Previous value</th>
+                    <th>New value</th>
+                    <th>Outcome</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+            <div class="modal-foot">
+              <button type="button" data-action="close-run-log">Close</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderPanelIdleEmptyState() {
+      const canRun = state.catalogSelected.size > 0;
+      const thread = state.idleChatLog
+        .map(
+          (turn) => `
+        <div class="panel-idle-thread">
+          <div class="panel-user">${escapeHtml(turn.prompt)}</div>
+          <p class="panel-lede">${escapeHtml(turn.reply)}</p>
+        </div>`
+        )
+        .join("");
+      return `
+        <div class="panel-empty">
+          ${thread}
+          <div class="panel-empty-hero">
+            <div class="panel-empty-icon">${svgHex()}</div>
+            <h2>Content optimizer</h2>
+            <p>${escapeHtml(AGENT_PURPOSE)}</p>
+            <button type="button" class="panel-link panel-empty-run" data-action="run-agent" ${canRun ? "" : "disabled"}>Run agent</button>
+          </div>
+        </div>`;
+    }
+
+    function renderPanel() {
+      if (!state.panelOpen) return "";
+      const st = stats();
+      const snapshot = state.completedRun;
+      const totalSuggestions = snapshot?.total ?? st.total;
+      const canChat = canSendPanelMessage();
+
+      let feed = renderSingleArchivedThreads();
+
+      if (state.panelPhase === "idle") {
+        feed += renderPanelIdleEmptyState();
+      }
+
+      if (state.panelPhase === "working") {
+        const stepsHtml = RUN_STEPS.map((label, idx) => {
+          const cls = idx < state.runStep ? "is-done" : idx === state.runStep ? "is-now" : "";
+          return `<li class="${cls}">${label}</li>`;
+        }).join("");
+        feed += `
+          <button type="button" class="work-toggle is-live" disabled>
+            <span class="spinner"></span> Working…
+          </button>
+          <ul class="steps">${stepsHtml}</ul>`;
+      }
+
+      if (state.panelPhase === "done" && state.runMode === "bulk") {
+        feed += renderRunResultTurn(totalSuggestions, "Review", false);
+      }
+
+      if (
+        state.runMode === "single" &&
+        ["singleAsking", "singleQuestions", "singleManual", "singleComplete"].includes(state.panelPhase)
+      ) {
+        feed += renderSingleRunTurn();
+        if (state.activeRefine) {
+          feed += renderActiveRefine(state.activeRefine);
+        }
+        if (state.panelPhase === "singleComplete") {
+          feed += renderSingleCompleteNote();
+        }
+      }
+
+      if (state.panelPhase === "reviewing" || state.panelPhase === "reviewPaused") {
+        const reviewBtnLabel = state.panelPhase === "reviewPaused" ? "Continue review" : "Reviewing";
+        const reviewBtnMuted = state.panelPhase === "reviewing";
+        feed += renderRunResultTurn(totalSuggestions, reviewBtnLabel, reviewBtnMuted);
+        feed += renderReviewSessionTimeline();
+        if (state.activeRefine) {
+          feed += renderActiveRefine(state.activeRefine);
+        }
+      }
+
+      if (state.panelPhase === "complete" && snapshot && state.runMode === "bulk") {
+        feed += renderRunResultTurn(snapshot.total, "Reviewed", true);
+        feed += renderReviewFinishedNote(snapshot.approvedCount);
+      }
+
+      const runDisabled =
+        (state.panelPhase !== "idle" && state.panelPhase !== "singleComplete") ||
+        state.catalogSelected.size === 0;
+      const reviewSelCount = state.reviewSelected.size;
+      const showSelectionChip =
+        state.view === "review" && reviewSelCount > 0 && state.panelPhase !== "working";
+      const selectionChipLabel =
+        reviewSelCount === 1 ? "1 selected" : reviewSelCount + " selected";
+
+      return `
+        <aside class="panel">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <button type="button" class="panel-icon-btn${state.panelMenuOpen ? " is-on" : ""}" data-action="toggle-panel-menu" aria-label="Open menu" aria-expanded="${state.panelMenuOpen}">${svgMore()}</button>
+              ${state.panelMenuOpen ? renderPanelMenu() : ""}
+              <div class="panel-title">${svgHex()} Content optimizer</div>
+            </div>
+          </div>
+          <div class="panel-rule"></div>
+          ${state.panelPhase !== "idle" ? `
+          <div class="panel-run-row">
+            <button type="button" class="run-chip" data-action="run-agent" ${runDisabled ? "disabled" : ""}>Run agent</button>
+          </div>` : ""}
+          <div class="panel-feed">${feed}</div>
+          <div class="panel-dock">
+            <div class="dock-input">
+              <div class="dock-input-body">
+                ${showSelectionChip ? `<span class="dock-selection-chip" aria-live="polite"><span class="star">★</span> ${selectionChipLabel} <span class="star">★</span></span>` : ""}
+                <textarea id="chat-input" rows="2" placeholder="Ask me anything about data and NEW UI…">${escapeHtml(state.chatDraft)}</textarea>
+              </div>
+              <button type="button" class="dock-send" data-action="send-panel-message" ${canChat ? "" : "disabled"} title="Send message">${svgSend()}</button>
+            </div>
+            <div class="dock-meta"><span class="ai-pill">AI</span> Uses AI. Verify results.</div>
+          </div>
+        </aside>`;
+    }
+
+    function pendingSuggestions() {
+      return suggestions.filter((s) => s.status === "pending");
+    }
+
+    function catalogSelectAllState() {
+      const total = CATALOG_ROWS.length;
+      const selected = state.catalogSelected.size;
+      return {
+        all: total > 0 && selected === total,
+        some: selected > 0 && selected < total,
+      };
+    }
+
+    function reviewSelectAllState() {
+      const all = suggestions;
+      if (!all.length) return { all: false, some: false, disabled: true };
+      const selectedCount = all.filter((s) => state.reviewSelected.has(s.id)).length;
+      return {
+        all: selectedCount === all.length,
+        some: selectedCount > 0 && selectedCount < all.length,
+        disabled: false,
+      };
+    }
+
+    function syncSelectAllCheckboxes() {
+      const catalogAll = document.querySelector("[data-action=select-all-catalog]");
+      if (catalogAll) {
+        const { all, some } = catalogSelectAllState();
+        catalogAll.checked = all;
+        catalogAll.indeterminate = some;
+      }
+      const reviewAll = document.querySelector("[data-action=select-all-review]");
+      if (reviewAll) {
+        const { all, some, disabled } = reviewSelectAllState();
+        reviewAll.disabled = disabled;
+        reviewAll.checked = all;
+        reviewAll.indeterminate = some;
+      }
+    }
+
+    function renderCatalogTable() {
+      const sel = state.catalogSelected;
+      const { all: allCatalog } = catalogSelectAllState();
+      const rows = CATALOG_ROWS.map((row) => {
+        const checked = sel.has(row.id);
+        return `
+          <tr class="${checked ? "is-selected" : ""}" data-row-id="${row.id}">
+            <td class="cell-check"><input type="checkbox" data-action="toggle-catalog" data-id="${row.id}" ${checked ? "checked" : ""} /></td>
+            <td><div class="item-cell"><span class="folder"></span>${escapeHtml(row.name)}</div></td>
+            <td>${escapeHtml(row.webName)}</td>
+            <td class="desc-col">${escapeHtml(row.shortDesc)}</td>
+            <td class="tag-col">${renderTagChips(row.tags)}</td>
+            <td>${escapeHtml(row.category)}</td>
+            <td>${escapeHtml(row.sku)}</td>
+            <td class="record-status">${escapeHtml(row.recordStatus)}</td>
+          </tr>`;
+      }).join("");
+      const headerCells = CATALOG_HEADERS.map((h) => `<th>${escapeHtml(h)}</th>`).join("");
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="cell-check">
+                  <input type="checkbox" data-action="select-all-catalog" aria-label="Select all rows" ${allCatalog ? "checked" : ""} />
+                </th>
+                ${headerCells}
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <footer class="table-status">${CATALOG_ROWS.length} items, ${sel.size} selected</footer>`;
+    }
+
+    function scoreBucket(score) {
+      if (score >= HIGH) return "high";
+      if (score >= 70) return "mid";
+      return "low";
+    }
+
+    function reviewGroupKey(s, mode) {
+      if (mode === "item") return s.item;
+      if (mode === "attribute") return s.attribute;
+      if (mode === "status") return s.status;
+      if (mode === "score") return scoreBucket(s.score);
+      return "";
+    }
+
+    function reviewGroupTitle(key, mode) {
+      if (mode === "item") return key;
+      if (mode === "attribute") return key;
+      if (mode === "status") {
+        if (key === "approved") return "Approved";
+        if (key === "rejected") return "Rejected";
+        return "Pending";
+      }
+      if (mode === "score") {
+        if (key === "high") return "High confidence (90%+)";
+        if (key === "mid") return "Medium confidence (70–89%)";
+        return "Needs attention (<70%)";
+      }
+      return key;
+    }
+
+    function suggestionsInReviewGroup(groupKey) {
+      const mode = state.reviewGroup;
+      if (!mode) return [];
+      return suggestions.filter((s) => reviewGroupKey(s, mode) === groupKey);
+    }
+
+    function sortReviewGroupKeys(keys, mode) {
+      if (mode === "score") {
+        const order = { high: 0, mid: 1, low: 2 };
+        return keys.sort((a, b) => (order[a] ?? 9) - (order[b] ?? 9));
+      }
+      if (mode === "status") {
+        const order = { pending: 0, approved: 1, rejected: 2 };
+        return keys.sort((a, b) => (order[a] ?? 9) - (order[b] ?? 9));
+      }
+      return keys.sort((a, b) => String(a).localeCompare(String(b)));
+    }
+
+    function renderReviewSuggestionRow(s, sel, opts = {}) {
+      const { hideItem = false, hideAttribute = false, hideScore = false, hideStatus = false } = opts;
+      const checked = sel.has(s.id);
+      const rowCls = [checked ? "is-selected" : "", s.status !== "pending" ? "is-reviewed" : ""].filter(Boolean).join(" ");
+      const statusLabel =
+        s.status === "approved" ? '<span class="status approved">Approved</span>' :
+        s.status === "rejected" ? '<span class="status rejected">Rejected</span>' :
+        '<span class="status">Pending</span>';
+      const itemCell = hideItem
+        ? '<td class="is-grouped-empty">—</td>'
+        : `<td><div class="item-cell"><span class="folder"></span>${escapeHtml(s.item)}</div></td>`;
+      const attrCell = hideAttribute
+        ? '<td class="is-grouped-empty">—</td>'
+        : `<td>${escapeHtml(s.attribute)}</td>`;
+      const scoreCell = hideScore
+        ? '<td class="is-grouped-empty">—</td>'
+        : `<td><span class="score ${scoreClass(s.score)}">${s.score}%</span></td>`;
+      const statusCell = hideStatus
+        ? '<td class="is-grouped-empty">—</td>'
+        : `<td>${statusLabel}</td>`;
+      return `
+        <tr class="${rowCls}" data-suggestion-id="${s.id}">
+          <td class="cell-check"><input type="checkbox" data-action="toggle-review" data-id="${s.id}" ${checked ? "checked" : ""} /></td>
+          ${itemCell}
+          ${attrCell}
+          <td class="value-col">${escapeHtml(s.previous) || "—"}</td>
+          <td class="value-col">${escapeHtml(s.newValue)}</td>
+          ${scoreCell}
+          <td class="reasoning">${escapeHtml(s.reasoning)}</td>
+          ${statusCell}
+        </tr>`;
+    }
+
+    function renderReviewTableBody(sel) {
+      const mode = state.reviewGroup;
+      if (!mode) {
+        return suggestions.map((s) => renderReviewSuggestionRow(s, sel)).join("");
+      }
+      const buckets = new Map();
+      suggestions.forEach((s) => {
+        const key = reviewGroupKey(s, mode);
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(s);
+      });
+      const keys = sortReviewGroupKeys([...buckets.keys()], mode);
+      const hideItem = mode === "item";
+      const hideAttribute = mode === "attribute";
+      const hideScore = mode === "score";
+      const hideStatus = false;
+      return keys.map((key) => {
+        const groupItems = buckets.get(key);
+        const title = reviewGroupTitle(key, mode);
+        const gKey = encodeURIComponent(key);
+        const selectedInGroup = groupItems.filter((s) => sel.has(s.id)).length;
+        const allInGroup = selectedInGroup === groupItems.length && groupItems.length > 0;
+        const header = `
+          <tr class="group-row">
+            <td class="cell-check">
+              <input type="checkbox" data-action="toggle-review-group" data-group-key="${gKey}"
+                ${allInGroup ? "checked" : ""} aria-label="Select all in group" />
+            </td>
+            <td colspan="7">
+              <strong>${escapeHtml(title)}</strong><span class="group-meta">${groupItems.length} suggestion${groupItems.length === 1 ? "" : "s"}</span>
+            </td>
+          </tr>`;
+        const body = groupItems
+          .map((s) => renderReviewSuggestionRow(s, sel, { hideItem, hideAttribute, hideScore, hideStatus }))
+          .join("");
+        return header + body;
+      }).join("");
+    }
+
+    function renderReviewTable() {
+      const sel = state.reviewSelected;
+      const { all: allReview, disabled: reviewAllDisabled } = reviewSelectAllState();
+      const rows = renderReviewTableBody(sel);
+
+      const st = stats();
+      const pct = st.total ? Math.round((st.reviewed / st.total) * 100) : 0;
+
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="cell-check">
+                  <input type="checkbox" data-action="select-all-review" aria-label="Select all suggestions" ${allReview ? "checked" : ""} ${reviewAllDisabled ? "disabled" : ""} />
+                </th>
+                <th>Item</th>
+                <th>Attribute name</th>
+                <th>Previous value</th>
+                <th>New value</th>
+                <th>Score</th>
+                <th>Reasoning</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <footer class="table-status">${st.total} suggestions, ${sel.size} selected, ${st.reviewed} reviewed</footer>
+        <footer class="review-finish-bar">
+          <div class="review-finish-progress">
+            <div class="progress-label"><strong>${pct}%</strong> reviewed</div>
+            <div class="progress-bar"><span style="width:${pct}%"></span></div>
+            <p class="finish-note">All suggestions must be approved or rejected before finishing this review.</p>
+          </div>
+          <button type="button" class="btn-finish" data-action="finish-review" ${st.pending ? "disabled" : ""}>Finish review</button>
+        </footer>`;
+    }
+
+    function renderReviewToolbar() {
+      const sel = state.reviewSelected;
+      const canAct = sel.size > 0;
+      const groupMenu = state.groupMenuOpen ? `
+        <div class="menu-pop group-menu" role="menu">
+          ${REVIEW_GROUP_OPTIONS.map((opt) => `
+            <button type="button" role="menuitemradio" aria-checked="${state.reviewGroup === opt.id}"
+              class="${state.reviewGroup === opt.id ? "is-active" : ""}"
+              data-action="set-review-group" data-group="${opt.id}">
+              <span><b>${opt.label}</b><br /><span style="font-size:12px;color:var(--muted);font-weight:400">${opt.hint}</span></span>
+            </button>`).join("")}
+          <div class="menu-pop-divider" role="separator"></div>
+          <button type="button" role="menuitem" data-action="set-review-group" data-group=""
+            ${state.reviewGroup ? "" : "disabled"}>Clear grouping</button>
+        </div>` : "";
+      return `
+        <div class="toolbar">
+          <button type="button" class="tool">${svgSort()} Sort</button>
+          <button type="button" class="tool">${svgFilter()} Filter</button>
+          <button type="button" class="tool${state.reviewGroup ? " is-on" : ""}" data-action="toggle-group-menu">${svgGroup()} Group${state.reviewGroup ? " · on" : ""}</button>
+          ${groupMenu}
+          <span class="spacer"></span>
+          <button type="button" class="tool" data-action="approve" ${canAct ? "" : "disabled"}>${svgCheck()} Approve</button>
+          <button type="button" class="tool" data-action="reject" ${canAct ? "" : "disabled"}>${svgX()} Reject</button>
+          <div class="zoom">Zoom level <input type="range" min="0.25" max="2" step="0.25" value="0.5" /> 0.5x</div>
+        </div>`;
+    }
+
+    function renderCatalogScreen() {
+      const agentsMenu = state.agentsMenuOpen ? `
+        <div class="menu-pop" role="menu">
+          <button type="button" class="is-active" data-action="start-optimizer">${svgSparkle()} Content optimizer</button>
+        </div>` : "";
+
+      return `
+        ${renderCatalogHeader()}
+        <div class="workspace-row">
+          <div class="workspace-main">
+            <div class="toolbar">
+              <button type="button" class="tool">${svgSort()} Sort</button>
+              <button type="button" class="tool">${svgFilter()} Filter</button>
+              <button type="button" class="tool" data-action="toggle-agents">${svgAgents()} Agents</button>
+              <button type="button" class="tool">${svgPlus()} Create</button>
+              <button type="button" class="tool">${svgPlus()} References</button>
+              <button type="button" class="tool">${svgInspect()} Inspect</button>
+              <button type="button" class="tool">${svgMore()} More</button>
+              ${agentsMenu}
+              <div class="zoom">Zoom level <input type="range" min="0.25" max="2" step="0.25" value="0.5" /> 0.5x</div>
+              <span class="spacer"></span>
+              <button type="button" class="tool">Customize</button>
+              <button type="button" class="details-btn">Details</button>
+            </div>
+            <div class="context-band">
+              <div class="tabs-row">
+                <button type="button" class="tab">Tab title</button>
+                <button type="button" class="tab is-on"><span class="tab-inner"><span class="tab-star">${svgStarTab()}</span> Tab title</span></button>
+                <button type="button" class="tab add">+</button>
+              </div>
+              <div class="crumbs">Home / Breadcrumb item 1 / Breadcrumb item 2 / Breadcrumb item 3 / Last item</div>
+            </div>
+            <div class="main-col">${renderCatalogTable()}</div>
+          </div>
+          ${renderPanel()}
+        </div>`;
+    }
+
+    function renderReviewScreen() {
+      return `
+        ${renderReviewHeader()}
+        <div class="workspace-row">
+          <div class="workspace-main review-screen">
+            ${renderReviewToolbar()}
+            <div class="main-col review-screen">${renderReviewTable()}</div>
+          </div>
+          ${renderPanel()}
+        </div>`;
+    }
+
+    const PANEL_FEED_NEAR_BOTTOM_PX = 72;
+
+    function capturePanelFeedScroll() {
+      const feed = document.querySelector(".panel-feed");
+      if (!feed) {
+        state.panelFeedWasNearBottom = true;
+        state.panelFeedScrollTop = 0;
+        return;
+      }
+      const maxScroll = feed.scrollHeight - feed.clientHeight;
+      state.panelFeedWasNearBottom =
+        maxScroll <= 0 || maxScroll - feed.scrollTop <= PANEL_FEED_NEAR_BOTTOM_PX;
+      state.panelFeedScrollTop = feed.scrollTop;
+    }
+
+    function scrollPanelFeedToLatest() {
+      requestAnimationFrame(() => {
+        const feed = document.querySelector(".panel-feed");
+        if (!feed) return;
+        if (state.panelFeedWasNearBottom) {
+          feed.scrollTop = feed.scrollHeight;
+        } else {
+          feed.scrollTop = state.panelFeedScrollTop;
+        }
+      });
+    }
+
+    function focusChatInputIfNeeded() {
+      if (!state.keepChatFocus) return;
+      state.keepChatFocus = false;
+      requestAnimationFrame(() => {
+        const chat = document.getElementById("chat-input");
+        if (chat) chat.focus();
+      });
+    }
+
+    function render() {
+      capturePanelFeedScroll();
+      const app = document.getElementById("app");
+      app.className = "app" + (state.view === "review" ? " screen-review" : "");
+      app.innerHTML =
+        (state.view === "review" ? renderReviewScreen() : renderCatalogScreen()) + renderRunLogModal();
+      bindEvents();
+      syncSelectAllCheckboxes();
+      scrollPanelFeedToLatest();
+      focusChatInputIfNeeded();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    let runTimer = null;
+    let refineTimer = null;
+
+    let singleAskingTimer = null;
+
+    function completeSingleRun(outcome) {
+      const approved = suggestions.filter((s) => s.status === "approved");
+      state.writtenChanges = approved.map((s) => ({ ...s }));
+      state.singleOutcome = outcome || state.singleQuestionChoice || "all";
+      state.currentRun = {
+        id: DEMO_RUN_ID,
+        at: "just now",
+        total: suggestions.length,
+        product: suggestions[0]?.item,
+        approvedCount: approved.length,
+        written: state.writtenChanges,
+      };
+      state.completedRun = state.currentRun;
+      state.panelPhase = "singleComplete";
+      render();
+    }
+
+    function applySingleChoiceAll() {
+      suggestions.forEach((s) => {
+        s.status = "approved";
+      });
+      completeSingleRun("all");
+    }
+
+    function applySingleChoiceHigh() {
+      suggestions.forEach((s) => {
+        s.status = s.score >= HIGH ? "approved" : "rejected";
+      });
+      completeSingleRun("high");
+    }
+
+    function singleDiscardAll() {
+      suggestions.forEach((s) => {
+        s.status = "rejected";
+      });
+      state.writtenChanges = [];
+      state.singleOutcome = "discard";
+      state.currentRun = {
+        id: DEMO_RUN_ID,
+        at: "just now",
+        total: suggestions.length,
+        product: suggestions[0]?.item,
+        approvedCount: 0,
+        written: [],
+      };
+      state.completedRun = state.currentRun;
+      state.panelPhase = "singleComplete";
+      render();
+    }
+
+    function startSingleManualReview() {
+      state.panelPhase = "singleManual";
+      state.singleManualIndex = 0;
+      if (suggestions[state.singleManualIndex]?.status !== "pending") {
+        singleManualAdvance();
+      }
+      render();
+    }
+
+    function singleManualAdvance() {
+      let idx = state.singleManualIndex;
+      while (idx < suggestions.length && suggestions[idx].status !== "pending") idx++;
+      if (idx >= suggestions.length) {
+        completeSingleRun("manual");
+        return;
+      }
+      state.singleManualIndex = idx;
+    }
+
+    function singleManualNext() {
+      const s = suggestions[state.singleManualIndex];
+      if (!s || s.status === "pending") return;
+      state.singleManualIndex++;
+      if (state.singleManualIndex >= suggestions.length) {
+        completeSingleRun("manual");
+        return;
+      }
+      singleManualAdvance();
+      render();
+    }
+
+    function startRun(fromMenu) {
+      if (state.catalogSelected.size === 0) return;
+      const selected = [...state.catalogSelected];
+      archiveSingleThreadIfNeeded();
+      state.runMode = selected.length === 1 ? "single" : "bulk";
+      const productRow = selected.length === 1 ? CATALOG_ROWS.find((r) => r.id === selected[0]) : null;
+      state.lastAnalyzedCount = selected.length;
+      suggestions = buildSuggestions(selected);
+      state.panelOpen = true;
+      state.panelPhase = "working";
+      state.runStep = 0;
+      state.workOpen = true;
+      state.agentsMenuOpen = false;
+      state.catalogSelected = new Set();
+      state.chatLog = [];
+      state.refineHistory = [];
+      state.activeRefine = null;
+      state.reviewSessionMarks = [];
+      state.idleChatLog = [];
+      state.completedRun = null;
+      state.writtenChanges = [];
+      state.singleQuestionChoice = null;
+      state.singleOutcome = null;
+      state.singleManualIndex = 0;
+      state.singleExpandedAttrs = new Set();
+      state.currentRun = {
+        id: DEMO_RUN_ID,
+        at: "just now",
+        product: productRow?.name,
+      };
+      state.panelMenuOpen = false;
+      state.runStepsOpen = false;
+      clearTimeout(singleAskingTimer);
+      render();
+
+      clearInterval(runTimer);
+      let step = 0;
+      runTimer = setInterval(() => {
+        step++;
+        state.runStep = step;
+        if (step >= RUN_STEPS.length) {
+          clearInterval(runTimer);
+          state.workOpen = false;
+          const runStats = stats();
+          if (state.runMode === "bulk") {
+            state.panelPhase = "done";
+            state.currentRun = {
+              id: DEMO_RUN_ID,
+              at: "just now",
+              total: runStats.total,
+              ready: runStats.ready,
+              attention: runStats.attention,
+            };
+            render();
+          } else {
+            state.panelPhase = "singleAsking";
+            state.currentRun = {
+              id: DEMO_RUN_ID,
+              at: "just now",
+              total: runStats.total,
+              product: productRow?.name,
+              ready: runStats.ready,
+              attention: runStats.attention,
+            };
+            render();
+            singleAskingTimer = setTimeout(() => {
+              if (state.panelPhase === "singleAsking") {
+                state.panelPhase = "singleQuestions";
+                render();
+              }
+            }, 900);
+          }
+          return;
+        }
+        render();
+      }, fromMenu ? 900 : 900);
+    }
+
+    function openReview() {
+      const resuming = state.panelPhase === "reviewPaused";
+      state.view = "review";
+      state.panelPhase = "reviewing";
+      if (!resuming) {
+        state.reviewSelected = new Set();
+        state.refineHistory = [];
+        state.activeRefine = null;
+        state.reviewGroup = null;
+        state.reviewSessionMarks = [{ type: "started", afterRefineIndex: 0 }];
+      } else {
+        state.reviewSessionMarks.push({
+          type: "resumed",
+          afterRefineIndex: state.refineHistory.length,
+        });
+      }
+      state.groupMenuOpen = false;
+      state.summaryOpen = false;
+      state.panelMenuOpen = false;
+      render();
+    }
+
+    function pauseReview() {
+      if (state.view !== "review" || state.panelPhase !== "reviewing") return;
+      if (state.activeRefine) {
+        clearInterval(refineTimer);
+        state.activeRefine = null;
+      }
+      state.view = "catalog";
+      state.panelPhase = "reviewPaused";
+      state.reviewSelected = new Set();
+      state.reviewSessionMarks.push({
+        type: "paused",
+        afterRefineIndex: state.refineHistory.length,
+        detail: pauseDetailText(),
+      });
+      state.groupMenuOpen = false;
+      state.panelMenuOpen = false;
+      render();
+    }
+
+    function finishReview() {
+      const st = stats();
+      if (st.pending) return;
+      const approved = suggestions.filter((s) => s.status === "approved");
+      state.writtenChanges = approved.map((s) => ({ ...s }));
+      state.completedRun = {
+        id: DEMO_RUN_ID,
+        at: "just now",
+        total: st.total,
+        approvedCount: approved.length,
+        ready: state.currentRun?.ready ?? 0,
+        attention: state.currentRun?.attention ?? 0,
+        written: state.writtenChanges,
+      };
+      state.currentRun = state.completedRun;
+      state.view = "catalog";
+      state.panelPhase = "complete";
+      state.reviewSelected = new Set();
+      suggestions = [];
+      state.catalogSelected = new Set();
+      render();
+    }
+
+    function openRunLog() {
+      state.runLogOpen = true;
+      state.panelMenuOpen = false;
+      render();
+    }
+
+    function closeRunLog() {
+      state.runLogOpen = false;
+      render();
+    }
+
+    function applyDecision(decision) {
+      state.reviewSelected.forEach((id) => {
+        const s = suggestions.find((x) => x.id === id);
+        if (s) s.status = decision;
+      });
+      state.reviewSelected.clear();
+      render();
+    }
+
+    function setReviewGroupSelection(groupKey, selected) {
+      suggestionsInReviewGroup(groupKey).forEach((s) => {
+        if (selected) state.reviewSelected.add(s.id);
+        else state.reviewSelected.delete(s.id);
+      });
+      render();
+    }
+
+    function syncReviewGroupCheckboxes() {
+      document.querySelectorAll("[data-action=toggle-review-group]").forEach((el) => {
+        const groupKey = decodeURIComponent(el.getAttribute("data-group-key") || "");
+        const items = suggestionsInReviewGroup(groupKey);
+        const n = items.filter((s) => state.reviewSelected.has(s.id)).length;
+        el.checked = n === items.length && items.length > 0;
+        el.indeterminate = n > 0 && n < items.length;
+      });
+    }
+
+    function refineReplyFor(prompt, count) {
+      const lower = prompt.toLowerCase();
+      if (lower.includes("short")) {
+        return `Done. Shortened ${count} suggestion${count === 1 ? "" : "s"}. They’re still pending your approval.`;
+      }
+      return `Done. Updated ${count} suggestion${count === 1 ? "" : "s"} based on your instructions. They’re still pending your approval.`;
+    }
+
+    function applyRefineToSuggestions(ids, prompt) {
+      const shorter = prompt.toLowerCase().includes("short");
+      ids.forEach((id) => {
+        const s = suggestions.find((x) => x.id === id);
+        if (!s) return;
+        if (shorter) {
+          const words = s.newValue.replace(/\s+/g, " ").trim().split(" ");
+          s.newValue = words.slice(0, Math.max(4, Math.ceil(words.length * 0.65))).join(" ").replace(/\.$/, "") + ".";
+        } else {
+          s.newValue = s.newValue.replace(/\.$/, "") + " — refined per your instructions.";
+        }
+        s.score = Math.min(99, s.score + 4);
+        s.reasoning = "Updated after refinement: " + prompt.slice(0, 80) + (prompt.length > 80 ? "…" : "");
+        s.status = "pending";
+      });
+    }
+
+    function sendPanelMessage() {
+      if (state.panelPhase === "idle") {
+        const text = state.chatDraft.trim();
+        if (!text) return;
+        if (isRunCommand(text)) {
+          state.chatDraft = "";
+          state.keepChatFocus = true;
+          if (state.catalogSelected.size === 0) {
+            state.idleChatLog.push({
+              prompt: text,
+              reply: "Select one or more products in the table, then type run or choose Run agent.",
+            });
+            render();
+            return;
+          }
+          startRun(false);
+          return;
+        }
+        state.chatDraft = "";
+        state.idleChatLog.push({
+          prompt: text,
+          reply:
+            "Select products in the table, then type run or choose Run agent to start Content optimizer.",
+        });
+        state.keepChatFocus = true;
+        render();
+        return;
+      }
+      sendRefine();
+    }
+
+    function sendRefine() {
+      const text = state.chatDraft.trim();
+      if (!text || (!canRefineInPanel() && !canChatWhilePaused())) return;
+
+      if (canChatWhilePaused() && !canRefineInPanel()) {
+        state.chatDraft = "";
+        state.refineHistory.push({
+          prompt: text,
+          reply:
+            "Noted. Open Continue review, select the suggestions you want to change, then send your instructions again.",
+        });
+        state.keepChatFocus = true;
+        render();
+        return;
+      }
+
+      let ids;
+      if (isSinglePanelPhase()) {
+        ids = suggestions.filter((s) => s.status === "pending").map((s) => s.id);
+      } else {
+        ids = [...state.reviewSelected].filter((id) => {
+          const s = suggestions.find((x) => x.id === id);
+          return s && s.status === "pending";
+        });
+      }
+      if (!ids.length) return;
+
+      state.chatDraft = "";
+      state.activeRefine = { prompt: text, step: 0, ids };
+      state.keepChatFocus = true;
+      render();
+
+      clearInterval(refineTimer);
+      let step = 0;
+      refineTimer = setInterval(() => {
+        step++;
+        if (!state.activeRefine) {
+          clearInterval(refineTimer);
+          return;
+        }
+        state.activeRefine.step = step;
+        if (step >= REFINE_STEPS.length) {
+          clearInterval(refineTimer);
+          const active = state.activeRefine;
+          applyRefineToSuggestions(active.ids, active.prompt);
+          state.refineHistory.push({
+            prompt: active.prompt,
+            reply: refineReplyFor(active.prompt, active.ids.length),
+          });
+          state.activeRefine = null;
+          state.keepChatFocus = true;
+        }
+        render();
+      }, 750);
+    }
+
+    function bindEvents() {
+      document.querySelector("[data-action=toggle-agents]")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (state.view !== "catalog") return;
+        state.agentsMenuOpen = !state.agentsMenuOpen;
+        render();
+      });
+      document.querySelector(".menu-pop")?.addEventListener("click", (e) => e.stopPropagation());
+      document.querySelector("[data-action=start-optimizer]")?.addEventListener("click", () => {
+        startRun(true);
+      });
+      document.querySelector("[data-action=open-assistant]")?.addEventListener("click", toggleAssistantPanel);
+      document.querySelectorAll("[data-action=run-agent]").forEach((el) => {
+        el.addEventListener("click", () => startRun(false));
+      });
+      document.querySelector("[data-action=toggle-summary]")?.addEventListener("click", () => {
+        state.summaryOpen = !state.summaryOpen;
+        render();
+      });
+      document.querySelector("[data-action=open-review]")?.addEventListener("click", () => {
+        if (state.runMode === "bulk") openReview();
+      });
+      document.querySelectorAll("[data-action=toggle-single-attr]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const id = el.getAttribute("data-id");
+          if (state.singleExpandedAttrs.has(id)) state.singleExpandedAttrs.delete(id);
+          else state.singleExpandedAttrs.add(id);
+          render();
+        });
+      });
+      document.querySelectorAll("[data-action=set-single-choice]").forEach((el) => {
+        el.addEventListener("change", () => {
+          if (!el.checked) return;
+          state.singleQuestionChoice = el.getAttribute("data-choice");
+          render();
+        });
+      });
+      document.querySelector("[data-action=single-discard-all]")?.addEventListener("click", singleDiscardAll);
+      document.querySelector("[data-action=single-primary]")?.addEventListener("click", () => {
+        const c = state.singleQuestionChoice;
+        if (c === "all") applySingleChoiceAll();
+        else if (c === "high") applySingleChoiceHigh();
+        else if (c === "manual") startSingleManualReview();
+      });
+      document.querySelectorAll("[data-action=single-manual-decide]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const decision = el.getAttribute("data-decision");
+          const s = suggestions[state.singleManualIndex];
+          if (s) s.status = decision;
+          render();
+        });
+      });
+      document.querySelector("[data-action=single-manual-next]")?.addEventListener("click", singleManualNext);
+      document.querySelector("[data-action=single-refine-focus]")?.addEventListener("click", () => {
+        state.keepChatFocus = true;
+        render();
+      });
+      document.querySelectorAll("[data-action=open-run-log]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openRunLog();
+        });
+      });
+      document.querySelectorAll("[data-action=close-run-log]").forEach((el) => {
+        el.addEventListener("click", closeRunLog);
+      });
+      document.querySelector("[data-action=close-run-log-scrim]")?.addEventListener("click", (e) => {
+        if (e.target.matches("[data-action=close-run-log-scrim]")) closeRunLog();
+      });
+      document.querySelector("[data-action=stop]")?.addEventListener("click", (e) => e.stopPropagation());
+      document.querySelector("[data-action=toggle-panel-menu]")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        state.panelMenuOpen = !state.panelMenuOpen;
+        render();
+      });
+      document.querySelector("[data-action=close-panel-menu]")?.addEventListener("click", () => {
+        state.panelMenuOpen = false;
+        render();
+      });
+      document.querySelector("[data-action=toggle-run-steps]")?.addEventListener("click", () => {
+        state.runStepsOpen = !state.runStepsOpen;
+        render();
+      });
+      document.querySelector("[data-action=back-catalog]")?.addEventListener("click", pauseReview);
+      document.querySelector(".group-menu")?.addEventListener("click", (e) => e.stopPropagation());
+      document.querySelector("[data-action=toggle-group-menu]")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        state.groupMenuOpen = !state.groupMenuOpen;
+        render();
+      });
+      document.querySelectorAll("[data-action=set-review-group]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const value = el.getAttribute("data-group");
+          state.reviewGroup = value || null;
+          state.groupMenuOpen = false;
+          render();
+        });
+      });
+      document.querySelector("[data-action=approve]")?.addEventListener("click", () => applyDecision("approved"));
+      document.querySelector("[data-action=reject]")?.addEventListener("click", () => applyDecision("rejected"));
+      document.querySelector("[data-action=finish-review]")?.addEventListener("click", finishReview);
+      document.querySelector("[data-action=send-panel-message]")?.addEventListener("click", sendPanelMessage);
+
+      document.querySelector("[data-action=select-all-catalog]")?.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          state.catalogSelected = new Set(CATALOG_ROWS.map((r) => r.id));
+        } else {
+          state.catalogSelected = new Set();
+        }
+        render();
+      });
+
+      document.querySelector("[data-action=select-all-review]")?.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          suggestions.forEach((s) => state.reviewSelected.add(s.id));
+        } else {
+          state.reviewSelected.clear();
+        }
+        render();
+      });
+
+      document.querySelectorAll("[data-action=toggle-catalog]").forEach((el) => {
+        el.addEventListener("change", (e) => {
+          const id = e.target.getAttribute("data-id");
+          if (e.target.checked) state.catalogSelected.add(id);
+          else state.catalogSelected.delete(id);
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-action=toggle-review]").forEach((el) => {
+        el.addEventListener("change", (e) => {
+          const id = e.target.getAttribute("data-id");
+          if (e.target.checked) state.reviewSelected.add(id);
+          else state.reviewSelected.delete(id);
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-action=toggle-review-group]").forEach((el) => {
+        el.addEventListener("change", (e) => {
+          const groupKey = decodeURIComponent(e.target.getAttribute("data-group-key") || "");
+          setReviewGroupSelection(groupKey, e.target.checked);
+        });
+      });
+      syncReviewGroupCheckboxes();
+
+      const chat = document.getElementById("chat-input");
+      if (chat) {
+        chat.addEventListener("input", (e) => {
+          state.chatDraft = e.target.value;
+          const send = document.querySelector("[data-action=send-panel-message]");
+          if (send) send.disabled = !canSendPanelMessage();
+        });
+        chat.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendPanelMessage();
+          }
+        });
+      }
+    }
+
+    document.addEventListener("click", () => {
+      let rerender = false;
+      if (state.agentsMenuOpen) {
+        state.agentsMenuOpen = false;
+        rerender = true;
+      }
+      if (state.panelMenuOpen) {
+        state.panelMenuOpen = false;
+        rerender = true;
+      }
+      if (state.groupMenuOpen) {
+        state.groupMenuOpen = false;
+        rerender = true;
+      }
+      if (rerender) render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
