@@ -4808,6 +4808,71 @@
         return v;
       }
 
+      var BRANDING_BG_FOR_WHITE_LOGO = '#263238';
+
+      /**
+       * Light / white logos get a dark header bg; otherwise default white (stored as null).
+       * Composites onto black before sampling so white-on-transparent marks (common Figma
+       * exports) are visible to pixel reads, then scores light vs dark ink.
+       */
+      function suggestBrandingBackgroundFromImage(img) {
+        try {
+          var w = img.naturalWidth || img.width;
+          var h = img.naturalHeight || img.height;
+          if (!w || !h) return null;
+          var maxSide = 128;
+          var scale = Math.min(1, maxSide / Math.max(w, h));
+          var cw = Math.max(1, Math.round(w * scale));
+          var ch = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = cw;
+          canvas.height = ch;
+          var ctx = canvas.getContext('2d', { willReadFrequently: true }) || canvas.getContext('2d');
+          if (!ctx) return null;
+          ctx.imageSmoothingEnabled = false;
+          // Bake onto black so transparent white logos still produce light pixels.
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, cw, ch);
+          ctx.drawImage(img, 0, 0, cw, ch);
+          var data;
+          try {
+            data = ctx.getImageData(0, 0, cw, ch).data;
+          } catch (readErr) {
+            return null;
+          }
+          var total = cw * ch;
+          var light = 0;
+          var dark = 0;
+          var lightLumSum = 0;
+          for (var i = 0; i < data.length; i += 4) {
+            var lum = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+            if (lum >= 180) {
+              light += 1;
+              lightLumSum += lum;
+            } else if (lum < 50) {
+              dark += 1;
+            }
+          }
+          if (!total) return null;
+          var lightShare = light / total;
+          var darkShare = dark / total;
+          var avgLightLum = light ? lightLumSum / light : 0;
+
+          // White/light mark on dark (or transparent→black) field.
+          if (lightShare >= 0.05 && avgLightLum >= 200 && darkShare >= 0.25) {
+            return BRANDING_BG_FOR_WHITE_LOGO;
+          }
+          // Mostly light artwork overall.
+          if (lightShare >= 0.4 && avgLightLum >= 200) {
+            return BRANDING_BG_FOR_WHITE_LOGO;
+          }
+          return null;
+        } catch (err) {
+          return null;
+        }
+      }
+
       var ConfigurationStore = (function () {
         var DEFAULT_GROUP_ID = 'default';
         var groups = [];
@@ -11103,7 +11168,8 @@
         var addBrandingDraft = {
           userGroups: [],
           brandingLogo: null,
-          brandingLogoMeta: null
+          brandingLogoMeta: null,
+          brandingBackgroundColor: null
         };
         var addBrandingModalUgHighlight = -1;
         var addBrandingModalUgBlurTimer = null;
@@ -11131,7 +11197,8 @@
             label: name,
             userGroups: addBrandingDraft.userGroups.slice(),
             brandingLogo: addBrandingDraft.brandingLogo,
-            brandingLogoMeta: addBrandingDraft.brandingLogoMeta
+            brandingLogoMeta: addBrandingDraft.brandingLogoMeta,
+            brandingBackgroundColor: addBrandingDraft.brandingBackgroundColor
           };
         }
 
@@ -11274,7 +11341,8 @@
           addBrandingDraft = {
             userGroups: [],
             brandingLogo: null,
-            brandingLogoMeta: null
+            brandingLogoMeta: null,
+            brandingBackgroundColor: null
           };
           addBrandingModalUgHighlight = -1;
           hideAddBrandingModalUgTypeahead();
@@ -11319,15 +11387,23 @@
             var dataUrl = reader.result;
             var img = new Image();
             img.onload = function () {
-              addBrandingDraft.brandingLogo = dataUrl;
-              addBrandingDraft.brandingLogoMeta = {
-                fileName: file.name,
-                fileSize: file.size,
-                width: img.naturalWidth || img.width,
-                height: img.naturalHeight || img.height
+              var finish = function () {
+                addBrandingDraft.brandingLogo = dataUrl;
+                addBrandingDraft.brandingLogoMeta = {
+                  fileName: file.name,
+                  fileSize: file.size,
+                  width: img.naturalWidth || img.width,
+                  height: img.naturalHeight || img.height
+                };
+                addBrandingDraft.brandingBackgroundColor = suggestBrandingBackgroundFromImage(img);
+                renderAddBrandingModal();
+                syncAddBrandingModalSubmit();
               };
-              renderAddBrandingModal();
-              syncAddBrandingModalSubmit();
+              if (typeof img.decode === 'function') {
+                img.decode().then(finish).catch(finish);
+              } else {
+                finish();
+              }
             };
             img.onerror = function () {
               addBrandingDraft.brandingLogo = dataUrl;
@@ -11337,6 +11413,7 @@
                 width: 0,
                 height: 0
               };
+              addBrandingDraft.brandingBackgroundColor = null;
               renderAddBrandingModal();
               syncAddBrandingModalSubmit();
             };
@@ -11475,19 +11552,28 @@
             var dataUrl = reader.result;
             var img = new Image();
             img.onload = function () {
-              ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
-                brandingLogo: dataUrl,
-                brandingLogoMeta: {
-                  fileName: file.name,
-                  fileSize: file.size,
-                  width: img.naturalWidth || img.width,
-                  height: img.naturalHeight || img.height
-                }
-              });
-              var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
-              renderBrandingAssetBranding(asset);
-              refreshBrandingHeaderIfPreviewing(selected.assetId);
-              markUnsaved();
+              var finish = function () {
+                var suggestedBg = suggestBrandingBackgroundFromImage(img);
+                ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
+                  brandingLogo: dataUrl,
+                  brandingLogoMeta: {
+                    fileName: file.name,
+                    fileSize: file.size,
+                    width: img.naturalWidth || img.width,
+                    height: img.naturalHeight || img.height
+                  },
+                  brandingBackgroundColor: suggestedBg
+                });
+                var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
+                renderBrandingAssetBranding(asset);
+                refreshBrandingHeaderIfPreviewing(selected.assetId);
+                markUnsaved();
+              };
+              if (typeof img.decode === 'function') {
+                img.decode().then(finish).catch(finish);
+              } else {
+                finish();
+              }
             };
             img.onerror = function () {
               ConfigurationStore.setPendingBrandingAsset(selected.assetId, {
@@ -11497,7 +11583,8 @@
                   fileSize: file.size,
                   width: 0,
                   height: 0
-                }
+                },
+                brandingBackgroundColor: null
               });
               var asset = ConfigurationStore.findBrandingAsset(selected.assetId);
               renderBrandingAssetBranding(asset);
@@ -11665,13 +11752,8 @@
             previewImg.alt = asset.label + ' logo';
             var previewWrap = previewImg.closest('.config-group-logo-upload__preview');
             if (previewWrap) {
-              if (hasCustomLogo && branding.brandingBackgroundColor) {
-                previewWrap.classList.remove('config-group-logo-upload__preview--checkered');
-                previewWrap.style.backgroundColor = branding.brandingBackgroundColor;
-              } else {
-                previewWrap.style.backgroundColor = '';
-                previewWrap.classList.add('config-group-logo-upload__preview--checkered');
-              }
+              previewWrap.style.backgroundColor = '';
+              previewWrap.classList.add('config-group-logo-upload__preview--checkered');
             }
           } else if (previewImg) {
             previewImg.removeAttribute('src');
@@ -12292,7 +12374,8 @@
           var rec = ConfigurationStore.addBrandingAsset(name, {
             userGroups: draft.userGroups,
             brandingLogo: draft.brandingLogo,
-            brandingLogoMeta: draft.brandingLogoMeta
+            brandingLogoMeta: draft.brandingLogoMeta,
+            brandingBackgroundColor: draft.brandingBackgroundColor
           });
           treeState.brandingAssetsExpanded = true;
           renderBrandingAssetDetail(rec.id);
